@@ -1,0 +1,25 @@
+<% content_for :title, "로그인" %>
+
+<div class="card auth-card">
+  <h1>로그인</h1>
+  <p class="muted">클럽 관리로 바로 들어가세요.</p>
+
+  <%= form_with url: session_path, method: :post, local: true, class: "form" do %>
+    <div class="field">
+      <label for="email">이메일</label>
+      <%= email_field_tag :email, params[:email], required: true, autocomplete: "email" %>
+    </div>
+    <div class="field">
+      <label for="password">비밀번호</label>
+      <%= password_field_tag :password, nil, required: true, autocomplete: "current-password" %>
+    </div>
+    <div class="actions">
+      <%= submit_tag "로그인", class: "button primary" %>
+    </div>
+  <% end %>
+
+  <div class="footer-links">
+    <span>계정이 없으신가요?</span>
+    <%= link_to "회원가입", new_registration_path %>
+  </div>
+</div>

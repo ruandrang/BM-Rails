@@ -1,0 +1,46 @@
+<% content_for :title, @club.name %>
+
+<div class="page-header">
+  <div class="title-with-icon">
+    <div class="club-icon large"><%= club_icon(@club.icon) %></div>
+    <div>
+      <h1><%= @club.name %></h1>
+      <p class="muted">멤버 <%= @members_count %>명 · 경기 <%= @matches_count %>회</p>
+    </div>
+  </div>
+  <div class="actions">
+    <%= link_to "클럽 편집", edit_club_path(@club), class: "button ghost" %>
+    <%= button_to "클럽 삭제", club_path(@club), method: :delete, data: { confirm: "정말 삭제할까요?" }, class: "button danger" %>
+  </div>
+</div>
+
+<div class="card-grid">
+  <div class="card">
+    <h2>멤버 관리</h2>
+    <p class="muted">멤버 추가/수정, CSV 가져오기/내보내기, 순서 변경</p>
+    <%= link_to "멤버 보기", club_members_path(@club), class: "button primary" %>
+  </div>
+  <div class="card">
+    <h2>팀 생성 & 경기 기록</h2>
+    <p class="muted">팀 밸런싱 후 경기 결과를 기록합니다.</p>
+    <%= link_to "경기 목록", club_matches_path(@club), class: "button primary" %>
+  </div>
+  <div class="card">
+    <h2>통계 대시보드</h2>
+    <p class="muted">선수별 승/무/패와 승률을 확인하세요.</p>
+    <%= link_to "통계 보기", club_stats_path(@club), class: "button primary" %>
+  </div>
+</div>
+
+<div class="card">
+  <h2>데이터 백업</h2>
+  <p class="muted">클럽 데이터를 JSON으로 백업하거나 복원할 수 있습니다.</p>
+  <div class="inline-actions">
+    <%= link_to "JSON 내보내기", export_json_club_path(@club), class: "button ghost" %>
+    <%= form_with url: import_json_club_path(@club), local: true, class: "inline-form", multipart: true do %>
+      <%= file_field_tag :file, accept: "application/json" %>
+      <%= submit_tag "JSON 가져오기", class: "button ghost" %>
+    <% end %>
+  </div>
+  <p class="muted small">가져오기를 실행하면 현재 클럽 데이터가 덮어써집니다.</p>
+</div>

@@ -1,0 +1,43 @@
+<% content_for :title, "멤버 관리" %>
+
+<div class="page-header">
+  <div>
+    <h1>멤버 관리</h1>
+    <p class="muted"><%= @club.name %> 멤버 목록입니다.</p>
+  </div>
+  <div class="actions">
+    <%= link_to "멤버 추가", new_club_member_path(@club), class: "button primary" %>
+    <%= link_to "CSV 내보내기", export_csv_club_members_path(@club), class: "button ghost" %>
+  </div>
+</div>
+
+<div class="card">
+  <div class="inline-actions">
+    <%= form_with url: import_csv_club_members_path(@club), local: true, multipart: true, class: "inline-form" do %>
+      <%= file_field_tag :file, accept: ".csv,text/csv" %>
+      <%= submit_tag "CSV 가져오기", class: "button ghost" %>
+    <% end %>
+    <span class="muted small">드래그해서 순서를 변경할 수 있습니다.</span>
+  </div>
+
+  <ul class="member-list" data-sortable-list data-reorder-url="<%= reorder_club_members_path(@club) %>">
+    <% @members.each do |member| %>
+      <li class="member-item" draggable="true" data-member-id="<%= member.id %>">
+        <div class="member-main">
+          <span class="member-name"><%= member.name %></span>
+          <span class="member-meta"><%= member.position %> · <%= member.age || "-" %>세 · <%= member.height_cm || "-" %>cm · #<%= member.jersey_number || "-" %></span>
+        </div>
+        <div class="member-actions">
+          <%= link_to "수정", edit_club_member_path(@club, member), class: "button ghost" %>
+          <%= button_to "삭제", club_member_path(@club, member), method: :delete, data: { confirm: "삭제할까요?" }, class: "button danger" %>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+
+  <% if @members.empty? %>
+    <div class="empty-state">
+      <p>아직 등록된 멤버가 없습니다.</p>
+    </div>
+  <% end %>
+</div>

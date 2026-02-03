@@ -1,0 +1,44 @@
+<% content_for :title, "회원가입" %>
+
+<div class="card auth-card">
+  <h1>회원가입</h1>
+  <p class="muted">간단하게 계정을 만들고 시작하세요.</p>
+
+  <%= form_with model: @user, url: registration_path, method: :post, local: true, class: "form" do |form| %>
+    <div class="field">
+      <%= form.label :name, "이름" %>
+      <%= form.text_field :name, autocomplete: "name" %>
+    </div>
+    <div class="field">
+      <%= form.label :email, "이메일" %>
+      <%= form.email_field :email, required: true, autocomplete: "email" %>
+    </div>
+    <div class="field">
+      <%= form.label :password, "비밀번호" %>
+      <%= form.password_field :password, required: true, autocomplete: "new-password" %>
+    </div>
+    <div class="field">
+      <%= form.label :password_confirmation, "비밀번호 확인" %>
+      <%= form.password_field :password_confirmation, required: true, autocomplete: "new-password" %>
+    </div>
+    <div class="actions">
+      <%= form.submit "회원가입", class: "button primary" %>
+    </div>
+  <% end %>
+
+  <% if @user.errors.any? %>
+    <div class="form-errors">
+      <strong>입력 오류</strong>
+      <ul>
+        <% @user.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="footer-links">
+    <span>이미 계정이 있으신가요?</span>
+    <%= link_to "로그인", new_session_path %>
+  </div>
+</div>

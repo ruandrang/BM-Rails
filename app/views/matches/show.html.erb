@@ -1,0 +1,79 @@
+<% content_for :title, "경기 상세" %>
+
+<div class="page-header">
+  <div>
+    <h1><%= @match.played_on.strftime("%Y-%m-%d") %> 경기</h1>
+    <p class="muted"><%= @club.name %> · <%= @match.teams_count %>팀</p>
+  </div>
+  <div class="actions">
+    <%= link_to "날짜 수정", edit_club_match_path(@club, @match), class: "button ghost" %>
+    <%= link_to "공유용 보기", share_club_match_path(@club, @match), class: "button ghost", target: "_blank" %>
+    <%= link_to "목록으로", club_matches_path(@club), class: "button ghost" %>
+  </div>
+</div>
+
+<div class="card-grid">
+  <% team_records = {} %>
+  <% @teams.each do |team| %>
+    <% wins = draws = losses = 0 %>
+    <% @games.each do |game| %>
+      <% next if game.result == "pending" %>
+      <% if game.result == "draw" %>
+        <% draws += 1 if [game.home_team_id, game.away_team_id].include?(team.id) %>
+      <% elsif game.result == "home_win" %>
+        <% wins += 1 if game.home_team_id == team.id %>
+        <% losses += 1 if game.away_team_id == team.id %>
+      <% elsif game.result == "away_win" %>
+        <% wins += 1 if game.away_team_id == team.id %>
+        <% losses += 1 if game.home_team_id == team.id %>
+      <% end %>
+    <% end %>
+    <% team_records[team.id] = { wins: wins, draws: draws, losses: losses } %>
+    <div class="card team-card">
+      <h2>팀 <%= team.label %> (<%= team.color %>)</h2>
+      <p class="muted">전적: <%= wins %>승 <%= draws %>무 <%= losses %>패</p>
+      <ul class="member-list">
+        <% team.members.each do |member| %>
+          <li class="member-item">
+            <span class="member-name"><%= member.name %></span>
+            <span class="member-meta"><%= member.position %> · #<%= member.jersey_number || "-" %></span>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+</div>
+
+<div class="card">
+  <h2>경기 결과</h2>
+  <%= form_with url: record_results_club_match_path(@club, @match), method: :patch, local: true, class: "form" do %>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>대결</th>
+          <th>결과</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @games.each do |game| %>
+          <tr>
+            <td>
+              팀 <%= game.home_team.label %> vs 팀 <%= game.away_team.label %>
+            </td>
+            <td>
+              <select name="games[<%= game.id %>]">
+                <option value="pending" <%= "selected" if game.result == "pending" %>>미기록</option>
+                <option value="home_win" <%= "selected" if game.result == "home_win" %>>팀 <%= game.home_team.label %> 승</option>
+                <option value="away_win" <%= "selected" if game.result == "away_win" %>>팀 <%= game.away_team.label %> 승</option>
+                <option value="draw" <%= "selected" if game.result == "draw" %>>무승부</option>
+              </select>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <div class="actions">
+      <%= submit_tag "결과 저장", class: "button primary" %>
+    </div>
+  <% end %>
+</div>

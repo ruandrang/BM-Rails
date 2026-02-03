@@ -1,0 +1,61 @@
+<% content_for :title, "새 경기" %>
+
+<div class="page-header">
+  <div>
+    <h1>새 경기 만들기</h1>
+    <p class="muted">선수 선택 후 팀 밸런싱을 진행합니다.</p>
+  </div>
+</div>
+
+<div class="card">
+  <%= form_with model: [@club, @match], local: true, class: "form" do |form| %>
+    <div class="field-row">
+      <div class="field">
+        <%= form.label :played_on, "경기 날짜" %>
+        <%= form.date_field :played_on, required: true %>
+      </div>
+      <div class="field">
+        <%= form.label :teams_count, "팀 수" %>
+        <%= form.select :teams_count, [ [ "2팀", 2 ], [ "3팀", 3 ] ], {}, required: true %>
+      </div>
+    </div>
+    <div class="field">
+      <%= form.label :note, "메모" %>
+      <%= form.text_field :note, placeholder: "예: 2월 정기 경기" %>
+    </div>
+
+    <div class="field">
+      <label>팀 색상</label>
+      <div class="team-color-grid">
+        <% labels = %w[A B C] %>
+        <% 3.times do |index| %>
+          <div class="team-color">
+            <strong>팀 <%= labels[index] %></strong>
+            <select name="team_colors[]">
+              <% Team::COLORS.each do |color| %>
+                <option value="<%= color %>" <%= "selected" if Team::COLORS[index] == color %>><%= color %></option>
+              <% end %>
+            </select>
+          </div>
+        <% end %>
+      </div>
+      <p class="muted small">2팀 경기인 경우 팀 A/B만 사용됩니다.</p>
+    </div>
+
+    <div class="field">
+      <label>참가 멤버 선택</label>
+      <div class="member-picker">
+        <% @members.each do |member| %>
+          <label class="member-option">
+            <%= check_box_tag "member_ids[]", member.id %>
+            <span><%= member.name %> (<%= member.position %>)</span>
+          </label>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="actions">
+      <%= form.submit "팀 생성하기", class: "button primary" %>
+    </div>
+  <% end %>
+</div>

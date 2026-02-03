@@ -1,0 +1,49 @@
+<div class="share-wrapper">
+  <div class="share-card">
+    <div class="share-header">
+      <div>
+        <h1><%= @club.name %></h1>
+        <p><%= @match.played_on.strftime("%Y-%m-%d") %> 경기</p>
+      </div>
+      <div class="share-note">
+        <span>공유용 요약</span>
+      </div>
+    </div>
+
+    <div class="share-teams">
+      <% @teams.each do |team| %>
+        <div class="share-team">
+          <h2>팀 <%= team.label %> · <%= team.color %></h2>
+          <ul>
+            <% team.members.each do |member| %>
+              <li><%= member.name %> (<%= member.position %>)</li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="share-results">
+      <h2>경기 결과</h2>
+      <ul>
+        <% @games.each do |game| %>
+          <li>
+            팀 <%= game.home_team.label %> vs 팀 <%= game.away_team.label %> :
+            <% case game.result %>
+            <% when "home_win" %>
+              팀 <%= game.home_team.label %> 승
+            <% when "away_win" %>
+              팀 <%= game.away_team.label %> 승
+            <% when "draw" %>
+              무승부
+            <% else %>
+              미기록
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+
+    <p class="share-hint">브라우저 스크린샷 또는 인쇄(PDF)로 저장하면 공유가 편합니다.</p>
+  </div>
+</div>

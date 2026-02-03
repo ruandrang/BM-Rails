@@ -1,0 +1,34 @@
+<%= form_with model: @club, local: true, class: "form" do |form| %>
+  <div class="field">
+    <%= form.label :name, "클럽 이름" %>
+    <%= form.text_field :name, required: true, placeholder: "예: 루키 바스켓볼" %>
+  </div>
+
+  <div class="field">
+    <label>클럽 아이콘</label>
+    <div class="icon-grid">
+      <% Club::ICONS.each do |icon| %>
+        <label class="icon-option">
+          <%= form.radio_button :icon, icon %>
+          <span class="icon-preview"><%= club_icon(icon) %></span>
+          <span class="icon-label"><%= icon %></span>
+        </label>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="actions">
+    <%= form.submit class: "button primary" %>
+  </div>
+<% end %>
+
+<% if @club.errors.any? %>
+  <div class="form-errors">
+    <strong>입력 오류</strong>
+    <ul>
+      <% @club.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>

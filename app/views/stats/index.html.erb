@@ -1,0 +1,46 @@
+<% content_for :title, "통계" %>
+
+<div class="page-header">
+  <div>
+    <h1>선수 통계</h1>
+    <p class="muted"><%= @club.name %> 멤버별 경기 기록</p>
+  </div>
+  <div class="actions">
+    <%= link_to "이름순", club_stats_path(@club, sort: "name"), class: "button ghost" %>
+    <%= link_to "경기수순", club_stats_path(@club, sort: "games"), class: "button ghost" %>
+    <%= link_to "승률순", club_stats_path(@club, sort: "win_rate"), class: "button ghost" %>
+  </div>
+</div>
+
+<div class="card">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>이름</th>
+        <th>경기</th>
+        <th>승</th>
+        <th>무</th>
+        <th>패</th>
+        <th>승률</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @stats.each do |row| %>
+        <tr>
+          <td><%= row[:member].name %></td>
+          <td><%= row[:games] %></td>
+          <td><%= row[:wins] %></td>
+          <td><%= row[:draws] %></td>
+          <td><%= row[:losses] %></td>
+          <td><%= (row[:win_rate] * 100).round(1) %>%</td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <% if @stats.empty? %>
+    <div class="empty-state">
+      <p>아직 통계를 낼 데이터가 없습니다.</p>
+    </div>
+  <% end %>
+</div>

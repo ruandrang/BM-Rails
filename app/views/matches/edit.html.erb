@@ -1,0 +1,24 @@
+<% content_for :title, "경기 수정" %>
+
+<div class="page-header">
+  <div>
+    <h1>경기 정보 수정</h1>
+    <p class="muted"><%= @club.name %> · <%= @match.played_on.strftime("%Y-%m-%d") %></p>
+  </div>
+</div>
+
+<div class="card">
+  <%= form_with model: [@club, @match], local: true, class: "form" do |form| %>
+    <div class="field">
+      <%= form.label :played_on, "경기 날짜" %>
+      <%= form.date_field :played_on, required: true %>
+    </div>
+    <div class="field">
+      <%= form.label :note, "메모" %>
+      <%= form.text_field :note %>
+    </div>
+    <div class="actions">
+      <%= form.submit "저장", class: "button primary" %>
+    </div>
+  <% end %>
+</div>

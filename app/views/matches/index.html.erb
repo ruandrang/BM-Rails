@@ -1,0 +1,36 @@
+<% content_for :title, "경기 목록" %>
+
+<div class="page-header">
+  <div>
+    <h1>경기 목록</h1>
+    <p class="muted"><%= @club.name %>의 경기 기록입니다.</p>
+  </div>
+  <%= link_to "새 경기 만들기", new_club_match_path(@club), class: "button primary" %>
+</div>
+
+<div class="card">
+  <ul class="match-list">
+    <% @matches.each do |match| %>
+      <li class="match-item">
+        <div>
+          <strong><%= match.played_on.strftime("%Y-%m-%d") %></strong>
+          <span class="muted"> · <%= match.teams_count %>팀</span>
+          <% if match.note.present? %>
+            <span class="muted"> · <%= match.note %></span>
+          <% end %>
+        </div>
+        <div class="member-actions">
+          <%= link_to "보기", club_match_path(@club, match), class: "button ghost" %>
+          <%= link_to "날짜 수정", edit_club_match_path(@club, match), class: "button ghost" %>
+          <%= button_to "삭제", club_match_path(@club, match), method: :delete, data: { confirm: "삭제할까요?" }, class: "button danger" %>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+
+  <% if @matches.empty? %>
+    <div class="empty-state">
+      <p>아직 기록된 경기가 없습니다.</p>
+    </div>
+  <% end %>
+</div>

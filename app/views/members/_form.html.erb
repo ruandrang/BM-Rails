@@ -1,0 +1,36 @@
+<%= form_with model: [@club, @member], local: true, class: "form" do |form| %>
+  <div class="field">
+    <%= form.label :name, "이름" %>
+    <%= form.text_field :name, required: true %>
+  </div>
+  <div class="field">
+    <%= form.label :age, "나이" %>
+    <%= form.number_field :age, min: 0 %>
+  </div>
+  <div class="field">
+    <%= form.label :height_cm, "키(cm)" %>
+    <%= form.number_field :height_cm, min: 0 %>
+  </div>
+  <div class="field">
+    <%= form.label :position, "포지션" %>
+    <%= form.select :position, Member::POSITIONS, {}, required: true %>
+  </div>
+  <div class="field">
+    <%= form.label :jersey_number, "등번호" %>
+    <%= form.number_field :jersey_number, min: 0 %>
+  </div>
+  <div class="actions">
+    <%= form.submit class: "button primary" %>
+  </div>
+<% end %>
+
+<% if @member.errors.any? %>
+  <div class="form-errors">
+    <strong>입력 오류</strong>
+    <ul>
+      <% @member.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
