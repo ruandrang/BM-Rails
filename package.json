@@ -1,0 +1,7 @@
+{
+  "name": "basketball-club-manager",
+  "private": true,
+  "devDependencies": {
+    "daisyui": "^5.0.0"
+  }
+}

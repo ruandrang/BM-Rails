@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "농구 클럽 매니저" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="농구 클럽 매니저">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
+    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "application", defer: true %>
+  </head>
+
+  <body>
+    <div class="app">
+      <header class="app-header">
+        <div class="brand">
+          <%= link_to "농구 클럽 매니저", logged_in? ? clubs_path : new_session_path %>
+        </div>
+        <nav class="nav">
+          <% if logged_in? %>
+            <%= link_to "내 클럽", clubs_path, class: "nav-link" %>
+            <%= link_to "새 클럽", new_club_path, class: "nav-link" %>
+            <% if current_user.admin? %>
+              <%= link_to "관리자", admin_root_path, class: "nav-link" %>
+            <% end %>
+            <%= button_to "로그아웃", session_path, method: :delete, class: "nav-button" %>
+          <% else %>
+            <%= link_to "로그인", new_session_path, class: "nav-link" %>
+            <%= link_to "회원가입", new_registration_path, class: "nav-link" %>
+          <% end %>
+        </nav>
+      </header>
+      <main class="app-main">
+        <% flash.each do |type, message| %>
+          <div class="flash <%= type %>"><%= message %></div>
+        <% end %>
+        <%= yield %>
+      </main>
+    </div>
+  </body>
+</html>
