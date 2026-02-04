@@ -1,0 +1,49 @@
+<% content_for :title, "관리자 대시보드" %>
+
+<div class="page-header">
+  <div>
+    <h1>관리자 대시보드</h1>
+    <p class="muted">전체 데이터 현황을 빠르게 확인합니다.</p>
+  </div>
+  <div class="actions">
+    <%= link_to "내 클럽으로", clubs_path, class: "button ghost" %>
+  </div>
+</div>
+
+<div class="card-grid">
+  <div class="card is-clickable" data-href="<%= admin_users_path %>">
+    <h2>사용자</h2>
+    <p class="muted"><%= @stats[:users] %>명</p>
+    <%= link_to "목록 보기", admin_users_path, class: "button primary" %>
+  </div>
+  <div class="card is-clickable" data-href="<%= admin_clubs_path %>">
+    <h2>클럽</h2>
+    <p class="muted"><%= @stats[:clubs] %>개</p>
+    <%= link_to "목록 보기", admin_clubs_path, class: "button primary" %>
+  </div>
+  <div class="card is-clickable" data-href="<%= admin_members_path %>">
+    <h2>멤버</h2>
+    <p class="muted"><%= @stats[:members] %>명</p>
+    <%= link_to "목록 보기", admin_members_path, class: "button primary" %>
+  </div>
+  <div class="card is-clickable" data-href="<%= admin_matches_path %>">
+    <h2>경기</h2>
+    <p class="muted"><%= @stats[:matches] %>회</p>
+    <%= link_to "목록 보기", admin_matches_path, class: "button primary" %>
+  </div>
+  <div class="card is-clickable" data-href="<%= admin_teams_path %>">
+    <h2>팀</h2>
+    <p class="muted"><%= @stats[:teams] %>개</p>
+    <%= link_to "목록 보기", admin_teams_path, class: "button primary" %>
+  </div>
+  <div class="card is-clickable" data-href="<%= admin_team_members_path %>">
+    <h2>팀 멤버</h2>
+    <p class="muted"><%= @stats[:team_members] %>건</p>
+    <%= link_to "목록 보기", admin_team_members_path, class: "button primary" %>
+  </div>
+  <div class="card is-clickable" data-href="<%= admin_games_path %>">
+    <h2>게임</h2>
+    <p class="muted"><%= @stats[:games] %>건</p>
+    <%= link_to "목록 보기", admin_games_path, class: "button primary" %>
+  </div>
+</div>

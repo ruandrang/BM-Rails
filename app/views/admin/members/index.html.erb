@@ -1,0 +1,38 @@
+<% content_for :title, "관리자 · 멤버" %>
+
+<div class="page-header">
+  <div>
+    <h1>멤버 목록</h1>
+    <p class="muted">전체 멤버 정보</p>
+  </div>
+  <div class="actions">
+    <%= link_to "대시보드", admin_root_path, class: "button ghost" %>
+  </div>
+</div>
+
+<div class="card">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>이름</th>
+        <th>클럽</th>
+        <th>포지션</th>
+        <th>등번호</th>
+        <th>보기</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @members.each do |member| %>
+        <tr>
+          <td><%= member.id %></td>
+          <td><%= member.name %></td>
+          <td><%= member.club.name %></td>
+          <td><%= member.position %></td>
+          <td><%= member.jersey_number || "-" %></td>
+          <td><%= link_to "보기", admin_member_path(member), class: "button ghost" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

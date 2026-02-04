@@ -6,6 +6,7 @@
     <p class="muted"><%= @club.name %> 멤버별 경기 기록</p>
   </div>
   <div class="actions">
+    <%= link_to "뒤로가기", club_path(@club), class: "button ghost" %>
     <%= link_to "이름순", club_stats_path(@club, sort: "name"), class: "button ghost" %>
     <%= link_to "경기수순", club_stats_path(@club, sort: "games"), class: "button ghost" %>
     <%= link_to "승률순", club_stats_path(@club, sort: "win_rate"), class: "button ghost" %>

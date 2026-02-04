@@ -5,6 +5,9 @@
     <h1>멤버 추가</h1>
     <p class="muted"><%= @club.name %>에 새 멤버를 등록하세요.</p>
   </div>
+  <div class="actions">
+    <%= link_to "뒤로가기", club_members_path(@club), class: "button ghost" %>
+  </div>
 </div>
 
 <div class="card">

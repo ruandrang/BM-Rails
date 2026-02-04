@@ -1,0 +1,24 @@
+<% content_for :title, "관리자 · 게임 상세" %>
+
+<div class="page-header">
+  <div>
+    <h1>게임 상세</h1>
+    <p class="muted"><%= @game.match.club.name %> · <%= @game.match.played_on.strftime("%Y-%m-%d") %></p>
+  </div>
+  <div class="actions">
+    <%= link_to "목록으로", admin_games_path, class: "button ghost" %>
+  </div>
+</div>
+
+<div class="card">
+  <table class="table">
+    <tbody>
+      <tr><th>ID</th><td><%= @game.id %></td></tr>
+      <tr><th>클럽</th><td><%= @game.match.club.name %></td></tr>
+      <tr><th>경기 날짜</th><td><%= @game.match.played_on.strftime("%Y-%m-%d") %></td></tr>
+      <tr><th>홈팀</th><td>팀 <%= @game.home_team.label %> (<%= @game.home_team.color %>)</td></tr>
+      <tr><th>원정팀</th><td>팀 <%= @game.away_team.label %> (<%= @game.away_team.color %>)</td></tr>
+      <tr><th>결과</th><td><%= @game.result %></td></tr>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,38 @@
+<% content_for :title, "관리자 · 게임" %>
+
+<div class="page-header">
+  <div>
+    <h1>게임 목록</h1>
+    <p class="muted">전체 게임 기록</p>
+  </div>
+  <div class="actions">
+    <%= link_to "대시보드", admin_root_path, class: "button ghost" %>
+  </div>
+</div>
+
+<div class="card">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>클럽</th>
+        <th>경기 날짜</th>
+        <th>대결</th>
+        <th>결과</th>
+        <th>보기</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @games.each do |game| %>
+        <tr>
+          <td><%= game.id %></td>
+          <td><%= game.match.club.name %></td>
+          <td><%= game.match.played_on.strftime("%Y-%m-%d") %></td>
+          <td>팀 <%= game.home_team.label %> vs 팀 <%= game.away_team.label %></td>
+          <td><%= game.result %></td>
+          <td><%= link_to "보기", admin_game_path(game), class: "button ghost" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

@@ -46,7 +46,9 @@ class MembersController < ApplicationController
       return
     end
 
-    csv_text = file.read
+    raw = file.read
+    csv_text = raw.force_encoding("UTF-8")
+    csv_text = csv_text.encode("UTF-8", invalid: :replace, undef: :replace, replace: "")
     csv_text = csv_text.sub(/\A\xEF\xBB\xBF/, "")
     imported = 0
     order = next_sort_order

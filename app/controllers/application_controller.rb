@@ -20,4 +20,10 @@ class ApplicationController < ActionController::Base
 
     redirect_to new_session_path, alert: "로그인이 필요합니다."
   end
+
+  def require_admin
+    return if logged_in? && current_user.admin?
+
+    redirect_to root_path, alert: "관리자 권한이 필요합니다."
+  end
 end

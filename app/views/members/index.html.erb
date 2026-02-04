@@ -6,6 +6,7 @@
     <p class="muted"><%= @club.name %> 멤버 목록입니다.</p>
   </div>
   <div class="actions">
+    <%= link_to "뒤로가기", club_path(@club), class: "button ghost" %>
     <%= link_to "멤버 추가", new_club_member_path(@club), class: "button primary" %>
     <%= link_to "CSV 내보내기", export_csv_club_members_path(@club), class: "button ghost" %>
   </div>

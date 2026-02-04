@@ -1,0 +1,40 @@
+<% content_for :title, "관리자 · 팀" %>
+
+<div class="page-header">
+  <div>
+    <h1>팀 목록</h1>
+    <p class="muted">전체 팀 정보</p>
+  </div>
+  <div class="actions">
+    <%= link_to "대시보드", admin_root_path, class: "button ghost" %>
+  </div>
+</div>
+
+<div class="card">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>라벨</th>
+        <th>색상</th>
+        <th>클럽</th>
+        <th>경기 날짜</th>
+        <th>멤버 수</th>
+        <th>보기</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @teams.each do |team| %>
+        <tr>
+          <td><%= team.id %></td>
+          <td><%= team.label %></td>
+          <td><%= team.color %></td>
+          <td><%= team.match.club.name %></td>
+          <td><%= team.match.played_on.strftime("%Y-%m-%d") %></td>
+          <td><%= team.members.count %></td>
+          <td><%= link_to "보기", admin_team_path(team), class: "button ghost" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

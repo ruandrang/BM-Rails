@@ -5,6 +5,9 @@
     <h1>경기 정보 수정</h1>
     <p class="muted"><%= @club.name %> · <%= @match.played_on.strftime("%Y-%m-%d") %></p>
   </div>
+  <div class="actions">
+    <%= link_to "뒤로가기", club_matches_path(@club), class: "button ghost" %>
+  </div>
 </div>
 
 <div class="card">

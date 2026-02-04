@@ -5,7 +5,10 @@
     <h1>경기 목록</h1>
     <p class="muted"><%= @club.name %>의 경기 기록입니다.</p>
   </div>
-  <%= link_to "새 경기 만들기", new_club_match_path(@club), class: "button primary" %>
+  <div class="actions">
+    <%= link_to "뒤로가기", club_path(@club), class: "button ghost" %>
+    <%= link_to "새 경기 만들기", new_club_match_path(@club), class: "button primary" %>
+  </div>
 </div>
 
 <div class="card">
