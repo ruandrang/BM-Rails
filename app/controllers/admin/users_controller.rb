@@ -1,6 +1,6 @@
 class Admin::UsersController < Admin::BaseController
   def index
-    @users = User.order(:id)
+    @users = paginate(User.order(:id))
   end
 
   def show

@@ -17,13 +17,26 @@ class ClubImporter
   def import_club!
     club_data = @payload.fetch("club")
     icon = Club::ICONS.include?(club_data["icon"]) ? club_data["icon"] : Club::ICONS.first
+
+    validate_payload!
+
+    @club.matches.destroy_all
+    @club.members.destroy_all
+
     @club.update!(
       name: club_data["name"],
       icon: icon
     )
+  end
 
-    @club.members.destroy_all
-    @club.matches.destroy_all
+  def validate_payload!
+    club_data = @payload["club"]
+    raise ArgumentError, "club 데이터가 필요합니다" unless club_data
+    raise ArgumentError, "클럽 이름이 필요합니다" if club_data["name"].blank?
+
+    Array(@payload["members"]).each_with_index do |member, idx|
+      raise ArgumentError, "멤버 #{idx + 1}의 이름이 필요합니다" if member["name"].blank?
+    end
   end
 
   def import_members!

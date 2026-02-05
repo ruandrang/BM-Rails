@@ -3,8 +3,13 @@ class User < ApplicationRecord
 
   has_many :clubs, dependent: :destroy
 
-  validates :email, presence: true, uniqueness: true
-  validates :password, length: { minimum: 6 }, allow_nil: true
+  validates :email, presence: true,
+                    uniqueness: { case_sensitive: false },
+                    format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates :password, length: { minimum: 6 }, on: :create
+  validates :password, length: { minimum: 6 }, allow_nil: true, on: :update
+
+  before_validation { self.email = email.to_s.downcase.strip }
 
   def admin?
     admin

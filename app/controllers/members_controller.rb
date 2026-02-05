@@ -53,13 +53,15 @@ class MembersController < ApplicationController
     imported = 0
     order = next_sort_order
 
-    CSV.parse(csv_text, headers: true) do |row|
-      attrs = csv_row_to_attributes(row)
-      next if attrs[:name].blank?
+    ActiveRecord::Base.transaction do
+      CSV.parse(csv_text, headers: true) do |row|
+        attrs = csv_row_to_attributes(row)
+        next if attrs[:name].blank?
 
-      @club.members.create!(attrs.merge(sort_order: order))
-      order += 1
-      imported += 1
+        @club.members.create!(attrs.merge(sort_order: order))
+        order += 1
+        imported += 1
+      end
     end
 
     redirect_to club_members_path(@club), notice: "#{imported}명의 멤버를 가져왔습니다."

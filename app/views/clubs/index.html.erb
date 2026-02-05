@@ -30,7 +30,7 @@
           </svg>
         </div>
         <div class="stat-title text-secondary-content/70">총 멤버</div>
-        <div class="stat-value"><%= @clubs.sum { |c| c.members.count } %></div>
+        <div class="stat-value"><%= @total_members %></div>
         <div class="stat-desc text-secondary-content/60">모든 클럽 멤버 합계</div>
       </div>
     </div>
@@ -43,7 +43,7 @@
           </svg>
         </div>
         <div class="stat-title text-accent-content/70">이번 달 경기</div>
-        <div class="stat-value"><%= @clubs.sum { |c| c.matches.where('created_at >= ?', Time.current.beginning_of_month).count } %></div>
+        <div class="stat-value"><%= @monthly_matches %></div>
         <div class="stat-desc text-accent-content/60"><%= Time.current.strftime('%Y년 %m월') %></div>
       </div>
     </div>
@@ -98,7 +98,7 @@
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  <span>최근 경기: <%= club.matches.last.date.strftime('%Y-%m-%d') %></span>
+                  <span>최근 경기: <%= club.matches.last.played_on.strftime('%Y-%m-%d') %></span>
                 </div>
               <% end %>
             </div>

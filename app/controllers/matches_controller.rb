@@ -40,7 +40,10 @@ class MatchesController < ApplicationController
     end
 
     team_colors = normalize_team_colors(params[:team_colors], teams_count)
-    assignments = TeamBalancer.new(selected_members, teams_count, stats: StatsCalculator.new(@club).member_stats).call
+    member_stats = Rails.cache.fetch("club_#{@club.id}_member_stats", expires_in: 5.minutes) do
+      StatsCalculator.new(@club).member_stats
+    end
+    assignments = TeamBalancer.new(selected_members, teams_count, stats: member_stats).call
 
     ActiveRecord::Base.transaction do
       @match.save!

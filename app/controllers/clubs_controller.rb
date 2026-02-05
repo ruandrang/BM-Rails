@@ -3,11 +3,17 @@ class ClubsController < ApplicationController
 
   def index
     @clubs = current_user.clubs.includes(:members, :matches).order(created_at: :desc)
+    @total_members = @clubs.sum { |c| c.members.size }
+    @monthly_matches = Match.where(club_id: @clubs.pluck(:id))
+                            .where("created_at >= ?", Time.current.beginning_of_month)
+                            .count
   end
 
   def show
     @members_count = @club.members.count
     @matches_count = @club.matches.count
+    @recent_matches = @club.matches.order(played_on: :desc).limit(5)
+    @preview_members = @club.members.order(:sort_order, :id).limit(8)
   end
 
   def new
@@ -45,10 +51,17 @@ class ClubsController < ApplicationController
     send_data JSON.pretty_generate(payload), filename: filename, type: "application/json"
   end
 
+  MAX_IMPORT_SIZE = 5.megabytes
+
   def import_json
     file = params[:file]
     if file.blank?
       redirect_to @club, alert: "JSON 파일을 선택해주세요."
+      return
+    end
+
+    if file.size > MAX_IMPORT_SIZE
+      redirect_to @club, alert: "파일 크기가 너무 큽니다. (최대 5MB)"
       return
     end
 

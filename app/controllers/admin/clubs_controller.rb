@@ -1,6 +1,6 @@
 class Admin::ClubsController < Admin::BaseController
   def index
-    @clubs = Club.includes(:user).order(:id)
+    @clubs = paginate(Club.includes(:user).order(:id))
   end
 
   def show
