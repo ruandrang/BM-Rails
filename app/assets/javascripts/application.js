@@ -154,7 +154,9 @@ document.addEventListener("DOMContentLoaded", () => {
         { team1: 0, team2: 0 },
         { team1: 0, team2: 0 },
         { team1: 0, team2: 0 }
-      ]
+      ],
+      quarter_history: {}, // { pairIdx: { quarterNum: { team1: score, team2: score } } }
+      possession: 'home' // 'home' or 'away'
     });
 
     const formatTime = (seconds) => {
@@ -415,6 +417,128 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
+      const renderRoster = (homeParams, awayParams) => {
+        const rosterEl = scoreboardRoot.querySelector("[data-roster-display]");
+        if (!rosterEl) return;
+
+        // Find actual team objects from state.teams using IDs to fetch members
+        // We need to match by ID because homeParams/awayParams are derived objects
+        const realHome = state.teams.find(t => t.id === homeParams.id);
+        const realAway = state.teams.find(t => t.id === awayParams.id);
+
+        const getMembersHtml = (team, isHome) => {
+          if (!team || !team.members || team.members.length === 0) {
+            return `<div class="text-gray-400 text-sm italic">No members</div>`;
+          }
+          // Sort by back_number if available, else name
+          const sortedMembers = [...team.members].sort((a, b) => (a.back_number || 999) - (b.back_number || 999));
+
+          return `
+              <div class="flex flex-col gap-2 ${isHome ? 'items-start' : 'items-end'}">
+                 <h4 class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-1">${team.label} ROSTER</h4>
+                 <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+                    ${sortedMembers.map(m => `
+                      <div class="flex items-center gap-2 text-sm text-gray-700">
+                        <span class="font-mono font-bold text-gray-400 w-6 text-right">${m.back_number || '-'}</span>
+                        <span class="font-bold">${m.name}</span>
+                      </div>
+                    `).join('')}
+                 </div>
+              </div>
+            `;
+        };
+
+        rosterEl.innerHTML = `
+            ${getMembersHtml(realHome, true)}
+            <div class="w-px bg-gray-200 self-stretch mx-4"></div>
+            ${getMembersHtml(realAway, false)}
+         `;
+      };
+
+      // Call Roster Render
+      renderRoster(home, away);
+
+      const renderQuarterTable = () => {
+        const tableContainer = scoreboardRoot.querySelector("[data-quarter-table]");
+        if (!tableContainer) return;
+
+        if (state.teams.length < 3) {
+          tableContainer.innerHTML = "<p class='text-center text-gray-500'>Need 3 teams for rotation table.</p>";
+          return;
+        }
+
+        const pairs = [[0, 1], [1, 2], [2, 0]];
+        const pairNames = ["Team A vs B", "Team B vs C", "Team C vs A"]; // Fallback or dynamic icons
+
+        let html = `
+           <table class="w-full text-center text-base border-collapse">
+             <thead>
+               <tr class="bg-gray-100 border-b border-gray-200 text-gray-600 font-bold uppercase tracking-wider text-sm">
+                 <th class="p-4 text-left">Matchup</th>
+                 <th class="p-4 w-20">1Q</th>
+                 <th class="p-4 w-20">2Q</th>
+                 <th class="p-4 w-20">3Q</th>
+                 <th class="p-4 w-20">4Q</th>
+                 <th class="p-4 w-24">Final</th>
+               </tr>
+             </thead>
+             <tbody class="divide-y divide-gray-200">
+         `;
+
+        pairs.forEach((pair, pairIdx) => {
+          const t1 = state.teams[pair[0]];
+          const t2 = state.teams[pair[1]];
+          const scores = state.quarter_history[pairIdx] || {};
+
+          // Check if this is the currently active matchup
+          // Active if state.rotation_step % 3 === pairIdx
+          // If active, maybe show current score in the "current quarter" slot?
+          // The user asked for "update when quarter ends", but usually showing live progress is nice.
+          // But strict reading: "update when quarter ends".
+          // Let's stick to saved history.
+
+          const getScoreCell = (q) => {
+            if (scores[q]) {
+              return `<div class="flex flex-col leading-none gap-1">
+                             <span class="font-bold text-gray-900 text-lg">${scores[q].team1}</span>
+                             <span class="font-bold text-gray-500 text-lg">${scores[q].team2}</span>
+                           </div>`;
+            }
+            return `<span class="text-gray-300 text-lg">-</span>`;
+          };
+
+          // Final Result: Only if Q4 is done? Or latest?
+          // Let's show empty for now unless game over? Or just show empty column as in image (it was empty).
+
+          html += `
+               <tr class="hover:bg-gray-50 transition-colors">
+                 <td class="p-4 text-left">
+                   <div class="flex flex-col gap-2">
+                     <div class="flex items-center gap-2">
+                       <span class="text-xl">${t1.icon || '🛡️'}</span>
+                       <span class="font-bold text-gray-900 text-base">${t1.label}</span>
+                     </div>
+                     <div class="flex items-center gap-2">
+                       <span class="text-xl">${t2.icon || '🛡️'}</span>
+                       <span class="font-bold text-gray-500 text-base">${t2.label}</span>
+                     </div>
+                   </div>
+                 </td>
+                 <td class="p-4 bg-white/50">${getScoreCell(1)}</td>
+                 <td class="p-4 bg-gray-50/50">${getScoreCell(2)}</td>
+                 <td class="p-4 bg-white/50">${getScoreCell(3)}</td>
+                 <td class="p-4 bg-gray-50/50">${getScoreCell(4)}</td>
+                 <td class="p-4 text-gray-400"></td> 
+               </tr>
+             `;
+        });
+
+        html += `</tbody></table>`;
+        tableContainer.innerHTML = html;
+      };
+
+      renderQuarterTable();
+
       // --- Team Foul Visuals (Control Page) ---
       const updateFoulVisuals = (team, count) => {
         const countEl = scoreboardRoot.querySelector(`[data-${team}-fouls]`);
@@ -494,25 +618,65 @@ document.addEventListener("DOMContentLoaded", () => {
       shotTimer = null;
     };
 
-    const playBuzzer = () => {
-      if (!soundEnabled) return;
+    // Global AudioContext for buzzer (initialized on first user interaction)
+    let globalAudioContext = null;
+
+    const initAudioContext = () => {
+      if (globalAudioContext) return;
+
       try {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
-        const context = new AudioContext();
-        const oscillator = context.createOscillator();
-        const gain = context.createGain();
+        globalAudioContext = new AudioContext();
+        console.log("🎵 Global AudioContext initialized:", globalAudioContext.state);
+
+        // Resume if suspended
+        if (globalAudioContext.state === 'suspended') {
+          globalAudioContext.resume().then(() => {
+            console.log("✅ AudioContext resumed on init");
+          });
+        }
+      } catch (e) {
+        console.error("Failed to init AudioContext:", e);
+      }
+    };
+
+    const playBuzzer = () => {
+      console.log("🔔 playBuzzer called! soundEnabled:", soundEnabled);
+      if (!soundEnabled) return;
+
+      // Initialize on first call
+      if (!globalAudioContext) {
+        initAudioContext();
+      }
+
+      try {
+        console.log("AudioContext state:", globalAudioContext?.state);
+
+        if (!globalAudioContext || globalAudioContext.state === 'closed') {
+          console.error("❌ AudioContext not available");
+          return;
+        }
+
+        // Resume if needed (for Safari)
+        if (globalAudioContext.state === 'suspended') {
+          globalAudioContext.resume();
+        }
+
+        const oscillator = globalAudioContext.createOscillator();
+        const gain = globalAudioContext.createGain();
         oscillator.type = "square";
         oscillator.frequency.value = 440;
         gain.gain.value = 0.15;
         oscillator.connect(gain);
-        gain.connect(context.destination);
+        gain.connect(globalAudioContext.destination);
         oscillator.start();
+        console.log("✅ Buzzer started!");
         setTimeout(() => {
           oscillator.stop();
-          context.close();
+          console.log("✅ Buzzer stopped!");
         }, 1500);
       } catch (error) {
-        // ignore audio errors
+        console.error("❌ Buzzer error:", error);
       }
     };
 
@@ -539,14 +703,22 @@ document.addEventListener("DOMContentLoaded", () => {
       if (shotTimer) return;
       shotTimer = setInterval(() => {
         if (state.shot_seconds > 0) {
-          if (state.shot_seconds <= 5) {
+          state.shot_seconds -= 1; // Decrement FIRST
+
+          console.log("⏱️ Shot clock:", state.shot_seconds);
+
+          // Then speak if <= 5
+          if (state.shot_seconds <= 5 && state.shot_seconds > 0) {
             speak(state.shot_seconds);
           }
-          state.shot_seconds -= 1;
-        } else {
-          state.shot_running = false;
-          stopShotTimer();
-          playBuzzer();
+
+          // Buzzer when reaching 0
+          if (state.shot_seconds === 0) {
+            console.log("🔔 Shot clock reached 0! Playing buzzer...");
+            state.shot_running = false;
+            stopShotTimer();
+            playBuzzer();
+          }
         }
         render();
         broadcast();
@@ -555,9 +727,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const speak = (text) => {
       if ('speechSynthesis' in window) {
+        // Cancel any previous speech to prevent duplicates
+        window.speechSynthesis.cancel();
+
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'ko-KR';
-        utterance.rate = 1.2;
+        utterance.rate = 1.0;
         window.speechSynthesis.speak(utterance);
       }
     };
@@ -582,6 +757,89 @@ document.addEventListener("DOMContentLoaded", () => {
       if (socket.readyState !== WebSocket.OPEN) return;
       const payload = JSON.stringify({ action: "update", payload: state });
       socket.send(JSON.stringify({ command: "message", identifier, data: payload }));
+    };
+
+    // Voice initialization flag to bypass browser autoplay policy
+    let voiceInitialized = false;
+
+    const initializeVoice = () => {
+      if (voiceInitialized) return;
+
+      // Play a silent utterance to activate speech synthesis
+      const silent = new SpeechSynthesisUtterance('');
+      silent.volume = 0;
+      window.speechSynthesis.speak(silent);
+      voiceInitialized = true;
+      console.log("✅ Voice initialized!");
+    };
+
+    const speakScore = () => {
+      console.log("🔊 speakScore called, role:", role);
+
+      // Only speak if speech synthesis is supported and acting as control
+      if (!window.speechSynthesis) {
+        console.warn("Speech synthesis not supported");
+        return;
+      }
+
+      if (role !== "control") {
+        console.log("Not in control role, skipping speech");
+        return;
+      }
+
+      // Reset speech synthesis to prevent stuck state
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
+
+      // Initialize voice on first call (browser autoplay policy workaround)
+      initializeVoice();
+
+      const [visualHome, visualAway] = currentMatchup();
+      console.log("Current matchup:", visualHome.label, "vs", visualAway.label);
+
+      // visualHome and visualAway already have the score values from currentMatchup
+      const homeScore = visualHome.score;
+      const awayScore = visualAway.score;
+
+      console.log("Scores to announce:", homeScore, "vs", awayScore);
+
+      // Format: "75 to 72" (Korean style: 75 대 72)
+      const text = `${homeScore} 대 ${awayScore}`;
+      console.log("Speaking:", text);
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ko-KR';
+      utterance.rate = 1.0;
+      utterance.volume = 1.0;
+      utterance.pitch = 1.0;
+
+      // Get available voices and select Korean voice if available
+      const voices = window.speechSynthesis.getVoices();
+      console.log("Available voices:", voices.length);
+
+      const koreanVoice = voices.find(voice => voice.lang.startsWith('ko'));
+      if (koreanVoice) {
+        utterance.voice = koreanVoice;
+        console.log("Using Korean voice:", koreanVoice.name);
+      } else {
+        console.warn("No Korean voice found, using default");
+      }
+
+      utterance.onstart = () => {
+        console.log("✅ Speech STARTED!");
+      };
+
+      utterance.onerror = (event) => {
+        console.error("❌ Speech error:", event.error, event);
+      };
+
+      utterance.onend = () => {
+        console.log("✅ Speech ended successfully");
+      };
+
+      console.log("Calling speechSynthesis.speak()...");
+      window.speechSynthesis.speak(utterance);
+      console.log("speak() called, speaking state:", window.speechSynthesis.speaking);
     };
 
     const handleTeamAction = (action) => {
@@ -612,12 +870,19 @@ document.addEventListener("DOMContentLoaded", () => {
       if (role !== "control") return;
       scoreboardRoot.querySelectorAll("[data-action]").forEach((btn) => {
         btn.addEventListener("click", () => {
+          // Initialize AudioContext on first user interaction
+          initAudioContext();
+
           const action = btn.dataset.action;
           if (["add-home", "add-home-1", "add-home-2", "add-home-3",
             "sub-home", "reset-home-score",
             "add-away", "add-away-1", "add-away-2", "add-away-3",
             "sub-away", "reset-away-score"].includes(action)) {
             handleTeamAction(action);
+            render();
+            broadcast();
+            // Speak after render to ensure scores are updated
+            speakScore();
           } else {
             switch (action) {
               case "toggle-main":
@@ -694,6 +959,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 const [p1, p2] = pairs[finishedPairIdx];
 
                 state.matchup_scores[finishedPairIdx] = {
+                  team1: state.teams[p1].score,
+                  team2: state.teams[p2].score
+                };
+
+                // SAVE Quarter History
+                // Calculate which quarter just finished (1-based)
+                // global rotation steps 0..11.
+                // Step 0 = Q1 of Pair 0. Step 1 = Q1 of Pair 1. Step 2 = Q1 of Pair 2.
+                // Step 3 = Q2 of Pair 0...
+                const finishedQuarter = Math.floor(state.rotation_step / 3) + 1;
+
+                if (!state.quarter_history[finishedPairIdx]) {
+                  state.quarter_history[finishedPairIdx] = {};
+                }
+                state.quarter_history[finishedPairIdx][finishedQuarter] = {
                   team1: state.teams[p1].score,
                   team2: state.teams[p2].score
                 };
@@ -784,9 +1064,42 @@ document.addEventListener("DOMContentLoaded", () => {
               case "possession-away":
                 state.possession = 'away';
                 break;
+              case "toggle-shortcuts":
+                const panel = document.querySelector("[data-shortcuts-panel]");
+                if (panel) {
+                  if (panel.classList.contains("hidden")) {
+                    panel.classList.remove("hidden");
+                  } else {
+                    panel.classList.add("hidden");
+                  }
+                }
+                break;
               case "new-game":
                 if (confirm("모든 경기 점수 데이터가 초기화 됩니다. 진행 하시겠습니까?")) {
-                  state = defaultState();
+                  // SAVE CURRENT QUARTER BEFORE RESET
+                  const currentPairIdx = state.rotation_step % 3;
+                  const pairs = [[0, 1], [1, 2], [2, 0]];
+                  const [p1, p2] = pairs[currentPairIdx];
+                  const currentQuarterNum = Math.floor(state.rotation_step / 3) + 1;
+
+                  if (!state.quarter_history[currentPairIdx]) {
+                    state.quarter_history[currentPairIdx] = {};
+                  }
+                  state.quarter_history[currentPairIdx][currentQuarterNum] = {
+                    team1: state.teams[p1].score,
+                    team2: state.teams[p2].score
+                  };
+
+                  // IMPORTANT: Call render() to update the table with saved scores
+                  render();
+                  broadcast();
+
+                  // Wait a moment for user to see final scores, then reset
+                  setTimeout(() => {
+                    state = defaultState();
+                    render();
+                    broadcast();
+                  }, 1500);
                 }
                 break;
               case "overtime":

@@ -6,7 +6,7 @@ class ScoreboardsController < ApplicationController
   end
 
   def control
-    @teams = @match.teams.order(:label)
+    @teams = @match.teams.order(:label).includes(:members)
   end
 
   def display
