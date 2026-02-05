@@ -315,6 +315,9 @@ document.addEventListener("DOMContentLoaded", () => {
           <span style="color: white; font-size: 18px; font-weight: 700; letter-spacing: 1px; font-family: Inter, sans-serif;">TEAM ${home.label}</span>
           <span style="color: white; font-size: 80px; font-weight: 700; line-height: 1; font-family: 'JetBrains Mono', monospace;">${home.score}</span>
           <span style="color: #E53935; font-size: 10px; font-weight: 600; letter-spacing: 2px; font-family: Inter, sans-serif;">HOME</span>
+          <div style="width: 40px; height: 40px; background: ${state.possession === 'home' ? '#E53935' : 'transparent'}; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: 8px;">
+            ${state.possession === 'home' ? '<span style="color: white; font-size: 24px; font-weight: bold;">◀</span>' : ''}
+          </div>
         </div>
 
         <!-- Center Panel -->
@@ -342,6 +345,9 @@ document.addEventListener("DOMContentLoaded", () => {
           <span style="color: white; font-size: 18px; font-weight: 700; letter-spacing: 1px; font-family: Inter, sans-serif;">TEAM ${away.label}</span>
           <span style="color: white; font-size: 80px; font-weight: 700; line-height: 1; font-family: 'JetBrains Mono', monospace;">${away.score}</span>
           <span style="color: ${COLORS.awayLogoBorder}; font-size: 10px; font-weight: 600; letter-spacing: 2px; font-family: Inter, sans-serif;">AWAY</span>
+          <div style="width: 40px; height: 40px; background: ${state.possession === 'away' ? COLORS.awayLogoBorder : 'transparent'}; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: 8px;">
+            ${state.possession === 'away' ? '<span style="color: white; font-size: 24px; font-weight: bold;">▶</span>' : ''}
+          </div>
         </div>
       `;
     };
@@ -388,6 +394,24 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
           nextQuarterBtn.textContent = "NEXT QUARTER";
           nextQuarterBtn.classList.remove("text-red-600", "font-bold");
+        }
+      }
+      const possHomeBtn = scoreboardRoot.querySelector('[data-possession-home-btn]');
+      const possAwayBtn = scoreboardRoot.querySelector('[data-possession-away-btn]');
+
+      if (possHomeBtn && possAwayBtn) {
+        if (state.possession === 'home') {
+          possHomeBtn.classList.remove("text-gray-400", "bg-white");
+          possHomeBtn.classList.add("bg-[#E53935]", "text-white", "border-[#E53935]");
+
+          possAwayBtn.classList.add("text-gray-400", "bg-white", "border-gray-300");
+          possAwayBtn.classList.remove("bg-[#3B82F6]", "text-white", "border-[#3B82F6]");
+        } else {
+          possAwayBtn.classList.remove("text-gray-400", "bg-white");
+          possAwayBtn.classList.add("bg-[#3B82F6]", "text-white", "border-[#3B82F6]");
+
+          possHomeBtn.classList.add("text-gray-400", "bg-white", "border-gray-300");
+          possHomeBtn.classList.remove("bg-[#E53935]", "text-white", "border-[#E53935]");
         }
       }
 
@@ -753,6 +777,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 break;
               case "buzzer":
                 playBuzzer();
+                break;
+              case "possession-home":
+                state.possession = 'home';
+                break;
+              case "possession-away":
+                state.possession = 'away';
                 break;
               case "new-game":
                 if (confirm("모든 경기 점수 데이터가 초기화 됩니다. 진행 하시겠습니까?")) {
