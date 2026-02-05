@@ -427,6 +427,22 @@ document.addEventListener("DOMContentLoaded", () => {
       socket.send(JSON.stringify({ command: "message", identifier, data: payload }));
     };
 
+    const handleTeamAction = (action) => {
+      const pairs = matchupPairs();
+      const [homeIdx, awayIdx] = pairs[state.matchup_index % pairs.length];
+
+      if (action === "add-home") state.teams[homeIdx].score += 1;
+      else if (action === "sub-home") state.teams[homeIdx].score = Math.max(0, state.teams[homeIdx].score - 1);
+      else if (action === "add-home-1") state.teams[homeIdx].score += 1;
+      else if (action === "add-home-2") state.teams[homeIdx].score += 2;
+      else if (action === "add-home-3") state.teams[homeIdx].score += 3;
+      else if (action === "add-away") state.teams[awayIdx].score += 1;
+      else if (action === "sub-away") state.teams[awayIdx].score = Math.max(0, state.teams[awayIdx].score - 1);
+      else if (action === "add-away-1") state.teams[awayIdx].score += 1;
+      else if (action === "add-away-2") state.teams[awayIdx].score += 2;
+      else if (action === "add-away-3") state.teams[awayIdx].score += 3;
+    };
+
     const attachControlHandlers = () => {
       if (role !== "control") return;
       scoreboardRoot.querySelectorAll("[data-action]").forEach((btn) => {
@@ -560,5 +576,19 @@ document.addEventListener("DOMContentLoaded", () => {
     socket.addEventListener("close", () => {
       ensureState();
     });
+    const fullscreenBtn = document.getElementById("fullscreen-toggle");
+    if (fullscreenBtn) {
+      fullscreenBtn.addEventListener("click", () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch((e) => {
+            console.error(`Error attempting to enable fullscreen mode: ${e.message} (${e.name})`);
+          });
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          }
+        }
+      });
+    }
   }
 });
