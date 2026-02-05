@@ -1,36 +1,84 @@
-<%= form_with model: [@club, @member], local: true, class: "form" do |form| %>
-  <div class="field">
-    <%= form.label :name, "이름" %>
-    <%= form.text_field :name, required: true %>
-  </div>
-  <div class="field">
-    <%= form.label :age, "나이" %>
-    <%= form.number_field :age, min: 0 %>
-  </div>
-  <div class="field">
-    <%= form.label :height_cm, "키(cm)" %>
-    <%= form.number_field :height_cm, min: 0 %>
-  </div>
-  <div class="field">
-    <%= form.label :position, "포지션" %>
-    <%= form.select :position, Member::POSITIONS, {}, required: true %>
-  </div>
-  <div class="field">
-    <%= form.label :jersey_number, "등번호" %>
-    <%= form.number_field :jersey_number, min: 0 %>
-  </div>
-  <div class="actions">
-    <%= form.submit class: "button primary" %>
-  </div>
-<% end %>
+<%= form_with model: [@club, @member], local: true, class: "space-y-6" do |form| %>
+  <% if @member.errors.any? %>
+    <div class="alert alert-error shadow-lg">
+      <div>
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div>
+          <h3 class="font-bold">입력 오류</h3>
+          <ul class="text-sm list-disc list-inside">
+            <% @member.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  <% end %>
 
-<% if @member.errors.any? %>
-  <div class="form-errors">
-    <strong>입력 오류</strong>
-    <ul>
-      <% @member.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
+  <!-- 이름 -->
+  <div class="form-control w-full">
+    <%= form.label :name, "이름", class: "label" %>
+    <%= form.text_field :name,
+        required: true,
+        placeholder: "홍길동",
+        class: "input input-bordered w-full" %>
+  </div>
+
+  <!-- 2열 그리드: 나이, 키 -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="form-control w-full">
+      <%= form.label :age, "나이", class: "label" %>
+      <%= form.number_field :age,
+          min: 0,
+          max: 100,
+          placeholder: "25",
+          class: "input input-bordered w-full" %>
+    </div>
+
+    <div class="form-control w-full">
+      <%= form.label :height_cm, "키 (cm)", class: "label" %>
+      <%= form.number_field :height_cm,
+          min: 100,
+          max: 250,
+          placeholder: "180",
+          class: "input input-bordered w-full" %>
+    </div>
+  </div>
+
+  <!-- 포지션 -->
+  <div class="form-control w-full">
+    <label class="label">
+      <span class="label-text font-bold">포지션</span>
+    </label>
+    <div class="grid grid-cols-5 gap-3">
+      <% Member::POSITIONS.each do |pos| %>
+        <label class="cursor-pointer">
+          <%= form.radio_button :position, pos, class: "hidden peer", required: true %>
+          <div class="card hover:opacity-80 transition-all duration-200 text-center py-3 border-2 border-transparent peer-checked:ring-2 peer-checked:ring-offset-2 shadow-sm text-white"
+               style="background-color: <%= Member::POSITION_COLORS[pos] %>;">
+            <span class="text-sm font-black"><%= pos %></span>
+            <span class="text-[10px] opacity-80 block"><%= Member::POSITION_NAMES[pos] %></span>
+          </div>
+        </label>
       <% end %>
-    </ul>
+    </div>
+  </div>
+
+  <!-- 등번호 -->
+  <div class="form-control w-full max-w-xs">
+    <%= form.label :jersey_number, "등번호", class: "label" %>
+    <%= form.number_field :jersey_number,
+        min: 0,
+        max: 99,
+        placeholder: "23",
+        class: "input input-bordered w-full font-bold" %>
+  </div>
+
+  <!-- 제출 버튼 -->
+  <div class="form-control mt-8">
+    <%= form.submit @member.new_record? ? "멤버 추가" : "저장하기",
+        class: "btn btn-primary btn-lg w-full gap-2" %>
   </div>
 <% end %>

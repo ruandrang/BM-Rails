@@ -1,47 +1,227 @@
-<% content_for :title, @club.name %>
+<% content_for :title, "#{@club.name} - 농구 클럽 매니저" %>
 
-<div class="page-header">
-  <div class="title-with-icon">
-    <div class="club-icon large"><%= club_icon(@club.icon) %></div>
-    <div>
-      <h1><%= @club.name %></h1>
-      <p class="muted">멤버 <%= @members_count %>명 · 경기 <%= @matches_count %>회</p>
-    </div>
-  </div>
-  <div class="actions">
-    <%= link_to "뒤로가기", clubs_path, class: "button ghost" %>
-    <%= link_to "클럽 편집", edit_club_path(@club), class: "button ghost" %>
-    <%= button_to "클럽 삭제", club_path(@club), method: :delete, data: { confirm: "정말 삭제할까요?" }, class: "button danger" %>
-  </div>
-</div>
-
-<div class="card-grid">
-  <div class="card is-clickable" data-href="<%= club_members_path(@club) %>">
-    <h2>멤버 관리</h2>
-    <p class="muted">멤버 추가/수정, CSV 가져오기/내보내기, 순서 변경</p>
-    <%= link_to "멤버 보기", club_members_path(@club), class: "button primary" %>
-  </div>
-  <div class="card is-clickable" data-href="<%= club_matches_path(@club) %>">
-    <h2>팀 생성 & 경기 기록</h2>
-    <p class="muted">팀 밸런싱 후 경기 결과를 기록합니다.</p>
-    <%= link_to "경기 목록", club_matches_path(@club), class: "button primary" %>
-  </div>
-  <div class="card is-clickable" data-href="<%= club_stats_path(@club) %>">
-    <h2>통계 대시보드</h2>
-    <p class="muted">선수별 승/무/패와 승률을 확인하세요.</p>
-    <%= link_to "통계 보기", club_stats_path(@club), class: "button primary" %>
-  </div>
-</div>
-
-<div class="card backup-card">
-  <h2>데이터 백업</h2>
-  <p class="muted">클럽 데이터를 JSON으로 백업하거나 복원할 수 있습니다.</p>
-  <div class="inline-actions">
-    <%= link_to "JSON 내보내기", export_json_club_path(@club), class: "button ghost" %>
-    <%= form_with url: import_json_club_path(@club), local: true, class: "inline-form", multipart: true do %>
-      <%= file_field_tag :file, accept: "application/json" %>
-      <%= submit_tag "JSON 가져오기", class: "button ghost" %>
+<div class="max-w-7xl mx-auto">
+  <!-- 뒤로가기 -->
+  <div class="mb-4">
+    <%= link_to clubs_path, class: "btn btn-ghost btn-sm gap-2" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      뒤로가기
     <% end %>
   </div>
-  <p class="muted small">가져오기를 실행하면 현재 클럽 데이터가 덮어써집니다.</p>
+
+  <!-- 클럽 헤더 카드 -->
+  <div class="card bg-gradient-to-r from-primary to-secondary text-primary-content mb-8">
+    <div class="card-body">
+      <div class="flex flex-col md:flex-row items-center gap-6">
+        <div class="text-8xl">
+          <%= club_icon(@club.icon) %>
+        </div>
+        <div class="flex-1 text-center md:text-left">
+          <h1 class="text-4xl font-bold mb-2"><%= @club.name %></h1>
+          <div class="flex flex-wrap justify-center md:justify-start gap-4 text-primary-content/80">
+            <span class="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              멤버 <%= @members_count %>명
+            </span>
+            <span class="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+              </svg>
+              경기 <%= @matches_count %>회
+            </span>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <%= link_to edit_club_path(@club), class: "btn btn-ghost btn-sm" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          <% end %>
+          <%= button_to club_path(@club), method: :delete, data: { turbo_confirm: "정말 이 클럽을 삭제하시겠습니까?" }, class: "btn btn-ghost btn-sm text-error" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 빠른 액션 카드들 -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- 멤버 관리 -->
+    <%= link_to club_members_path(@club), class: "card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1" do %>
+      <div class="card-body items-center text-center">
+        <div class="text-4xl mb-2">👥</div>
+        <h2 class="card-title">멤버 관리</h2>
+        <p class="text-base-content/60 text-sm">멤버 추가/수정, CSV 관리</p>
+        <div class="badge badge-primary mt-2"><%= @members_count %>명</div>
+      </div>
+    <% end %>
+
+    <!-- 경기 기록 -->
+    <%= link_to club_matches_path(@club), class: "card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1" do %>
+      <div class="card-body items-center text-center">
+        <div class="text-4xl mb-2">🏆</div>
+        <h2 class="card-title">팀 생성 & 경기</h2>
+        <p class="text-base-content/60 text-sm">팀 밸런싱 및 결과 기록</p>
+        <div class="badge badge-secondary mt-2"><%= @matches_count %>회</div>
+      </div>
+    <% end %>
+
+    <!-- 통계 -->
+    <%= link_to club_stats_path(@club), class: "card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1" do %>
+      <div class="card-body items-center text-center">
+        <div class="text-4xl mb-2">📊</div>
+        <h2 class="card-title">통계 대시보드</h2>
+        <p class="text-base-content/60 text-sm">선수별 승/무/패, 승률</p>
+        <div class="badge badge-accent mt-2">분석</div>
+      </div>
+    <% end %>
+
+    <!-- 새 경기 -->
+    <%= link_to new_club_match_path(@club), class: "card bg-primary text-primary-content shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1" do %>
+      <div class="card-body items-center text-center">
+        <div class="text-4xl mb-2 text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+        </div>
+        <h2 class="card-title">새 경기 만들기</h2>
+        <p class="text-primary-content/70 text-sm">지금 바로 시작</p>
+        <div class="badge badge-outline mt-2">빠른 시작</div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- 데이터 백업 섹션 -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <!-- 최근 경기 -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="card-title gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            최근 경기
+          </h2>
+          <%= link_to "전체보기", club_matches_path(@club), class: "btn btn-ghost btn-xs" %>
+        </div>
+
+        <% if @recent_matches.any? %>
+          <div class="overflow-x-auto">
+            <table class="table table-sm table-zebra w-full">
+              <thead>
+                <tr>
+                  <th>날짜</th>
+                  <th>메모</th>
+                  <th class="text-right">액션</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @recent_matches.each do |match| %>
+                  <tr>
+                    <td class="whitespace-nowrap font-medium"><%= match.played_on.strftime("%Y.%m.%d") %></td>
+                    <td class="max-w-[150px] truncate opacity-70"><%= match.note %></td>
+                    <td class="text-right">
+                      <%= link_to club_match_path(@club, match), class: "btn btn-ghost btn-xs btn-circle" do %>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                      <% end %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <div class="text-center py-8 text-base-content/40">
+            <p>아직 기록된 경기가 없습니다</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- 멤버 미리보기 -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="card-title gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            멤버 미리보기
+          </h2>
+          <%= link_to "전체보기", club_members_path(@club), class: "btn btn-ghost btn-xs" %>
+        </div>
+
+        <% if @preview_members.any? %>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <% @preview_members.each do |member| %>
+              <div class="card bg-base-200 p-3">
+                <div class="font-bold text-sm truncate"><%= member.name %></div>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="badge badge-xs text-white" style="<%= position_badge_style(member.position) %>">
+                    <%= member.position %>
+                  </span>
+                  <% if member.jersey_number %>
+                    <span class="text-xs opacity-60">#<%= member.jersey_number %></span>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="text-center py-8 text-base-content/40">
+            <p>등록된 멤버가 없습니다</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- 데이터 백업 섹션 -->
+  <div class="card bg-base-100 shadow-xl border border-base-200/50">
+    <div class="card-body">
+      <h2 class="card-title gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+        </svg>
+        데이터 백업
+      </h2>
+      <p class="text-base-content/60">클럽 데이터를 JSON으로 백업하거나 복원할 수 있습니다.</p>
+
+      <div class="flex flex-wrap items-center gap-4 mt-4">
+        <%= link_to export_json_club_path(@club), class: "btn btn-outline btn-primary gap-2" do %>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          JSON 내보내기
+        <% end %>
+
+        <%= form_with url: import_json_club_path(@club), local: true, multipart: true, class: "flex items-center gap-2" do %>
+          <input type="file" name="file" accept="application/json" class="file-input file-input-bordered file-input-sm w-full max-w-xs" />
+          <button type="submit" class="btn btn-outline btn-sm gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            JSON 가져오기
+          </button>
+        <% end %>
+      </div>
+
+      <div class="alert alert-warning mt-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <span>가져오기를 실행하면 현재 클럽 데이터가 덮어써집니다.</span>
+      </div>
+    </div>
+  </div>
 </div>

@@ -1,8 +1,10 @@
 Rails.application.routes.draw do
+  mount ActionCable.server => "/cable"
   root "clubs#index"
 
   resource :session, only: [ :new, :create, :destroy ]
   resource :registration, only: [ :new, :create ]
+  resources :scoreboards, only: [ :index ]
 
   resources :clubs do
     member do
@@ -22,6 +24,8 @@ Rails.application.routes.draw do
       member do
         patch :record_results
         get :share
+        get :scoreboard, to: "scoreboards#control"
+        get :scoreboard_display, to: "scoreboards#display"
       end
     end
 

@@ -1,15 +1,26 @@
-<% content_for :title, "멤버 편집" %>
+<% content_for :title, "멤버 편집 - #{@member.name}" %>
 
-<div class="page-header">
-  <div>
-    <h1>멤버 편집</h1>
-    <p class="muted"><%= @club.name %> 멤버 정보를 수정하세요.</p>
+<div class="max-w-7xl mx-auto">
+  <!-- 뒤로가기 -->
+  <div class="mb-4">
+    <%= link_to club_members_path(@club), class: "btn btn-ghost btn-sm gap-2" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      뒤로가기
+    <% end %>
   </div>
-  <div class="actions">
-    <%= link_to "뒤로가기", club_members_path(@club), class: "button ghost" %>
-  </div>
-</div>
 
-<div class="card">
-  <%= render "form" %>
+  <!-- 페이지 헤더 -->
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-base-content mb-2">멤버 편집</h1>
+    <p class="text-base-content/60"><%= @member.name %> 정보를 수정하세요</p>
+  </div>
+
+  <!-- 폼 카드 -->
+  <div class="card bg-base-100 shadow-xl max-w-2xl mx-auto">
+    <div class="card-body">
+      <%= render "form" %>
+    </div>
+  </div>
 </div>

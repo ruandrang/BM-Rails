@@ -15,7 +15,7 @@
     <tbody>
       <tr><th>ID</th><td><%= @club.id %></td></tr>
       <tr><th>클럽명</th><td><%= @club.name %></td></tr>
-      <tr><th>아이콘</th><td><%= @club.icon %></td></tr>
+      <tr><th>아이콘</th><td><%= club_icon(@club.icon) %></td></tr>
       <tr><th>소유자</th><td><%= @club.user.email %></td></tr>
       <tr><th>멤버 수</th><td><%= @club.members.count %></td></tr>
       <tr><th>경기 수</th><td><%= @club.matches.count %></td></tr>

@@ -1,0 +1,159 @@
+<div class="min-h-screen bg-[#0F0F0F] text-white p-4 md:p-8 font-['Inter']" 
+     data-scoreboard-root 
+     data-scoreboard-role="control"
+     data-match-id="<%= @match.id %>"
+     data-teams="<%= @match.teams.to_json %>"
+     data-teams-count="<%= @match.teams.count %>">
+  <div class="max-w-4xl mx-auto space-y-6">
+    
+    <!-- Header -->
+    <header class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="font-['Cormorant_Garamond'] text-3xl font-semibold tracking-wider text-[#FAFAF7]">SCOREBOARD CONTROLLER</h1>
+        <p class="text-[#666666] text-sm mt-1 font-mono">CONNECTED • <%= @match.match_title %></p>
+      </div>
+      <div class="flex items-center gap-3">
+        <%= link_to "OPEN DISPLAY", scoreboard_display_club_match_path(@club, @match), target: "_blank", class: "btn btn-sm btn-outline border-[#333333] text-[#999999] hover:bg-[#333333] hover:text-white" %>
+        <div class="px-3 py-1 rounded border border-[#22C55E]/30 bg-[#22C55E]/10 text-[#22C55E] text-xs font-bold tracking-wider">
+          LIVE
+        </div>
+      </div>
+    </header>
+
+    <!-- Timer Section -->
+    <section class="bg-[#1A1A1A] rounded-xl border border-[#333333] p-6 shadow-lg">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+        <!-- Main Timer Display -->
+        <div class="text-center space-y-2">
+          <span class="text-[#666666] text-xs tracking-widest font-bold">GAME CLOCK</span>
+          <div class="font-['JetBrains_Mono'] text-6xl font-bold tabluar-nums tracking-tighter" 
+               id="control-game-clock" 
+               data-scoreboard-timer>
+            10:00
+          </div>
+          <!-- Current Quarter Badge -->
+          <div class="text-center">
+             <span class="text-[#E53935] font-bold text-sm" data-scoreboard-quarter>1Q</span>
+          </div>
+        </div>
+
+        <!-- Timer Controls -->
+        <div class="flex justify-center gap-4">
+          <button class="w-16 h-16 rounded-full bg-[#22C55E] text-black flex items-center justify-center hover:brightness-110 active:scale-95 transition-all shadow-[0_0_20px_rgba(34,197,94,0.3)]"
+                  data-action="toggle-main">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <button class="w-16 h-16 rounded-full bg-[#333333] border border-[#555555] text-white flex items-center justify-center hover:bg-[#444444] active:scale-95 transition-all"
+                  data-action="reset-main">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          </button>
+        </div>
+
+        <!-- Shot Clock Controls -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between bg-[#111111] p-3 rounded border border-[#333333]">
+            <span class="text-[#666666] text-xs font-bold">SHOT CLOCK</span>
+            <span class="font-['JetBrains_Mono'] text-[#E53935] text-2xl font-bold" 
+                  id="control-shot-clock"
+                  data-scoreboard-shot>24</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <button class="btn btn-sm bg-[#C41E3A] border-none text-white hover:bg-[#A01830]"
+                    data-action="reset-shot-14">RESET 14</button>
+            <button class="btn btn-sm bg-[#C41E3A] border-none text-white hover:bg-[#A01830]"
+                    data-action="reset-shot-24">RESET 24</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Teams Score Controls -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Home Team -->
+      <section class="bg-[#1A1A1A] rounded-xl border border-[#333333] p-6 relative overflow-hidden group">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl"><%= @match.home_team.icon %></span>
+            <h3 class="font-bold text-xl tracking-wider"><%= @match.home_team.name %></h3>
+          </div>
+          <span class="font-['JetBrains_Mono'] text-5xl font-bold tabular-nums" 
+                id="control-home-score" 
+                data-home-score>0</span>
+        </div>
+        
+        <div class="grid grid-cols-3 gap-3 mb-6">
+          <button class="btn border-[#333333] bg-[#222222] hover:bg-[#333333] text-white h-14 text-lg"
+                  data-action="add-home-1">+1</button>
+          <button class="btn border-[#333333] bg-[#222222] hover:bg-[#333333] text-white h-14 text-lg"
+                  data-action="add-home-2">+2</button>
+          <button class="btn border-[#333333] bg-[#222222] hover:bg-[#333333] text-white h-14 text-lg"
+                  data-action="add-home-3">+3</button>
+        </div>
+
+        <div class="border-t border-[#333333] pt-4 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-[#666666]">FOULS</span>
+            <div class="join">
+              <button class="join-item btn btn-xs btn-ghost border border-[#444]"
+                      data-action="decrement-home-fouls">-</button>
+              <button class="join-item btn btn-xs btn-active cursor-default w-8"
+                      data-home-fouls>0</button>
+              <button class="join-item btn btn-xs btn-ghost border border-[#444]"
+                      data-action="increment-home-fouls">+</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Away Team -->
+      <section class="bg-[#1A1A1A] rounded-xl border border-[#333333] p-6 relative overflow-hidden group">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl"><%= @match.away_team.icon %></span>
+            <h3 class="font-bold text-xl tracking-wider"><%= @match.away_team.name %></h3>
+          </div>
+          <span class="font-['JetBrains_Mono'] text-5xl font-bold tabular-nums" 
+                id="control-away-score" 
+                data-away-score>0</span>
+        </div>
+        
+        <div class="grid grid-cols-3 gap-3 mb-6">
+          <button class="btn border-[#333333] bg-[#222222] hover:bg-[#333333] text-white h-14 text-lg"
+                  data-action="add-away-1">+1</button>
+          <button class="btn border-[#333333] bg-[#222222] hover:bg-[#333333] text-white h-14 text-lg"
+                  data-action="add-away-2">+2</button>
+          <button class="btn border-[#333333] bg-[#222222] hover:bg-[#333333] text-white h-14 text-lg"
+                  data-action="add-away-3">+3</button>
+        </div>
+
+        <div class="border-t border-[#333333] pt-4 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-[#666666]">FOULS</span>
+            <div class="join">
+              <button class="join-item btn btn-xs btn-ghost border border-[#444]"
+                      data-action="decrement-away-fouls">-</button>
+              <button class="join-item btn btn-xs btn-active cursor-default w-8"
+                      data-away-fouls>0</button>
+              <button class="join-item btn btn-xs btn-ghost border border-[#444]"
+                      data-action="increment-away-fouls">+</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mt-8 border-t border-[#333333] pt-6">
+      <h4 class="text-[#666666] text-[10px] tracking-[2px] font-bold mb-4 uppercase">Quick Actions</h4>
+      <div class="flex gap-4">
+        <button class="btn btn-sm border-[#333333] bg-[#1A1A1A] text-[#888] hover:text-white"
+                data-action="next-quarter">NEXT QUARTER</button>
+        <button class="btn btn-sm border-[#333333] bg-[#1A1A1A] text-[#888] hover:text-white"
+                data-action="next-matchup">SWAP TEAMS</button>
+        <button class="btn btn-sm border-[#333333] bg-[#1A1A1A] text-[#888] hover:text-white"
+                data-action="new-game">RESET GAME</button>
+      </div>
+    </div>
+
+  </div>
+</div>

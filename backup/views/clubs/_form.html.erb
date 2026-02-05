@@ -1,0 +1,58 @@
+<%= form_with model: @club, local: true, class: "space-y-6" do |form| %>
+  <% if @club.errors.any? %>
+    <div class="alert alert-error shadow-lg">
+      <div>
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div>
+          <h3 class="font-bold">입력 오류</h3>
+          <ul class="text-sm list-disc list-inside">
+            <% @club.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- 클럽 이름 -->
+  <div class="form-control w-full">
+    <%= form.label :name, "클럽 이름", class: "label" %>
+    <%= form.text_field :name,
+        required: true,
+        placeholder: "예: 루키 바스켓볼",
+        class: "input input-bordered w-full" %>
+    <label class="label">
+      <span class="label-text-alt text-base-content/60">기억하기 쉬운 이름을 입력하세요</span>
+    </label>
+  </div>
+
+  <!-- 클럽 아이콘 선택 -->
+  <div class="form-control w-full">
+    <label class="label">
+      <span class="label-text font-medium">클럽 아이콘</span>
+    </label>
+    <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+      <% Club::ICONS.each do |icon| %>
+        <label class="cursor-pointer">
+          <input type="radio" name="club[icon]" value="<%= icon %>"
+                 class="hidden peer"
+                 <%= "checked" if @club.icon == icon || (@club.new_record? && Club::ICONS.first == icon) %>>
+          <div class="card bg-base-200 hover:bg-base-300 peer-checked:bg-primary peer-checked:text-primary-content transition-all duration-200 peer-checked:ring-2 peer-checked:ring-primary">
+            <div class="card-body items-center p-4">
+              <span class="text-4xl"><%= icon %></span>
+            </div>
+          </div>
+        </label>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- 제출 버튼 -->
+  <div class="form-control mt-8">
+    <%= form.submit @club.new_record? ? "클럽 만들기" : "저장하기",
+        class: "btn btn-primary btn-lg w-full gap-2" %>
+  </div>
+<% end %>

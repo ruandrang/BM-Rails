@@ -29,7 +29,7 @@
           <td><%= club.id %></td>
           <td><%= club.name %></td>
           <td><%= club.user.email %></td>
-          <td><%= club.icon %></td>
+          <td><%= club_icon(club.icon) %></td>
           <td><%= club.members.count %></td>
           <td><%= club.matches.count %></td>
           <td><%= link_to "보기", admin_club_path(club), class: "button ghost" %></td>

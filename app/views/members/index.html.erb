@@ -18,39 +18,24 @@
   </div>
 
   <!-- 포지션별 통계 카드 -->
-  <% guards = @members.select { |m| m.position == "Guard" }.count %>
-  <% forwards = @members.select { |m| m.position == "Forward" }.count %>
-  <% centers = @members.select { |m| m.position == "Center" }.count %>
+  <% position_counts = @members.group_by(&:position).transform_values(&:count) %>
 
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
     <div class="stats shadow bg-primary text-primary-content">
-      <div class="stat">
-        <div class="stat-title text-primary-content/70">총 멤버</div>
-        <div class="stat-value"><%= @members.count %></div>
-        <div class="stat-desc text-primary-content/60">명 등록됨</div>
+      <div class="stat p-4">
+        <div class="stat-title text-primary-content/70 text-xs">총 멤버</div>
+        <div class="stat-value text-2xl"><%= @members.count %></div>
       </div>
     </div>
-    <div class="stats shadow bg-base-100">
-      <div class="stat">
-        <div class="stat-title text-base-content/60">Guard</div>
-        <div class="stat-value text-secondary"><%= guards %></div>
-        <div class="stat-desc">G 포지션</div>
+    <% Member::POSITIONS.each do |pos| %>
+      <div class="stats shadow" style="background-color: <%= Member::POSITION_COLORS[pos] %>;">
+        <div class="stat p-4">
+          <div class="stat-title text-white/70 text-xs"><%= pos %></div>
+          <div class="stat-value text-2xl text-white"><%= position_counts[pos] || 0 %></div>
+          <div class="stat-desc text-white/60 text-xs"><%= position_display(pos) %></div>
+        </div>
       </div>
-    </div>
-    <div class="stats shadow bg-base-100">
-      <div class="stat">
-        <div class="stat-title text-base-content/60">Forward</div>
-        <div class="stat-value text-accent"><%= forwards %></div>
-        <div class="stat-desc">F 포지션</div>
-      </div>
-    </div>
-    <div class="stats shadow bg-base-100">
-      <div class="stat">
-        <div class="stat-title text-base-content/60">Center</div>
-        <div class="stat-value text-neutral"><%= centers %></div>
-        <div class="stat-desc">C 포지션</div>
-      </div>
-    </div>
+    <% end %>
   </div>
 
   <!-- 액션 버튼들 -->
@@ -81,46 +66,76 @@
 
   <!-- 멤버 목록 -->
   <% if @members.any? %>
-    <div class="mb-4 flex items-center gap-2 text-sm text-base-content/50">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-      카드 드래그로 순서 변경 (저장됨)
+    <!-- 정렬 및 안내 -->
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+      <div class="flex items-center gap-2 text-sm text-base-content/50">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        카드 드래그로 순서 변경 (저장됨)
+      </div>
+
+      <!-- 정렬 버튼들 -->
+      <div class="flex gap-2">
+        <button type="button" class="btn btn-ghost btn-xs gap-1" data-sort="name">
+          이름
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sort-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+          </svg>
+        </button>
+        <button type="button" class="btn btn-ghost btn-xs gap-1" data-sort="position">
+          포지션
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sort-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+          </svg>
+        </button>
+        <button type="button" class="btn btn-ghost btn-xs gap-1" data-sort="jersey">
+          등번호
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sort-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+          </svg>
+        </button>
+      </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-sortable-list data-reorder-url="<%= reorder_club_members_path(@club) %>">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="member-list" data-sortable-list data-reorder-url="<%= reorder_club_members_path(@club) %>">
       <% @members.each do |member| %>
         <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-move member-item"
              draggable="true"
-             data-member-id="<%= member.id %>">
+             data-member-id="<%= member.id %>"
+             data-name="<%= member.name %>"
+             data-position="<%= member.position %>"
+             data-jersey="<%= member.jersey_number || 999 %>">
           <div class="card-body p-5">
             <div class="flex items-start justify-between">
-              <div class="flex items-center gap-4">
-                <div class="avatar placeholder">
-                  <div class="bg-primary text-primary-content rounded-full w-14 ring ring-primary ring-offset-base-100 ring-offset-2">
-                    <span class="text-2xl font-bold"><%= member.name[0] %></span>
-                  </div>
-                </div>
-                <div>
-                  <h3 class="card-title text-xl"><%= member.name %></h3>
-                  <div class="flex items-center gap-2 mt-1">
-                    <span class="badge badge-secondary badge-sm"><%= member.position %></span>
-                    <% if member.jersey_number %>
-                      <span class="badge badge-accent badge-sm font-bold">#<%= member.jersey_number %></span>
-                    <% end %>
-                  </div>
+              <div>
+                <h3 class="card-title text-xl mb-2"><%= member.name %></h3>
+                <div class="flex items-center gap-2">
+                  <span class="badge badge-sm text-white" style="<%= position_badge_style(member.position) %>">
+                    <%= member.position %>
+                  </span>
+                  <% if member.jersey_number %>
+                    <span class="badge badge-outline badge-sm font-bold">#<%= member.jersey_number %></span>
+                  <% end %>
                 </div>
               </div>
-              
+
               <div class="dropdown dropdown-end">
                 <label tabindex="0" class="btn btn-ghost btn-xs btn-circle">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                   </svg>
                 </label>
-                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32 border border-base-200">
-                  <li><%= link_to "수정", edit_club_member_path(@club, member) %></li>
-                  <li><%= button_to "삭제", club_member_path(@club, member), method: :delete, class: "text-error", data: { turbo_confirm: "정말 삭제할까요?" } %></li>
+                <ul tabindex="0" class="dropdown-content z-[1] menu menu-sm p-2 shadow bg-base-100 rounded-box w-36 border border-base-200">
+                  <li><%= link_to "수정", edit_club_member_path(@club, member), class: "justify-start" %></li>
+                  <li>
+                    <%= button_to club_member_path(@club, member),
+                        method: :delete,
+                        class: "text-error justify-start w-full text-left",
+                        data: { turbo_confirm: "정말 삭제할까요?" } do %>
+                      삭제
+                    <% end %>
+                  </li>
                 </ul>
               </div>
             </div>
@@ -164,3 +179,45 @@
     </div>
   <% end %>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const sortButtons = document.querySelectorAll("[data-sort]");
+  const memberList = document.getElementById("member-list");
+
+  if (!memberList) return;
+
+  const sortState = {};
+
+  sortButtons.forEach(btn => {
+    btn.addEventListener("click", function() {
+      const sortKey = this.dataset.sort;
+      sortState[sortKey] = sortState[sortKey] === "asc" ? "desc" : "asc";
+
+      const items = Array.from(memberList.querySelectorAll(".member-item"));
+
+      items.sort((a, b) => {
+        let aVal = a.dataset[sortKey];
+        let bVal = b.dataset[sortKey];
+
+        if (sortKey === "jersey") {
+          aVal = parseInt(aVal) || 999;
+          bVal = parseInt(bVal) || 999;
+        }
+
+        if (sortState[sortKey] === "asc") {
+          return aVal > bVal ? 1 : -1;
+        } else {
+          return aVal < bVal ? 1 : -1;
+        }
+      });
+
+      items.forEach(item => memberList.appendChild(item));
+
+      // Update button active state
+      sortButtons.forEach(b => b.classList.remove("btn-active"));
+      this.classList.add("btn-active");
+    });
+  });
+});
+</script>

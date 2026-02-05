@@ -10,4 +10,20 @@ class Team < ApplicationRecord
   validates :label, presence: true
   validates :label, uniqueness: { scope: :match_id }
   validates :color, presence: true, inclusion: { in: COLORS }
+
+  def name
+    label
+  end
+
+  def icon
+    case color
+    when "Red" then "🔴"
+    when "Blue" then "🔵"
+    when "Black" then "⚫"
+    when "White" then "⚪"
+    when "Yellow" then "🟡"
+    when "Green" then "🟢"
+    else "🛡️"
+    end
+  end
 end

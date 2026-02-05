@@ -1,0 +1,106 @@
+{
+  "version": "2.0",
+  "lastUpdated": "2026-02-05T12:58:59.200Z",
+  "activeFeatures": [
+    "BM-rail",
+    "helpers"
+  ],
+  "primaryFeature": "BM-rail",
+  "features": {
+    "code-quality": {
+      "phase": "completed",
+      "phaseNumber": 6,
+      "matchRate": 92,
+      "iterationCount": 1,
+      "requirements": [
+        "Critical #1: ScoreboardStore Rails.cache 변경",
+        "Critical #2: JSON 파일 크기 제한",
+        "Critical #3: ClubImporter 유효성 검증",
+        "Major #4-11: N+1, 캐싱, 페이지네이션 등"
+      ],
+      "documents": {
+        "report": "docs/04-report/features/code-quality.report.md"
+      },
+      "timestamps": {
+        "started": "2026-02-05T12:20:00.000Z",
+        "lastUpdated": "2026-02-05T12:45:00.000Z",
+        "completed": "2026-02-05T12:45:00.000Z"
+      },
+      "commit": "62302a9"
+    },
+    "BM-rail": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-02-05T12:57:10.398Z",
+        "lastUpdated": "2026-02-05T12:58:59.200Z"
+      },
+      "lastFile": "/Users/dunkey/Develop/BM-rail/app/controllers/members_controller.rb"
+    },
+    "helpers": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-02-05T12:57:24.048Z",
+        "lastUpdated": "2026-02-05T12:57:24.048Z"
+      },
+      "lastFile": "/Users/dunkey/Develop/BM-rail/app/helpers/application_helper.rb"
+    }
+  },
+  "pipeline": {
+    "currentPhase": 1,
+    "level": "Dynamic",
+    "phaseHistory": []
+  },
+  "session": {
+    "startedAt": "2026-02-05T12:09:52.734Z",
+    "onboardingCompleted": true,
+    "lastActivity": "2026-02-05T12:58:59.200Z"
+  },
+  "history": [
+    {
+      "timestamp": "2026-02-05T12:20:00.000Z",
+      "feature": "code-quality",
+      "phase": "check",
+      "action": "code-review"
+    },
+    {
+      "timestamp": "2026-02-05T12:35:00.000Z",
+      "feature": "code-quality",
+      "phase": "act",
+      "action": "iterate"
+    },
+    {
+      "timestamp": "2026-02-05T12:45:00.000Z",
+      "feature": "code-quality",
+      "phase": "completed",
+      "action": "report"
+    },
+    {
+      "timestamp": "2026-02-05T12:57:10.398Z",
+      "feature": "BM-rail",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-05T12:57:24.048Z",
+      "feature": "helpers",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-05T12:58:59.200Z",
+      "feature": "BM-rail",
+      "phase": "do",
+      "action": "updated"
+    }
+  ]
+}

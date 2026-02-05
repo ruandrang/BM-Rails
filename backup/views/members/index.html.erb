@@ -1,0 +1,170 @@
+<% content_for :title, "멤버 관리 - #{@club.name}" %>
+
+<div class="max-w-7xl mx-auto">
+  <!-- 뒤로가기 -->
+  <div class="mb-4">
+    <%= link_to club_path(@club), class: "btn btn-ghost btn-sm gap-2" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      뒤로가기
+    <% end %>
+  </div>
+
+  <!-- 페이지 헤더 -->
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-base-content mb-2">멤버 관리</h1>
+    <p class="text-base-content/60"><%= @club.name %> 멤버 목록입니다</p>
+  </div>
+
+  <!-- 포지션별 통계 카드 -->
+  <% guards = @members.select { |m| m.position == "Guard" }.count %>
+  <% forwards = @members.select { |m| m.position == "Forward" }.count %>
+  <% centers = @members.select { |m| m.position == "Center" }.count %>
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div class="stats shadow bg-base-100">
+      <div class="stat">
+        <div class="stat-title">총 멤버</div>
+        <div class="stat-value text-primary"><%= @members.count %></div>
+        <div class="stat-desc">명</div>
+      </div>
+    </div>
+    <div class="stats shadow bg-base-100">
+      <div class="stat">
+        <div class="stat-title">Guard</div>
+        <div class="stat-value text-secondary"><%= guards %></div>
+        <div class="stat-desc">명</div>
+      </div>
+    </div>
+    <div class="stats shadow bg-base-100">
+      <div class="stat">
+        <div class="stat-title">Forward</div>
+        <div class="stat-value text-accent"><%= forwards %></div>
+        <div class="stat-desc">명</div>
+      </div>
+    </div>
+    <div class="stats shadow bg-base-100">
+      <div class="stat">
+        <div class="stat-title">Center</div>
+        <div class="stat-value"><%= centers %></div>
+        <div class="stat-desc">명</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 액션 버튼들 -->
+  <div class="flex flex-wrap items-center gap-4 mb-6">
+    <%= link_to new_club_member_path(@club), class: "btn btn-primary gap-2" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      멤버 추가
+    <% end %>
+
+    <%= link_to export_csv_club_members_path(@club), class: "btn btn-outline gap-2" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+      </svg>
+      CSV 내보내기
+    <% end %>
+
+    <%= form_with url: import_csv_club_members_path(@club), local: true, multipart: true, class: "flex items-center gap-2" do %>
+      <input type="file" name="file" accept=".csv,text/csv" class="file-input file-input-bordered file-input-sm w-full max-w-xs" />
+      <button type="submit" class="btn btn-outline btn-sm gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+        </svg>
+        CSV 가져오기
+      </button>
+    <% end %>
+  </div>
+
+  <!-- 멤버 목록 -->
+  <% if @members.any? %>
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body p-0">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-base-200">
+          <span class="text-sm text-base-content/60">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            드래그해서 순서를 변경할 수 있습니다
+          </span>
+        </div>
+
+        <ul class="divide-y divide-base-200" data-sortable-list data-reorder-url="<%= reorder_club_members_path(@club) %>">
+          <% @members.each do |member| %>
+            <li class="flex items-center justify-between p-4 hover:bg-base-200/50 transition-colors cursor-move" draggable="true" data-member-id="<%= member.id %>">
+              <div class="flex items-center gap-4">
+                <!-- 드래그 핸들 -->
+                <div class="text-base-content/30">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </div>
+
+                <!-- 아바타 -->
+                <div class="avatar placeholder">
+                  <div class="bg-primary text-primary-content rounded-full w-12">
+                    <span class="text-xl"><%= member.name[0] %></span>
+                  </div>
+                </div>
+
+                <!-- 정보 -->
+                <div>
+                  <div class="font-bold text-lg"><%= member.name %></div>
+                  <div class="flex flex-wrap items-center gap-2 text-sm text-base-content/60">
+                    <span class="badge badge-sm badge-outline"><%= member.position %></span>
+                    <% if member.age %>
+                      <span><%= member.age %>세</span>
+                    <% end %>
+                    <% if member.height_cm %>
+                      <span><%= member.height_cm %>cm</span>
+                    <% end %>
+                    <% if member.jersey_number %>
+                      <span class="badge badge-sm badge-primary">#<%= member.jersey_number %></span>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 액션 버튼 -->
+              <div class="flex gap-2">
+                <%= link_to edit_club_member_path(@club, member), class: "btn btn-ghost btn-sm" do %>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                <% end %>
+                <%= button_to club_member_path(@club, member), method: :delete, data: { turbo_confirm: "#{member.name}님을 삭제하시겠습니까?" }, class: "btn btn-ghost btn-sm text-error" do %>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                <% end %>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  <% else %>
+    <!-- 빈 상태 -->
+    <div class="hero min-h-[400px] bg-base-200 rounded-box">
+      <div class="hero-content text-center">
+        <div class="max-w-md">
+          <div class="text-6xl mb-4">👥</div>
+          <h1 class="text-3xl font-bold mb-4">멤버가 없습니다</h1>
+          <p class="mb-6 text-base-content/70">
+            클럽에 멤버를 추가하여 팀을 구성하고 경기를 시작하세요!
+          </p>
+          <%= link_to new_club_member_path(@club), class: "btn btn-primary btn-lg gap-2" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            첫 멤버 추가하기
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

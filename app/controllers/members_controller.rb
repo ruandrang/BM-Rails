@@ -140,12 +140,17 @@ class MembersController < ApplicationController
   end
 
   def normalize_position(value)
-    return "Guard" if value.blank?
+    return "PG" if value.blank?
 
     normalized = value.to_s.strip.downcase
-    return "Guard" if %w[g guard 가드].include?(normalized)
-    return "Forward" if %w[f forward 포워드].include?(normalized)
-    return "Center" if %w[c center 센터].include?(normalized)
-    "Guard"
+    return "PG" if %w[pg 포인트가드 포인트 가드 point guard].include?(normalized)
+    return "SG" if %w[sg 슈팅가드 슈팅 가드 shooting guard].include?(normalized)
+    return "SF" if %w[sf 스몰포워드 스몰 포워드 small forward].include?(normalized)
+    return "PF" if %w[pf 파워포워드 파워 포워드 power forward].include?(normalized)
+    return "C" if %w[c 센터 center].include?(normalized)
+    # Legacy support
+    return "PG" if %w[g guard 가드].include?(normalized)
+    return "SF" if %w[f forward 포워드].include?(normalized)
+    "PG"
   end
 end

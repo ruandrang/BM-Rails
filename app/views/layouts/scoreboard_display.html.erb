@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <title>Scoreboard Display</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="utf-8">
+    <%= csrf_meta_tags %>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "application", defer: true %>
+
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #0A0A0A;
+        overflow: hidden;
+      }
+      /* Hide scrollbars but allow scrolling if needed */
+      ::-webkit-scrollbar {
+        display: none;
+      }
+      * {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+  </head>
+  <body class="bg-[#0A0A0A] text-white min-h-screen">
+    <%= yield %>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const setupFullscreen = () => {
+          const btn = document.getElementById("fullscreen-toggle");
+          if (!btn) return;
+          
+          // Remove old listeners by cloning
+          const newBtn = btn.cloneNode(true);
+          btn.parentNode.replaceChild(newBtn, btn);
+          
+          newBtn.addEventListener("click", () => {
+            if (!document.fullscreenElement) {
+              document.documentElement.requestFullscreen().catch(err => {
+                console.error(`Error enabling fullscreen mode: ${err.message}`);
+              });
+            } else {
+              if (document.exitFullscreen) {
+                document.exitFullscreen();
+              }
+            }
+          });
+        };
+
+        // Run immediately
+        setupFullscreen();
+
+        // Also run on Turbo load events if applicable
+        document.addEventListener("turbo:load", setupFullscreen);
+        
+        // Backup: check periodically in case of dynamic rendering
+        setTimeout(setupFullscreen, 1000);
+      });
+    </script>
+  </body>
+</html>

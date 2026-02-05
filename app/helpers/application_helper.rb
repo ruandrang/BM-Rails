@@ -17,4 +17,13 @@ module ApplicationHelper
   def club_icon(icon_key)
     CLUB_ICON_EMOJI[icon_key] || "🏀"
   end
+
+  def position_badge_style(position)
+    color = Member::POSITION_COLORS[position] || "#6B7280"
+    "background-color: #{color}; color: white;"
+  end
+
+  def position_display(position)
+    Member::POSITION_NAMES[position] || position
+  end
 end

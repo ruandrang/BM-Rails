@@ -1,47 +1,178 @@
-<% content_for :title, "통계" %>
+<% content_for :title, "통계 - #{@club.name}" %>
 
-<div class="page-header">
-  <div>
-    <h1>선수 통계</h1>
-    <p class="muted"><%= @club.name %> 멤버별 경기 기록</p>
+<div class="max-w-7xl mx-auto">
+  <!-- 뒤로가기 -->
+  <div class="mb-4">
+    <%= link_to club_path(@club), class: "btn btn-ghost btn-sm gap-2" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      뒤로가기
+    <% end %>
   </div>
-  <div class="actions">
-    <%= link_to "뒤로가기", club_path(@club), class: "button ghost" %>
-    <%= link_to "이름순", club_stats_path(@club, sort: "name"), class: "button ghost" %>
-    <%= link_to "경기수순", club_stats_path(@club, sort: "games"), class: "button ghost" %>
-    <%= link_to "승률순", club_stats_path(@club, sort: "win_rate"), class: "button ghost" %>
-  </div>
-</div>
 
-<div class="card">
-  <table class="table">
-    <thead>
-      <tr>
-        <th>이름</th>
-        <th>경기</th>
-        <th>승</th>
-        <th>무</th>
-        <th>패</th>
-        <th>승률</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @stats.each do |row| %>
-        <tr>
-          <td><%= row[:member].name %></td>
-          <td><%= row[:games] %></td>
-          <td><%= row[:wins] %></td>
-          <td><%= row[:draws] %></td>
-          <td><%= row[:losses] %></td>
-          <td><%= (row[:win_rate] * 100).round(1) %>%</td>
-        </tr>
+  <!-- 페이지 헤더 -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+    <div>
+      <h1 class="text-4xl font-bold text-base-content mb-2">선수 통계</h1>
+      <p class="text-base-content/60"><%= @club.name %> 멤버별 경기 기록</p>
+    </div>
+
+    <!-- 정렬 버튼 -->
+    <div class="join">
+      <%= link_to club_stats_path(@club, sort: "name"),
+          class: "btn join-item #{params[:sort] == 'name' || params[:sort].nil? ? 'btn-active' : ''}" do %>
+        이름순
       <% end %>
-    </tbody>
-  </table>
+      <%= link_to club_stats_path(@club, sort: "games"),
+          class: "btn join-item #{params[:sort] == 'games' ? 'btn-active' : ''}" do %>
+        경기수순
+      <% end %>
+      <%= link_to club_stats_path(@club, sort: "win_rate"),
+          class: "btn join-item #{params[:sort] == 'win_rate' ? 'btn-active' : ''}" do %>
+        승률순
+      <% end %>
+    </div>
+  </div>
 
-  <% if @stats.empty? %>
-    <div class="empty-state">
-      <p>아직 통계를 낼 데이터가 없습니다.</p>
+  <% if @stats.any? %>
+    <!-- 통계 요약 카드 -->
+    <% total_games = @stats.sum { |s| s[:games] } / 2 rescue 0 %>
+    <% avg_win_rate = @stats.any? ? (@stats.sum { |s| s[:win_rate] } / @stats.size * 100).round(1) : 0 %>
+    <% top_player = @stats.max_by { |s| s[:win_rate] } %>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <!-- 선수 현황 -->
+      <div class="card bg-base-100 shadow-xl border-l-4 border-primary">
+        <div class="card-body p-6 flex-row items-center gap-4">
+          <div class="p-3 bg-primary/10 rounded-2xl">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </div>
+          <div>
+            <div class="text-sm font-bold opacity-50 uppercase tracking-widest">Active Players</div>
+            <div class="text-3xl font-black"><%= @stats.count %><span class="text-sm font-normal ml-1">명</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 성과 지표 -->
+      <div class="card bg-base-100 shadow-xl border-l-4 border-secondary">
+        <div class="card-body p-6 flex-row items-center gap-4">
+          <div class="p-3 bg-secondary/10 rounded-2xl">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+          </div>
+          <div>
+            <div class="text-sm font-bold opacity-50 uppercase tracking-widest">Avg Win Rate</div>
+            <div class="text-3xl font-black text-secondary"><%= avg_win_rate %><span class="text-sm font-normal ml-1">%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MVP -->
+      <% if top_player %>
+        <div class="card bg-neutral text-neutral-content shadow-xl border-l-4 border-accent">
+          <div class="card-body p-6 flex-row items-center gap-4">
+            <div class="p-3 bg-accent rounded-2xl">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+              </svg>
+            </div>
+            <div>
+              <div class="text-sm font-bold text-accent uppercase tracking-widest">Season MVP</div>
+              <div class="text-2xl font-black truncate max-w-[150px]"><%= top_player[:member].name %></div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- 통계 테이블 -->
+    <div class="card bg-base-100 shadow-xl overflow-hidden">
+      <div class="card-body p-0">
+        <div class="overflow-x-auto">
+          <table class="table w-full">
+            <thead>
+              <tr class="bg-base-200 border-b-2 border-base-300">
+                <th class="bg-transparent text-center py-5">RANK</th>
+                <th class="bg-transparent">PLAYER</th>
+                <th class="bg-transparent text-center">GAMES</th>
+                <th class="bg-transparent text-center text-success">W</th>
+                <th class="bg-transparent text-center opacity-50">D</th>
+                <th class="bg-transparent text-center text-error">L</th>
+                <th class="bg-transparent text-center">WIN RATE %</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-base-200">
+              <% @stats.each_with_index do |row, index| %>
+                <tr class="hover:bg-base-200/40 transition-colors">
+                  <td class="text-center font-black">
+                    <% if index == 0 && row[:win_rate] > 0 %>
+                      <div class="badge badge-lg bg-accent border-none text-black font-black">1ST</div>
+                    <% elsif index == 1 && row[:win_rate] > 0 %>
+                      <div class="badge badge-lg bg-base-300 border-none font-black">2ND</div>
+                    <% elsif index == 2 && row[:win_rate] > 0 %>
+                      <div class="badge badge-lg bg-orange-200 border-none font-black">3RD</div>
+                    <% else %>
+                      <span class="opacity-30"><%= index + 1 %></span>
+                    <% end %>
+                  </td>
+                  <td>
+                    <div class="flex items-center gap-4">
+                      <div>
+                        <div class="font-black text-lg"><%= row[:member].name %></div>
+                        <div class="flex items-center gap-2 mt-1">
+                          <span class="badge badge-sm text-white" style="<%= position_badge_style(row[:member].position) %>">
+                            <%= row[:member].position %>
+                          </span>
+                          <% if row[:member].jersey_number %>
+                            <span class="text-xs opacity-60">#<%= row[:member].jersey_number %></span>
+                          <% end %>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-center font-bold text-xl"><%= row[:games] %></td>
+                  <td class="text-center text-success font-black text-xl"><%= row[:wins] %></td>
+                  <td class="text-center text-base-content/40 font-bold"><%= row[:draws] %></td>
+                  <td class="text-center text-error font-black text-xl"><%= row[:losses] %></td>
+                  <td class="text-center min-w-[150px]">
+                    <% win_rate = (row[:win_rate] * 100).round(1) %>
+                    <div class="flex flex-col gap-1 px-4">
+                      <div class="flex justify-between items-end">
+                        <span class="text-xs font-black italic"><%= win_rate %>%</span>
+                      </div>
+                      <progress class="progress progress-primary w-full h-3 rounded-full" value="<%= win_rate %>" max="100"></progress>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  <% else %>
+    <!-- 빈 상태 -->
+    <div class="hero min-h-[400px] bg-base-200 rounded-box">
+      <div class="hero-content text-center">
+        <div class="max-w-md">
+          <div class="text-6xl mb-4">📊</div>
+          <h1 class="text-3xl font-bold mb-4">통계 데이터가 없습니다</h1>
+          <p class="mb-6 text-base-content/70">
+            경기를 진행하고 결과를 기록하면 선수별 통계가 자동으로 생성됩니다.
+          </p>
+          <%= link_to new_club_match_path(@club), class: "btn btn-primary btn-lg gap-2" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            첫 경기 만들기
+          <% end %>
+        </div>
+      </div>
     </div>
   <% end %>
 </div>
