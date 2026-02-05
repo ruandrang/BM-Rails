@@ -1,141 +1,160 @@
-<div class="min-h-screen bg-[#0F0F0F] text-white p-4 md:p-8 font-['Inter']" 
-     data-scoreboard-root 
+<div class="min-h-screen bg-gray-50 text-gray-900 p-4 md:p-8 font-sans selection:bg-[#FF6B35] selection:text-white"
+     data-scoreboard-root
      data-scoreboard-role="control"
      data-match-id="<%= @match.id %>"
      data-teams="<%= @match.teams.to_json %>"
      data-teams-count="<%= @match.teams.count %>">
-  <div class="max-w-4xl mx-auto space-y-6">
-    
+
+  <div class="max-w-[1400px] mx-auto">
     <!-- Header -->
-    <header class="flex items-center justify-between mb-8">
-      <div>
-        <h1 class="font-['Cormorant_Garamond'] text-3xl font-semibold tracking-wider text-[#FAFAF7]">SCOREBOARD CONTROLLER</h1>
-        <p class="text-[#666666] text-sm mt-1 font-mono">CONNECTED • <%= @match.match_title %></p>
+    <header class="flex justify-between items-center mb-8 border-b border-gray-200 pb-6">
+      <div class="flex items-center gap-4">
+        <h1 class="text-3xl font-black tracking-tighter italic text-gray-900">
+          CONTROL <span class="text-[#FF6B35]">PANEL</span>
+        </h1>
+        <p class="text-gray-500 text-sm mt-1 font-mono">CONNECTED • <%= @match.match_title %></p>
       </div>
       <div class="flex items-center gap-3">
-        <%= link_to "OPEN DISPLAY", scoreboard_display_club_match_path(@club, @match), target: "_blank", class: "btn btn-sm btn-outline border-[#333333] text-[#999999] hover:bg-[#333333] hover:text-white" %>
+        <%= link_to "OPEN DISPLAY", scoreboard_display_club_match_path(@club, @match), target: "_blank", class: "btn btn-sm btn-outline border-gray-300 text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-400" %>
         <div class="px-3 py-1 rounded border border-[#22C55E]/30 bg-[#22C55E]/10 text-[#22C55E] text-xs font-bold tracking-wider">
           LIVE
         </div>
       </div>
     </header>
 
-    <!-- Timer Section -->
-    <section class="bg-[#1A1A1A] rounded-xl border border-[#333333] p-6 shadow-lg">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-        <!-- Main Timer Display -->
-        <div class="text-center space-y-2">
-          <span class="text-[#666666] text-xs tracking-widest font-bold">GAME CLOCK</span>
-          <div class="font-['JetBrains_Mono'] text-6xl font-bold tabluar-nums tracking-tighter" 
-               id="control-game-clock" 
-               data-scoreboard-timer>
-            10:00
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12">
+      
+      <!-- Timer Section (Left) -->
+      <section class="lg:col-span-5 flex flex-col gap-6">
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+          <div class="flex justify-between items-center mb-4">
+             <h2 class="text-gray-500 text-[10px] tracking-[2px] font-bold uppercase">Game Timer</h2>
+             <span class="text-[#E53935] font-black text-3xl" data-scoreboard-quarter>1Q</span>
           </div>
-          <!-- Current Quarter Badge -->
-          <div class="text-center">
-             <span class="text-[#E53935] font-bold text-sm" data-scoreboard-quarter>1Q</span>
+          
+          <!-- Timer Display -->
+          <div class="flex justify-center items-center gap-4 mb-2">
+            <div class="flex items-end gap-1">
+               <div class="text-8xl font-black tracking-tighter tabular-nums leading-none text-gray-900 select-none" 
+                    id="control-game-clock" 
+                    data-scoreboard-timer>
+                 10:00
+               </div>
+            </div>
           </div>
-        </div>
 
-        <!-- Timer Controls -->
-        <div class="flex justify-center gap-4">
-          <button class="w-16 h-16 rounded-full bg-[#22C55E] text-black flex items-center justify-center hover:brightness-110 active:scale-95 transition-all shadow-[0_0_20px_rgba(34,197,94,0.3)]"
-                  data-action="toggle-main">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-          </button>
-          <button class="w-16 h-16 rounded-full bg-[#333333] border border-[#555555] text-white flex items-center justify-center hover:bg-[#444444] active:scale-95 transition-all"
+          <!-- Timer Controls -->
+          <div class="grid grid-cols-2 gap-3 mb-2">
+            <button class="btn btn-sm bg-gray-100 border-none text-gray-600 hover:bg-gray-200 font-bold" data-action="minus-minute">-1 MIN</button>
+            <button class="btn btn-sm bg-gray-100 border-none text-gray-600 hover:bg-gray-200 font-bold" data-action="plus-minute">+1 MIN</button>
+          </div>
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <button class="btn btn-lg bg-[#22C55E] hover:bg-[#15803d] text-white border-none font-black text-2xl h-20 rounded-xl shadow-md transform active:scale-95 transition-all flex items-center justify-center gap-2"
+                    data-action="toggle-main"
+                    data-start-text="START"
+                    data-stop-text="STOP">
+              <span>START</span>
+            </button>
+            <div class="flex flex-col gap-2">
+               <button class="btn btn-outline h-20 px-6 rounded-xl border-2 border-gray-300 text-gray-600 font-bold text-lg hover:bg-gray-100 hover:text-gray-900 hover:border-gray-400"
                   data-action="reset-main">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-          </button>
-        </div>
-
-        <!-- Shot Clock Controls -->
-        <div class="space-y-3">
-          <div class="flex items-center justify-between bg-[#111111] p-3 rounded border border-[#333333]">
-            <span class="text-[#666666] text-xs font-bold">SHOT CLOCK</span>
-            <span class="font-['JetBrains_Mono'] text-[#E53935] text-2xl font-bold" 
-                  id="control-shot-clock"
-                  data-scoreboard-shot>24</span>
-          </div>
-          <div class="grid grid-cols-2 gap-2">
-            <button class="btn btn-sm bg-[#C41E3A] border-none text-white hover:bg-[#A01830]"
-                    data-action="reset-shot-14">RESET 14</button>
-            <button class="btn btn-sm bg-[#C41E3A] border-none text-white hover:bg-[#A01830]"
-                    data-action="reset-shot-24">RESET 24</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Teams Score Controls -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <!-- Home Team -->
-      <section class="bg-[#1A1A1A] rounded-xl border border-[#333333] p-6 relative overflow-hidden group">
-        <div class="flex items-center justify-between mb-6">
-          <div class="flex items-center gap-3">
-            <span class="text-3xl"><%= @match.home_team.icon %></span>
-            <h3 class="font-bold text-xl tracking-wider"><%= @match.home_team.name %></h3>
-          </div>
-          <span class="font-['JetBrains_Mono'] text-5xl font-bold tabular-nums" 
-                id="control-home-score" 
-                data-home-score>0</span>
-        </div>
-        
-        <div class="grid grid-cols-3 gap-3 mb-6">
-          <button class="btn border-[#333333] bg-[#222222] hover:bg-[#333333] text-white h-14 text-lg"
-                  data-action="add-home-1">+1</button>
-          <button class="btn border-[#333333] bg-[#222222] hover:bg-[#333333] text-white h-14 text-lg"
-                  data-action="add-home-2">+2</button>
-          <button class="btn border-[#333333] bg-[#222222] hover:bg-[#333333] text-white h-14 text-lg"
-                  data-action="add-home-3">+3</button>
-        </div>
-
-        <div class="border-t border-[#333333] pt-4 flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="text-xs text-[#666666]">FOULS</span>
-            <div class="join">
-              <button class="join-item btn btn-xs btn-ghost border border-[#444]"
-                      data-action="decrement-home-fouls">-</button>
-              <button class="join-item btn btn-xs btn-active cursor-default w-8"
-                      data-home-fouls>0</button>
-              <button class="join-item btn btn-xs btn-ghost border border-[#444]"
-                      data-action="increment-home-fouls">+</button>
+                RESET
+              </button>
             </div>
           </div>
         </div>
+
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+           <div class="flex items-center justify-between mb-4">
+             <h2 class="text-gray-500 text-[10px] tracking-[2px] font-bold uppercase">Shot Clock</h2>
+           </div>
+           
+           <div class="flex gap-4">
+              <div class="flex-1 bg-gray-900 rounded-xl flex items-center justify-center h-32 relative overflow-hidden shadow-inner">
+                <span class="text-7xl font-black text-[#F7B801] tracking-tighter tabular-nums z-10" 
+                      id="control-shot-clock"
+                      data-scoreboard-shot>24</span>
+              </div>
+              <div class="flex flex-col gap-2 w-32">
+                <button class="btn flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 border-none font-bold" data-action="reset-shot-24">24s</button>
+                <button class="btn flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 border-none font-bold" data-action="reset-shot-14">14s</button>
+                <button class="btn flex-1 btn-outline border-gray-300 text-gray-500 hover:bg-gray-100 hover:text-gray-800" data-action="toggle-shot">STOP</button>
+              </div>
+           </div>
+        </div>
       </section>
 
-      <!-- Away Team -->
-      <section class="bg-[#1A1A1A] rounded-xl border border-[#333333] p-6 relative overflow-hidden group">
-        <div class="flex items-center justify-between mb-6">
-          <div class="flex items-center gap-3">
-            <span class="text-3xl"><%= @match.away_team.icon %></span>
-            <h3 class="font-bold text-xl tracking-wider"><%= @match.away_team.name %></h3>
+      <!-- Scores Section (Right) -->
+      <section class="lg:col-span-7 grid grid-cols-2 gap-6 relative">
+        <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center font-black text-gray-400 text-xs border border-gray-200 z-10">VS</div>
+
+        <!-- Home Team -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col gap-4 text-center shadow-sm relative overflow-hidden group">
+          <div class="flex items-center justify-center gap-3 border-b border-gray-100 pb-4">
+             <span class="text-3xl" data-home-icon><%= @match.home_team.icon %></span>
+             <h3 class="font-black text-2xl uppercase text-gray-900" data-home-name><%= @match.home_team.name %></h3>
           </div>
-          <span class="font-['JetBrains_Mono'] text-5xl font-bold tabular-nums" 
-                id="control-away-score" 
-                data-away-score>0</span>
-        </div>
-        
-        <div class="grid grid-cols-3 gap-3 mb-6">
-          <button class="btn border-[#333333] bg-[#222222] hover:bg-[#333333] text-white h-14 text-lg"
-                  data-action="add-away-1">+1</button>
-          <button class="btn border-[#333333] bg-[#222222] hover:bg-[#333333] text-white h-14 text-lg"
-                  data-action="add-away-2">+2</button>
-          <button class="btn border-[#333333] bg-[#222222] hover:bg-[#333333] text-white h-14 text-lg"
-                  data-action="add-away-3">+3</button>
+          
+          <div class="flex-1 flex flex-col items-center justify-center py-6">
+            <span class="text-9xl font-black text-gray-900 tracking-tighter leading-none" 
+                  id="control-home-score" 
+                  data-home-score>0</span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2">
+            <button class="btn h-14 bg-gray-100 hover:bg-gray-200 text-gray-900 border-none text-xl font-bold rounded-lg" data-action="add-home-1">+1</button>
+            <button class="btn h-14 bg-gray-100 hover:bg-gray-200 text-gray-900 border-none text-xl font-bold rounded-lg" data-action="add-home-2">+2</button>
+            <button class="btn h-14 bg-gray-100 hover:bg-gray-200 text-gray-900 border-none text-xl font-bold rounded-lg" data-action="add-home-3">+3</button>
+          </div>
+          <div class="grid grid-cols-2 gap-2 mt-2">
+            <button class="btn h-10 bg-gray-50 hover:bg-gray-100 text-gray-600 border border-gray-200 text-sm font-bold rounded-lg" data-action="sub-home">-1</button>
+            <button class="btn h-10 bg-gray-50 hover:bg-red-50 text-red-500 border border-red-100 text-sm font-bold rounded-lg" data-action="reset-home-score">RESET</button>
+          </div>
+          <div class="flex justify-between items-center mt-2 px-2">
+            <div class="flex items-center gap-2">
+               <span class="text-sm font-bold text-gray-400 uppercase">Fouls</span>
+               <div class="join border border-gray-200 rounded-lg overflow-hidden">
+                 <button class="join-item btn btn-sm btn-ghost border-r border-gray-200 bg-white" data-action="decrement-home-fouls">-</button>
+                 <button class="join-item btn btn-sm btn-active bg-gray-50 cursor-default w-12 text-gray-900 text-lg font-bold border-none" data-home-fouls>0</button>
+                 <button class="join-item btn btn-sm btn-ghost border-l border-gray-200 bg-white" data-action="increment-home-fouls">+</button>
+               </div>
+                <span class="hidden text-lg font-bold text-red-500 uppercase ml-2 animate-pulse" data-home-team-foul-indicator>Team Foul</span>
+            </div>
+          </div>
         </div>
 
-        <div class="border-t border-[#333333] pt-4 flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="text-xs text-[#666666]">FOULS</span>
-            <div class="join">
-              <button class="join-item btn btn-xs btn-ghost border border-[#444]"
-                      data-action="decrement-away-fouls">-</button>
-              <button class="join-item btn btn-xs btn-active cursor-default w-8"
-                      data-away-fouls>0</button>
-              <button class="join-item btn btn-xs btn-ghost border border-[#444]"
-                      data-action="increment-away-fouls">+</button>
+        <!-- Away Team -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col gap-4 text-center shadow-sm relative overflow-hidden group">
+          <div class="flex items-center justify-center gap-3 border-b border-gray-100 pb-4">
+             <span class="text-3xl" data-away-icon><%= @match.away_team.icon %></span>
+             <h3 class="font-black text-2xl uppercase text-gray-900" data-away-name><%= @match.away_team.name %></h3>
+          </div>
+          
+          <div class="flex-1 flex flex-col items-center justify-center py-6">
+            <span class="text-9xl font-black text-gray-900 tracking-tighter leading-none" 
+                  id="control-away-score" 
+                  data-away-score>0</span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2">
+            <button class="btn h-14 bg-gray-100 hover:bg-gray-200 text-gray-900 border-none text-xl font-bold rounded-lg" data-action="add-away-1">+1</button>
+            <button class="btn h-14 bg-gray-100 hover:bg-gray-200 text-gray-900 border-none text-xl font-bold rounded-lg" data-action="add-away-2">+2</button>
+            <button class="btn h-14 bg-gray-100 hover:bg-gray-200 text-gray-900 border-none text-xl font-bold rounded-lg" data-action="add-away-3">+3</button>
+          </div>
+          <div class="grid grid-cols-2 gap-2 mt-2">
+            <button class="btn h-10 bg-gray-50 hover:bg-gray-100 text-gray-600 border border-gray-200 text-sm font-bold rounded-lg" data-action="sub-away">-1</button>
+            <button class="btn h-10 bg-gray-50 hover:bg-red-50 text-red-500 border border-red-100 text-sm font-bold rounded-lg" data-action="reset-away-score">RESET</button>
+          </div>
+          <div class="flex justify-between items-center mt-2 px-2">
+            <div class="flex items-center gap-2">
+               <span class="text-sm font-bold text-gray-400 uppercase">Fouls</span>
+               <div class="join border border-gray-200 rounded-lg overflow-hidden">
+                 <button class="join-item btn btn-sm btn-ghost border-r border-gray-200 bg-white" data-action="decrement-away-fouls">-</button>
+                 <button class="join-item btn btn-sm btn-active bg-gray-50 cursor-default w-12 text-gray-900 text-lg font-bold border-none" data-away-fouls>0</button>
+                 <button class="join-item btn btn-sm btn-ghost border-l border-gray-200 bg-white" data-action="increment-away-fouls">+</button>
+               </div>
+                <span class="hidden text-lg font-bold text-red-500 uppercase ml-2 animate-pulse" data-away-team-foul-indicator>Team Foul</span>
             </div>
           </div>
         </div>
@@ -143,17 +162,64 @@
     </div>
 
     <!-- Quick Actions -->
-    <div class="mt-8 border-t border-[#333333] pt-6">
-      <h4 class="text-[#666666] text-[10px] tracking-[2px] font-bold mb-4 uppercase">Quick Actions</h4>
+    <div class="mt-8 border-t border-gray-200 pt-6">
+      <h4 class="text-gray-500 text-[10px] tracking-[2px] font-bold mb-4 uppercase">Quick Actions</h4>
       <div class="flex gap-4">
-        <button class="btn btn-sm border-[#333333] bg-[#1A1A1A] text-[#888] hover:text-white"
+        <button class="btn btn-sm border-gray-300 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-400 shadow-sm"
                 data-action="next-quarter">NEXT QUARTER</button>
-        <button class="btn btn-sm border-[#333333] bg-[#1A1A1A] text-[#888] hover:text-white"
-                data-action="next-matchup">SWAP TEAMS</button>
-        <button class="btn btn-sm border-[#333333] bg-[#1A1A1A] text-[#888] hover:text-white"
+        <button class="btn btn-sm border-red-200 bg-red-50 text-red-600 hover:bg-red-100 hover:border-red-300 shadow-sm"
                 data-action="new-game">RESET GAME</button>
       </div>
     </div>
 
   </div>
+    <!-- Keyboard Shortcuts Guide -->
+    <!-- Clean Legend Grid Shortcuts -->
+    <!-- Clean Legend Grid Shortcuts -->
+    <div class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-md border border-gray-200 rounded-2xl px-12 py-6 shadow-2xl z-50">
+      <div class="flex gap-16 text-gray-700 text-sm font-bold font-sans">
+        
+        <!-- Column 1: Timers -->
+        <div class="flex flex-col gap-4">
+          <div class="flex items-center gap-4">
+            <kbd class="bg-gray-100 text-gray-900 px-3 py-1 rounded-lg font-black min-w-[60px] text-center shadow-sm border border-gray-300 border-b-4 text-base">Space</kbd>
+            <span>Start / Stop Game Clock</span>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="flex gap-2">
+              <kbd class="bg-gray-100 text-gray-900 px-3 py-1 rounded-lg font-black min-w-[36px] text-center shadow-sm border border-gray-300 border-b-4 text-base">Z</kbd>
+              <kbd class="bg-gray-100 text-gray-900 px-3 py-1 rounded-lg font-black min-w-[36px] text-center shadow-sm border border-gray-300 border-b-4 text-base">X</kbd>
+            </div>
+            <span>Reset Shot Clock (14s / 24s)</span>
+          </div>
+          <div class="flex items-center gap-4">
+            <kbd class="bg-gray-100 text-gray-900 px-3 py-1 rounded-lg font-black min-w-[36px] text-center shadow-sm border border-gray-300 border-b-4 text-base">C</kbd>
+            <span>Stop Shot Clock</span>
+          </div>
+        </div>
+
+        <div class="w-px bg-gray-300"></div>
+
+        <!-- Column 2: Scores -->
+        <div class="flex flex-col gap-4">
+          <div class="flex items-center gap-4">
+            <div class="flex gap-2">
+              <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-base">1</kbd>
+              <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-base">2</kbd>
+              <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-base">3</kbd>
+            </div>
+            <span>Left Score (+1, +2, +3)</span>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="flex gap-2">
+              <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-base">8</kbd>
+              <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-base">9</kbd>
+              <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-base">0</kbd>
+            </div>
+            <span>Right Score (+1, +2, +3)</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
 </div>

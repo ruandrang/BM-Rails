@@ -140,14 +140,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const defaultState = () => ({
       quarter: 1,
-      period_seconds: 600,
+      period_seconds: 480,
       shot_seconds: 24,
       running: false,
       shot_running: false,
       matchup_index: 0,
+      rotation_step: 0, // 0-11 (3 matchups * 4 quarters)
       home_fouls: 0,
       away_fouls: 0,
       teams: defaultTeams().map((team) => ({ ...team, score: 0 })),
+      // Store scores for the 3 pairings: [A-B, B-C, C-A]
+      matchup_scores: [
+        { team1: 0, team2: 0 },
+        { team1: 0, team2: 0 },
+        { team1: 0, team2: 0 }
+      ]
     });
 
     const formatTime = (seconds) => {
@@ -167,10 +174,38 @@ document.addEventListener("DOMContentLoaded", () => {
       ];
     };
 
+    const currentMatchupIndex = () => {
+      return state.rotation_step % 3;
+    };
+
+    const currentQuarter = () => {
+      return Math.floor(state.rotation_step / 3) + 1;
+    };
+
+    const isSidesSwapped = () => {
+      return currentQuarter() >= 3;
+    };
+
     const currentMatchup = () => {
-      const pairs = matchupPairs();
-      const [homeIdx, awayIdx] = pairs[state.matchup_index % pairs.length];
-      return [state.teams[homeIdx], state.teams[awayIdx]];
+      // 3 Teams: [A, B, C]
+      // Pairs: 0:[0,1] (A-B), 1:[1,2] (B-C), 2:[2,0] (C-A)
+      const pairs = [
+        [0, 1],
+        [1, 2],
+        [2, 0]
+      ];
+
+      const pairIdx = currentMatchupIndex();
+      let [idx1, idx2] = pairs[pairIdx];
+
+      // Logic:
+      // Q1/Q2: idx1 vs idx2 (e.g., A vs B)
+      // Q3/Q4: idx2 vs idx1 (e.g., B vs A) -> Swapped
+
+      if (isSidesSwapped()) {
+        return [state.teams[idx2], state.teams[idx1]]; // Visual Home is Team 2, Visual Away is Team 1
+      }
+      return [state.teams[idx1], state.teams[idx2]]; // Visual Home is Team 1, Visual Away is Team 2
     };
 
     const setText = (selector, value) => {
@@ -327,8 +362,62 @@ document.addEventListener("DOMContentLoaded", () => {
       setText("[data-scoreboard-timer]", formatTime(state.period_seconds));
       setText("[data-scoreboard-shot]", state.shot_seconds);
       setText("[data-scoreboard-matchup]", `팀 ${home.label} vs 팀 ${away.label}`);
+      setText("[data-home-name]", `TEAM ${home.label}`);
+      setText("[data-away-name]", `TEAM ${away.label}`);
+      const homeIconEl = scoreboardRoot.querySelector("[data-home-icon]");
+      if (homeIconEl) {
+        // Use icon if available, otherwise fallback to label or empty
+        homeIconEl.textContent = home.icon || "●";
+        homeIconEl.style.color = home.color || "#333";
+      }
+
+      const awayIconEl = scoreboardRoot.querySelector("[data-away-icon]");
+      if (awayIconEl) {
+        awayIconEl.textContent = away.icon || "●";
+        awayIconEl.style.color = away.color || "#333";
+      }
       setText("[data-home-fouls]", state.home_fouls || 0);
       setText("[data-away-fouls]", state.away_fouls || 0);
+
+      const nextQuarterBtn = scoreboardRoot.querySelector('[data-action="next-quarter"]');
+      if (nextQuarterBtn) {
+        // Step 11 (Index 11) is the 12th game (Final game).
+        if (state.rotation_step === 11) {
+          nextQuarterBtn.textContent = "END GAME";
+          nextQuarterBtn.classList.add("text-red-600", "font-bold");
+        } else {
+          nextQuarterBtn.textContent = "NEXT QUARTER";
+          nextQuarterBtn.classList.remove("text-red-600", "font-bold");
+        }
+      }
+
+      // --- Team Foul Visuals (Control Page) ---
+      const updateFoulVisuals = (team, count) => {
+        const countEl = scoreboardRoot.querySelector(`[data-${team}-fouls]`);
+        const indicatorEl = scoreboardRoot.querySelector(`[data-${team}-team-foul-indicator]`);
+
+        if (countEl) {
+          if (count >= 5) {
+            countEl.classList.add("text-red-500");
+            countEl.classList.remove("text-gray-900");
+          } else {
+            countEl.classList.remove("text-red-500");
+            countEl.classList.add("text-gray-900");
+          }
+        }
+
+        if (indicatorEl) {
+          if (count >= 5) {
+            indicatorEl.classList.remove("hidden");
+          } else {
+            indicatorEl.classList.add("hidden");
+          }
+        }
+      };
+
+      updateFoulVisuals("home", state.home_fouls || 0);
+      updateFoulVisuals("away", state.away_fouls || 0);
+
 
       // Display page specific updates
       setText("[data-home-score]", home.score);
@@ -341,6 +430,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // renderTeamsControl();
       // renderDisplayScores();
+      // Update Main Timer Button Text/Style
+      const mainToggleBtn = scoreboardRoot.querySelector('[data-action="toggle-main"]');
+      if (mainToggleBtn) {
+        const span = mainToggleBtn.querySelector('span');
+        if (state.running) {
+          if (span) span.textContent = "STOP";
+          mainToggleBtn.classList.remove("bg-[#22C55E]", "hover:bg-[#15803d]");
+          mainToggleBtn.classList.add("bg-[#ef4444]", "hover:bg-[#b91c1c]"); // Red for Stop
+        } else {
+          if (span) span.textContent = "START";
+          mainToggleBtn.classList.remove("bg-[#ef4444]", "hover:bg-[#b91c1c]");
+          mainToggleBtn.classList.add("bg-[#22C55E]", "hover:bg-[#15803d]"); // Green for Start
+        }
+      }
+
+      // Update Shot Clock Toggle Icon/Text (optional, but requested implicitly)
+      const shotToggleBtn = scoreboardRoot.querySelector('[data-action="toggle-shot"]');
+      if (shotToggleBtn) {
+        if (state.shot_running) {
+          shotToggleBtn.classList.add("btn-active");
+          shotToggleBtn.textContent = "STOP";
+        } else {
+          shotToggleBtn.classList.remove("btn-active");
+          shotToggleBtn.textContent = "ALIVE";
+        }
+      }
+
       renderPreview();
     };
 
@@ -370,7 +486,7 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => {
           oscillator.stop();
           context.close();
-        }, 350);
+        }, 1500);
       } catch (error) {
         // ignore audio errors
       }
@@ -380,9 +496,13 @@ document.addEventListener("DOMContentLoaded", () => {
       if (mainTimer) return;
       mainTimer = setInterval(() => {
         if (state.period_seconds > 0) {
+          if (state.period_seconds <= 5) {
+            speak(state.period_seconds);
+          }
           state.period_seconds -= 1;
         } else {
           state.running = false;
+          state.shot_running = false;
           stopMainTimer();
           playBuzzer();
         }
@@ -395,6 +515,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (shotTimer) return;
       shotTimer = setInterval(() => {
         if (state.shot_seconds > 0) {
+          if (state.shot_seconds <= 5) {
+            speak(state.shot_seconds);
+          }
           state.shot_seconds -= 1;
         } else {
           state.shot_running = false;
@@ -405,6 +528,16 @@ document.addEventListener("DOMContentLoaded", () => {
         broadcast();
       }, 1000);
     };
+
+    const speak = (text) => {
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'ko-KR';
+        utterance.rate = 1.2;
+        window.speechSynthesis.speak(utterance);
+      }
+    };
+
 
     const syncTimers = () => {
       if (role !== "control") return;
@@ -428,19 +561,27 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const handleTeamAction = (action) => {
-      const pairs = matchupPairs();
-      const [homeIdx, awayIdx] = pairs[state.matchup_index % pairs.length];
+      // "Home" action targets the Visually Left team
+      // "Away" action targets the Visually Right team
+      const [visualHome, visualAway] = currentMatchup();
+
+      // We need to find the real index of these teams in state.teams
+      // visualHome might be Team A (index 0) or Team B (index 1) depending on swap
+      const homeIdx = state.teams.findIndex(t => t.id === visualHome.id);
+      const awayIdx = state.teams.findIndex(t => t.id === visualAway.id);
 
       if (action === "add-home") state.teams[homeIdx].score += 1;
       else if (action === "sub-home") state.teams[homeIdx].score = Math.max(0, state.teams[homeIdx].score - 1);
       else if (action === "add-home-1") state.teams[homeIdx].score += 1;
       else if (action === "add-home-2") state.teams[homeIdx].score += 2;
       else if (action === "add-home-3") state.teams[homeIdx].score += 3;
+      else if (action === "reset-home-score") state.teams[homeIdx].score = 0;
       else if (action === "add-away") state.teams[awayIdx].score += 1;
       else if (action === "sub-away") state.teams[awayIdx].score = Math.max(0, state.teams[awayIdx].score - 1);
       else if (action === "add-away-1") state.teams[awayIdx].score += 1;
       else if (action === "add-away-2") state.teams[awayIdx].score += 2;
       else if (action === "add-away-3") state.teams[awayIdx].score += 3;
+      else if (action === "reset-away-score") state.teams[awayIdx].score = 0;
     };
 
     const attachControlHandlers = () => {
@@ -449,21 +590,24 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.addEventListener("click", () => {
           const action = btn.dataset.action;
           if (["add-home", "add-home-1", "add-home-2", "add-home-3",
-            "sub-home",
+            "sub-home", "reset-home-score",
             "add-away", "add-away-1", "add-away-2", "add-away-3",
-            "sub-away"].includes(action)) {
+            "sub-away", "reset-away-score"].includes(action)) {
             handleTeamAction(action);
           } else {
             switch (action) {
               case "toggle-main":
                 state.running = !state.running;
+                state.shot_running = state.running && state.shot_seconds > 0;
                 break;
               case "pause-main":
                 state.running = false;
+                state.shot_running = false;
                 break;
               case "reset-main":
-                state.period_seconds = 600;
+                state.period_seconds = 480;
                 state.running = false;
+                state.shot_running = false;
                 break;
               // ... existing cases ...
               case "minus-minute":
@@ -477,17 +621,108 @@ document.addEventListener("DOMContentLoaded", () => {
                 break;
               case "reset-shot-24":
                 state.shot_seconds = 24;
-                state.shot_running = false;
+                state.shot_running = state.running;
                 break;
               case "reset-shot-14":
                 state.shot_seconds = 14;
-                state.shot_running = false;
+                state.shot_running = state.running;
                 break;
               case "next-quarter":
-                state.quarter = Math.min(4, state.quarter + 1);
+                // Check if we are at the end of the game
+                // Total steps = 12 (0 to 11). Step 11 is the last game.
+                if (state.rotation_step >= 11) {
+                  // Game Over logic
+                  // Maybe show an alert or just stop?
+                  // User asked to "Stop".
+                  // We can just return or toggle a game over state.
+                  // For now, let's just not advance.
+                  alert("GAME OVER! All quarters completed.");
+                  return;
+                }
+
+                // 1. Save current scores to matchup_scores
+                const currentPairIdx = currentMatchupIndex();
+                const [team1, team2] = currentMatchup();
+                // Ensure we save to the correct team slot based on who team1/team2 actually are
+                // team1 is Visual Home, team2 is Visual Away
+
+                // We need to map back to the 'matchup_scores' structure
+                // matchup_scores[0] is A vs B
+                // matchup_scores[1] is B vs C
+                // matchup_scores[2] is C vs A
+
+                // Let's rely on state.teams because that's what we modify in handleTeamAction
+                // But wait, handleTeamAction modifies state.teams DIRECTLY based on ID.
+                // So state.teams ALWAYS holds the latest scores for everyone.
+
+                // The issue is: When we switch to B vs C, we want A's score to be "hidden" or "reset" contextually?
+                // No, the user wants: "Save the score of A and B". "Then B and C start at 0:0 (or saved score)."
+                // The `state.teams` array holds global state.
+                // WE MUST NOT RESET state.teams scores globally if we want them to persist?
+                // actually, the requirement is: "B and C start 0:0 in Q1".
+                // This implies we DO need to reset `state.teams` scores when entering a new matchup, 
+                // loading from `matchup_scores`.
+
+                // SAVE:
+                // We need to identify which pairing we just finished.
+                const finishedPairIdx = state.rotation_step % 3;
+                const pairs = [[0, 1], [1, 2], [2, 0]];
+                const [p1, p2] = pairs[finishedPairIdx];
+
+                state.matchup_scores[finishedPairIdx] = {
+                  team1: state.teams[p1].score,
+                  team2: state.teams[p2].score
+                };
+
+                // ADVANCE:
+                state.rotation_step += 1;
+
+                // LOAD:
+                const nextPairIdx = state.rotation_step % 3;
+                const [n1, n2] = pairs[nextPairIdx];
+
+                // Load saved scores (or 0 if first time)
+                // We must update state.teams directly for the UI to reflect
+                state.teams[n1].score = state.matchup_scores[nextPairIdx].team1;
+                state.teams[n2].score = state.matchup_scores[nextPairIdx].team2;
+
+                // Reset third team's score to 0 just to be clean? (Optional, but good for UI)
+                // usage: pairs has 3 indices total. find the one not in [n1, n2]
+                const allIdx = [0, 1, 2];
+                const thirdIdx = allIdx.find(i => i !== n1 && i !== n2);
+                state.teams[thirdIdx].score = 0;
+
+                // Reset Timers
+                state.quarter = currentQuarter();
+                state.period_seconds = 480;
+                state.shot_seconds = 24;
+                state.running = false;
+                state.shot_running = false;
                 break;
               case "prev-quarter":
+                // Previous quarter logic (Simplified reverse of next-quarter or just decrement quarter?)
+                // For now, let's just decrement logic carefully if needed, or simple decrement quarter
+                // Use simple decrement for now as full reverse logic is complex and rarely used perfectly
                 state.quarter = Math.max(1, state.quarter - 1);
+                // Ideally we should reverse rotation_step too, but user didn't explicitly ask for full undo support
+                // Let's implement basic undo for rotation_step
+                if (state.rotation_step > 0) {
+                  // SAVE current (which matches nextPairIdx logic above)
+                  const curPairIdx = state.rotation_step % 3;
+                  const [c1, c2] = pairs[curPairIdx];
+                  state.matchup_scores[curPairIdx] = { team1: state.teams[c1].score, team2: state.teams[c2].score };
+
+                  state.rotation_step -= 1;
+
+                  // LOAD prev
+                  const prevPairIdx = state.rotation_step % 3;
+                  const [pr1, pr2] = pairs[prevPairIdx];
+                  state.teams[pr1].score = state.matchup_scores[prevPairIdx].team1;
+                  state.teams[pr2].score = state.matchup_scores[prevPairIdx].team2;
+
+                  state.quarter = currentQuarter();
+                  state.period_seconds = 480;
+                }
                 break;
               case "next-matchup":
                 state.matchup_index += 1;
@@ -520,7 +755,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 playBuzzer();
                 break;
               case "new-game":
-                state = defaultState();
+                if (confirm("모든 경기 점수 데이터가 초기화 됩니다. 진행 하시겠습니까?")) {
+                  state = defaultState();
+                }
                 break;
               case "overtime":
                 state.quarter = 5;
@@ -535,7 +772,68 @@ document.addEventListener("DOMContentLoaded", () => {
           broadcast();
         });
       });
+
+      // Keyboard Shortcuts
+      document.addEventListener("keydown", (e) => {
+        if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+
+        // Helper to click button by action
+        const clickAction = (action) => {
+          const btn = document.querySelector(`[data-action="${action}"]`);
+          if (btn) {
+            btn.click();
+
+            // Add visual feedback
+            btn.classList.add('active:scale-95', 'transform', 'transition-all');
+            btn.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+              btn.style.transform = '';
+            }, 100);
+          }
+        };
+
+        switch (e.code) {
+          case "Space":
+            e.preventDefault();
+            clickAction("toggle-main");
+            break;
+          case "Digit1":
+          case "Numpad1":
+            clickAction("add-home-1");
+            break;
+          case "Digit2":
+          case "Numpad2":
+            clickAction("add-home-2");
+            break;
+          case "Digit3":
+          case "Numpad3":
+            clickAction("add-home-3");
+            break;
+          case "Digit8":
+          case "Numpad8":
+            clickAction("add-away-1");
+            break;
+          case "Digit9":
+          case "Numpad9":
+            clickAction("add-away-2");
+            break;
+          case "Digit0":
+          case "Numpad0":
+            clickAction("add-away-3");
+            break;
+          case "KeyZ":
+            clickAction("reset-shot-14");
+            break;
+          case "KeyX":
+            clickAction("reset-shot-24");
+            break;
+          case "KeyC":
+            clickAction("toggle-shot");
+            break;
+        }
+      });
     };
+
 
     const ensureState = () => {
       if (!state) {
