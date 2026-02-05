@@ -366,15 +366,64 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const render = () => {
       const [home, away] = currentMatchup();
-      setText("[data-scoreboard-quarter]", `${state.quarter}Q`);
+
+      // Quarter and timers
+      setText("[data-scoreboard-quarter]", state.quarter);
       setText("[data-scoreboard-timer]", formatTime(state.period_seconds));
       setText("[data-scoreboard-shot]", state.shot_seconds);
+
+      // Team names (for new sports display)
+      setText("[data-team-name-left]", `TEAM ${home.label}`);
+      setText("[data-team-name-right]", `TEAM ${away.label}`);
+
+      // Scores (new display)
+      setText("[data-score-left]", home.score);
+      setText("[data-score-right]", away.score);
+
+      // Fouls (new display) - Fill circles based on count
+      const updateFoulCircles = (containerSelector, foulCount) => {
+        const container = scoreboardRoot.querySelector(containerSelector);
+        console.log('[Foul Debug]', containerSelector, 'count:', foulCount, 'container:', container);
+        if (!container) return;
+
+        const circles = container.querySelectorAll('[data-foul-circle]');
+        console.log('[Foul Debug] Circles found:', circles.length);
+        circles.forEach((circle, index) => {
+          if (index < foulCount) {
+            circle.style.backgroundColor = '#dc2626'; // red-600
+            console.log('[Foul Debug] Filling circle', index, 'red');
+          } else {
+            circle.style.backgroundColor = '#1a1a1a'; // dark/empty
+            console.log('[Foul Debug] Emptying circle', index);
+          }
+        });
+      };
+
+      updateFoulCircles('[data-foul-indicators-left]', state.home_fouls || 0);
+      updateFoulCircles('[data-foul-indicators-right]', state.away_fouls || 0);
+
+      // Possession arrows (new display)
+      const arrowLeft = scoreboardRoot.querySelector(".possession-arrow-left");
+      const arrowRight = scoreboardRoot.querySelector(".possession-arrow-right");
+      if (arrowLeft && arrowRight) {
+        if (state.possession === 'home') {
+          arrowLeft.classList.remove('hidden');
+          arrowRight.classList.add('hidden');
+        } else if (state.possession === 'away') {
+          arrowLeft.classList.add('hidden');
+          arrowRight.classList.remove('hidden');
+        } else {
+          arrowLeft.classList.add('hidden');
+          arrowRight.classList.add('hidden');
+        }
+      }
+
+      // Legacy display elements
       setText("[data-scoreboard-matchup]", `팀 ${home.label} vs 팀 ${away.label}`);
       setText("[data-home-name]", `TEAM ${home.label}`);
       setText("[data-away-name]", `TEAM ${away.label}`);
       const homeIconEl = scoreboardRoot.querySelector("[data-home-icon]");
       if (homeIconEl) {
-        // Use icon if available, otherwise fallback to label or empty
         homeIconEl.textContent = home.icon || "●";
         homeIconEl.style.color = home.color || "#333";
       }

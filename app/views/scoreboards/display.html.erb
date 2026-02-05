@@ -1,120 +1,195 @@
-<div class="relative w-full h-screen flex flex-col bg-[#0A0A0A] overflow-hidden select-none"
+<%# External Sports Scoreboard Display %>
+<div class="w-full h-screen flex flex-col bg-[#0a0a0a] overflow-hidden select-none relative"
      data-scoreboard-root 
      data-scoreboard-role="display"
      data-match-id="<%= @match.id %>"
      data-teams="<%= @match.teams.to_json %>"
      data-teams-count="<%= @match.teams.count %>">
-  <!-- Header -->
-  <header class="h-[72px] flex flex-col justify-center items-center bg-[#111111] border-b-[3px] border-[#E53935] z-10 shrink-0">
-    <div class="flex items-center gap-4">
-      <span class="text-[#E53935] font-['Inter'] font-bold text-[13px] tracking-[3px]">BM LEAGUE</span>
-    </div>
-    <div class="text-[#666666] font-['JetBrains_Mono'] text-[11px] tracking-[1px] mt-1 uppercase">
-      <%= @match.date.strftime("%Y.%m.%d") %> — GAME <%= @match.id %>
-    </div>
-  </header>
 
-  <!-- Score Body -->
-  <main class="flex-1 flex justify-center items-center w-full px-12 gap-12">
-    <!-- Home Team -->
-    <div class="flex-1 flex flex-col items-center justify-center p-8 border border-[#222222] bg-[#141414]/50 rounded-lg backdrop-blur-sm h-[400px]">
-      <div class="text-6xl mb-6 scale-150"><%= @match.home_team.icon %></div>
-      <h2 class="text-white font-['Inter'] text-2xl font-bold tracking-wider mb-2"><%= @match.home_team.name %></h2>
-      <div class="text-[#666666] text-sm uppercase tracking-widest mb-10">HOME</div>
-      <div class="font-['JetBrains_Mono'] text-[140px] leading-none font-bold text-white tabular-nums tracking-tighter" 
-           id="home-score-display"
-           data-home-score>
-        0
+  <%# Top Bar - Team Names and Timer %>
+  <div class="h-[18%] bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] border-b-4 border-[#333] flex items-center justify-between px-12 relative">
+    <%# Left Team Name %>
+    <div class="flex-1 flex justify-start">
+      <div class="px-8 py-3 rounded-lg shadow-lg team-badge-left" style="background-color: #1e40af; border: 2px solid #3b82f6;">
+        <span class="text-white font-bold text-4xl tracking-wider font-['Inter']" data-team-name-left>TEAM A</span>
       </div>
     </div>
 
-    <!-- Center Panel (Timer) -->
-    <div class="w-[300px] flex flex-col items-center justify-center gap-8 h-[400px]">
-      <!-- Quarter Badge -->
-      <div class="px-5 py-2 bg-[#E53935] text-white font-['JetBrains_Mono'] font-bold text-xl rounded">
-        <span data-scoreboard-quarter>1Q</span>
-      </div>
-
-      <!-- Main Timer -->
-      <div class="font-['JetBrains_Mono'] text-[100px] leading-none font-bold text-white tabular-nums tracking-tighter text-shadow-glow" 
-           id="game-clock-display"
-           data-scoreboard-timer>
-        10:00
-      </div>
-
-      <!-- Shot Clock -->
-      <div class="mt-4 px-8 py-3 bg-[#1A1A1A] border border-[#333333] rounded-lg">
-        <span class="font-['JetBrains_Mono'] text-[#E53935] text-5xl font-bold tabular-nums" 
-              id="shot-clock-display"
-              data-scoreboard-shot>24</span>
-      </div>
+    <%# Center Timer %>
+    <div class="flex flex-col items-center gap-2">
+      <span class="text-[#00ff00] font-['DSEG7'] font-bold tracking-wider tabular-nums" 
+            style="font-size: 10rem;"
+            data-scoreboard-timer>10:00</span>
+      <span class="text-gray-500 text-sm tracking-widest uppercase">Game Clock</span>
     </div>
 
-    <!-- Away Team -->
-    <div class="flex-1 flex flex-col items-center justify-center p-8 border border-[#222222] bg-[#141414]/50 rounded-lg backdrop-blur-sm h-[400px]">
-      <div class="text-6xl mb-6 scale-150"><%= @match.away_team.icon %></div>
-      <h2 class="text-white font-['Inter'] text-2xl font-bold tracking-wider mb-2"><%= @match.away_team.name %></h2>
-      <div class="text-[#666666] text-sm uppercase tracking-widest mb-10">AWAY</div>
-      <div class="font-['JetBrains_Mono'] text-[140px] leading-none font-bold text-white tabular-nums tracking-tighter" 
-           id="away-score-display"
-           data-away-score>
-        0
-      </div>
-    </div>
-  </main>
-
-  <!-- Stats Bar -->
-  <div class="h-[90px] w-full bg-[#111111] border-t-[3px] border-[#E53935] flex items-center justify-between px-16 shrink-0">
-    <!-- Home Stats -->
-    <div class="flex items-center gap-12 text-[#888888] font-['JetBrains_Mono']">
-      <div class="flex flex-col items-center">
-        <span class="text-xs uppercase tracking-widest mb-1">FOULS</span>
-        <span class="text-3xl text-white font-bold" data-home-fouls-display>0</span>
-      </div>
-    </div>
-
-    <!-- Center Stats Info -->
-    <div class="flex flex-col items-center justify-center">
-      <span class="text-[#444444] text-xs tracking-[2px] mb-2 font-bold">POSSESSION</span>
-      <div class="flex items-center gap-3">
-        <div class="w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-r-[12px] border-r-[#333333]" id="home-poss-indicator"></div>
-        <div class="w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-[#E53935]" id="away-poss-indicator"></div>
-      </div>
-    </div>
-
-    <!-- Away Stats -->
-    <div class="flex items-center gap-12 text-[#888888] font-['JetBrains_Mono']">
-      <div class="flex flex-col items-center">
-        <span class="text-xs uppercase tracking-widest mb-1">FOULS</span>
-        <span class="text-3xl text-white font-bold" data-away-fouls-display>0</span>
+    <%# Right Team Name %>
+    <div class="flex-1 flex justify-end">
+      <div class="px-8 py-3 rounded-lg shadow-lg team-badge-right" style="background-color: #dc2626; border: 2px solid #ef4444;">
+        <span class="text-white font-bold text-4xl tracking-wider font-['Inter']" data-team-name-right>TEAM B</span>
       </div>
     </div>
   </div>
 
-  <!-- Quarter Scores (Bottom) -->
-  <div class="h-[78px] bg-[#0D0D0D] border-t border-[#222222] flex w-full shrink-0">
-    <div class="w-[120px] flex items-center justify-center border-r border-[#222222] bg-[#141414] text-[#666666] font-bold text-lg font-['Inter']">
-      SCORES
-    </div>
-    <div class="flex-1 flex items-center justify-center gap-20 font-['JetBrains_Mono'] text-[#888888]">
-      <div class="flex flex-col items-center gap-1">
-        <span class="text-xs">1Q</span>
-        <span class="text-white font-bold text-lg">24 - 22</span>
+  <%# Center Score Area %>
+  <div class="flex-1 flex items-center justify-center px-12 relative">
+    <%# Left Score %>
+    <div class="flex flex-col items-center gap-4 flex-1 justify-center">
+      <span class="text-[#ffa500] font-['DSEG7'] font-bold tabular-nums leading-none" 
+            style="font-size: 26.4rem;"
+            data-score-left>0</span>
+      <div class="px-6 py-2 bg-[#1a1a1a] border border-[#333] rounded flex items-center gap-3">
+        <span class="text-gray-400 text-xs tracking-wider uppercase">FOUL</span>
+        <div class="flex gap-2" data-foul-indicators-left>
+          <div class="w-4 h-4 rounded-full bg-[#1a1a1a] border-2 border-red-600" data-foul-circle="0"></div>
+          <div class="w-4 h-4 rounded-full bg-[#1a1a1a] border-2 border-red-600" data-foul-circle="1"></div>
+          <div class="w-4 h-4 rounded-full bg-[#1a1a1a] border-2 border-red-600" data-foul-circle="2"></div>
+          <div class="w-4 h-4 rounded-full bg-[#1a1a1a] border-2 border-red-600" data-foul-circle="3"></div>
+          <div class="w-4 h-4 rounded-full bg-[#1a1a1a] border-2 border-red-600" data-foul-circle="4"></div>
+        </div>
       </div>
     </div>
-    <div class="w-[120px] flex items-center justify-center border-l border-[#222222] bg-[#141414]">
-      <!-- Fullscreen Toggle Button -->
-      <button id="fullscreen-toggle" class="text-[#666666] hover:text-white transition-colors p-3 rounded-full hover:bg-[#333333]">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+
+    <%# Center Info - Quarter and Possession - FIXED POSITION %>
+    <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-8" style="width: 400px;">
+      <%# Possession Arrow %>
+      <div class="h-16 flex justify-center" data-possession-indicator>
+        <svg width="80" height="64" viewBox="0 0 80 64" class="possession-arrow-left hidden">
+          <polygon points="80,32 20,0 20,24 0,24 0,40 20,40 20,64" fill="#ff0000" />
         </svg>
-      </button>
+        <svg width="80" height="64" viewBox="0 0 80 64" class="possession-arrow-right hidden">
+          <polygon points="0,32 60,0 60,24 80,24 80,40 60,40 60,64" fill="#ff0000" />
+        </svg>
+      </div>
+
+      <%# Quarter Badge %>
+      <div class="px-12 py-4 bg-white border-4 border-[#666] rounded-xl shadow-2xl">
+        <span class="text-black font-['DSEG7'] text-6xl font-bold" data-scoreboard-quarter>1</span>
+      </div>
+
+      <%# Shot Clock %>
+      <div class="flex flex-col items-center gap-1">
+        <span class="text-[#00ff00] font-['DSEG7'] font-bold tabular-nums" 
+              style="font-size: 10rem;"
+              data-scoreboard-shot>24</span>
+        <span class="text-gray-500 text-xs tracking-widest uppercase">Shot Clock</span>
+      </div>
+    </div>
+
+    <%# Right Score %>
+    <div class="flex flex-col items-center gap-4 flex-1 justify-center">
+      <span class="text-[#ffa500] font-['DSEG7'] font-bold tabular-nums leading-none" 
+            style="font-size: 26.4rem;"
+            data-score-right>0</span>
+      <div class="px-6 py-2 bg-[#1a1a1a] border border-[#333] rounded flex items-center gap-3">
+        <span class="text-gray-400 text-xs tracking-wider uppercase">FOUL</span>
+        <div class="flex gap-2" data-foul-indicators-right>
+          <div class="w-4 h-4 rounded-full bg-[#1a1a1a] border-2 border-red-600" data-foul-circle="0"></div>
+          <div class="w-4 h-4 rounded-full bg-[#1a1a1a] border-2 border-red-600" data-foul-circle="1"></div>
+          <div class="w-4 h-4 rounded-full bg-[#1a1a1a] border-2 border-red-600" data-foul-circle="2"></div>
+          <div class="w-4 h-4 rounded-full bg-[#1a1a1a] border-2 border-red-600" data-foul-circle="3"></div>
+          <div class="w-4 h-4 rounded-full bg-[#1a1a1a] border-2 border-red-600" data-foul-circle="4"></div>
+        </div>
+      </div>
     </div>
   </div>
+
+  <%# Bottom Bar - Info and Fullscreen %>
+  <div class="h-[12%] bg-gradient-to-t from-[#1a1a1a] to-[#0f0f0f] border-t-4 border-[#333] flex items-center justify-between px-12">
+    <%# League Info %>
+    <div class="flex flex-col">
+      <span class="text-[#666] text-xs tracking-[3px] uppercase">BM League</span>
+      <span class="text-gray-400 text-sm font-['JetBrains_Mono']"><%= @match.date.strftime("%Y.%m.%d") %> — Game <%= @match.id %></span>
+    </div>
+
+    <%# Fullscreen Button %>
+    <button id="fullscreen-btn" 
+            class="px-6 py-3 bg-[#1a1a1a] hover:bg-[#2a2a2a] border border-[#444] hover:border-[#666] rounded-lg transition-all duration-200 flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-400">
+        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+      </svg>
+      <span class="text-gray-400 text-sm font-bold tracking-wider uppercase">Fullscreen</span>
+    </button>
+  </div>
+
 </div>
 
 <style>
-  .text-shadow-glow {
-    text-shadow: 0 0 30px rgba(255, 255, 255, 0.15);
+  /* 7-Segment LED Font */
+  @font-face {
+    font-family: 'DSEG7';
+    src: url('/fonts/7-segment-trackmania-united.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  /* Possession Arrow Animation */
+  .possession-arrow-left,
+  .possession-arrow-right {
+    animation: pulse 1s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  /* Smooth transitions */
+  [data-score-left], [data-score-right] {
+    transition: all 0.3s ease;
   }
 </style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    
+    if (fullscreenBtn) {
+      fullscreenBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else {
+          document.exitFullscreen();
+        }
+      });
+    }
+    
+    // Apply team colors to badges
+    const applyTeamColors = () => {
+      const scoreboardRoot = document.querySelector('[data-scoreboard-root]');
+      if (!scoreboardRoot) return;
+      
+      const teamsData = scoreboardRoot.dataset.teams;
+      if (!teamsData) return;
+      
+      try {
+        const teams = JSON.parse(teamsData);
+        if (teams.length >= 2) {
+          const teamLeft = teams[0];
+          const teamRight = teams[1];
+          
+          const badgeLeft = document.querySelector('.team-badge-left');
+          const badgeRight = document.querySelector('.team-badge-right');
+          
+          if (badgeLeft && teamLeft.color) {
+            badgeLeft.style.backgroundColor = teamLeft.color;
+            badgeLeft.style.borderColor = teamLeft.color;
+          }
+          
+          if (badgeRight && teamRight.color) {
+            badgeRight.style.backgroundColor = teamRight.color;
+            badgeRight.style.borderColor = teamRight.color;
+          }
+        }
+      } catch(e) {
+        console.error('Failed to parse team colors:', e);
+      }
+    };
+    
+    // Apply on load
+    applyTeamColors();
+    
+    // Reapply when data updates (via ActionCable)
+    document.addEventListener('scoreboard:updated', applyTeamColors);
+  });
+</script>
