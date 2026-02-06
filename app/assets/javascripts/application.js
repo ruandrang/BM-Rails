@@ -369,18 +369,25 @@ document.addEventListener("DOMContentLoaded", () => {
     const render = () => {
       const [home, away] = currentMatchup();
 
+      // For display page, swap left/right (Control: A:B, Display: B:A)
+      const isDisplayPage = role === 'display';
+      const leftTeam = isDisplayPage ? away : home;
+      const rightTeam = isDisplayPage ? home : away;
+      const leftFouls = isDisplayPage ? (state.away_fouls || 0) : (state.home_fouls || 0);
+      const rightFouls = isDisplayPage ? (state.home_fouls || 0) : (state.away_fouls || 0);
+
       // Quarter and timers
       setText("[data-scoreboard-quarter]", state.quarter);
       setText("[data-scoreboard-timer]", formatTime(state.period_seconds));
       setText("[data-scoreboard-shot]", state.shot_seconds);
 
       // Team names (for new sports display)
-      setText("[data-team-name-left]", `TEAM ${home.label}`);
-      setText("[data-team-name-right]", `TEAM ${away.label}`);
+      setText("[data-team-name-left]", `TEAM ${leftTeam.label}`);
+      setText("[data-team-name-right]", `TEAM ${rightTeam.label}`);
 
       // Scores (new display)
-      setText("[data-score-left]", home.score);
-      setText("[data-score-right]", away.score);
+      setText("[data-score-left]", leftTeam.score);
+      setText("[data-score-right]", rightTeam.score);
 
       // Fouls (new display) - Fill circles based on count
       const updateFoulCircles = (containerSelector, foulCount) => {
@@ -410,17 +417,25 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       };
 
-      updateFoulCircles('[data-foul-indicators-left]', state.home_fouls || 0);
-      updateFoulCircles('[data-foul-indicators-right]', state.away_fouls || 0);
+      updateFoulCircles('[data-foul-indicators-left]', leftFouls);
+      updateFoulCircles('[data-foul-indicators-right]', rightFouls);
 
       // Possession arrows (new display)
       const arrowLeft = scoreboardRoot.querySelector(".possession-arrow-left");
       const arrowRight = scoreboardRoot.querySelector(".possession-arrow-right");
       if (arrowLeft && arrowRight) {
-        if (state.possession === 'home') {
+        // For display page, swap possession arrows too
+        const showLeftArrow = isDisplayPage
+          ? (state.possession === 'away')  // Display: away -> left
+          : (state.possession === 'home'); // Control: home -> left
+        const showRightArrow = isDisplayPage
+          ? (state.possession === 'home')  // Display: home -> right
+          : (state.possession === 'away'); // Control: away -> right
+
+        if (showLeftArrow) {
           arrowLeft.classList.remove('hidden');
           arrowRight.classList.add('hidden');
-        } else if (state.possession === 'away') {
+        } else if (showRightArrow) {
           arrowLeft.classList.add('hidden');
           arrowRight.classList.remove('hidden');
         } else {
