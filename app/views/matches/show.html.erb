@@ -24,6 +24,12 @@
           <% end %>
         </div>
         <div class="flex gap-2">
+          <%= link_to scoreboard_club_match_path(@club, @match), class: "btn btn-primary btn-sm gap-2", target: "_blank" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+            </svg>
+            스코어보드
+          <% end %>
           <%= link_to edit_club_match_path(@club, @match), class: "btn btn-ghost btn-sm" do %>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -43,7 +49,27 @@
 
   <!-- 팀 카드들 -->
   <% team_records = {} %>
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-<%= @match.teams_count %> gap-6 mb-8">
+  <!-- 팀 카드들 -->
+  <% team_records = {} %>
+  
+  <!-- 팀 랜덤 재배치 버튼 (게임 기록 없을 때만) -->
+  <% if @match.games.none? { |g| g.result != 'pending' || g.home_score > 0 || g.away_score > 0 } %>
+    <div class="flex justify-end mb-4">
+      <%= button_to shuffle_teams_club_match_path(@club, @match),
+          method: :patch,
+          class: "btn btn-warning gap-2 btn-sm",
+          data: { turbo_confirm: "현재 팀 구성이 초기화되고 멤버가 랜덤하게 다시 섞입니다.\n계속하시겠습니까?" } do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        팀 랜덤 다시 섞기
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-<%= @match.teams_count %> gap-6 mb-8"
+       data-controller="match-drag"
+       data-match-drag-match-id-value="<%= @match.id %>">
     <% @teams.each do |team| %>
       <% wins = draws = losses = 0 %>
       <% @games.each do |game| %>
@@ -90,10 +116,10 @@
             </div>
           </div>
 
-          <!-- 멤버 목록 -->
-          <div class="grid grid-cols-2 gap-2">
+          <!-- 멤버 목록 (Sortable Target) -->
+          <div class="grid grid-cols-2 gap-2 min-h-[50px] p-2 bg-base-100 rounded-lg" data-team-id="<%= team.id %>">
             <% team.members.each do |member| %>
-              <div class="flex items-center justify-between p-2 bg-base-200/50 rounded-lg border border-base-300/30">
+              <div class="flex items-center justify-between p-2 bg-base-200/50 rounded-lg border border-base-300/30 cursor-move hover:bg-base-200 transition-colors" data-id="<%= member.id %>">
                 <div class="text-sm font-bold truncate"><%= member.name %></div>
                 <span class="badge badge-xs text-white flex-shrink-0" style="<%= position_badge_style(member.position) %>">
                   <%= member.position %>
@@ -118,7 +144,6 @@
         <h2 class="text-2xl font-black italic tracking-tighter">GAME SCOREBOARD</h2>
       </div>
 
-      <%= form_with url: record_results_club_match_path(@club, @match), method: :patch, local: true do %>
         <div class="grid grid-cols-1 gap-6">
           <% @games.each_with_index do |game, index| %>
             <div class="group relative bg-black/30 rounded-2xl p-6 ring-1 ring-white/10 hover:ring-primary/50 transition-all duration-300">
@@ -137,6 +162,13 @@
 
                 <!-- Score/Result Middle -->
                 <div class="flex flex-col items-center gap-4 min-w-[200px]">
+                  <!-- 점수 표시 -->
+                  <div class="flex items-center gap-2 text-slate-100">
+                    <span class="text-4xl font-black font-mono"><%= game.home_score %></span>
+                    <span class="text-2xl opacity-50">:</span>
+                    <span class="text-4xl font-black font-mono"><%= game.away_score %></span>
+                  </div>
+                  
                   <div class="flex items-center gap-4">
                     <% if game.result == "home_win" %>
                       <div class="bg-success text-success-content px-4 py-2 rounded-xl text-3xl font-black shadow-[0_0_15px_rgba(54,211,153,0.3)]">W</div>
@@ -155,12 +187,42 @@
                     <% end %>
                   </div>
 
-                  <select name="games[<%= game.id %>]" class="select select-bordered bg-black/50 border-white/20 text-white select-sm w-full font-bold focus:border-primary">
-                    <option value="pending" <%= "selected" if game.result == "pending" %>>-- 기록 대기 중 --</option>
-                    <option value="home_win" <%= "selected" if game.result == "home_win" %>>TEAM <%= game.home_team.label %> 승리</option>
-                    <option value="away_win" <%= "selected" if game.result == "away_win" %>>TEAM <%= game.away_team.label %> 승리</option>
-                    <option value="draw" <%= "selected" if game.result == "draw" %>>무승부 (DRAW)</option>
-                  </select>
+                  <!-- 쿼터별 점수 테이블 -->
+                  <!-- 쿼터별 점수 테이블 -->
+                  <div class="w-full mt-2">
+                    <table class="table table-xs text-center bg-black/20 rounded-lg">
+                      <thead>
+                        <tr>
+                          <th class="text-white/50 border-b border-white/10 p-1 w-8">Q</th>
+                          <th class="text-white/50 border-b border-white/10 p-1">1</th>
+                          <th class="text-white/50 border-b border-white/10 p-1">2</th>
+                          <th class="text-white/50 border-b border-white/10 p-1">3</th>
+                          <th class="text-white/50 border-b border-white/10 p-1 border-r border-white/10">4</th>
+                          <th class="text-white/90 border-b border-white/10 p-1 font-bold">Total</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <!-- Home Team Row -->
+                        <tr>
+                          <td class="text-white/90 font-bold border-b border-white/5 p-1"><%= game.home_team.label %></td>
+                          <% (1..4).each do |q| %>
+                            <% s = (game.quarter_scores&.dig(q.to_s, "home") || 0) %>
+                            <td class="text-white/90 font-mono border-b border-white/5 p-1 <%= 'border-r border-white/10' if q == 4 %>"><%= s %></td>
+                          <% end %>
+                          <td class="text-white font-mono font-bold border-b border-white/5 p-1 text-yellow-400"><%= game.home_score %></td>
+                        </tr>
+                        <!-- Away Team Row -->
+                        <tr>
+                          <td class="text-white/90 font-bold border-b border-white/5 p-1"><%= game.away_team.label %></td>
+                          <% (1..4).each do |q| %>
+                            <% s = (game.quarter_scores&.dig(q.to_s, "away") || 0) %>
+                            <td class="text-white/90 font-mono border-b border-white/5 p-1 <%= 'border-r border-white/10' if q == 4 %>"><%= s %></td>
+                          <% end %>
+                          <td class="text-white font-mono font-bold border-b border-white/5 p-1 text-yellow-400"><%= game.away_score %></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
 
                 <!-- 어웨이팀 Area -->
@@ -176,9 +238,69 @@
         </div>
 
         <div class="flex justify-center mt-12">
-          <%= submit_tag "결과 최종 저장하기", class: "btn btn-primary btn-lg px-20 text-xl italic font-black rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all" %>
+          <!-- 점수 수정 모달 트리거 -->
+          <button type="button" class="btn btn-primary btn-lg px-20 text-xl italic font-black rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all" onclick="document.getElementById('score_edit_modal').showModal()">
+            점수 수정하기
+          </button>
         </div>
-      <% end %>
+
+        <!-- 점수 수정 모달 -->
+        <dialog id="score_edit_modal" class="modal modal-bottom sm:modal-middle text-base-content">
+          <div class="modal-box">
+            <h3 class="font-bold text-lg mb-4">경기 점수 수정</h3>
+            
+            <%= form_with url: update_scores_club_match_path(@club, @match), method: :patch, class: "space-y-4" do |f| %>
+              <% @games.each_with_index do |game, index| %>
+                <div class="card bg-base-200 p-4 border border-base-300">
+                  <div class="flex justify-between items-center mb-2">
+                    <div class="text-xs font-bold opacity-50">GAME <%= index + 1 %></div>
+                    <div class="text-xs opacity-70">
+                      <%= game.home_team.label %> vs <%= game.away_team.label %>
+                    </div>
+                  </div>
+                  
+                  <div class="overflow-x-auto">
+                    <table class="table table-xs w-full text-center">
+                      <thead>
+                        <tr>
+                          <th class="w-10">Q</th>
+                          <th class="text-primary"><%= game.home_team.label %></th>
+                          <th class="text-secondary"><%= game.away_team.label %></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% (1..4).each do |q| %>
+                          <% 
+                             q_scores = game.quarter_scores&.dig(q.to_s) || { "home" => 0, "away" => 0 }
+                             hf_val = q_scores["home"]
+                             af_val = q_scores["away"]
+                          %>
+                          <tr>
+                            <th class="opacity-50"><%= q %></th>
+                            <td>
+                              <input type="number" name="scores[<%= game.id %>][quarters][<%= q %>][home]" value="<%= hf_val %>" class="input input-xs input-bordered w-full text-center" min="0">
+                            </td>
+                            <td>
+                              <input type="number" name="scores[<%= game.id %>][quarters][<%= q %>][away]" value="<%= af_val %>" class="input input-xs input-bordered w-full text-center" min="0">
+                            </td>
+                          </tr>
+                        <% end %>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              <% end %>
+              
+              <div class="modal-action">
+                <button type="button" class="btn" onclick="document.getElementById('score_edit_modal').close()">취소</button>
+                <%= f.submit "저장", class: "btn btn-primary" %>
+              </div>
+            <% end %>
+          </div>
+          <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+          </form>
+        </dialog>
     </div>
   </div>
 </div>

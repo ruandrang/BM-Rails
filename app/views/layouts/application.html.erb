@@ -14,6 +14,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- SortableJS -->
+    <script src="https://unpkg.com/sortablejs@1.15.0/Sortable.min.js"></script>
 
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
@@ -60,19 +63,19 @@
         </header>
 
         <!-- 메인 컨텐츠 -->
-        <main class="flex-1 p-4 lg:p-6">
+        <main class="flex-1 p-4 lg:p-6 relative">
           <!-- Flash 메시지 -->
-          <% flash.each do |type, message| %>
-            <div class="alert <%= type == 'notice' ? 'alert-success' : 'alert-error' %> shadow-lg mb-4">
-              <div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+          <div id="flash-messages" class="absolute top-2 left-0 w-full flex flex-col items-center gap-2 z-50 pointer-events-none px-4">
+            <% flash.each do |type, message| %>
+              <div class="alert <%= type == 'notice' ? 'alert-success' : 'alert-error' %> shadow-xl pointer-events-auto flex flex-row items-center gap-3 p-3 w-auto max-w-lg min-w-[300px]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span><%= message %></span>
+                <span class="flex-1 text-sm font-medium truncate text-center"><%= message %></span>
+                <button class="btn btn-xs btn-circle btn-ghost flex-shrink-0" onclick="this.parentElement.remove()">✕</button>
               </div>
-              <button class="btn btn-sm btn-ghost" onclick="this.parentElement.style.display='none'">✕</button>
-            </div>
-          <% end %>
+            <% end %>
+          </div>
 
           <%= yield %>
         </main>

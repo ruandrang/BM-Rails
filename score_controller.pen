@@ -1,5 +1,5 @@
 {
-  "version": "2.6",
+  "version": "2.7",
   "children": [
     {
       "type": "frame",
@@ -41,7 +41,7 @@
               "content": "SCOREBOARD CONTROLLER",
               "fontFamily": "Cormorant Garamond",
               "fontSize": 28,
-              "fontWeight": "700",
+              "fontWeight": "600",
               "letterSpacing": 2
             },
             {
@@ -76,7 +76,7 @@
                   "content": "LIVE",
                   "fontFamily": "Inter",
                   "fontSize": 11,
-                  "fontWeight": "700",
+                  "fontWeight": "600",
                   "letterSpacing": 1
                 }
               ]
@@ -108,7 +108,7 @@
                   "content": "GAME TIME",
                   "fontFamily": "Inter",
                   "fontSize": 10,
-                  "fontWeight": "700",
+                  "fontWeight": "600",
                   "letterSpacing": 2
                 },
                 {
@@ -131,7 +131,7 @@
                       "content": "12:00",
                       "fontFamily": "JetBrains Mono",
                       "fontSize": 48,
-                      "fontWeight": "700"
+                      "fontWeight": "500"
                     }
                   ]
                 }
@@ -153,7 +153,7 @@
                   "content": "QUARTER",
                   "fontFamily": "Inter",
                   "fontSize": 10,
-                  "fontWeight": "700",
+                  "fontWeight": "600",
                   "letterSpacing": 2
                 },
                 {
@@ -176,7 +176,7 @@
                       "content": "1st",
                       "fontFamily": "Cormorant Garamond",
                       "fontSize": 36,
-                      "fontWeight": "700"
+                      "fontWeight": "500"
                     }
                   ]
                 }
@@ -198,7 +198,7 @@
                   "content": "SHOT CLOCK",
                   "fontFamily": "Inter",
                   "fontSize": 10,
-                  "fontWeight": "700",
+                  "fontWeight": "600",
                   "letterSpacing": 2
                 },
                 {
@@ -221,7 +221,7 @@
                       "content": "24",
                       "fontFamily": "JetBrains Mono",
                       "fontSize": 48,
-                      "fontWeight": "800"
+                      "fontWeight": "600"
                     }
                   ]
                 }
@@ -267,7 +267,7 @@
                   "content": "START",
                   "fontFamily": "Inter",
                   "fontSize": 12,
-                  "fontWeight": "700",
+                  "fontWeight": "600",
                   "letterSpacing": 1
                 }
               ]
@@ -306,7 +306,7 @@
                   "content": "PAUSE",
                   "fontFamily": "Inter",
                   "fontSize": 12,
-                  "fontWeight": "700",
+                  "fontWeight": "600",
                   "letterSpacing": 1
                 }
               ]
@@ -345,7 +345,7 @@
                   "content": "RESET",
                   "fontFamily": "Inter",
                   "fontSize": 12,
-                  "fontWeight": "700",
+                  "fontWeight": "600",
                   "letterSpacing": 1
                 }
               ]
@@ -370,7 +370,7 @@
                   "content": "14 SEC",
                   "fontFamily": "Inter",
                   "fontSize": 12,
-                  "fontWeight": "700",
+                  "fontWeight": "600",
                   "letterSpacing": 1
                 }
               ]
@@ -395,7 +395,7 @@
                   "content": "24 SEC",
                   "fontFamily": "Inter",
                   "fontSize": 12,
-                  "fontWeight": "700",
+                  "fontWeight": "600",
                   "letterSpacing": 1
                 }
               ]
@@ -443,7 +443,7 @@
                       "content": "HOME",
                       "fontFamily": "Inter",
                       "fontSize": 10,
-                      "fontWeight": "700",
+                      "fontWeight": "600",
                       "letterSpacing": 2
                     },
                     {
@@ -454,7 +454,7 @@
                       "content": "TEAM A",
                       "fontFamily": "Inter",
                       "fontSize": 14,
-                      "fontWeight": "700"
+                      "fontWeight": "600"
                     }
                   ]
                 },
@@ -502,7 +502,7 @@
                       "content": "00",
                       "fontFamily": "Cormorant Garamond",
                       "fontSize": 64,
-                      "fontWeight": "700"
+                      "fontWeight": "500"
                     },
                     {
                       "type": "frame",
@@ -561,7 +561,7 @@
                           "content": "+1",
                           "fontFamily": "JetBrains Mono",
                           "fontSize": 14,
-                          "fontWeight": "700"
+                          "fontWeight": "500"
                         }
                       ]
                     },
@@ -590,7 +590,7 @@
                           "content": "+2",
                           "fontFamily": "JetBrains Mono",
                           "fontSize": 14,
-                          "fontWeight": "700"
+                          "fontWeight": "500"
                         }
                       ]
                     },
@@ -619,7 +619,7 @@
                           "content": "+3",
                           "fontFamily": "JetBrains Mono",
                           "fontSize": 14,
-                          "fontWeight": "700"
+                          "fontWeight": "500"
                         }
                       ]
                     }
@@ -653,7 +653,7 @@
                       "content": "AWAY",
                       "fontFamily": "Inter",
                       "fontSize": 10,
-                      "fontWeight": "700",
+                      "fontWeight": "600",
                       "letterSpacing": 2
                     },
                     {
@@ -664,7 +664,7 @@
                       "content": "TEAM B",
                       "fontFamily": "Inter",
                       "fontSize": 14,
-                      "fontWeight": "700"
+                      "fontWeight": "600"
                     }
                   ]
                 },
@@ -712,7 +712,7 @@
                       "content": "00",
                       "fontFamily": "Cormorant Garamond",
                       "fontSize": 64,
-                      "fontWeight": "700"
+                      "fontWeight": "500"
                     },
                     {
                       "type": "frame",
@@ -771,7 +771,7 @@
                           "content": "+1",
                           "fontFamily": "JetBrains Mono",
                           "fontSize": 14,
-                          "fontWeight": "700"
+                          "fontWeight": "500"
                         }
                       ]
                     },
@@ -800,7 +800,7 @@
                           "content": "+2",
                           "fontFamily": "JetBrains Mono",
                           "fontSize": 14,
-                          "fontWeight": "700"
+                          "fontWeight": "500"
                         }
                       ]
                     },
@@ -829,7 +829,7 @@
                           "content": "+3",
                           "fontFamily": "JetBrains Mono",
                           "fontSize": 14,
-                          "fontWeight": "700"
+                          "fontWeight": "500"
                         }
                       ]
                     }
@@ -880,7 +880,7 @@
                       "content": "HOME FOULS",
                       "fontFamily": "Inter",
                       "fontSize": 10,
-                      "fontWeight": "700",
+                      "fontWeight": "600",
                       "letterSpacing": 2
                     },
                     {
@@ -891,7 +891,7 @@
                       "content": "0",
                       "fontFamily": "JetBrains Mono",
                       "fontSize": 24,
-                      "fontWeight": "800"
+                      "fontWeight": "600"
                     }
                   ]
                 },
@@ -1009,7 +1009,7 @@
                       "content": "AWAY FOULS",
                       "fontFamily": "Inter",
                       "fontSize": 10,
-                      "fontWeight": "700",
+                      "fontWeight": "600",
                       "letterSpacing": 2
                     },
                     {
@@ -1020,7 +1020,7 @@
                       "content": "0",
                       "fontFamily": "JetBrains Mono",
                       "fontSize": 24,
-                      "fontWeight": "800"
+                      "fontWeight": "600"
                     }
                   ]
                 },
@@ -1138,7 +1138,7 @@
                       "content": "TIMEOUTS",
                       "fontFamily": "Inter",
                       "fontSize": 10,
-                      "fontWeight": "700",
+                      "fontWeight": "600",
                       "letterSpacing": 2
                     }
                   ]
@@ -1167,7 +1167,7 @@
                           "content": "HOME",
                           "fontFamily": "Inter",
                           "fontSize": 9,
-                          "fontWeight": "700"
+                          "fontWeight": "500"
                         },
                         {
                           "type": "frame",
@@ -1223,7 +1223,7 @@
                           "content": "AWAY",
                           "fontFamily": "Inter",
                           "fontSize": 9,
-                          "fontWeight": "700"
+                          "fontWeight": "500"
                         },
                         {
                           "type": "frame",
@@ -1297,7 +1297,7 @@
               "content": "QUICK ACTIONS",
               "fontFamily": "Inter",
               "fontSize": 10,
-              "fontWeight": "700",
+              "fontWeight": "600",
               "letterSpacing": 2
             },
             {
@@ -1339,7 +1339,7 @@
                       "content": "POSSESSION",
                       "fontFamily": "Inter",
                       "fontSize": 11,
-                      "fontWeight": "700",
+                      "fontWeight": "600",
                       "letterSpacing": 1
                     }
                   ]
@@ -1376,7 +1376,7 @@
                       "content": "BONUS",
                       "fontFamily": "Inter",
                       "fontSize": 11,
-                      "fontWeight": "700",
+                      "fontWeight": "600",
                       "letterSpacing": 1
                     }
                   ]
@@ -1417,7 +1417,7 @@
                       "content": "BUZZER",
                       "fontFamily": "Inter",
                       "fontSize": 11,
-                      "fontWeight": "700",
+                      "fontWeight": "600",
                       "letterSpacing": 1
                     }
                   ]
@@ -1463,7 +1463,7 @@
                       "content": "NEXT PERIOD",
                       "fontFamily": "Inter",
                       "fontSize": 11,
-                      "fontWeight": "700",
+                      "fontWeight": "600",
                       "letterSpacing": 1
                     }
                   ]
@@ -1500,7 +1500,7 @@
                       "content": "OVERTIME",
                       "fontFamily": "Inter",
                       "fontSize": 11,
-                      "fontWeight": "700",
+                      "fontWeight": "600",
                       "letterSpacing": 1
                     }
                   ]
@@ -1541,7 +1541,7 @@
                       "content": "NEW GAME",
                       "fontFamily": "Inter",
                       "fontSize": 11,
-                      "fontWeight": "700",
+                      "fontWeight": "600",
                       "letterSpacing": 1
                     }
                   ]

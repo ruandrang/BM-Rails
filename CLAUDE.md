@@ -8,28 +8,32 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **프레임워크**: Ruby on Rails 8.1.2
 - **Ruby 버전**: 3.3.5 (rbenv)
 - **데이터베이스**: SQLite3
-- **프론트엔드**: Tailwind CSS v4 + DaisyUI v5 + Stimulus.js
+- **에셋 파이프라인**: Propshaft (Sprockets 아님)
+- **프론트엔드**: Tailwind CSS v4 + DaisyUI v5 (plugin via `@plugin "daisyui"`)
+- **JS**: Stimulus.js + 바닐라 JS (importmap 미사용, `app/assets/javascripts/application.js`에서 직접 작성)
+- **배포**: Kamal (Docker 기반)
+- **테스트**: 테스트 프레임워크 미설정 (`rails/test_unit/railtie` 비활성화)
 
 ## 주요 명령어
 
 ```bash
-# 개발 서버 실행 (웹서버 + CSS 컴파일러 동시 실행)
+# 개발 서버 실행 (Puma + Tailwind 워처 동시 실행)
 bin/dev
 
-# 데이터베이스 설정
+# 데이터베이스
 bin/rails db:create db:migrate
 bin/rails db:reset              # 초기화 후 재마이그레이션
 
-# 콘솔
-bin/rails console
-
 # 린트
-rubocop                         # Ruby 코드 스타일 검사
-rubocop -a                      # 자동 수정
+bin/rubocop                     # Ruby 코드 스타일 검사
+bin/rubocop -a                  # 자동 수정
 
 # 보안 검사
-brakeman                        # 정적 보안 분석
-bundle audit                    # 의존성 보안 감사
+bin/brakeman --no-pager         # 정적 보안 분석
+bin/bundler-audit               # 의존성 보안 감사
+
+# CI (보안 스캔 + 린트 한번에)
+bin/ci
 ```
 
 ## 아키텍처
@@ -56,46 +60,76 @@ Team (1)
 
 | 서비스 | 역할 |
 |--------|------|
-| `TeamBalancer` | 포지션 균형 + 승률 기반 팀 자동 배정 |
-| `StatsCalculator` | 선수별 승/패/무 통계 집계 |
+| `TeamBalancer` | 포지션 균형 + 승률 기반 팀 자동 배정 (5경기 미만은 승률 0.5 기본값) |
+| `StatsCalculator` | 선수별 승/패/무/승률 통계 집계 |
 | `ClubExporter` | 클럽 데이터 JSON 내보내기 |
 | `ClubImporter` | 클럽 데이터 JSON 가져오기 |
+
+### 도메인 로직
+
+- **Match 생성 흐름** (`MatchesController#create`): 선수 선택 → `TeamBalancer`로 자동 배정 → 팀 생성 → `teams.combination(2)`로 모든 대전 Game 자동 생성 (트랜잭션)
+- **3팀전**: teams_count=3일 때 Game 3개 (A vs B, A vs C, B vs C), 2팀전이면 Game 1개
+- **Game 결과**: `pending` → `home_win` / `away_win` / `draw` (수동 기록)
+- **포지션**: PG, SG, SF, PF, C (Member::POSITIONS 상수)
+- **팀 색상**: White, Black, Red, Blue, Yellow, Green (Team::COLORS 상수)
+
+### 실시간 스코어보드 시스템
+
+ActionCable 기반 실시간 점수판 기능이 있으며, 두 가지 화면으로 구성:
+- **Control** (`scoreboards#control`): 점수/타이머 조작 화면 (조작자용)
+- **Display** (`scoreboards#display`): 전광판 디스플레이 (별도 레이아웃 `scoreboard_display.html.erb` 사용)
+- **ScoreboardChannel**: WebSocket 채널, `ScoreboardStore`(Rails.cache 기반, 24시간 TTL)로 상태 관리
+- `ScoreboardStore` 클래스는 `app/channels/scoreboard_channel.rb` 파일 내에 함께 정의됨
+- 스트림 이름: `scoreboard:#{match_id}`
+- ActionCable 어댑터: 개발=async, 프로덕션=Redis (`config/cable.yml`)
+
+### 레이아웃 구조
+
+- `application.html.erb`: DaisyUI drawer 패턴 (사이드바 + 메인 콘텐츠), `data-theme="basketball"` 사용
+- `scoreboard_display.html.erb`: 전광판 전용 미니멀 레이아웃 (검정 배경, 스크롤 숨김)
+- `share.html.erb`: 경기 결과 공유 전용 레이아웃
+
+### JavaScript 구조
+
+Stimulus + 바닐라 JS 혼합 사용 (importmap 미사용, `<script>` 태그로 직접 로드):
+- `app/javascript/controllers/scoreboard_controller.js`: Stimulus 컨트롤러 (기본 타이머/점수)
+- `app/assets/javascripts/application.js`: 바닐라 JS (카드 클릭, 드래그 정렬, ActionCable 스코어보드 클라이언트 등)
+- 새 JS 기능 추가 시 `application.js`의 `DOMContentLoaded` 이벤트 리스너 내에 작성
 
 ### 주요 라우트 구조
 
 ```
-/                           → 클럽 목록 (홈)
-/clubs/:club_id/members     → 선수 관리
-/clubs/:club_id/matches     → 경기 관리
-/clubs/:club_id/stats       → 통계 대시보드
-/admin                      → 관리자 패널
+/                                          → 클럽 목록 (홈)
+/clubs/:club_id/members                    → 선수 관리 (CSV import/export, reorder)
+/clubs/:club_id/matches                    → 경기 관리
+/clubs/:club_id/matches/:id/scoreboard     → 점수판 컨트롤
+/clubs/:club_id/matches/:id/scoreboard_display → 전광판 디스플레이
+/clubs/:club_id/stats                      → 통계 대시보드
+/clubs/:id/export_json, import_json        → 클럽 데이터 백업/복원
+/admin                                     → 관리자 패널 (읽기 전용)
 ```
 
 ## 인증/인가
 
-- **인증**: 세션 기반 (bcrypt 패스워드 해싱)
+- **인증**: 세션 기반 (bcrypt `has_secure_password`)
 - **인가**: `users.admin` 플래그로 관리자 구분
-- `ApplicationController`에서 `before_action :require_login` 적용
+- `ApplicationController`에서 `before_action :require_login` 전역 적용
+- `sessions#new`, `registrations#new`는 로그인 불필요 (`skip_before_action` 처리)
+- Admin 컨트롤러는 `Admin::BaseController`에서 `require_admin` 적용
 
 ## 코드 컨벤션
 
-- **스타일**: rubocop-rails-omakase (Rails 공식 권장)
+- **Ruby 스타일**: rubocop-rails-omakase (Rails 공식 권장, `.rubocop.yml`에서 상속)
 - **뷰**: ERB 템플릿 + Tailwind/DaisyUI 클래스
-- **JS**: Stimulus 컨트롤러 (app/javascript/controllers/)
-
-## 데이터베이스 스키마 요약
-
-| 테이블 | 주요 컬럼 | 비고 |
-|--------|-----------|------|
-| users | email, password_digest, admin | 인증 |
-| clubs | user_id, name, icon | 12가지 아이콘 |
-| members | club_id, name, position, jersey_number | Guard/Forward/Center |
-| matches | club_id, played_on, teams_count | 2팀 또는 3팀전 |
-| teams | match_id, label, color | 6가지 색상 |
-| games | match_id, home_team_id, away_team_id, result | 경기 결과 |
+- **Active Storage / Action Mailbox / Action Text**: 비활성화 상태 (`config/application.rb`)
+- **모든 UI 텍스트**: 한국어
 
 ## 개발 시 참고사항
 
-- `bin/dev` 실행 시 Procfile.dev에 정의된 웹서버와 Tailwind 워처가 동시에 실행됨
-- 실시간 기능을 위한 ActionCable 인프라 구축됨 (app/channels/)
+- `bin/dev` 실행 시 Procfile.dev에 정의된 웹서버(Puma)와 Tailwind 워처가 동시에 실행됨
+- Tailwind CSS는 `app/assets/tailwind/application.css`에서 설정 (`@import "tailwindcss"; @plugin "daisyui";`)
+- CSS 빌드 결과물은 `app/assets/builds/tailwind.css`에 출력됨
 - 한글 CSV 처리 시 UTF-8 BOM 인코딩 필요
+- CI는 GitHub Actions로 `scan_ruby`(brakeman + bundler-audit)와 `lint`(rubocop) 두 job 실행
+- 모든 리소스는 `current_user` 스코프로 접근 (예: `current_user.clubs.find(params[:club_id])`) — 타인의 데이터에 접근 불가
+- 캐시: `StatsCalculator` 결과를 `Rails.cache`로 5분 TTL 캐싱 (`club_#{id}_member_stats`)

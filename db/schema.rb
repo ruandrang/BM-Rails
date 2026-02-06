@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_04_004556) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_06_142453) do
   create_table "clubs", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "icon", default: "basketball", null: false
@@ -21,10 +21,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_04_004556) do
   end
 
   create_table "games", force: :cascade do |t|
+    t.integer "away_score", default: 0
     t.integer "away_team_id", null: false
     t.datetime "created_at", null: false
+    t.integer "home_score", default: 0
     t.integer "home_team_id", null: false
     t.integer "match_id", null: false
+    t.json "quarter_scores", default: {}
     t.string "result", default: "pending", null: false
     t.datetime "updated_at", null: false
     t.index ["away_team_id"], name: "index_games_on_away_team_id"

@@ -77,35 +77,27 @@
 
       <!-- 정렬 버튼들 -->
       <div class="flex gap-2">
-        <button type="button" class="btn btn-ghost btn-xs gap-1" data-sort="name">
-          이름
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sort-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-          </svg>
-        </button>
-        <button type="button" class="btn btn-ghost btn-xs gap-1" data-sort="position">
-          포지션
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sort-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-          </svg>
-        </button>
-        <button type="button" class="btn btn-ghost btn-xs gap-1" data-sort="jersey">
-          등번호
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sort-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-          </svg>
-        </button>
+        <button type="button" class="btn btn-ghost btn-xs gap-1" data-sort="name">이름</button>
+        <button type="button" class="btn btn-ghost btn-xs gap-1" data-sort="position">포지션</button>
+        <button type="button" class="btn btn-ghost btn-xs gap-1" data-sort="height">키</button>
+        <button type="button" class="btn btn-ghost btn-xs gap-1" data-sort="winrate">승률</button>
+        <button type="button" class="btn btn-ghost btn-xs gap-1" data-sort="games">경기수</button>
+        <button type="button" class="btn btn-ghost btn-xs gap-1" data-sort="jersey">등번호</button>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="member-list" data-sortable-list data-reorder-url="<%= reorder_club_members_path(@club) %>">
+    <div class="grid grid-cols-1 md://grid-cols-2 lg:grid-cols-3 gap-6" id="member-list" data-sortable-list data-reorder-url="<%= reorder_club_members_path(@club) %>">
       <% @members.each do |member| %>
+        <% stats = @member_stats[member.id] || { games: 0, win_rate: 0.0 } %>
         <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-move member-item"
              draggable="true"
              data-member-id="<%= member.id %>"
              data-name="<%= member.name %>"
              data-position="<%= member.position %>"
-             data-jersey="<%= member.jersey_number || 999 %>">
+             data-jersey="<%= member.jersey_number || 999 %>"
+             data-height="<%= member.height_cm || 0 %>"
+             data-winrate="<%= stats[:win_rate] %>"
+             data-games="<%= stats[:games] %>">
           <div class="card-body p-5">
             <div class="flex items-start justify-between">
               <div>
@@ -153,7 +145,13 @@
                   <span class="font-medium text-base-content"><%= member.height_cm %>cm</span>
                 </div>
               <% end %>
+              <!-- 승률 표시 -->
+              <div class="flex flex-col ml-auto text-right">
+                <span class="text-[10px] uppercase font-bold opacity-50">Win Rate</span>
+                <span class="font-medium text-base-content"><%= (stats[:win_rate] * 100).round(1) %>% <span class="text-xs opacity-50">(<%= stats[:games] %>G)</span></span>
+              </div>
             </div>
+            <!-- 경기수 별도 표시(요청사항 반영) - 사실 승률 옆에 이미 있지만, 카드 하단에 더 명확히 추가 -->
           </div>
         </div>
       <% end %>
@@ -181,6 +179,9 @@
 </div>
 
 <script>
+// 포지션 정렬 순서
+const POSITION_ORDER = { "PG": 1, "SG": 2, "SF": 3, "PF": 4, "C": 5 };
+
 document.addEventListener("DOMContentLoaded", function() {
   const sortButtons = document.querySelectorAll("[data-sort]");
   const memberList = document.getElementById("member-list");
@@ -192,7 +193,9 @@ document.addEventListener("DOMContentLoaded", function() {
   sortButtons.forEach(btn => {
     btn.addEventListener("click", function() {
       const sortKey = this.dataset.sort;
-      sortState[sortKey] = sortState[sortKey] === "asc" ? "desc" : "asc";
+      // Toggle state
+      if (sortState[sortKey] === "desc") sortState[sortKey] = "asc";
+      else sortState[sortKey] = "desc";
 
       const items = Array.from(memberList.querySelectorAll(".member-item"));
 
@@ -200,23 +203,37 @@ document.addEventListener("DOMContentLoaded", function() {
         let aVal = a.dataset[sortKey];
         let bVal = b.dataset[sortKey];
 
-        if (sortKey === "jersey") {
-          aVal = parseInt(aVal) || 999;
-          bVal = parseInt(bVal) || 999;
+        // Type conversion
+        if (sortKey === "position") {
+          aVal = POSITION_ORDER[aVal] || 99;
+          bVal = POSITION_ORDER[bVal] || 99;
+        } else if (sortKey === "height" || sortKey === "jersey" || sortKey === "games") {
+          aVal = parseInt(aVal) || 0;
+          bVal = parseInt(bVal) || 0;
+        } else if (sortKey === "winrate") {
+          aVal = parseFloat(aVal) || 0.0;
+          bVal = parseFloat(bVal) || 0.0;
         }
 
-        if (sortState[sortKey] === "asc") {
-          return aVal > bVal ? 1 : -1;
-        } else {
-          return aVal < bVal ? 1 : -1;
-        }
+        if (aVal === bVal) return 0;
+
+        const modifier = sortState[sortKey] === "asc" ? 1 : -1;
+        return aVal > bVal ? modifier : -modifier;
       });
 
       items.forEach(item => memberList.appendChild(item));
 
       // Update button active state
-      sortButtons.forEach(b => b.classList.remove("btn-active"));
-      this.classList.add("btn-active");
+      sortButtons.forEach(b => {
+        b.classList.remove("btn-active", "btn-primary", "text-primary-content");
+        // Reset text
+        const text = b.textContent.trim().split(" ")[0]; // Remove existing arrow if any
+        b.innerHTML = text;
+      });
+
+      this.classList.add("btn-active", "btn-primary", "text-primary-content");
+      const arrow = sortState[sortKey] === "asc" ? "↑" : "↓";
+      this.innerHTML += ` <span class="ml-1">${arrow}</span>`;
     });
   });
 });

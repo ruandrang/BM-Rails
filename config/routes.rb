@@ -22,9 +22,14 @@ Rails.application.routes.draw do
 
     resources :matches do
       member do
-        patch :record_results
-        get :share
         get :scoreboard, to: "scoreboards#control"
+        get :share
+        patch :move_member # 멤버 이동
+        patch :record_results
+        patch :save_game_scores
+        patch :save_quarter_scores
+        patch :update_scores # 점수 일괄 수정
+        patch :shuffle_teams # 팀 랜덤 재배치
         get :scoreboard_display, to: "scoreboards#display"
       end
     end

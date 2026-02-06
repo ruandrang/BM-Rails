@@ -1,12 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
   <head>
-    <title>공유용 경기 결과</title>
+    <title><%= @club&.name || "농구 클럽 매니저" %> - 경기 결과</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    
+
   </head>
-  <body class="share-body">
+  <body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
     <%= yield %>
   </body>
 </html>

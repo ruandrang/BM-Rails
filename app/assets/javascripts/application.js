@@ -1,4 +1,19 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // Flash Messages Auto-dismiss
+  const flashMessages = document.getElementById("flash-messages");
+  if (flashMessages && flashMessages.children.length > 0) {
+    setTimeout(() => {
+      // Fade out
+      flashMessages.style.transition = "opacity 0.5s ease-out";
+      flashMessages.style.opacity = "0";
+
+      // Remove after fade out
+      setTimeout(() => {
+        flashMessages.remove();
+      }, 500);
+    }, 3000);
+  }
+
   document.querySelectorAll("[data-href]").forEach((card) => {
     card.addEventListener("click", (event) => {
       const target = event.target;
@@ -462,17 +477,22 @@ document.addEventListener("DOMContentLoaded", () => {
       setText("[data-home-fouls]", state.home_fouls || 0);
       setText("[data-away-fouls]", state.away_fouls || 0);
 
+      // 12쿼터 종료 시 NEXT QUARTER 버튼 숨기기 및 마지막 단계 텍스트 변경
       const nextQuarterBtn = scoreboardRoot.querySelector('[data-action="next-quarter"]');
       if (nextQuarterBtn) {
-        // Step 11 (Index 11) is the 12th game (Final game).
         if (state.rotation_step === 11) {
-          nextQuarterBtn.textContent = "END GAME";
-          nextQuarterBtn.classList.add("text-red-600", "font-bold");
+          nextQuarterBtn.textContent = "점수 확정";
+          nextQuarterBtn.classList.add("bg-red-600", "hover:bg-red-700"); // 스타일 강조 (선택사항)
+          nextQuarterBtn.style.display = '';
+        } else if (state.rotation_step >= 12) {
+          nextQuarterBtn.style.display = 'none';
         } else {
           nextQuarterBtn.textContent = "NEXT QUARTER";
-          nextQuarterBtn.classList.remove("text-red-600", "font-bold");
+          nextQuarterBtn.classList.remove("bg-red-600", "hover:bg-red-700");
+          nextQuarterBtn.style.display = '';
         }
       }
+
       const possHomeBtn = scoreboardRoot.querySelector('[data-possession-home-btn]');
       const possAwayBtn = scoreboardRoot.querySelector('[data-possession-away-btn]');
 
@@ -992,18 +1012,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 state.shot_running = state.running;
                 break;
               case "next-quarter":
-                // Check if we are at the end of the game
-                // Total steps = 12 (0 to 11). Step 11 is the last game.
-                if (state.rotation_step >= 11) {
-                  // Game Over logic
-                  // Maybe show an alert or just stop?
-                  // User asked to "Stop".
-                  // We can just return or toggle a game over state.
-                  // For now, let's just not advance.
-                  alert("GAME OVER! All quarters completed.");
-                  return;
-                }
-
                 // 1. Save current scores to matchup_scores
                 const currentPairIdx = currentMatchupIndex();
                 const [team1, team2] = currentMatchup();
@@ -1040,9 +1048,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 // SAVE Quarter History
                 // Calculate which quarter just finished (1-based)
-                // global rotation steps 0..11.
-                // Step 0 = Q1 of Pair 0. Step 1 = Q1 of Pair 1. Step 2 = Q1 of Pair 2.
-                // Step 3 = Q2 of Pair 0...
                 const finishedQuarter = Math.floor(state.rotation_step / 3) + 1;
 
                 if (!state.quarter_history[finishedPairIdx]) {
@@ -1053,7 +1058,54 @@ document.addEventListener("DOMContentLoaded", () => {
                   team2: state.teams[p2].score
                 };
 
+                // 서버로 쿼터 점수 전송
+                const saveQuarterScore = async () => {
+                  const matchId = scoreboardRoot.dataset.matchId;
+                  const clubId = window.location.pathname.match(/\/clubs\/(\d+)/)[1];
+                  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+                  try {
+                    await fetch(`/clubs/${clubId}/matches/${matchId}/save_quarter_scores`, {
+                      method: 'PATCH',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken
+                      },
+                      body: JSON.stringify({
+                        home_team_id: teams[p1].id,
+                        away_team_id: teams[p2].id,
+                        quarter: finishedQuarter,
+                        home_score: state.teams[p1].score,
+                        away_score: state.teams[p2].score
+                      })
+                    });
+
+                    if (state.rotation_step === 11) {
+                      // alert("모든 경기 점수가 저장되었습니다.");
+                      // window.location.reload(); 
+                      // 점수 확정 후 자동 리로드를 하지 않고, 사용자가 하단의 '경기 종료' 버튼을 누를 수 있도록 대기합니다.
+                      // 이미 render()를 막아두었으므로 화면 점수가 0으로 초기화되는 문제는 발생하지 않습니다.
+                    }
+                  } catch (error) {
+                    console.error('쿼터 점수 저장 중 오류:', error);
+                  }
+                };
+
+                saveQuarterScore();
+
                 // ADVANCE:
+                // 마지막 단계(11)였다면 12로 증가시키지 말고 멈춤 (화면 초기화 방지)
+                if (state.rotation_step === 11) {
+                  const nextQuarterBtn = scoreboardRoot.querySelector('[data-action="next-quarter"]');
+                  if (nextQuarterBtn) {
+                    nextQuarterBtn.textContent = "저장 완료";
+                    nextQuarterBtn.disabled = true;
+                    nextQuarterBtn.classList.add("opacity-50", "cursor-not-allowed");
+                  }
+                  // state.rotation_step을 증가시키지 않음 -> render() 호출 안 함 -> 점수 유지됨
+                  return;
+                }
+
                 state.rotation_step += 1;
 
                 // LOAD:
@@ -1138,6 +1190,54 @@ document.addEventListener("DOMContentLoaded", () => {
                 break;
               case "possession-away":
                 state.possession = 'away';
+                break;
+              case "finish-game":
+                // 경기 종료 - 현재 점수를 서버로 전송
+                const saveGameScore = async () => {
+                  const [home, away] = currentMatchup();
+                  const pairs = matchupPairs();
+                  const currentPairIdx = state.matchup_index % pairs.length;
+                  const [homeIdx, awayIdx] = pairs[currentPairIdx];
+
+                  // 현재 매치 ID
+                  const matchId = scoreboardRoot.dataset.matchId;
+
+                  // teams 정보를 기반으로 게임 찾기 (첫 번째 게임 사용)
+                  // 실제로는 home_team과 away_team을 매칭해야 하지만, 
+                  // 2팀 경기인 경우 게임이 하나뿐이므로 단순화
+                  const clubId = window.location.pathname.match(/\/clubs\/(\d+)/)[1];
+
+                  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+                  try {
+                    const response = await fetch(`/clubs/${clubId}/matches/${matchId}/save_game_scores`, {
+                      method: 'PATCH',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken
+                      },
+                      body: JSON.stringify({
+                        home_score: home.score,
+                        away_score: away.score
+                      })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                      alert(`경기 종료!\n최종 점수: ${home.label} ${home.score} : ${away.score} ${away.label}\n결과: ${data.result}`);
+                    } else {
+                      alert('점수 저장 실패: ' + (data.error || '알 수 없는 오류'));
+                    }
+                  } catch (error) {
+                    console.error('점수 저장 중 오류:', error);
+                    alert('점수 저장 중 오류가 발생했습니다.');
+                  }
+                };
+
+                if (confirm('경기를 종료하고 현재 점수를 저장하시겠습니까?')) {
+                  saveGameScore();
+                }
                 break;
               case "toggle-shortcuts":
                 const panel = document.querySelector("[data-shortcuts-panel]");
@@ -1308,3 +1408,111 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 });
+
+// ==========================================
+// 팀 멤버 드래그 앤 드롭 (SortableJS)
+// ==========================================
+const initDragAndDrop = () => {
+  console.log("initDragAndDrop called");
+
+  // SortableJS가 로드되었는지 확인
+  if (typeof Sortable === 'undefined') {
+    console.log("Sortable is undefined, retrying in 500ms...");
+    // 혹시 CDN 로드가 늦어질 수 있으므로 0.5초 뒤 한 번 더 시도
+    setTimeout(() => {
+      if (typeof Sortable !== 'undefined') {
+        console.log("Sortable loaded on retry");
+        initDragAndDrop();
+      } else {
+        console.error("Sortable failed to load");
+      }
+    }, 500);
+    return;
+  }
+
+  const dragContainers = document.querySelectorAll('[data-team-id]');
+  console.log(`Found ${dragContainers.length} drag containers`);
+
+  if (dragContainers.length === 0) return;
+
+  // 이미 Sortable이 적용된 경우 중복 적용 방지 (Sortable 객체가 expando 속성으로 저장되지만 명시적으로 체크)
+  // 간단히는 기존 인스턴스 파괴 후 재생성하거나, 클래스로 마킹
+  dragContainers.forEach(container => {
+    if (container.classList.contains('sortable-initialized')) {
+      console.log("Container already initialized");
+      return;
+    }
+
+    console.log("Initializing Sortable for container:", container);
+    new Sortable(container, {
+      group: 'shared', // 팀 간 이동 허용
+      animation: 150,
+      cursor: 'move',
+      delay: 0,
+      touchStartThreshold: 0,
+      onEnd: async function (evt) {
+        console.log("Drag ended", evt);
+        const { item, to, from } = evt;
+
+        // 이동하지 않았거나 같은 팀 내 이동인 경우 무시
+        if (to === from) return;
+
+        const memberId = item.dataset.id;
+        const targetTeamId = to.dataset.teamId;
+
+        console.log(`Moving member ${memberId} to team ${targetTeamId}`);
+
+        // 매치 ID 찾기
+        const matchContainer = document.querySelector('[data-match-drag-match-id-value]');
+        const matchId = matchContainer ? matchContainer.dataset.matchDragMatchIdValue : null;
+
+        if (!matchId) {
+          console.error("Match ID not found");
+          alert("오류: Match ID를 찾을 수 없습니다.");
+          return;
+        }
+
+        const clubId = window.location.pathname.match(/\/clubs\/(\d+)/)[1];
+        const url = `/clubs/${clubId}/matches/${matchId}/move_member`;
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+        try {
+          const response = await fetch(url, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': csrfToken
+            },
+            body: JSON.stringify({
+              member_id: memberId,
+              target_team_id: targetTeamId
+            })
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || `Server Error: ${response.status}`);
+          }
+
+          if (data.success) {
+            console.log("Member moved successfully");
+            // 통계 갱신을 위해 리로드
+            window.location.reload();
+          } else {
+            throw new Error(data.error || "Unknown error");
+          }
+        } catch (error) {
+          console.error("Move failed:", error);
+          alert(`멤버 이동 실패: ${error.message}\n페이지를 새로고침합니다.`);
+          window.location.reload();
+        }
+      }
+    });
+
+    container.classList.add('sortable-initialized');
+  });
+};
+
+document.addEventListener("turbo:load", initDragAndDrop);
+document.addEventListener("DOMContentLoaded", initDragAndDrop);
