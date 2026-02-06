@@ -1,5 +1,6 @@
 <%# External Sports Scoreboard Display %>
-<div class="w-full h-screen flex flex-col bg-[#0a0a0a] overflow-hidden select-none relative"
+<div id="scoreboard-root"
+     class="w-full h-screen flex flex-col bg-[#0a0a0a] overflow-hidden select-none relative"
      data-scoreboard-root 
      data-scoreboard-role="display"
      data-match-id="<%= @match.id %>"
@@ -41,11 +42,11 @@
       <div class="px-6 py-2 bg-[#1a1a1a] border border-[#333] rounded flex items-center gap-3">
         <span class="text-gray-400 text-xs tracking-wider uppercase">FOUL</span>
         <div class="flex gap-2" data-foul-indicators-left>
-          <div class="w-4 h-4 rounded-full bg-[#1a1a1a] border-2 border-red-600" data-foul-circle="0"></div>
-          <div class="w-4 h-4 rounded-full bg-[#1a1a1a] border-2 border-red-600" data-foul-circle="1"></div>
-          <div class="w-4 h-4 rounded-full bg-[#1a1a1a] border-2 border-red-600" data-foul-circle="2"></div>
-          <div class="w-4 h-4 rounded-full bg-[#1a1a1a] border-2 border-red-600" data-foul-circle="3"></div>
-          <div class="w-4 h-4 rounded-full bg-[#1a1a1a] border-2 border-red-600" data-foul-circle="4"></div>
+          <div class="w-4 h-4 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="0"></div>
+          <div class="w-4 h-4 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="1"></div>
+          <div class="w-4 h-4 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="2"></div>
+          <div class="w-4 h-4 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="3"></div>
+          <div class="w-4 h-4 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="4"></div>
         </div>
       </div>
     </div>
@@ -84,11 +85,11 @@
       <div class="px-6 py-2 bg-[#1a1a1a] border border-[#333] rounded flex items-center gap-3">
         <span class="text-gray-400 text-xs tracking-wider uppercase">FOUL</span>
         <div class="flex gap-2" data-foul-indicators-right>
-          <div class="w-4 h-4 rounded-full bg-[#1a1a1a] border-2 border-red-600" data-foul-circle="0"></div>
-          <div class="w-4 h-4 rounded-full bg-[#1a1a1a] border-2 border-red-600" data-foul-circle="1"></div>
-          <div class="w-4 h-4 rounded-full bg-[#1a1a1a] border-2 border-red-600" data-foul-circle="2"></div>
-          <div class="w-4 h-4 rounded-full bg-[#1a1a1a] border-2 border-red-600" data-foul-circle="3"></div>
-          <div class="w-4 h-4 rounded-full bg-[#1a1a1a] border-2 border-red-600" data-foul-circle="4"></div>
+          <div class="w-4 h-4 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="0"></div>
+          <div class="w-4 h-4 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="1"></div>
+          <div class="w-4 h-4 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="2"></div>
+          <div class="w-4 h-4 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="3"></div>
+          <div class="w-4 h-4 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="4"></div>
         </div>
       </div>
     </div>

@@ -91,7 +91,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const scoreboardRoot = document.querySelector("[data-scoreboard-root]");
+
   if (scoreboardRoot) {
+
     const role = scoreboardRoot.dataset.scoreboardRole;
     const matchId = scoreboardRoot.dataset.matchId;
     const teams = JSON.parse(scoreboardRoot.dataset.teams || "[]");
@@ -383,18 +385,14 @@ document.addEventListener("DOMContentLoaded", () => {
       // Fouls (new display) - Fill circles based on count
       const updateFoulCircles = (containerSelector, foulCount) => {
         const container = scoreboardRoot.querySelector(containerSelector);
-        console.log('[Foul Debug]', containerSelector, 'count:', foulCount, 'container:', container);
         if (!container) return;
 
         const circles = container.querySelectorAll('[data-foul-circle]');
-        console.log('[Foul Debug] Circles found:', circles.length);
         circles.forEach((circle, index) => {
           if (index < foulCount) {
             circle.style.backgroundColor = '#dc2626'; // red-600
-            console.log('[Foul Debug] Filling circle', index, 'red');
           } else {
             circle.style.backgroundColor = '#1a1a1a'; // dark/empty
-            console.log('[Foul Debug] Emptying circle', index);
           }
         });
       };
