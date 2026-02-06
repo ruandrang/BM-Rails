@@ -395,6 +395,19 @@ document.addEventListener("DOMContentLoaded", () => {
             circle.style.backgroundColor = '#1a1a1a'; // dark/empty
           }
         });
+
+        // Show/hide TEAM FOUL indicator based on foul count
+        const isLeft = containerSelector.includes('left');
+        const indicatorSelector = isLeft ? '[data-left-team-foul-indicator]' : '[data-right-team-foul-indicator]';
+        const indicator = scoreboardRoot.querySelector(indicatorSelector);
+
+        if (indicator) {
+          if (foulCount >= 5) {
+            indicator.classList.remove('hidden');
+          } else {
+            indicator.classList.add('hidden');
+          }
+        }
       };
 
       updateFoulCircles('[data-foul-indicators-left]', state.home_fouls || 0);
