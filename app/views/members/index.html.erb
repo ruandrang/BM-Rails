@@ -66,32 +66,22 @@
 
   <!-- 멤버 목록 -->
   <% if @members.any? %>
-    <!-- 정렬 및 안내 -->
-    <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
-      <div class="flex items-center gap-2 text-sm text-base-content/50">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-        카드 드래그로 순서 변경 (저장됨)
-      </div>
-
-      <!-- 정렬 버튼들 -->
-      <div class="flex gap-2">
-        <button type="button" class="btn btn-ghost btn-xs gap-1" data-sort="name">이름</button>
-        <button type="button" class="btn btn-ghost btn-xs gap-1" data-sort="position">포지션</button>
-        <button type="button" class="btn btn-ghost btn-xs gap-1" data-sort="height">키</button>
-        <button type="button" class="btn btn-ghost btn-xs gap-1" data-sort="winrate">승률</button>
-        <button type="button" class="btn btn-ghost btn-xs gap-1" data-sort="games">경기수</button>
-        <button type="button" class="btn btn-ghost btn-xs gap-1" data-sort="jersey">등번호</button>
-      </div>
+    <!-- 정렬 컨트롤 (새 경기 페이지와 통일) -->
+    <div class="flex flex-wrap items-center gap-2 mb-4 p-2 bg-base-200 rounded-lg justify-end">
+      <span class="text-xs font-bold opacity-50 px-2 mr-auto">정렬:</span>
+      <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="name">이름</button>
+      <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="position">포지션</button>
+      <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="height">키</button>
+      <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="winrate">승률</button>
+      <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="games">경기수</button>
+      <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="jersey">등번호</button>
     </div>
 
-    <div class="grid grid-cols-1 md://grid-cols-2 lg:grid-cols-3 gap-6" id="member-list" data-sortable-list data-reorder-url="<%= reorder_club_members_path(@club) %>">
+    <div class="grid grid-cols-1 md://grid-cols-2 lg:grid-cols-3 gap-6" id="member-list">
       <% @members.each do |member| %>
         <% stats = @member_stats[member.id] || { games: 0, win_rate: 0.0 } %>
-        <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-move member-item"
-             draggable="true"
-             data-member-id="<%= member.id %>"
+        <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 member-item cursor-pointer relative group"
+             onclick="location.href='<%= edit_club_member_path(@club, member) %>'"
              data-name="<%= member.name %>"
              data-position="<%= member.position %>"
              data-jersey="<%= member.jersey_number || 999 %>"
@@ -99,7 +89,19 @@
              data-winrate="<%= stats[:win_rate] %>"
              data-games="<%= stats[:games] %>">
           <div class="card-body p-5">
-            <div class="flex items-start justify-between">
+            <!-- 삭제 버튼 (우측 상단 절대 위치) -->
+            <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation();">
+              <%= button_to club_member_path(@club, member),
+                  method: :delete,
+                  form: { onsubmit: "return confirm('정말 삭제할까요?');" },
+                  class: "btn btn-ghost btn-xs btn-circle text-error" do %>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              <% end %>
+            </div>
+
+            <div class="flex items-start justify-between mb-4">
               <div>
                 <h3 class="card-title text-xl mb-2"><%= member.name %></h3>
                 <div class="flex items-center gap-2">
@@ -111,47 +113,30 @@
                   <% end %>
                 </div>
               </div>
-
-              <div class="dropdown dropdown-end">
-                <label tabindex="0" class="btn btn-ghost btn-xs btn-circle">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                  </svg>
-                </label>
-                <ul tabindex="0" class="dropdown-content z-[1] menu menu-sm p-2 shadow bg-base-100 rounded-box w-36 border border-base-200">
-                  <li><%= link_to "수정", edit_club_member_path(@club, member), class: "justify-start" %></li>
-                  <li>
-                    <%= button_to club_member_path(@club, member),
-                        method: :delete,
-                        class: "text-error justify-start w-full text-left",
-                        data: { turbo_confirm: "정말 삭제할까요?" } do %>
-                      삭제
-                    <% end %>
-                  </li>
-                </ul>
-              </div>
             </div>
 
-            <div class="mt-4 flex gap-4 text-sm text-base-content/60">
+            <div class="grid grid-cols-2 gap-y-2 gap-x-4 text-sm text-base-content/70">
               <% if member.age %>
                 <div class="flex flex-col">
                   <span class="text-[10px] uppercase font-bold opacity-50">Age</span>
-                  <span class="font-medium text-base-content"><%= member.age %>세</span>
+                  <span class="font-medium"><%= member.age %>세</span>
                 </div>
               <% end %>
               <% if member.height_cm %>
                 <div class="flex flex-col">
                   <span class="text-[10px] uppercase font-bold opacity-50">Height</span>
-                  <span class="font-medium text-base-content"><%= member.height_cm %>cm</span>
+                  <span class="font-medium"><%= member.height_cm %>cm</span>
                 </div>
               <% end %>
-              <!-- 승률 표시 -->
-              <div class="flex flex-col ml-auto text-right">
+              <div class="flex flex-col">
                 <span class="text-[10px] uppercase font-bold opacity-50">Win Rate</span>
-                <span class="font-medium text-base-content"><%= (stats[:win_rate] * 100).round(1) %>% <span class="text-xs opacity-50">(<%= stats[:games] %>G)</span></span>
+                <span class="font-medium <%= 'text-primary' if stats[:win_rate] >= 0.5 %>"><%= (stats[:win_rate] * 100).round(0) %>%</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-[10px] uppercase font-bold opacity-50">Games</span>
+                <span class="font-medium"><%= stats[:games] %>경기</span>
               </div>
             </div>
-            <!-- 경기수 별도 표시(요청사항 반영) - 사실 승률 옆에 이미 있지만, 카드 하단에 더 명확히 추가 -->
           </div>
         </div>
       <% end %>

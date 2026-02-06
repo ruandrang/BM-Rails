@@ -7,10 +7,12 @@ Rails.application.routes.draw do
   resources :scoreboards, only: [ :index ]
 
   resources :clubs do
-    member do
-      get :export_json
-      post :import_json
+    collection do
+      get :backup
+      get :export_all
+      post :import_all
     end
+
 
     resources :members do
       collection do

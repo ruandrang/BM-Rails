@@ -131,13 +131,14 @@
           </div>
           
           <!-- 정렬 컨트롤 -->
-          <div class="flex flex-wrap items-center gap-2 mb-4 p-2 bg-base-200 rounded-lg">
-            <span class="text-xs font-bold opacity-50 px-2">정렬:</span>
-            <button type="button" class="btn btn-ghost btn-xs gap-1" data-sort="name">이름</button>
-            <button type="button" class="btn btn-ghost btn-xs gap-1" data-sort="position">포지션</button>
-            <button type="button" class="btn btn-ghost btn-xs gap-1" data-sort="height">키</button>
-            <button type="button" class="btn btn-ghost btn-xs gap-1" data-sort="winrate">승률</button>
-            <button type="button" class="btn btn-ghost btn-xs gap-1" data-sort="games">경기수</button>
+          <div class="flex flex-wrap items-center gap-2 mb-4 p-2 bg-base-200 rounded-lg justify-end">
+            <span class="text-xs font-bold opacity-50 px-2 mr-auto">정렬:</span>
+            <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="name">이름</button>
+            <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="position">포지션</button>
+            <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="height">키</button>
+            <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="winrate">승률</button>
+            <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="games">경기수</button>
+            <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="jersey">등번호</button>
           </div>
 
           <% if @members.any? %>
@@ -148,6 +149,7 @@
                        data-member-id="<%= member.id %>"
                        data-name="<%= member.name %>"
                        data-position="<%= member.position %>"
+                       data-jersey="<%= member.jersey_number || 999 %>"
                        data-height="<%= member.height_cm || 0 %>"
                        data-winrate="<%= stats[:win_rate] %>"
                        data-games="<%= stats[:games] %>">
@@ -170,13 +172,16 @@
                         <% end %>
                       </div>
                       
-                      <!-- 승률 표시 -->
-                      <div class="mt-2 pt-2 border-t border-base-content/10 flex justify-between items-end">
+                      <!-- 승률 및 경기수 표시 -->
+                      <div class="mt-2 pt-2 border-t border-base-content/10 flex justify-between items-end text-xs">
                         <div class="flex flex-col">
                           <span class="text-[10px] opacity-60">승률</span>
-                          <span class="text-xs font-bold font-mono"><%= (stats[:win_rate] * 100).round(1) %>%</span>
+                          <span class="font-bold font-mono <%= 'text-primary' if stats[:win_rate] >= 0.5 %>"><%= (stats[:win_rate] * 100).round(0) %>%</span>
                         </div>
-                        <div class="text-[10px] opacity-60"><%= stats[:games] %>G</div>
+                        <div class="flex flex-col text-right">
+                          <span class="text-[10px] opacity-60">경기수</span>
+                          <span class="font-bold"><%= stats[:games] %></span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -303,7 +308,7 @@ function setupSorting() {
         if (sortKey === "position") {
           aVal = POSITION_ORDER[aVal] || 99;
           bVal = POSITION_ORDER[bVal] || 99;
-        } else if (sortKey === "height" || sortKey === "games" || sortKey === "member-id") {
+        } else if (sortKey === "height" || sortKey === "games" || sortKey === "member-id" || sortKey === "jersey") {
           aVal = parseInt(aVal) || 0;
           bVal = parseInt(bVal) || 0;
         } else if (sortKey === "winrate") {

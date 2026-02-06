@@ -1,5 +1,5 @@
 class ClubsController < ApplicationController
-  before_action :set_club, only: [ :show, :edit, :update, :destroy, :export_json, :import_json ]
+  before_action :set_club, only: [ :show, :edit, :update, :destroy ]
 
   def index
     @clubs = current_user.clubs.includes(:members, :matches).order(created_at: :desc)
@@ -45,33 +45,37 @@ class ClubsController < ApplicationController
     redirect_to clubs_path, notice: "클럽이 삭제되었습니다."
   end
 
-  def export_json
-    payload = ClubExporter.new(@club).call
-    filename = "club-#{@club.id}-#{Time.zone.now.strftime('%Y%m%d')}.json"
+  def backup
+    # View rendering only (Global backup)
+  end
+
+  def export_all
+    payload = UserExporter.new(current_user).call
+    filename = "basketball-manager-backup-#{Time.zone.now.strftime('%Y%m%d')}.json"
     send_data JSON.pretty_generate(payload), filename: filename, type: "application/json"
   end
 
-  MAX_IMPORT_SIZE = 5.megabytes
+  MAX_IMPORT_SIZE = 10.megabytes
 
-  def import_json
+  def import_all
     file = params[:file]
     if file.blank?
-      redirect_to @club, alert: "JSON 파일을 선택해주세요."
+      redirect_to backup_clubs_path, alert: "JSON 파일을 선택해주세요."
       return
     end
 
     if file.size > MAX_IMPORT_SIZE
-      redirect_to @club, alert: "파일 크기가 너무 큽니다. (최대 5MB)"
+      redirect_to backup_clubs_path, alert: "파일 크기가 너무 큽니다. (최대 10MB)"
       return
     end
 
     payload = JSON.parse(file.read)
-    ClubImporter.new(@club, payload).call
-    redirect_to @club, notice: "JSON 데이터를 복원했습니다."
+    UserImporter.new(current_user, payload).call
+    redirect_to clubs_path, notice: "모든 데이터가 복원되었습니다."
   rescue JSON::ParserError
-    redirect_to @club, alert: "JSON 파일 형식이 올바르지 않습니다."
+    redirect_to backup_clubs_path, alert: "JSON 파일 형식이 올바르지 않습니다."
   rescue StandardError => e
-    redirect_to @club, alert: "복원 중 오류가 발생했습니다: #{e.message}"
+    redirect_to backup_clubs_path, alert: "복원 중 오류가 발생했습니다: #{e.message}"
   end
 
   private

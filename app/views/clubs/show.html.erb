@@ -41,7 +41,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
           <% end %>
-          <%= button_to club_path(@club), method: :delete, data: { turbo_confirm: "정말 이 클럽을 삭제하시겠습니까?" }, class: "btn btn-ghost btn-sm text-error" do %>
+          <%= button_to club_path(@club), method: :delete, form: { onsubmit: "return confirm('정말 이 클럽을 삭제하시겠습니까?');" }, class: "btn btn-ghost btn-sm text-error" do %>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
@@ -52,7 +52,7 @@
   </div>
 
   <!-- 빠른 액션 카드들 -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
     <!-- 멤버 관리 -->
     <%= link_to club_members_path(@club), class: "card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1" do %>
       <div class="card-body items-center text-center">
@@ -82,6 +82,16 @@
         <div class="badge badge-accent mt-2">분석</div>
       </div>
     <% end %>
+
+    <!-- 궁합 보기 -->
+    <a href="#" class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 group">
+      <div class="card-body items-center text-center">
+        <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">❤️</div>
+        <h2 class="card-title">궁합 보기</h2>
+        <p class="text-base-content/60 text-sm">멤버간 케미 분석</p>
+        <div class="badge badge-error badge-outline mt-2">준비중</div>
+      </div>
+    </a>
 
     <!-- 새 경기 -->
     <%= link_to new_club_match_path(@club), class: "card bg-primary text-primary-content shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1" do %>
@@ -186,42 +196,5 @@
     </div>
   </div>
 
-  <!-- 데이터 백업 섹션 -->
-  <div class="card bg-base-100 shadow-xl border border-base-200/50">
-    <div class="card-body">
-      <h2 class="card-title gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-        </svg>
-        데이터 백업
-      </h2>
-      <p class="text-base-content/60">클럽 데이터를 JSON으로 백업하거나 복원할 수 있습니다.</p>
 
-      <div class="flex flex-wrap items-center gap-4 mt-4">
-        <%= link_to export_json_club_path(@club), class: "btn btn-outline btn-primary gap-2" do %>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-          </svg>
-          JSON 내보내기
-        <% end %>
-
-        <%= form_with url: import_json_club_path(@club), local: true, multipart: true, class: "flex items-center gap-2" do %>
-          <input type="file" name="file" accept="application/json" class="file-input file-input-bordered file-input-sm w-full max-w-xs" />
-          <button type="submit" class="btn btn-outline btn-sm gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-            </svg>
-            JSON 가져오기
-          </button>
-        <% end %>
-      </div>
-
-      <div class="alert alert-warning mt-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
-        <span>가져오기를 실행하면 현재 클럽 데이터가 덮어써집니다.</span>
-      </div>
-    </div>
-  </div>
 </div>

@@ -1,0 +1,79 @@
+<% content_for :title, "전체 데이터 백업 - 농구 클럽 매니저" %>
+
+<div class="max-w-4xl mx-auto">
+  <!-- 뒤로가기 -->
+  <div class="mb-4">
+    <%= link_to clubs_path, class: "btn btn-ghost btn-sm gap-2" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      뒤로가기
+    <% end %>
+  </div>
+
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold mb-2">전체 데이터 백업</h1>
+    <p class="text-base-content/60">계정 내 모든 클럽 데이터를 JSON 파일로 안전하게 보관하거나 복원하세요.</p>
+  </div>
+
+  <!-- 데이터 백업 섹션 -->
+  <div class="card bg-base-100 shadow-xl border border-base-200/50">
+    <div class="card-body">
+      <h2 class="card-title gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+        </svg>
+        백업 및 복원
+      </h2>
+      <p class="text-base-content/60">모든 클럽, 멤버, 경기 기록이 포함됩니다.</p>
+
+      <div class="flex flex-wrap items-center gap-4 mt-6">
+        <%= link_to export_all_clubs_path, class: "btn btn-outline btn-primary gap-2" do %>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          전체 데이터 내보내기 (백업)
+        <% end %>
+
+        <div class="divider lg:divider-horizontal">OR</div>
+
+        <%= form_with url: import_all_clubs_path, local: true, multipart: true, class: "flex items-center gap-2", html: { onsubmit: "showLoading()" } do %>
+          <input type="file" name="file" accept="application/json" class="file-input file-input-bordered file-input-sm w-full max-w-xs" />
+          <button type="submit" class="btn btn-outline btn-sm gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            전체 데이터 가져오기 (복원)
+          </button>
+        <% end %>
+      </div>
+
+      <div class="alert alert-warning mt-8">
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <div>
+          <h3 class="font-bold">주의사항</h3>
+          <div class="text-xs">가져오기(복원)를 실행하면 <strong>현재 계정의 모든 데이터(클럽, 멤버, 경기)가 완전히 삭제</strong>되고 백업 파일의 내용으로 교체됩니다. <br/>이 작업은 절대 되돌릴 수 없습니다.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 로딩 오버레이 -->
+  <div id="loading-overlay" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden backdrop-blur-sm">
+    <div class="card bg-base-100 shadow-xl p-8 text-center min-w-[300px]">
+      <div class="loading loading-spinner loading-lg text-primary mx-auto mb-4"></div>
+      <h3 class="text-xl font-bold mb-2">데이터 복원 중...</h3>
+      <p class="text-base-content/60">잠시만 기다려주세요.<br>데이터 양에 따라 시간이 걸릴 수 있습니다.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showLoading() {
+    const fileInput = document.querySelector('input[name="file"]');
+    if (fileInput && fileInput.files.length > 0) {
+      document.getElementById('loading-overlay').classList.remove('hidden');
+    }
+  }
+</script>
