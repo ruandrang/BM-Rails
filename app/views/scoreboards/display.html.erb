@@ -172,8 +172,9 @@
       try {
         const teams = JSON.parse(teamsData);
         if (teams.length >= 2) {
-          const teamLeft = teams[0];
-          const teamRight = teams[1];
+          // For display page, swap team colors (teams[1] -> left, teams[0] -> right)
+          const teamLeft = teams[1];  // Away team on left
+          const teamRight = teams[0]; // Home team on right
           
           const badgeLeft = document.querySelector('.team-badge-left');
           const badgeRight = document.querySelector('.team-badge-right');
