@@ -17,7 +17,6 @@
     </div>
   <% end %>
 
-  <!-- 클럽 이름 -->
   <div class="form-control w-full">
     <%= form.label :name, "클럽 이름", class: "label" %>
     <%= form.text_field :name,
@@ -27,6 +26,33 @@
     <label class="label">
       <span class="label-text-alt text-base-content/60">기억하기 쉬운 이름을 입력하세요</span>
     </label>
+  </div>
+
+  <!-- 정기 운동 요일 -->
+  <div class="form-control w-full">
+    <%= form.label :meeting_days, "정기 운동 요일", class: "label" %>
+    <div class="flex flex-wrap gap-2">
+      <% Club::MEETING_DAYS.each do |day| %>
+        <label class="cursor-pointer">
+          <%= check_box_tag "club[meeting_days][]", day, @club.meeting_days&.include?(day), class: "peer hidden" %>
+          <span class="btn btn-sm w-12 bg-base-100 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary peer-checked:hover:bg-primary/70">
+            <%= day %>
+          </span>
+        </label>
+      <% end %>
+    </div>
+    <label class="label">
+      <span class="label-text-alt text-base-content/60">버튼을 눌러 운동하는 요일을 모두 선택하세요</span>
+    </label>
+  </div>
+
+  <!-- 클럽 소개 -->
+  <div class="form-control w-full">
+    <%= form.label :description, "클럽 소개", class: "label" %>
+    <%= form.text_area :description, 
+        rows: 3, 
+        placeholder: "클럽에 대한 간단한 소개를 입력하세요",
+        class: "textarea textarea-bordered w-full" %>
   </div>
 
   <!-- 클럽 아이콘 선택 -->

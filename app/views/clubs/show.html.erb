@@ -33,7 +33,22 @@
               </svg>
               경기 <%= @matches_count %>회
             </span>
+            <% if @club.meeting_days.present? %>
+              <span class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <% if @club.meeting_days.respond_to?(:join) %>
+                  매주 <%= @club.meeting_days.join(", ") %>
+                <% else %>
+                  매주 <%= @club.meeting_days %>
+                <% end %>
+              </span>
+            <% end %>
           </div>
+          <% if @club.description.present? %>
+            <div class="mt-4 text-primary-content/90 text-sm md:text-base whitespace-pre-line bg-white/10 p-3 rounded-lg"><%= @club.description %></div>
+          <% end %>
         </div>
         <div class="flex gap-2">
           <%= link_to edit_club_path(@club), class: "btn btn-ghost btn-sm" do %>

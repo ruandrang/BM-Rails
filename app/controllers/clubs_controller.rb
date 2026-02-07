@@ -97,7 +97,7 @@ class ClubsController < ApplicationController
   end
 
   def club_params
-    params.require(:club).permit(:name, :icon)
+    params.require(:club).permit(:name, :icon, :description, meeting_days: [])
   end
 
   def import_result_message(stats)

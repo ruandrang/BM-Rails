@@ -9,7 +9,28 @@ class MatchesController < ApplicationController
   end
 
   def new
-    @match = @club.matches.new(played_on: Date.current, teams_count: 3)
+    default_date = Date.current
+
+    if @club.meeting_days.present? && @club.meeting_days.is_a?(Array)
+      # 저장된 한글 요일을 영어 요일 인덱스로 변환 (월:1 ~ 일:0/7)
+      target_wdays = @club.meeting_days.map { |d| Club::DAY_MAPPING[d] }.compact.map { |en| Date::DAYNAMES.index(en) }
+
+      if target_wdays.any?
+        today_wday = default_date.wday
+
+        # 각 요일별로 오늘로부터 며칠 뒤인지 계산 (0이면 오늘)
+        # (target - current) % 7
+        days_ahead_list = target_wdays.map do |target|
+          (target - today_wday) % 7
+        end
+
+        # 가장 가까운 날짜(최소값) 선택
+        min_days = days_ahead_list.min
+        default_date += min_days.days
+      end
+    end
+
+    @match = @club.matches.new(played_on: default_date, teams_count: 3)
     @members = @club.members.order(:sort_order, :id)
 
     # 승률 계산 (뷰에서 정렬용)
