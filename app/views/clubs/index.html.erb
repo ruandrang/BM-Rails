@@ -63,8 +63,8 @@
   <% if @clubs.any? %>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <% @clubs.each do |club| %>
-        <%= link_to club_path(club), class: "card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" do %>
-          <div class="card-body">
+        <%= link_to club_path(club), class: "card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer h-full" do %>
+          <div class="card-body flex flex-col h-full">
             <!-- 클럽 아이콘 & 이름 -->
             <div class="flex items-center gap-4 mb-4">
               <div class="text-5xl">
@@ -104,7 +104,7 @@
             </div>
 
             <!-- 액션 버튼 영역 -->
-            <div class="card-actions justify-end mt-4">
+            <div class="card-actions justify-end mt-auto">
               <div class="badge badge-primary">클릭하여 관리</div>
             </div>
           </div>

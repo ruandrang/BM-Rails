@@ -34,7 +34,7 @@
 
           <div class="form-control w-full col-span-1 md:col-span-2">
             <%= form.label :teams_count, "팀 수 선택", class: "label" %>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-10">
               <% [2, 3].each do |count| %>
                 <label class="cursor-pointer group">
                   <%= form.radio_button :teams_count, count, class: "hidden peer", required: true %>

@@ -18,28 +18,19 @@
       <p class="text-base-content/60"><%= @club.name %> 멤버별 경기 기록</p>
     </div>
 
-    <!-- 정렬 버튼 -->
-    <div class="join">
-      <%= link_to club_stats_path(@club, sort: "name"),
-          class: "btn join-item #{params[:sort] == 'name' || params[:sort].nil? ? 'btn-active' : ''}" do %>
-        이름순
-      <% end %>
-      <%= link_to club_stats_path(@club, sort: "games"),
-          class: "btn join-item #{params[:sort] == 'games' ? 'btn-active' : ''}" do %>
-        경기수순
-      <% end %>
-      <%= link_to club_stats_path(@club, sort: "win_rate"),
-          class: "btn join-item #{params[:sort] == 'win_rate' ? 'btn-active' : ''}" do %>
-        승률순
-      <% end %>
+    <!-- 정렬 버튼 (JS) -->
+    <div class="flex flex-wrap items-center gap-2 p-2 bg-base-200 rounded-lg">
+      <span class="text-xs font-bold opacity-50 px-2">정렬:</span>
+      <button type="button" class="btn btn-ghost btn-xs gap-1 w-20" data-sort="name">이름</button>
+      <button type="button" class="btn btn-ghost btn-xs gap-1 w-20" data-sort="position">포지션</button>
+      <button type="button" class="btn btn-ghost btn-xs gap-1 w-20" data-sort="games">경기수</button>
+      <button type="button" class="btn btn-ghost btn-xs gap-1 w-20" data-sort="winrate">승률</button>
     </div>
   </div>
 
   <% if @stats.any? %>
     <!-- 통계 요약 카드 -->
-    <% total_games = @stats.sum { |s| s[:games] } / 2 rescue 0 %>
     <% avg_win_rate = @stats.any? ? (@stats.sum { |s| s[:win_rate] } / @stats.size * 100).round(1) : 0 %>
-    <% top_player = @stats.max_by { |s| s[:win_rate] } %>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       <!-- 선수 현황 -->
@@ -72,8 +63,8 @@
         </div>
       </div>
 
-      <!-- MVP -->
-      <% if top_player %>
+      <!-- 월간 MVP -->
+      <% if @monthly_mvp %>
         <div class="card bg-neutral text-neutral-content shadow-xl border-l-4 border-accent">
           <div class="card-body p-6 flex-row items-center gap-4">
             <div class="p-3 bg-accent rounded-2xl">
@@ -82,11 +73,25 @@
               </svg>
             </div>
             <div>
-              <div class="text-sm font-bold text-accent uppercase tracking-widest">Season MVP</div>
-              <div class="text-2xl font-black truncate max-w-[150px]"><%= top_player[:member].name %></div>
+              <div class="text-sm font-bold text-accent uppercase tracking-widest"><%= @mvp_month %>월 MVP</div>
+              <div class="text-2xl font-black truncate max-w-[150px]"><%= @monthly_mvp[:member].name %></div>
             </div>
           </div>
         </div>
+      <% else %>
+         <div class="card bg-base-100 shadow-xl">
+           <div class="card-body p-6 flex-row items-center gap-4 opacity-50">
+             <div class="p-3 bg-base-200 rounded-2xl">
+               <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+               </svg>
+             </div>
+             <div>
+               <div class="text-sm font-bold uppercase tracking-widest"><%= @mvp_month %>월 MVP</div>
+               <div class="text-sm">데이터 없음</div>
+             </div>
+           </div>
+         </div>
       <% end %>
     </div>
 
@@ -97,8 +102,7 @@
           <table class="table w-full">
             <thead>
               <tr class="bg-base-200 border-b-2 border-base-300">
-                <th class="bg-transparent text-center py-5">RANK</th>
-                <th class="bg-transparent">PLAYER</th>
+                <th class="bg-transparent pl-6">PLAYER</th>
                 <th class="bg-transparent text-center">GAMES</th>
                 <th class="bg-transparent text-center text-success">W</th>
                 <th class="bg-transparent text-center opacity-50">D</th>
@@ -106,21 +110,15 @@
                 <th class="bg-transparent text-center">WIN RATE %</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-base-200">
-              <% @stats.each_with_index do |row, index| %>
-                <tr class="hover:bg-base-200/40 transition-colors">
-                  <td class="text-center font-black">
-                    <% if index == 0 && row[:win_rate] > 0 %>
-                      <div class="badge badge-lg bg-accent border-none text-black font-black">1ST</div>
-                    <% elsif index == 1 && row[:win_rate] > 0 %>
-                      <div class="badge badge-lg bg-base-300 border-none font-black">2ND</div>
-                    <% elsif index == 2 && row[:win_rate] > 0 %>
-                      <div class="badge badge-lg bg-orange-200 border-none font-black">3RD</div>
-                    <% else %>
-                      <span class="opacity-30"><%= index + 1 %></span>
-                    <% end %>
-                  </td>
-                  <td>
+            <tbody class="divide-y divide-base-200" id="stats-list">
+              <% @stats.each do |row| %>
+                <% win_rate = (row[:win_rate] * 100).round(1) %>
+                <tr class="hover:bg-base-200/40 transition-colors stats-row"
+                    data-name="<%= row[:member].name %>"
+                    data-position="<%= row[:member].position %>"
+                    data-games="<%= row[:games] %>"
+                    data-winrate="<%= win_rate %>">
+                  <td class="pl-6">
                     <div class="flex items-center gap-4">
                       <div>
                         <div class="font-black text-lg"><%= row[:member].name %></div>
@@ -140,7 +138,6 @@
                   <td class="text-center text-base-content/40 font-bold"><%= row[:draws] %></td>
                   <td class="text-center text-error font-black text-xl"><%= row[:losses] %></td>
                   <td class="text-center min-w-[150px]">
-                    <% win_rate = (row[:win_rate] * 100).round(1) %>
                     <div class="flex flex-col gap-1 px-4">
                       <div class="flex justify-between items-end">
                         <span class="text-xs font-black italic"><%= win_rate %>%</span>
@@ -176,3 +173,64 @@
     </div>
   <% end %>
 </div>
+
+<script>
+// 포지션 정렬 순서
+const POSITION_ORDER = { "PG": 1, "SG": 2, "SF": 3, "PF": 4, "C": 5 };
+
+document.addEventListener("DOMContentLoaded", function() {
+  const sortButtons = document.querySelectorAll("[data-sort]");
+  const statsList = document.getElementById("stats-list");
+
+  if (!statsList) return;
+
+  const sortState = {};
+
+  sortButtons.forEach(btn => {
+    btn.addEventListener("click", function() {
+      const sortKey = this.dataset.sort;
+      // Toggle state
+      if (sortState[sortKey] === "desc") sortState[sortKey] = "asc";
+      else sortState[sortKey] = "desc";
+
+      const rows = Array.from(statsList.querySelectorAll(".stats-row"));
+
+      rows.sort((a, b) => {
+        let aVal = a.dataset[sortKey];
+        let bVal = b.dataset[sortKey];
+
+        // Type conversion
+        if (sortKey === "position") {
+          aVal = POSITION_ORDER[aVal] || 99;
+          bVal = POSITION_ORDER[bVal] || 99;
+        } else if (sortKey === "games") {
+          aVal = parseInt(aVal) || 0;
+          bVal = parseInt(bVal) || 0;
+        } else if (sortKey === "winrate") {
+          aVal = parseFloat(aVal) || 0.0;
+          bVal = parseFloat(bVal) || 0.0;
+        }
+
+        if (aVal === bVal) return 0;
+
+        const modifier = sortState[sortKey] === "asc" ? 1 : -1;
+        return aVal > bVal ? modifier : -modifier;
+      });
+
+      rows.forEach(row => statsList.appendChild(row));
+
+      // Update button active state
+      sortButtons.forEach(b => {
+        b.classList.remove("btn-active", "btn-primary", "text-primary-content");
+        // Reset text (arrow removal)
+        const text = b.textContent.trim().split(" ")[0];
+        b.innerHTML = text;
+      });
+
+      this.classList.add("btn-active", "btn-primary", "text-primary-content");
+      const arrow = sortState[sortKey] === "asc" ? "↑" : "↓";
+      this.innerHTML += ` <span class="ml-1">${arrow}</span>`;
+    });
+  });
+});
+</script>

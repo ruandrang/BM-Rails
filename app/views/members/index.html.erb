@@ -77,7 +77,7 @@
       <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="jersey">등번호</button>
     </div>
 
-    <div class="grid grid-cols-1 md://grid-cols-2 lg:grid-cols-3 gap-6" id="member-list">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="member-list">
       <% @members.each do |member| %>
         <% stats = @member_stats[member.id] || { games: 0, win_rate: 0.0 } %>
         <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 member-item cursor-pointer relative group"

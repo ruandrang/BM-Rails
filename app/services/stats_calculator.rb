@@ -3,7 +3,7 @@ class StatsCalculator
     @club = club
   end
 
-  def member_stats
+  def member_stats(period: nil)
     members = @club.members.to_a
     stats = Hash.new { |hash, key| hash[key] = { games: 0, wins: 0, draws: 0, losses: 0 } }
 
@@ -11,8 +11,15 @@ class StatsCalculator
 
     team_members.each do |team_member|
       team = team_member.team
-      team.match.games.each do |game|
-        next unless [game.home_team_id, game.away_team_id].include?(team.id)
+      match = team.match
+
+      # 기간 필터링
+      if period.present?
+        next unless period.cover?(match.played_on)
+      end
+
+      match.games.each do |game|
+        next unless [ game.home_team_id, game.away_team_id ].include?(team.id)
         next if game.result == "pending"
 
         stats[team_member.member_id][:games] += 1

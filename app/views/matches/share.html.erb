@@ -1,4 +1,4 @@
-<div class="max-w-5xl w-full">
+<div class="max-w-7xl w-full">
   <!-- Header -->
   <div class="flex flex-col items-start justify-start mb-12">
     <h1 class="font-black text-gray-900 text-5xl leading-tight mb-3 tracking-tight"><%= @club.name %></h1>
@@ -105,63 +105,119 @@
     </div>
 
     <!-- Match Logs (Quarters) -->
-    <div class="bg-gray-50 p-6">
-      <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">MATCH LOGS</h3>
-      <div class="space-y-2">
-        <% @games.each_with_index do |game, idx| %>
-          <div class="bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded">GAME <%= idx + 1 %></span>
+    <div class="bg-slate-900 p-6 text-white">
+      <h3 class="text-xs font-bold text-white/40 uppercase tracking-widest mb-6">GAME SCOREBOARD</h3>
+      <div class="flex flex-col gap-6">
+        <% @games.each_with_index do |game, index| %>
+          <div class="group bg-black/40 rounded-xl p-5 ring-1 ring-white/10">
+            <!-- Game Header -->
+            <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-2">
+              <div class="bg-primary/20 text-primary text-[10px] font-black px-2 py-1 rounded tracking-widest">
+                GAME <%= index + 1 %>
+              </div>
+              <div class="text-[10px] font-bold text-white/20 uppercase tracking-widest">
+                Match Result
+              </div>
             </div>
-            
-            <table class="w-full text-center text-sm">
-              <thead>
-                <tr class="text-gray-400 text-xs border-b border-gray-100">
-                  <th class="pb-1 text-left">Q</th>
-                  <th class="pb-1 w-8">1</th>
-                  <th class="pb-1 w-8">2</th>
-                  <th class="pb-1 w-8">3</th>
-                  <th class="pb-1 w-8">4</th>
-                  <th class="pb-1 w-10 font-bold text-gray-600">Total</th>
-                </tr>
-              </thead>
-              <tbody class="font-mono">
-                <!-- Home Team Row -->
-                <tr class="h-8">
-                  <td class="text-left font-bold text-gray-900 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full" style="background-color: <%= game.home_team.color %>"></span>
-                    <%= game.home_team.label %>
-                  </td>
-                  <% 
-                    q_scores = game.quarter_scores || {} 
-                    total_h = 0
-                    (1..4).each do |q| 
-                      s = (q_scores[q.to_s] || {})["home"].to_i
-                      total_h += s
-                  %>
-                    <td class="text-gray-600"><%= s %></td>
-                  <% end %>
-                  <td class="font-bold text-gray-900"><%= game.home_score %></td>
-                </tr>
+
+            <div class="flex flex-col gap-6 pt-2">
+              <!-- 상단: 점수판 메인 -->
+              <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-2 relative">
                 
-                <!-- Away Team Row -->
-                <tr class="h-8 border-t border-gray-50">
-                  <td class="text-left font-bold text-gray-900 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full" style="background-color: <%= game.away_team.color %>"></span>
-                    <%= game.away_team.label %>
-                  </td>
-                  <% 
-                    total_a = 0
-                    (1..4).each do |q| 
-                      s = (q_scores[q.to_s] || {})["away"].to_i
-                      total_a += s
-                  %>
-                    <td class="text-gray-600"><%= s %></td>
+                <!-- 홈팀 정보 -->
+                <div class="flex flex-col items-start min-w-0">
+                  <div class="flex items-center gap-2 mb-1">
+                    <div class="w-1.5 h-8 rounded-sm" style="background-color: <%= game.home_team.color %>"></div>
+                    <span class="text-xs md:text-sm font-bold text-white/40 tracking-[0.2em]">HOME</span>
+                  </div>
+                  <div class="text-2xl md:text-4xl font-black italic text-slate-100 truncate w-full leading-none"><%= game.home_team.label %></div>
+                </div>
+
+                <!-- 중앙 점수 -->
+                <div class="flex items-center justify-center gap-6 md:gap-12">
+                   <div class="text-[4rem] md:text-[6rem] font-black font-mono leading-none tracking-tighter text-slate-100 <%= 'text-yellow-400 drop-shadow-[0_0_30px_rgba(250,204,21,0.4)]' if game.home_score > game.away_score %>">
+                     <%= game.home_score %>
+                   </div>
+
+                   <div class="flex flex-col items-center justify-center gap-1 opacity-60 pb-2">
+                     <% if game.home_score > game.away_score %>
+                       <div class="flex items-center gap-2">
+                         <span class="text-[0.6rem] font-black text-success tracking-widest uppercase">WIN</span>
+                         <div class="w-px h-3 bg-white/20"></div>
+                         <span class="text-[0.6rem] font-bold text-white/20 tracking-widest uppercase">LOSE</span>
+                       </div>
+                     <% elsif game.away_score > game.home_score %>
+                       <div class="flex items-center gap-2">
+                         <span class="text-[0.6rem] font-bold text-white/20 tracking-widest uppercase">LOSE</span>
+                         <div class="w-px h-3 bg-white/20"></div>
+                         <span class="text-[0.6rem] font-black text-success tracking-widest uppercase">WIN</span>
+                       </div>
+                     <% elsif game.home_score == game.away_score && game.result != "pending" %>
+                       <div class="flex items-center gap-2">
+                         <span class="text-[0.6rem] font-bold text-warning tracking-widest uppercase">DRAW</span>
+                         <div class="w-px h-3 bg-white/20"></div>
+                         <span class="text-[0.6rem] font-bold text-warning tracking-widest uppercase">DRAW</span>
+                       </div>
+                     <% else %>
+                       <span class="text-xl font-black italic text-white/20">VS</span>
+                     <% end %>
+                   </div>
+
+                   <div class="text-[4rem] md:text-[6rem] font-black font-mono leading-none tracking-tighter text-slate-100 <%= 'text-yellow-400 drop-shadow-[0_0_30px_rgba(250,204,21,0.4)]' if game.away_score > game.home_score %>">
+                     <%= game.away_score %>
+                   </div>
+                </div>
+
+                <!-- 어웨이팀 정보 -->
+                <div class="flex flex-col items-end min-w-0">
+                  <div class="flex items-center gap-2 mb-1 justify-end">
+                    <span class="text-xs md:text-sm font-bold text-white/40 tracking-[0.2em]">AWAY</span>
+                    <div class="w-1.5 h-8 rounded-sm" style="background-color: <%= game.away_team.color %>"></div>
+                  </div>
+                  <div class="text-2xl md:text-4xl font-black italic text-slate-100 truncate w-full text-right leading-none"><%= game.away_team.label %></div>
+                </div>
+              </div>
+
+              <!-- 하단: 박스스코어 (Classic Grid) -->
+              <div class="bg-black/20 rounded-lg p-3 md:p-4 border border-white/5">
+                <div class="grid grid-cols-[100px_1fr_1fr_1fr_1fr_1fr] gap-y-2 text-center items-center">
+                  <!-- Header -->
+                  <div class="text-left text-xs font-bold text-white/20 pl-2">TEAM</div>
+                  <div class="text-xs font-bold text-white/20">1Q</div>
+                  <div class="text-xs font-bold text-white/20">2Q</div>
+                  <div class="text-xs font-bold text-white/20">3Q</div>
+                  <div class="text-xs font-bold text-white/20">4Q</div>
+                  <div class="text-xs font-bold text-white/40">TOT</div>
+
+                  <!-- Divider -->
+                  <div class="col-span-6 h-px bg-white/5 my-1"></div>
+
+                  <!-- Home Row -->
+                  <div class="text-left font-bold text-slate-100 truncate pl-2 flex items-center gap-2">
+                    <div class="w-1 h-3 rounded-full" style="background-color: <%= game.home_team.color %>"></div>
+                    <%= game.home_team.label %>
+                  </div>
+                  <% (1..4).each do |q| %>
+                    <div class="font-mono text-lg md:text-xl font-bold <%= 'text-yellow-400' if (game.quarter_scores&.dig(q.to_s, "home") || 0) > (game.quarter_scores&.dig(q.to_s, "away") || 0) %>">
+                      <%= game.quarter_scores&.dig(q.to_s, "home") || 0 %>
+                    </div>
                   <% end %>
-                  <td class="font-bold text-gray-900"><%= game.away_score %></td>
-                </tr>
-              </tbody>
-            </table>
+                  <div class="font-mono text-lg md:text-xl font-black text-white/60"><%= game.home_score %></div>
+
+                  <!-- Away Row -->
+                  <div class="text-left font-bold text-slate-100 truncate pl-2 flex items-center gap-2">
+                     <div class="w-1 h-3 rounded-full" style="background-color: <%= game.away_team.color %>"></div>
+                     <%= game.away_team.label %>
+                  </div>
+                  <% (1..4).each do |q| %>
+                    <div class="font-mono text-lg md:text-xl font-bold <%= 'text-yellow-400' if (game.quarter_scores&.dig(q.to_s, "away") || 0) > (game.quarter_scores&.dig(q.to_s, "home") || 0) %>">
+                      <%= game.quarter_scores&.dig(q.to_s, "away") || 0 %>
+                    </div>
+                  <% end %>
+                  <div class="font-mono text-lg md:text-xl font-black text-white/60"><%= game.away_score %></div>
+                </div>
+              </div>
+            </div>
           </div>
         <% end %>
       </div>
