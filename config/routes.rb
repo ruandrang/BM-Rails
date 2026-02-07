@@ -39,6 +39,9 @@ Rails.application.routes.draw do
     resources :stats, only: [ :index ]
   end
 
+  get "standalone_scoreboard", to: "scoreboards#standalone_control", as: :standalone_scoreboard
+  get "standalone_display", to: "scoreboards#standalone_display", as: :standalone_display
+
   namespace :admin do
     root "dashboard#index"
     resources :users, only: [ :index, :show ]

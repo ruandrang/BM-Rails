@@ -6,7 +6,7 @@ class ScoreboardChannel < ApplicationCable::Channel
   MAX_PAYLOAD_SIZE = 10_000
 
   def subscribed
-    @match_id = params[:match_id].to_i
+    @match_id = params[:match_id]
     unless authorized_for_match?(@match_id)
       reject
       return
@@ -40,7 +40,15 @@ class ScoreboardChannel < ApplicationCable::Channel
   end
 
   def authorized_for_match?(match_id)
-    current_user.clubs.joins(:matches).where(matches: { id: match_id }).exists?
+    if match_id.to_s.start_with?("standalone_u")
+      user_id = match_id.to_s.sub("standalone_u", "").to_i
+      current_user.id == user_id
+    elsif match_id.to_s.start_with?("standalone_") # Legacy or other
+      club_id = match_id.to_s.split("_").last.to_i
+      current_user.clubs.where(id: club_id).exists?
+    else
+      current_user.clubs.joins(:matches).where(matches: { id: match_id.to_i }).exists?
+    end
   end
 
   def valid_payload?(payload)
@@ -83,7 +91,7 @@ class ScoreboardStore
           { "team1" => 0, "team2" => 0 }
         ],
         "quarter_history" => {},
-        "possession" => "home"
+        "possession" => "away"
       }
     end
 

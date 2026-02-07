@@ -8,7 +8,7 @@
      data-teams-count="<%= @match.teams.count %>">
 
   <%# Top Bar - Team Names and Timer %>
-  <div class="h-[18%] bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] border-b-4 border-[#333] flex items-center justify-between px-12 relative">
+  <div class="h-[25%] bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] border-b-4 border-[#333] flex items-center justify-between px-12 relative overflow-visible">
     <%# Left Team Name %>
     <div class="flex-1 flex justify-start">
       <div class="px-8 py-3 rounded-lg shadow-lg team-badge-left" style="background-color: #1e40af; border: 2px solid #3b82f6;">
@@ -19,7 +19,7 @@
     <%# Center Timer %>
     <div class="flex flex-col items-center gap-2">
       <span class="text-[#00ff00] font-['DSEG7'] font-bold tracking-wider tabular-nums" 
-            style="font-size: 10rem;"
+            style="font-size: 14rem;"
             data-scoreboard-timer>10:00</span>
       <span class="text-gray-500 text-sm tracking-widest uppercase">Game Clock</span>
     </div>
@@ -102,7 +102,7 @@
     <%# League Info %>
     <div class="flex flex-col">
       <span class="text-[#666] text-xs tracking-[3px] uppercase">BM League</span>
-      <span class="text-gray-400 text-sm font-['JetBrains_Mono']"><%= @match.date.strftime("%Y.%m.%d") %> — Game <%= @match.id %></span>
+      <span class="text-gray-400 text-sm font-['JetBrains_Mono']"><%= @match.respond_to?(:date) ? @match.date.strftime("%Y.%m.%d") : Time.current.strftime("%Y.%m.%d") %> — Standalone Mode</span>
     </div>
 
     <%# Fullscreen Button %>

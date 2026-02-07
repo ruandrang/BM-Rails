@@ -103,7 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
         { team1: 0, team2: 0 }
       ],
       quarter_history: {}, // { pairIdx: { quarterNum: { team1: score, team2: score } } }
-      possession: 'home' // 'home' or 'away'
+      possession: 'away' // 'home' or 'away'
     });
 
     const formatTime = (seconds) => {
@@ -327,8 +327,8 @@ document.addEventListener("DOMContentLoaded", () => {
       setText("[data-scoreboard-shot]", state.shot_seconds);
 
       // Team names (for new sports display)
-      setText("[data-team-name-left]", `TEAM ${leftTeam.label}`);
-      setText("[data-team-name-right]", `TEAM ${rightTeam.label}`);
+      setText("[data-team-name-left]", leftTeam.name || `TEAM ${leftTeam.label}`);
+      setText("[data-team-name-right]", rightTeam.name || `TEAM ${rightTeam.label}`);
 
       // Scores (new display)
       setText("[data-score-left]", leftTeam.score);
@@ -358,18 +358,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const arrowLeft = scoreboardRoot.querySelector(".possession-arrow-left");
       const arrowRight = scoreboardRoot.querySelector(".possession-arrow-right");
       if (arrowLeft && arrowRight) {
-        // For display page, swap possession arrows too
-        const showLeftArrow = isDisplayPage
-          ? (state.possession === 'away')  // Display: away -> left
-          : (state.possession === 'home'); // Control: home -> left
-        const showRightArrow = isDisplayPage
-          ? (state.possession === 'home')  // Display: home -> right
-          : (state.possession === 'away'); // Control: away -> right
-
-        if (showLeftArrow) {
+        if (state.possession === 'home') {
           arrowLeft.classList.remove('hidden');
           arrowRight.classList.add('hidden');
-        } else if (showRightArrow) {
+        } else if (state.possession === 'away') {
           arrowLeft.classList.add('hidden');
           arrowRight.classList.remove('hidden');
         } else {
@@ -379,9 +371,9 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Legacy display elements
-      setText("[data-scoreboard-matchup]", `팀 ${home.label} vs 팀 ${away.label}`);
-      setText("[data-home-name]", `TEAM ${home.label}`);
-      setText("[data-away-name]", `TEAM ${away.label}`);
+      setText("[data-scoreboard-matchup]", `${home.name || '팀 ' + home.label} vs ${away.name || '팀 ' + away.label}`);
+      setText("[data-home-name]", home.name || `TEAM ${home.label}`);
+      setText("[data-away-name]", away.name || `TEAM ${away.label}`);
       const homeIconEl = scoreboardRoot.querySelector("[data-home-icon]");
       if (homeIconEl) {
         homeIconEl.textContent = home.icon || "●";
@@ -691,10 +683,10 @@ document.addEventListener("DOMContentLoaded", () => {
       if (mainTimer) return;
       mainTimer = setInterval(() => {
         if (state.period_seconds > 0) {
-          if (state.period_seconds <= 5) {
+          state.period_seconds -= 1;
+          if (state.period_seconds <= 5 && state.period_seconds > 0) {
             speak(state.period_seconds);
           }
-          state.period_seconds -= 1;
         } else {
           state.running = false;
           state.shot_running = false;
@@ -904,6 +896,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 state.period_seconds = 480;
                 state.running = false;
                 state.shot_running = false;
+                break;
+              case "reset-all":
+                if (confirm("정말로 모든 점수와 시간을 초기화하시겠습니까?")) {
+                  state.period_seconds = 480;
+                  state.shot_seconds = 24;
+                  state.running = false;
+                  state.shot_running = false;
+                  state.home_fouls = 0;
+                  state.away_fouls = 0;
+                  state.teams.forEach(t => t.score = 0);
+                }
                 break;
               // ... existing cases ...
               case "minus-minute":
@@ -1155,10 +1158,13 @@ document.addEventListener("DOMContentLoaded", () => {
               case "toggle-shortcuts":
                 const panel = document.querySelector("[data-shortcuts-panel]");
                 if (panel) {
+                  const btn = scoreboardRoot.querySelector('[data-action="toggle-shortcuts"]');
                   if (panel.classList.contains("hidden")) {
                     panel.classList.remove("hidden");
+                    if (btn) btn.textContent = "⌨️ Hide Details";
                   } else {
                     panel.classList.add("hidden");
+                    if (btn) btn.textContent = "⌨️ Show Details";
                   }
                 }
                 break;
@@ -1210,7 +1216,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Helper to click button by action
         const clickAction = (action) => {
-          const btn = document.querySelector(`[data-action="${action}"]`);
+          const btn = scoreboardRoot.querySelector(`[data-action="${action}"]`);
           if (btn) {
             btn.click();
 

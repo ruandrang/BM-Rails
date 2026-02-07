@@ -2,7 +2,7 @@
      data-scoreboard-root
      data-scoreboard-role="control"
      data-match-id="<%= @match.id %>"
-     data-teams="<%= @match.teams.includes(:members).to_json(include: :members) %>"
+     data-teams="<%= @match.teams.respond_to?(:includes) ? @match.teams.includes(:members).to_json(include: :members) : @match.teams.to_json %>"
      data-teams-count="<%= @match.teams.count %>">
 
   <div class="max-w-[1400px] mx-auto">
@@ -17,12 +17,16 @@
 
       <!-- Center Info -->
       <div class="absolute left-1/2 -translate-x-1/2 text-center">
-        <h2 class="text-xl font-bold text-gray-900"><%= @club.name %></h2>
+        <h2 class="text-xl font-bold text-gray-900"><%= @club&.name || "Standalone Mode" %></h2>
         <p class="text-gray-500 text-sm font-mono"><%= Time.current.strftime("%Y.%m.%d") %></p>
       </div>
 
       <div class="flex items-center gap-3">
-        <%= link_to "OPEN DISPLAY", scoreboard_display_club_match_path(@club, @match), target: "_blank", class: "btn btn-sm btn-outline border-gray-300 text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-400" %>
+        <% if @match.id.to_s.start_with?("standalone_") %>
+          <%= link_to "OPEN DISPLAY", standalone_display_path, target: "_blank", class: "btn btn-sm btn-outline border-gray-300 text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-400" %>
+        <% else %>
+          <%= link_to "OPEN DISPLAY", scoreboard_display_club_match_path(@club, @match), target: "_blank", class: "btn btn-sm btn-outline border-gray-300 text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-400" %>
+        <% end %>
         <div class="px-3 py-1 rounded border border-[#22C55E]/30 bg-[#22C55E]/10 text-[#22C55E] text-xs font-bold tracking-wider">
           LIVE
         </div>
@@ -172,22 +176,26 @@
     <div class="mt-8 border-t border-gray-200 pt-6 flex justify-between items-start">
       
       <!-- Quick Actions -->
-      <div>
-        <h4 class="text-gray-500 text-[10px] tracking-[2px] font-bold mb-4 uppercase">Quick Actions</h4>
-        <div class="flex gap-4">
-          <button class="btn btn-sm border-gray-300 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-400 shadow-sm"
-                  data-action="next-quarter">NEXT QUARTER</button>
-          <button class="btn btn-sm border-red-200 bg-red-50 text-red-600 hover:bg-red-100 hover:border-red-300 shadow-sm"
-                  data-action="new-game">RESET GAME</button>
-          <button class="btn btn-sm border-green-300 bg-green-50 text-green-700 hover:bg-green-100 hover:border-green-400 shadow-sm font-bold"
-                  data-action="finish-game">🏁 경기 종료</button>
+      <% unless @match.id.to_s.start_with?("standalone_") %>
+        <div>
+          <h4 class="text-gray-500 text-[10px] tracking-[2px] font-bold mb-4 uppercase">Quick Actions</h4>
+          <div class="flex gap-4">
+            <button class="btn btn-sm border-gray-300 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-400 shadow-sm"
+                    data-action="next-quarter">NEXT QUARTER</button>
+            <button class="btn btn-sm border-red-200 bg-red-50 text-red-600 hover:bg-red-100 hover:border-red-300 shadow-sm"
+                    data-action="new-game">RESET GAME</button>
+            <button class="btn btn-sm border-green-300 bg-green-50 text-green-700 hover:bg-green-100 hover:border-green-400 shadow-sm font-bold"
+                    data-action="finish-game">🏁 경기 종료</button>
+          </div>
         </div>
-      </div>
+      <% end %>
 
-      <!-- Buzzer -->
-      <div class="flex items-center">
-        <button class="btn btn-sm border-gray-300 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-400 shadow-sm font-bold"
+      <!-- Buzzer & Global Reset -->
+      <div class="flex items-center gap-4">
+        <button class="btn btn-md px-8 py-4 border-gray-300 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-400 shadow-sm font-black text-xl h-16"
                 data-action="buzzer">🔔 BUZZER</button>
+        <button class="btn btn-md px-6 border-red-200 bg-red-50 text-red-600 hover:bg-red-100 hover:border-red-300 shadow-sm font-bold h-16"
+                data-action="reset-all">🔄 전체 리셋</button>
       </div>
 
       <!-- Possession -->
@@ -206,20 +214,22 @@
     <!-- Footer Area: Score Table, Roster & Shortcuts -->
     <div class="mt-12 w-full pb-16 flex flex-col items-center">
         
-        <!-- Quarterly Score Table (Always Visible) -->
-        <div data-quarter-table class="w-full max-w-5xl bg-white border border-gray-200 rounded-2xl p-8 shadow-sm mb-8">
-           <!-- Table injected by JS -->
-        </div>
+        <% unless @match.id.to_s.start_with?("standalone_") %>
+          <!-- Quarterly Score Table (Always Visible) -->
+          <div data-quarter-table class="w-full max-w-5xl bg-white border border-gray-200 rounded-2xl p-8 shadow-sm mb-8">
+             <!-- Table injected by JS -->
+          </div>
+        <% end %>
 
         <!-- Toggle Button -->
         <div class="mb-4">
              <button data-action="toggle-shortcuts" class="btn btn-xs bg-white border border-gray-300 shadow-sm text-gray-500 rounded-full px-4 hover:bg-gray-50 transition-all">
-                ⌨️ Show Details
+                ⌨️ Hide Details
              </button>
         </div>
 
         <!-- Collapsible Panel: Shortcuts + Roster -->
-        <div data-shortcuts-panel class="hidden w-full max-w-5xl flex flex-col gap-8 animate-in slide-in-from-bottom-4 fade-in duration-200">
+        <div data-shortcuts-panel class="w-full max-w-5xl flex flex-col gap-8 animate-in slide-in-from-bottom-4 fade-in duration-200">
             
             <!-- Shortcuts -->
             <div class="bg-white border border-gray-200 rounded-2xl px-12 py-6 shadow-sm">
@@ -268,10 +278,12 @@
               </div>
             </div>
 
-            <!-- Roster Display -->
-            <div data-roster-display class="bg-white border border-gray-200 rounded-2xl px-12 py-8 shadow-sm">
-                <!-- Roster content injected by JS -->
-            </div>
+            <% unless @match.id.to_s.start_with?("standalone_") %>
+              <!-- Roster Display -->
+              <div data-roster-display class="bg-white border border-gray-200 rounded-2xl px-12 py-8 shadow-sm">
+                  <!-- Roster content injected by JS -->
+              </div>
+            <% end %>
 
         </div>
 
