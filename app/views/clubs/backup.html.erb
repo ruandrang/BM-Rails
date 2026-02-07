@@ -48,13 +48,16 @@
         <% end %>
       </div>
 
-      <div class="alert alert-warning mt-8">
+      <div class="alert alert-info mt-8">
         <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <div>
-          <h3 class="font-bold">주의사항</h3>
-          <div class="text-xs">가져오기(복원)를 실행하면 <strong>현재 계정의 모든 데이터(클럽, 멤버, 경기)가 완전히 삭제</strong>되고 백업 파일의 내용으로 교체됩니다. <br/>이 작업은 절대 되돌릴 수 없습니다.</div>
+          <h3 class="font-bold">안내사항</h3>
+          <div class="text-xs">
+            <strong>백업</strong>: 모든 클럽, 멤버, 경기(진행중 포함)가 JSON 파일로 저장됩니다.<br/>
+            <strong>복원</strong>: 기존 데이터를 삭제하지 않고, 백업 파일의 데이터를 <strong>비교하여 새로운 항목만 추가</strong>합니다. 이미 존재하는 클럽·멤버·경기는 건너뜁니다.
+          </div>
         </div>
       </div>
     </div>
