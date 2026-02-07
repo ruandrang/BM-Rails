@@ -1,6 +1,6 @@
 <%# External Sports Scoreboard Display %>
 <div id="scoreboard-root"
-     class="w-full h-screen flex flex-col bg-[#0a0a0a] overflow-hidden select-none relative"
+     class="w-full h-screen flex flex-col bg-[#0a0a0a] overflow-hidden select-none relative pt-12"
      data-scoreboard-root 
      data-scoreboard-role="display"
      data-match-id="<%= @match.id %>"
@@ -49,9 +49,7 @@
           <div class="w-8 h-8 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="4"></div>
         </div>
       </div>
-      <div class="hidden mt-2" data-left-team-foul-indicator>
-        <span class="text-red-500 font-bold text-lg tracking-widest uppercase animate-pulse">TEAM FOUL</span>
-      </div>
+
     </div>
 
     <%# Center Info - Quarter and Possession - FIXED POSITION %>
@@ -95,9 +93,7 @@
           <div class="w-8 h-8 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="4"></div>
         </div>
       </div>
-      <div class="hidden mt-2" data-right-team-foul-indicator>
-        <span class="text-red-500 font-bold text-lg tracking-widest uppercase animate-pulse">TEAM FOUL</span>
-      </div>
+
     </div>
   </div>
 

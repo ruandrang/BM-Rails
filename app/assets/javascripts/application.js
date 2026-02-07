@@ -348,18 +348,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         });
 
-        // Show/hide TEAM FOUL indicator based on foul count
-        const isLeft = containerSelector.includes('left');
-        const indicatorSelector = isLeft ? '[data-left-team-foul-indicator]' : '[data-right-team-foul-indicator]';
-        const indicator = scoreboardRoot.querySelector(indicatorSelector);
 
-        if (indicator) {
-          if (foulCount >= 5) {
-            indicator.classList.remove('hidden');
-          } else {
-            indicator.classList.add('hidden');
-          }
-        }
       };
 
       updateFoulCircles('[data-foul-indicators-left]', leftFouls);
@@ -579,18 +568,11 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
 
-        if (indicatorEl) {
-          if (count >= 5) {
-            indicatorEl.classList.remove("hidden");
-          } else {
-            indicatorEl.classList.add("hidden");
-          }
-        }
+
       };
 
       updateFoulVisuals("home", state.home_fouls || 0);
       updateFoulVisuals("away", state.away_fouls || 0);
-
 
       // Display page specific updates
       setText("[data-home-score]", home.score);
