@@ -37,6 +37,12 @@ class ClubImporter
     Array(@payload["members"]).each_with_index do |member, idx|
       raise ArgumentError, "멤버 #{idx + 1}의 이름이 필요합니다" if member["name"].blank?
     end
+
+    Array(@payload["matches"]).each_with_index do |match, idx|
+      raise ArgumentError, "경기 #{idx + 1}의 날짜가 필요합니다" if match["played_on"].blank?
+      teams_count = (match["teams_count"] || 2).to_i
+      raise ArgumentError, "경기 #{idx + 1}의 팀 수가 올바르지 않습니다" unless [ 2, 3 ].include?(teams_count)
+    end
   end
 
   def import_members!
@@ -82,7 +88,14 @@ class ClubImporter
         next unless home_team && away_team
 
         result = Game::RESULTS.include?(game_data["result"]) ? game_data["result"] : "pending"
-        match.games.create!(home_team: home_team, away_team: away_team, result: result)
+        match.games.create!(
+          home_team: home_team,
+          away_team: away_team,
+          result: result,
+          home_score: game_data["home_score"].to_i,
+          away_score: game_data["away_score"].to_i,
+          quarter_scores: game_data["quarter_scores"]
+        )
       end
     end
   end

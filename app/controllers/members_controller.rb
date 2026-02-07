@@ -7,7 +7,9 @@ class MembersController < ApplicationController
   def index
     @members = @club.members.order(:sort_order, :id)
     # 승률 계산 (뷰에서 정렬용)
-    raw_stats = StatsCalculator.new(@club).member_stats
+    raw_stats = Rails.cache.fetch("club_#{@club.id}_member_stats", expires_in: 5.minutes) do
+      StatsCalculator.new(@club).member_stats
+    end
     @member_stats = raw_stats.index_by { |s| s[:member].id }
   end
 

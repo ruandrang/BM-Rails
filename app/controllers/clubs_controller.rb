@@ -3,9 +3,10 @@ class ClubsController < ApplicationController
 
   def index
     @clubs = current_user.clubs.includes(:members, :matches).order(created_at: :desc)
-    @total_members = @clubs.sum { |c| c.members.size }
-    @monthly_matches = Match.where(club_id: @clubs.pluck(:id))
-                            .where("created_at >= ?", Time.current.beginning_of_month)
+    club_ids = @clubs.map(&:id)
+    @total_members = Member.where(club_id: club_ids).count
+    @monthly_matches = Match.where(club_id: club_ids)
+                            .where("played_on >= ?", Date.current.beginning_of_month)
                             .count
   end
 
@@ -74,8 +75,11 @@ class ClubsController < ApplicationController
     redirect_to clubs_path, notice: "모든 데이터가 복원되었습니다."
   rescue JSON::ParserError
     redirect_to backup_clubs_path, alert: "JSON 파일 형식이 올바르지 않습니다."
+  rescue ArgumentError => e
+    redirect_to backup_clubs_path, alert: e.message
   rescue StandardError => e
-    redirect_to backup_clubs_path, alert: "복원 중 오류가 발생했습니다: #{e.message}"
+    Rails.logger.error("데이터 복원 실패: #{e.class} - #{e.message}\n#{e.backtrace&.first(5)&.join("\n")}")
+    redirect_to backup_clubs_path, alert: "복원 중 오류가 발생했습니다. 파일을 확인해주세요."
   end
 
   private

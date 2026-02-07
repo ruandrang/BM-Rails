@@ -43,7 +43,10 @@ class ClubExporter
             {
               home_label: game.home_team.label,
               away_label: game.away_team.label,
-              result: game.result
+              result: game.result,
+              home_score: game.home_score,
+              away_score: game.away_score,
+              quarter_scores: game.quarter_scores
             }
           end
         }

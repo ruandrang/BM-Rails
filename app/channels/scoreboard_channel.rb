@@ -1,6 +1,13 @@
 class ScoreboardChannel < ApplicationCable::Channel
+  ALLOWED_PAYLOAD_KEYS = %w[quarter period_seconds shot_seconds running shot_running matchup_index teams].freeze
+  MAX_PAYLOAD_SIZE = 10_000
+
   def subscribed
     @match_id = params[:match_id].to_i
+    unless authorized_for_match?(@match_id)
+      reject
+      return
+    end
     stream_from(stream_name)
     transmit(type: "state", payload: ScoreboardStore.fetch(@match_id))
   end
@@ -8,6 +15,7 @@ class ScoreboardChannel < ApplicationCable::Channel
   def update(data)
     payload = data["payload"]
     return if payload.blank?
+    return unless valid_payload?(payload)
 
     ScoreboardStore.update(@match_id, payload)
     ActionCable.server.broadcast(stream_name, { type: "state", payload: payload })
@@ -16,6 +24,7 @@ class ScoreboardChannel < ApplicationCable::Channel
   def reset(data)
     payload = data["payload"]
     return if payload.blank?
+    return unless valid_payload?(payload)
 
     ScoreboardStore.update(@match_id, payload)
     ActionCable.server.broadcast(stream_name, { type: "state", payload: payload })
@@ -25,6 +34,16 @@ class ScoreboardChannel < ApplicationCable::Channel
 
   def stream_name
     "scoreboard:#{@match_id}"
+  end
+
+  def authorized_for_match?(match_id)
+    current_user.clubs.joins(:matches).where(matches: { id: match_id }).exists?
+  end
+
+  def valid_payload?(payload)
+    return false unless payload.is_a?(Hash)
+    return false if payload.to_json.bytesize > MAX_PAYLOAD_SIZE
+    payload.keys.all? { |key| ALLOWED_PAYLOAD_KEYS.include?(key) }
   end
 end
 

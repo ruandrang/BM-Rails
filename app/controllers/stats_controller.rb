@@ -2,8 +2,9 @@ class StatsController < ApplicationController
   before_action :set_club
 
   def index
-    calculator = StatsCalculator.new(@club)
-    stats = calculator.member_stats
+    stats = Rails.cache.fetch("club_#{@club.id}_member_stats", expires_in: 5.minutes) do
+      StatsCalculator.new(@club).member_stats
+    end
 
     @sort = params[:sort].presence || "name"
     @stats = case @sort
