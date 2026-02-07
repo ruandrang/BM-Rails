@@ -1156,6 +1156,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     if (data.success) {
                       alert(`경기 종료!\n최종 점수: ${home.label} ${home.score} : ${away.score} ${away.label}\n결과: ${data.result}`);
+                      window.location.href = `/clubs/${clubId}/matches/${matchId}`;
                     } else {
                       alert('점수 저장 실패: ' + (data.error || '알 수 없는 오류'));
                     }

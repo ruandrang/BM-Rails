@@ -24,11 +24,13 @@
           <% end %>
         </div>
         <div class="flex gap-2">
-          <%= link_to scoreboard_club_match_path(@club, @match), class: "btn btn-primary btn-sm gap-2", target: "_blank" do %>
+          <%= link_to scoreboard_club_match_path(@club, @match), 
+              class: "btn btn-primary btn-sm gap-2 #{@match.finished? ? 'btn-disabled' : ''}",
+              disabled: @match.finished? do %>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
             </svg>
-            스코어보드
+            <%= @match.finished? ? "경기 종료됨" : "스코어보드" %>
           <% end %>
           <%= link_to edit_club_match_path(@club, @match), class: "btn btn-ghost btn-sm" do %>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -235,8 +237,13 @@
                       <%= game.home_team.label %>
                     </div>
                     <% (1..4).each do |q| %>
+                      <% 
+                        current_q_score = game.quarter_scores&.dig(q.to_s, "home") || 0
+                        prev_q_score = q > 1 ? (game.quarter_scores&.dig((q-1).to_s, "home") || 0) : 0
+                        delta = current_q_score - prev_q_score
+                      %>
                       <div class="font-mono text-lg md:text-xl font-bold <%= 'text-yellow-400' if (game.quarter_scores&.dig(q.to_s, "home") || 0) > (game.quarter_scores&.dig(q.to_s, "away") || 0) %>">
-                        <%= game.quarter_scores&.dig(q.to_s, "home") || 0 %>
+                        <%= delta %>
                       </div>
                     <% end %>
                     <div class="font-mono text-lg md:text-xl font-black text-white/60"><%= game.home_score %></div>
@@ -247,8 +254,13 @@
                        <%= game.away_team.label %>
                     </div>
                     <% (1..4).each do |q| %>
+                      <% 
+                        current_q_score = game.quarter_scores&.dig(q.to_s, "away") || 0
+                        prev_q_score = q > 1 ? (game.quarter_scores&.dig((q-1).to_s, "away") || 0) : 0
+                        delta = current_q_score - prev_q_score
+                      %>
                       <div class="font-mono text-lg md:text-xl font-bold <%= 'text-yellow-400' if (game.quarter_scores&.dig(q.to_s, "away") || 0) > (game.quarter_scores&.dig(q.to_s, "home") || 0) %>">
-                        <%= game.quarter_scores&.dig(q.to_s, "away") || 0 %>
+                        <%= delta %>
                       </div>
                     <% end %>
                     <div class="font-mono text-lg md:text-xl font-black text-white/60"><%= game.away_score %></div>
