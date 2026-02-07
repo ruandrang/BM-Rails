@@ -215,9 +215,10 @@ class MatchesController < ApplicationController
       quarter_scores = game.quarter_scores || {}
       quarter_scores[quarter.to_s] = { "home" => quarter_home_score, "away" => quarter_away_score }
 
-      # 전체 쿼터 점수 합산으로 총점 계산
-      total_home = quarter_scores.values.sum { |q| q["home"].to_i }
-      total_away = quarter_scores.values.sum { |q| q["away"].to_i }
+      # 누적 방식: 마지막 쿼터 점수를 총점으로 사용
+      latest_q = quarter_scores.keys.map(&:to_i).max.to_s
+      total_home = quarter_scores[latest_q]["home"].to_i
+      total_away = quarter_scores[latest_q]["away"].to_i
 
       game.assign_attributes(
         quarter_scores: quarter_scores,
@@ -243,7 +244,7 @@ class MatchesController < ApplicationController
     scores_data = params.permit(scores: {}).to_h[:scores] || extract_scores_from_params
 
     if scores_data.present?
-      input_mode = params[:input_mode] || "per_quarter"
+      input_mode = params[:input_mode] || "cumulative"
 
       ActiveRecord::Base.transaction do
         scores_data.each do |game_id, score_params|
