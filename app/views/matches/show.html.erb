@@ -24,11 +24,13 @@
           <% end %>
         </div>
         <div class="flex gap-2">
-          <%= link_to scoreboard_club_match_path(@club, @match), class: "btn btn-primary btn-sm gap-2" do %>
+          <%= link_to scoreboard_club_match_path(@club, @match), 
+              class: "btn btn-primary btn-sm gap-2 #{@match.finished? ? 'btn-disabled' : ''}",
+              disabled: @match.finished? do %>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
             </svg>
-            스코어보드
+            <%= @match.finished? ? "경기 종료됨" : "스코어보드" %>
           <% end %>
           <%= link_to edit_club_match_path(@club, @match), class: "btn btn-ghost btn-sm" do %>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -235,8 +237,13 @@
                       <%= game.home_team.label %>
                     </div>
                     <% (1..4).each do |q| %>
+                      <% 
+                        current_q_score = game.quarter_scores&.dig(q.to_s, "home") || 0
+                        prev_q_score = q > 1 ? (game.quarter_scores&.dig((q-1).to_s, "home") || 0) : 0
+                        delta = current_q_score - prev_q_score
+                      %>
                       <div class="font-mono text-lg md:text-xl font-bold <%= 'text-yellow-400' if (game.quarter_scores&.dig(q.to_s, "home") || 0) > (game.quarter_scores&.dig(q.to_s, "away") || 0) %>">
-                        <%= game.quarter_scores&.dig(q.to_s, "home") || 0 %>
+                        <%= delta %>
                       </div>
                     <% end %>
                     <div class="font-mono text-lg md:text-xl font-black text-white/60"><%= game.home_score %></div>
@@ -247,8 +254,13 @@
                        <%= game.away_team.label %>
                     </div>
                     <% (1..4).each do |q| %>
+                      <% 
+                        current_q_score = game.quarter_scores&.dig(q.to_s, "away") || 0
+                        prev_q_score = q > 1 ? (game.quarter_scores&.dig((q-1).to_s, "away") || 0) : 0
+                        delta = current_q_score - prev_q_score
+                      %>
                       <div class="font-mono text-lg md:text-xl font-bold <%= 'text-yellow-400' if (game.quarter_scores&.dig(q.to_s, "away") || 0) > (game.quarter_scores&.dig(q.to_s, "home") || 0) %>">
-                        <%= game.quarter_scores&.dig(q.to_s, "away") || 0 %>
+                        <%= delta %>
                       </div>
                     <% end %>
                     <div class="font-mono text-lg md:text-xl font-black text-white/60"><%= game.away_score %></div>
@@ -271,7 +283,24 @@
           <div class="modal-box">
             <h3 class="font-bold text-lg mb-4">경기 점수 수정</h3>
             
-            <%= form_with url: update_scores_club_match_path(@club, @match), method: :patch, class: "space-y-4" do |f| %>
+            <%= form_with url: update_scores_club_match_path(@club, @match), method: :patch, class: "space-y-4", id: "score_edit_form" do |f| %>
+              <%= hidden_field_tag :input_mode, "delta", id: "modal_input_mode" %>
+              
+              <!-- Toggle UI -->
+              <div class="flex items-center justify-end gap-3 px-1 mb-2">
+                <span class="text-xs font-medium opacity-70">입력 모드:</span>
+                <div class="flex items-center bg-base-300 p-1 rounded-xl shadow-inner">
+                   <button type="button" 
+                           id="toggle_delta" 
+                           class="btn btn-xs rounded-lg transition-all px-3 bg-primary text-primary-content border-none"
+                           onclick="switchMode('delta')">쿼터별</button>
+                   <button type="button" 
+                           id="toggle_cumulative" 
+                           class="btn btn-xs rounded-lg transition-all px-3 bg-transparent text-base-content border-none"
+                           onclick="switchMode('cumulative')">누적</button>
+                </div>
+              </div>
+
               <% @games.each_with_index do |game, index| %>
                 <div class="card bg-base-200 p-4 border border-base-300">
                   <div class="flex justify-between items-center mb-2">
@@ -293,17 +322,33 @@
                       <tbody>
                         <% (1..4).each do |q| %>
                           <% 
-                             q_scores = game.quarter_scores&.dig(q.to_s) || { "home" => 0, "away" => 0 }
-                             hf_val = q_scores["home"]
-                             af_val = q_scores["away"]
+                             h_score = game.quarter_scores&.dig(q.to_s, "home") || 0
+                             h_prev = q > 1 ? (game.quarter_scores&.dig((q-1).to_s, "home") || 0) : 0
+                             h_delta = h_score - h_prev
+
+                             a_score = game.quarter_scores&.dig(q.to_s, "away") || 0
+                             a_prev = q > 1 ? (game.quarter_scores&.dig((q-1).to_s, "away") || 0) : 0
+                             a_delta = a_score - a_prev
                           %>
                           <tr>
                             <th class="opacity-50"><%= q %></th>
                             <td>
-                              <input type="number" name="scores[<%= game.id %>][quarters][<%= q %>][home]" value="<%= hf_val %>" class="input input-xs input-bordered w-full text-center" min="0">
+                              <input type="number" 
+                                     name="scores[<%= game.id %>][quarters][<%= q %>][home]" 
+                                     value="<%= h_delta %>" 
+                                     data-delta="<%= h_delta %>" 
+                                     data-cumulative="<%= h_score %>" 
+                                     class="score-input input input-xs input-bordered w-full text-center" 
+                                     min="0">
                             </td>
                             <td>
-                              <input type="number" name="scores[<%= game.id %>][quarters][<%= q %>][away]" value="<%= af_val %>" class="input input-xs input-bordered w-full text-center" min="0">
+                              <input type="number" 
+                                     name="scores[<%= game.id %>][quarters][<%= q %>][away]" 
+                                     value="<%= a_delta %>" 
+                                     data-delta="<%= a_delta %>" 
+                                     data-cumulative="<%= a_score %>" 
+                                     class="score-input input input-xs input-bordered w-full text-center" 
+                                     min="0">
                             </td>
                           </tr>
                         <% end %>
@@ -318,6 +363,37 @@
                 <%= f.submit "저장", class: "btn btn-primary" %>
               </div>
             <% end %>
+
+            <script>
+              function switchMode(mode) {
+                const inputModeField = document.getElementById('modal_input_mode');
+                const inputs = document.querySelectorAll('.score-input');
+                const btnDelta = document.getElementById('toggle_delta');
+                const btnCum = document.getElementById('toggle_cumulative');
+
+                inputModeField.value = mode;
+
+                if (mode === 'delta') {
+                  btnDelta.classList.add('bg-primary', 'text-primary-content');
+                  btnDelta.classList.remove('bg-transparent', 'text-base-content');
+                  btnCum.classList.remove('bg-primary', 'text-primary-content');
+                  btnCum.classList.add('bg-transparent', 'text-base-content');
+                } else {
+                  btnCum.classList.add('bg-primary', 'text-primary-content');
+                  btnCum.classList.remove('bg-transparent', 'text-base-content');
+                  btnDelta.classList.remove('bg-primary', 'text-primary-content');
+                  btnDelta.classList.add('bg-transparent', 'text-base-content');
+                }
+
+                inputs.forEach(input => {
+                  if (mode === 'delta') {
+                    input.value = input.dataset.delta;
+                  } else {
+                    input.value = input.dataset.cumulative;
+                  }
+                });
+              }
+            </script>
           </div>
           <form method="dialog" class="modal-backdrop">
             <button>close</button>

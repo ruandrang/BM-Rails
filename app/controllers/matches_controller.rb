@@ -184,11 +184,25 @@ class MatchesController < ApplicationController
       @match.games.first
     end
 
-    if game && game.update_scores(home_score, away_score)
-      expire_member_stats_cache
-      render json: { success: true, result: game.result, game_id: game.id }
+    if game
+      home_team_id = params[:home_team_id]
+      # 클라이언트에서 보낸 home_team_id가 실제 게임의 away_team_id라면 점수를 스왑해야 함
+      if home_team_id.present? && game.home_team_id.to_s != home_team_id.to_s
+        actual_home_score = away_score
+        actual_away_score = home_score
+      else
+        actual_home_score = home_score
+        actual_away_score = away_score
+      end
+
+      if game.update_scores(actual_home_score, actual_away_score)
+        expire_member_stats_cache
+        render json: { success: true, result: game.result, game_id: game.id }
+      else
+        render json: { success: false, errors: game&.errors&.full_messages || [ "Game not found" ] }, status: :unprocessable_entity
+      end
     else
-      render json: { success: false, errors: game&.errors&.full_messages || [ "Game not found" ] }, status: :unprocessable_entity
+      render json: { success: false, error: "Game not found" }, status: :not_found
     end
   rescue ActiveRecord::RecordNotFound
     render json: { success: false, error: "Game not found" }, status: :not_found
@@ -212,12 +226,22 @@ class MatchesController < ApplicationController
     end
 
     if game
-      quarter_scores = game.quarter_scores || {}
-      quarter_scores[quarter.to_s] = { "home" => quarter_home_score, "away" => quarter_away_score }
+      # 클라이언트에서 보낸 home_team_id가 실제 게임의 away_team_id라면 점수를 스왑해야 함
+      if home_team_id.present? && game.home_team_id.to_s != home_team_id.to_s
+        actual_home_score = quarter_away_score
+        actual_away_score = quarter_home_score
+      else
+        actual_home_score = quarter_home_score
+        actual_away_score = quarter_away_score
+      end
 
-      # 전체 쿼터 점수 합산으로 총점 계산
-      total_home = quarter_scores.values.sum { |q| q["home"].to_i }
-      total_away = quarter_scores.values.sum { |q| q["away"].to_i }
+      quarter_scores = game.quarter_scores || {}
+      quarter_scores[quarter.to_s] = { "home" => actual_home_score, "away" => actual_away_score }
+
+      # 누적 방식: 마지막 쿼터 점수를 총점으로 사용
+      latest_q = quarter_scores.keys.map(&:to_i).max.to_s
+      total_home = quarter_scores[latest_q]["home"].to_i
+      total_away = quarter_scores[latest_q]["away"].to_i
 
       game.assign_attributes(
         quarter_scores: quarter_scores,
@@ -243,7 +267,7 @@ class MatchesController < ApplicationController
     scores_data = params.permit(scores: {}).to_h[:scores] || extract_scores_from_params
 
     if scores_data.present?
-      input_mode = params[:input_mode] || "per_quarter"
+      input_mode = params[:input_mode] || "cumulative"
 
       ActiveRecord::Base.transaction do
         scores_data.each do |game_id, score_params|
@@ -253,28 +277,48 @@ class MatchesController < ApplicationController
           current_quarter_scores = game.quarter_scores || {}
 
           temp_scores = {}
+          cum_home = 0
+          cum_away = 0
+
           (1..4).each do |q|
             q_s = q.to_s
+            h_val = 0
+            a_val = 0
+
             if quarters_params[q_s].present?
-              temp_scores[q_s] = {
-                "home" => quarters_params[q_s]["home"].to_i,
-                "away" => quarters_params[q_s]["away"].to_i
-              }
+              h_val = quarters_params[q_s]["home"].to_i
+              a_val = quarters_params[q_s]["away"].to_i
             else
-              temp_scores[q_s] = current_quarter_scores[q_s] || { "home" => 0, "away" => 0 }
+              # If quarter param is missing, we need to handle it.
+              # For delta, we assume 0 was added. For cumulative, we use existing.
+              existing = current_quarter_scores[q_s] || { "home" => 0, "away" => 0 }
+              if input_mode != "delta"
+                h_val = existing["home"].to_i
+                a_val = existing["away"].to_i
+              end
             end
+
+            if input_mode == "delta"
+              cum_home += h_val
+              cum_away += a_val
+            else
+              cum_home = h_val
+              cum_away = a_val
+            end
+
+            temp_scores[q_s] = { "home" => cum_home, "away" => cum_away }
           end
 
-          h_scores = (1..4).map { |q| temp_scores[q.to_s]["home"] }
-          a_scores = (1..4).map { |q| temp_scores[q.to_s]["away"] }
-
-          # 명시적 입력 모드에 따라 총점 계산
-          if input_mode == "cumulative"
-            game.home_score = h_scores.last
-            game.away_score = a_scores.last
+          # 총점 계산 (마지막 쿼터 기준 또는 합산)
+          if input_mode == "cumulative" || input_mode == "delta"
+            game.home_score = temp_scores["4"]["home"]
+            game.away_score = temp_scores["4"]["away"]
           else
-            game.home_score = h_scores.sum
-            game.away_score = a_scores.sum
+            # "per_quarter" 가 선택된 경우 (현재 기본은 아님)
+            # 사실 위 loop에서 cum_* 방식이 per_quarter와 충돌할 수 있음.
+            # 하지만 현재 프로젝트의 요구사항은 기본적으로 cumulative/delta 임.
+            game.home_score = temp_scores.values.sum { |v| v["home"].to_i }
+            game.away_score = temp_scores.values.sum { |v| v["away"].to_i }
           end
 
           game.quarter_scores = temp_scores

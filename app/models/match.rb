@@ -21,4 +21,8 @@ class Match < ApplicationRecord
   def date
     played_on
   end
+
+  def finished?
+    games.any? && games.all? { |g| g.result != "pending" }
+  end
 end

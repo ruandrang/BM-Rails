@@ -198,8 +198,13 @@
                     <%= game.home_team.label %>
                   </div>
                   <% (1..4).each do |q| %>
+                    <% 
+                      current_q_score = game.quarter_scores&.dig(q.to_s, "home") || 0
+                      prev_q_score = q > 1 ? (game.quarter_scores&.dig((q-1).to_s, "home") || 0) : 0
+                      delta = current_q_score - prev_q_score
+                    %>
                     <div class="font-mono text-lg md:text-xl font-bold <%= 'text-yellow-400' if (game.quarter_scores&.dig(q.to_s, "home") || 0) > (game.quarter_scores&.dig(q.to_s, "away") || 0) %>">
-                      <%= game.quarter_scores&.dig(q.to_s, "home") || 0 %>
+                      <%= delta %>
                     </div>
                   <% end %>
                   <div class="font-mono text-lg md:text-xl font-black text-white/60"><%= game.home_score %></div>
@@ -210,8 +215,13 @@
                      <%= game.away_team.label %>
                   </div>
                   <% (1..4).each do |q| %>
+                    <% 
+                      current_q_score = game.quarter_scores&.dig(q.to_s, "away") || 0
+                      prev_q_score = q > 1 ? (game.quarter_scores&.dig((q-1).to_s, "away") || 0) : 0
+                      delta = current_q_score - prev_q_score
+                    %>
                     <div class="font-mono text-lg md:text-xl font-bold <%= 'text-yellow-400' if (game.quarter_scores&.dig(q.to_s, "away") || 0) > (game.quarter_scores&.dig(q.to_s, "home") || 0) %>">
-                      <%= game.quarter_scores&.dig(q.to_s, "away") || 0 %>
+                      <%= delta %>
                     </div>
                   <% end %>
                   <div class="font-mono text-lg md:text-xl font-black text-white/60"><%= game.away_score %></div>

@@ -1,5 +1,8 @@
 class ScoreboardChannel < ApplicationCable::Channel
-  ALLOWED_PAYLOAD_KEYS = %w[quarter period_seconds shot_seconds running shot_running matchup_index teams].freeze
+  ALLOWED_PAYLOAD_KEYS = %w[
+    quarter period_seconds shot_seconds running shot_running matchup_index
+    teams rotation_step home_fouls away_fouls matchup_scores quarter_history possession
+  ].freeze
   MAX_PAYLOAD_SIZE = 10_000
 
   def subscribed
@@ -65,12 +68,22 @@ class ScoreboardStore
     def default_state
       {
         "quarter" => 1,
-        "period_seconds" => 600,
+        "period_seconds" => 480,
         "shot_seconds" => 24,
         "running" => false,
         "shot_running" => false,
         "matchup_index" => 0,
-        "teams" => []
+        "rotation_step" => 0,
+        "home_fouls" => 0,
+        "away_fouls" => 0,
+        "teams" => [],
+        "matchup_scores" => [
+          { "team1" => 0, "team2" => 0 },
+          { "team1" => 0, "team2" => 0 },
+          { "team1" => 0, "team2" => 0 }
+        ],
+        "quarter_history" => {},
+        "possession" => "home"
       }
     end
 

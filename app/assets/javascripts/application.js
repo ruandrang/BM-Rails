@@ -348,18 +348,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         });
 
-        // Show/hide TEAM FOUL indicator based on foul count
-        const isLeft = containerSelector.includes('left');
-        const indicatorSelector = isLeft ? '[data-left-team-foul-indicator]' : '[data-right-team-foul-indicator]';
-        const indicator = scoreboardRoot.querySelector(indicatorSelector);
 
-        if (indicator) {
-          if (foulCount >= 5) {
-            indicator.classList.remove('hidden');
-          } else {
-            indicator.classList.add('hidden');
-          }
-        }
       };
 
       updateFoulCircles('[data-foul-indicators-left]', leftFouls);
@@ -579,18 +568,11 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
 
-        if (indicatorEl) {
-          if (count >= 5) {
-            indicatorEl.classList.remove("hidden");
-          } else {
-            indicatorEl.classList.add("hidden");
-          }
-        }
+
       };
 
       updateFoulVisuals("home", state.home_fouls || 0);
       updateFoulVisuals("away", state.away_fouls || 0);
-
 
       // Display page specific updates
       setText("[data-home-score]", home.score);
@@ -1156,6 +1138,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     if (data.success) {
                       alert(`경기 종료!\n최종 점수: ${home.label} ${home.score} : ${away.score} ${away.label}\n결과: ${data.result}`);
+                      window.location.href = `/clubs/${clubId}/matches/${matchId}`;
                     } else {
                       alert('점수 저장 실패: ' + (data.error || '알 수 없는 오류'));
                     }
