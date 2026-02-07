@@ -71,8 +71,8 @@ class ClubsController < ApplicationController
     end
 
     payload = JSON.parse(file.read)
-    UserImporter.new(current_user, payload).call
-    redirect_to clubs_path, notice: "모든 데이터가 복원되었습니다."
+    stats = UserImporter.new(current_user, payload).call
+    redirect_to clubs_path, notice: import_result_message(stats)
   rescue JSON::ParserError
     redirect_to backup_clubs_path, alert: "JSON 파일 형식이 올바르지 않습니다."
   rescue ArgumentError => e
@@ -90,5 +90,37 @@ class ClubsController < ApplicationController
 
   def club_params
     params.require(:club).permit(:name, :icon)
+  end
+
+  def import_result_message(stats)
+    parts = []
+
+    if stats[:clubs_added] > 0
+      parts << "새 클럽 #{stats[:clubs_added]}개"
+    end
+    if stats[:members_added] > 0
+      parts << "새 멤버 #{stats[:members_added]}명"
+    end
+    if stats[:matches_added] > 0
+      parts << "새 경기 #{stats[:matches_added]}개"
+    end
+
+    skipped_parts = []
+    if stats[:members_skipped] > 0
+      skipped_parts << "멤버 #{stats[:members_skipped]}명"
+    end
+    if stats[:matches_skipped] > 0
+      skipped_parts << "경기 #{stats[:matches_skipped]}개"
+    end
+
+    if parts.any?
+      message = "#{parts.join(', ')} 추가 완료."
+      message += " (이미 존재: #{skipped_parts.join(', ')})" if skipped_parts.any?
+      message
+    elsif skipped_parts.any?
+      "모든 데이터가 이미 존재합니다. (#{skipped_parts.join(', ')} 건너뜀)"
+    else
+      "복원할 데이터가 없습니다."
+    end
   end
 end

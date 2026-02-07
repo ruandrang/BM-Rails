@@ -5,18 +5,33 @@ class UserImporter
   end
 
   def call
-    ActiveRecord::Base.transaction do
-      # 기존 클럽 데이터 모두 삭제
-      @user.clubs.destroy_all
+    total_stats = { clubs_added: 0, clubs_merged: 0, members_added: 0, members_skipped: 0, matches_added: 0, matches_skipped: 0 }
 
-      # 클럽 데이터 복원
+    ActiveRecord::Base.transaction do
+      existing_clubs = @user.clubs.index_by { |c| c.name.to_s.strip.downcase }
+
       Array(@payload["clubs"]).each do |club_data|
-        # ClubImporter가 업데이트 방식으로 동작하므로,
-        # 일단 빈 클럽을 생성한 후 Importer에게 위임
-        # (ClubImporter 내부에서 name, icon 등을 다시 update 함)
-        club = @user.clubs.create!(name: "Restoring...", icon: "basketball")
-        ClubImporter.new(club, club_data).call
+        club_name = club_data.dig("club", "name").to_s.strip
+        club_name_key = club_name.downcase
+
+        club = existing_clubs[club_name_key]
+
+        if club
+          total_stats[:clubs_merged] += 1
+        else
+          club = @user.clubs.create!(name: club_name, icon: "basketball")
+          existing_clubs[club_name_key] = club
+          total_stats[:clubs_added] += 1
+        end
+
+        stats = ClubImporter.new(club, club_data).call
+        total_stats[:members_added] += stats[:members_added]
+        total_stats[:members_skipped] += stats[:members_skipped]
+        total_stats[:matches_added] += stats[:matches_added]
+        total_stats[:matches_skipped] += stats[:matches_skipped]
       end
     end
+
+    total_stats
   end
 end
