@@ -103,7 +103,8 @@ document.addEventListener("DOMContentLoaded", () => {
         { team1: 0, team2: 0 }
       ],
       quarter_history: {}, // { pairIdx: { quarterNum: { team1: score, team2: score } } }
-      possession: 'away' // 'home' or 'away'
+      possession: 'away', // 'home' or 'away'
+      manual_swap: false
     });
 
     const formatTime = (seconds) => {
@@ -132,7 +133,9 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const isSidesSwapped = () => {
-      return currentQuarter() >= 3;
+      // Automatic swap for Q3/Q4, or manual swap override
+      const autoSwap = currentQuarter() >= 3;
+      return state.manual_swap ? !autoSwap : autoSwap;
     };
 
     const currentMatchup = () => {
@@ -355,19 +358,32 @@ document.addEventListener("DOMContentLoaded", () => {
       updateFoulCircles('[data-foul-indicators-right]', rightFouls);
 
       // Possession arrows (new display)
-      const arrowLeft = scoreboardRoot.querySelector(".possession-arrow-left");
-      const arrowRight = scoreboardRoot.querySelector(".possession-arrow-right");
-      if (arrowLeft && arrowRight) {
-        if (state.possession === 'home') {
-          arrowLeft.classList.remove('hidden');
-          arrowRight.classList.add('hidden');
-        } else if (state.possession === 'away') {
-          arrowLeft.classList.add('hidden');
-          arrowRight.classList.remove('hidden');
+      // Possession arrows (new display)
+      const arrowsLeft = scoreboardRoot.querySelectorAll(".possession-arrow-left");
+      const arrowsRight = scoreboardRoot.querySelectorAll(".possession-arrow-right");
+
+      const centerText = scoreboardRoot.querySelector(".center-vs-text");
+      if (centerText) {
+        if (state.possession === 'home' || state.possession === 'away') {
+          centerText.classList.add('hidden');
         } else {
-          arrowLeft.classList.add('hidden');
-          arrowRight.classList.add('hidden');
+          centerText.classList.remove('hidden');
         }
+      }
+
+      const showArrows = (arrows, show) => {
+        arrows.forEach(a => a.classList.toggle('hidden', !show));
+      };
+
+      if (state.possession === 'home') {
+        showArrows(arrowsLeft, true);
+        showArrows(arrowsRight, false);
+      } else if (state.possession === 'away') {
+        showArrows(arrowsLeft, false);
+        showArrows(arrowsRight, true);
+      } else {
+        showArrows(arrowsLeft, false);
+        showArrows(arrowsRight, false);
       }
 
       // Legacy display elements
@@ -398,10 +414,22 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (state.rotation_step >= 12) {
           nextQuarterBtn.style.display = 'none';
         } else {
-          nextQuarterBtn.textContent = "NEXT QUARTER";
+          nextQuarterBtn.textContent = "다음 쿼터";
           nextQuarterBtn.classList.remove("bg-red-600", "hover:bg-red-700");
           nextQuarterBtn.style.display = '';
         }
+      }
+
+      const toggleMainBtn = scoreboardRoot.querySelector('[data-action="toggle-main"]');
+      if (toggleMainBtn) {
+        const span = toggleMainBtn.querySelector('span');
+        if (span) span.textContent = state.running ? "경기 멈춤" : "경기 시작";
+        toggleMainBtn.style.backgroundColor = state.running ? '#dc2626' : '#22C55E';
+      }
+
+      const toggleShotBtn = scoreboardRoot.querySelector('[data-action="toggle-shot"]');
+      if (toggleShotBtn) {
+        toggleShotBtn.textContent = state.shot_running ? "샷클락 멈춤" : "샷클락 시작";
       }
 
       const possHomeBtn = scoreboardRoot.querySelector('[data-possession-home-btn]');
@@ -423,30 +451,45 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      const renderRoster = (homeParams, awayParams) => {
+      const renderRoster = () => {
         const rosterEl = scoreboardRoot.querySelector("[data-roster-display]");
         if (!rosterEl) return;
 
-        // Find actual team objects from state.teams using IDs to fetch members
-        // We need to match by ID because homeParams/awayParams are derived objects
-        const realHome = state.teams.find(t => t.id === homeParams.id);
-        const realAway = state.teams.find(t => t.id === awayParams.id);
+        const positionColors = {
+          "PG": "#3B82F6",
+          "SG": "#8B5CF6",
+          "SF": "#10B981",
+          "PF": "#F59E0B",
+          "C": "#EF4444"
+        };
 
-        const getMembersHtml = (team, isHome) => {
+        const getTeamRosterHtml = (team) => {
           if (!team || !team.members || team.members.length === 0) {
-            return `<div class="text-gray-400 text-sm italic">No members</div>`;
+            return `<div class="flex-1 flex flex-col gap-4">
+                      <div class="flex items-center gap-3 border-b border-gray-100 pb-2 mb-2">
+                        <span class="text-2xl">${team?.icon || '🛡️'}</span>
+                        <span class="font-black text-lg uppercase text-gray-900">${team?.label || '팀'} 명단</span>
+                      </div>
+                      <div class="text-gray-400 text-sm italic">명단 없음</div>
+                    </div>`;
           }
-          // Sort by back_number if available, else name
+
           const sortedMembers = [...team.members].sort((a, b) => (a.back_number || 999) - (b.back_number || 999));
 
           return `
-              <div class="flex flex-col gap-2 ${isHome ? 'items-start' : 'items-end'}">
-                 <h4 class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-1">${team.label} ROSTER</h4>
-                 <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+              <div class="flex-1 flex flex-col gap-3 min-w-[200px]">
+                 <div class="flex items-center gap-2 border-b-2 border-gray-100 pb-2 mb-1">
+                    <span class="text-2xl">${team.icon || '🛡️'}</span>
+                    <span class="font-black text-lg uppercase text-gray-900 truncate">${team.label}</span>
+                 </div>
+                 <div class="grid grid-cols-2 gap-2">
                     ${sortedMembers.map(m => `
-                      <div class="flex items-center gap-2 text-sm text-gray-700">
-                        <span class="font-mono font-bold text-gray-400 w-6 text-right">${m.back_number || '-'}</span>
-                        <span class="font-bold">${m.name}</span>
+                      <div class="flex items-center justify-between bg-gray-50 border border-gray-100 rounded-lg px-2 py-2 shadow-sm">
+                        <span class="font-bold text-gray-800 text-xs truncate mr-1">${m.name}</span>
+                        <span class="px-2 py-0.5 rounded-full text-[8px] font-black text-white shadow-sm flex-shrink-0 border border-white/20" 
+                              style="background-color: ${positionColors[m.position] || '#6B7280'}">
+                          ${m.position || '?'}
+                        </span>
                       </div>
                     `).join('')}
                  </div>
@@ -455,21 +498,21 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         rosterEl.innerHTML = `
-            ${getMembersHtml(realHome, true)}
-            <div class="w-px bg-gray-200 self-stretch mx-4"></div>
-            ${getMembersHtml(realAway, false)}
+            <div class="flex flex-wrap lg:flex-nowrap gap-8 w-full">
+              ${state.teams.map(t => getTeamRosterHtml(t)).join('')}
+            </div>
          `;
       };
 
       // Call Roster Render
-      renderRoster(home, away);
+      renderRoster();
 
       const renderQuarterTable = () => {
         const tableContainer = scoreboardRoot.querySelector("[data-quarter-table]");
         if (!tableContainer) return;
 
         if (state.teams.length < 3) {
-          tableContainer.innerHTML = "<p class='text-center text-gray-500'>Need 3 teams for rotation table.</p>";
+          tableContainer.innerHTML = "<p class='text-center text-gray-500'>로테이션 표를 위해 3팀이 필요합니다.</p>";
           return;
         }
 
@@ -480,28 +523,25 @@ document.addEventListener("DOMContentLoaded", () => {
            <table class="w-full text-center text-base border-collapse">
              <thead>
                <tr class="bg-gray-100 border-b border-gray-200 text-gray-600 font-bold uppercase tracking-wider text-sm">
-                 <th class="p-4 text-left">Matchup</th>
+                 <th class="p-4 text-left">경기 (Matchup)</th>
                  <th class="p-4 w-20">1Q</th>
                  <th class="p-4 w-20">2Q</th>
                  <th class="p-4 w-20">3Q</th>
                  <th class="p-4 w-20">4Q</th>
-                 <th class="p-4 w-24">Final</th>
+                 <th class="p-4 w-24">최종</th>
                </tr>
              </thead>
              <tbody class="divide-y divide-gray-200">
          `;
 
+        const activeMatchupIdx = state.rotation_step % 3;
+        const currentQ = state.quarter;
+
         pairs.forEach((pair, pairIdx) => {
           const t1 = state.teams[pair[0]];
           const t2 = state.teams[pair[1]];
           const scores = state.quarter_history[pairIdx] || {};
-
-          // Check if this is the currently active matchup
-          // Active if state.rotation_step % 3 === pairIdx
-          // If active, maybe show current score in the "current quarter" slot?
-          // The user asked for "update when quarter ends", but usually showing live progress is nice.
-          // But strict reading: "update when quarter ends".
-          // Let's stick to saved history.
+          const isActiveRow = pairIdx === activeMatchupIdx;
 
           const getScoreCell = (q) => {
             if (scores[q]) {
@@ -513,12 +553,17 @@ document.addEventListener("DOMContentLoaded", () => {
             return `<span class="text-gray-300 text-lg">-</span>`;
           };
 
-          // Final Result: Only if Q4 is done? Or latest?
-          // Let's show empty for now unless game over? Or just show empty column as in image (it was empty).
+          const getCellClass = (q) => {
+            let base = "p-4 ";
+            if (isActiveRow && currentQ === q) {
+              return base + "bg-blue-50 border-x-2 border-blue-200 ring-2 ring-blue-500/20 z-10 relative";
+            }
+            return base + (q % 2 === 0 ? "bg-gray-50/50" : "bg-white/50");
+          };
 
           html += `
-               <tr class="hover:bg-gray-50 transition-colors">
-                 <td class="p-4 text-left">
+               <tr class="${isActiveRow ? 'bg-gray-100/80 shadow-inner' : 'hover:bg-gray-50'} transition-all duration-300">
+                 <td class="p-4 text-left border-l-4 ${isActiveRow ? 'border-blue-500' : 'border-transparent'}">
                    <div class="flex flex-col gap-2">
                      <div class="flex items-center gap-2">
                        <span class="text-xl">${t1.icon || '🛡️'}</span>
@@ -530,11 +575,11 @@ document.addEventListener("DOMContentLoaded", () => {
                      </div>
                    </div>
                  </td>
-                 <td class="p-4 bg-white/50">${getScoreCell(1)}</td>
-                 <td class="p-4 bg-gray-50/50">${getScoreCell(2)}</td>
-                 <td class="p-4 bg-white/50">${getScoreCell(3)}</td>
-                 <td class="p-4 bg-gray-50/50">${getScoreCell(4)}</td>
-                 <td class="p-4 text-gray-400"></td> 
+                 <td class="${getCellClass(1)}">${getScoreCell(1)}</td>
+                 <td class="${getCellClass(2)}">${getScoreCell(2)}</td>
+                 <td class="${getCellClass(3)}">${getScoreCell(3)}</td>
+                 <td class="${getCellClass(4)}">${getScoreCell(4)}</td>
+                 <td class="p-4 text-gray-400 font-bold"></td> 
                </tr>
              `;
         });
@@ -920,11 +965,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 break;
               case "reset-shot-24":
                 state.shot_seconds = 24;
-                state.shot_running = state.running;
+                state.shot_running = false;
                 break;
               case "reset-shot-14":
                 state.shot_seconds = 14;
-                state.shot_running = state.running;
+                state.shot_running = false;
                 break;
               case "next-quarter":
                 // 1. Save current scores to matchup_scores
@@ -1161,12 +1206,15 @@ document.addEventListener("DOMContentLoaded", () => {
                   const btn = scoreboardRoot.querySelector('[data-action="toggle-shortcuts"]');
                   if (panel.classList.contains("hidden")) {
                     panel.classList.remove("hidden");
-                    if (btn) btn.textContent = "⌨️ Hide Details";
+                    if (btn) btn.textContent = "⌨️ 상세 숨기기";
                   } else {
                     panel.classList.add("hidden");
-                    if (btn) btn.textContent = "⌨️ Show Details";
+                    if (btn) btn.textContent = "⌨️ 상세 보기";
                   }
                 }
+                break;
+              case "swap-sides":
+                state.manual_swap = !state.manual_swap;
                 break;
               case "new-game":
                 if (confirm("모든 경기 점수 데이터가 초기화 됩니다. 진행 하시겠습니까?")) {

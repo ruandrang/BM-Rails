@@ -10,9 +10,9 @@
     <header class="flex justify-between items-center mb-8 border-b border-gray-200 pb-6 relative">
       <div class="flex items-center gap-4">
         <h1 class="text-3xl font-black tracking-tighter italic text-gray-900">
-          CONTROL <span class="text-[#FF6B35]">PANEL</span>
+          제어 <span class="text-[#FF6B35]">패널</span>
         </h1>
-        <p class="text-gray-500 text-sm mt-1 font-mono">CONNECTED</p>
+        <p class="text-gray-500 text-sm mt-1 font-mono">연결됨</p>
       </div>
 
       <!-- Center Info -->
@@ -23,12 +23,12 @@
 
       <div class="flex items-center gap-3">
         <% if @match.id.to_s.start_with?("standalone_") %>
-          <%= link_to "OPEN DISPLAY", standalone_display_path, target: "_blank", class: "btn btn-sm btn-outline border-gray-300 text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-400" %>
+          <%= link_to "디스플레이 열기", standalone_display_path, target: "_blank", class: "btn btn-sm btn-outline border-gray-300 text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-400" %>
         <% else %>
-          <%= link_to "OPEN DISPLAY", scoreboard_display_club_match_path(@club, @match), target: "_blank", class: "btn btn-sm btn-outline border-gray-300 text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-400" %>
+          <%= link_to "디스플레이 열기", scoreboard_display_club_match_path(@club, @match), target: "_blank", class: "btn btn-sm btn-outline border-gray-300 text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-400" %>
         <% end %>
         <div class="px-3 py-1 rounded border border-[#22C55E]/30 bg-[#22C55E]/10 text-[#22C55E] text-xs font-bold tracking-wider">
-          LIVE
+          라이브
         </div>
       </div>
     </header>
@@ -40,7 +40,7 @@
       <section class="lg:col-span-5 flex flex-col gap-6">
         <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
           <div class="flex justify-between items-center mb-4">
-             <h2 class="text-gray-500 text-[10px] tracking-[2px] font-bold uppercase">Game Timer</h2>
+             <h2 class="text-gray-500 text-[10px] tracking-[2px] font-bold uppercase">경기 타이머</h2>
              <span class="text-[#E53935] font-black text-3xl" data-scoreboard-quarter>1Q</span>
           </div>
           
@@ -63,14 +63,14 @@
           <div class="grid grid-cols-2 gap-3 mb-4">
             <button class="btn btn-lg bg-[#22C55E] hover:bg-[#15803d] text-white border-none font-black text-2xl h-20 rounded-xl shadow-md transform active:scale-95 transition-all flex items-center justify-center gap-2"
                     data-action="toggle-main"
-                    data-start-text="START"
-                    data-stop-text="STOP">
-              <span>START</span>
+                    data-start-text="경기 시작"
+                    data-stop-text="경기 멈춤">
+              <span>경기 시작</span>
             </button>
             <div class="flex flex-col gap-2">
                <button class="btn btn-outline h-20 px-6 rounded-xl border-2 border-gray-300 text-gray-600 font-bold text-lg hover:bg-gray-100 hover:text-gray-900 hover:border-gray-400"
                   data-action="reset-main">
-                RESET
+                리셋
               </button>
             </div>
           </div>
@@ -78,7 +78,7 @@
 
         <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
            <div class="flex items-center justify-between mb-4">
-             <h2 class="text-gray-500 text-[10px] tracking-[2px] font-bold uppercase">Shot Clock</h2>
+             <h2 class="text-gray-500 text-[10px] tracking-[2px] font-bold uppercase">샷클락</h2>
            </div>
            
            <div class="flex gap-4">
@@ -90,7 +90,7 @@
               <div class="flex flex-col gap-2 w-32">
                 <button class="btn flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 border-none font-bold" data-action="reset-shot-24">24s</button>
                 <button class="btn flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 border-none font-bold" data-action="reset-shot-14">14s</button>
-                <button class="btn flex-1 btn-outline border-gray-300 text-gray-500 hover:bg-gray-100 hover:text-gray-800" data-action="toggle-shot">STOP</button>
+                <button class="btn flex-1 btn-outline border-gray-300 text-gray-500 hover:bg-gray-100 hover:text-gray-800" data-action="toggle-shot">멈춤</button>
               </div>
            </div>
         </div>
@@ -98,7 +98,15 @@
 
       <!-- Scores Section (Right) -->
       <section class="lg:col-span-7 grid grid-cols-2 gap-6 relative">
-        <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center font-black text-gray-400 text-xs border border-gray-200 z-10">VS</div>
+        <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center font-black text-gray-400 text-xs border border-gray-200 z-10 overflow-hidden">
+          <svg width="24" height="24" viewBox="0 0 24 24" class="possession-arrow-left hidden" style="fill: #E53935;">
+            <polygon points="24,12 6,0 6,8 0,8 0,16 6,16 6,24" />
+          </svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" class="possession-arrow-right hidden" style="fill: #3B82F6;">
+            <polygon points="0,12 18,0 18,8 24,8 24,16 18,16 18,24" />
+          </svg>
+          <span class="center-vs-text">VS</span>
+        </div>
 
         <!-- Home Team -->
         <div class="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col gap-4 text-center shadow-sm relative overflow-hidden group">
@@ -120,11 +128,11 @@
           </div>
           <div class="grid grid-cols-2 gap-2 mt-2">
             <button class="btn h-10 bg-gray-50 hover:bg-gray-100 text-gray-600 border border-gray-200 text-sm font-bold rounded-lg" data-action="sub-home">-1</button>
-            <button class="btn h-10 bg-gray-50 hover:bg-red-50 text-red-500 border border-red-100 text-sm font-bold rounded-lg" data-action="reset-home-score">RESET</button>
+            <button class="btn h-10 bg-gray-50 hover:bg-red-50 text-red-500 border border-red-100 text-sm font-bold rounded-lg" data-action="reset-home-score">리셋</button>
           </div>
           <div class="flex justify-between items-center mt-2 px-2">
             <div class="flex items-center gap-2">
-               <span class="text-sm font-bold text-gray-400 uppercase">Fouls</span>
+               <span class="text-sm font-bold text-gray-400 uppercase">파울</span>
                <div class="join border border-gray-200 rounded-lg overflow-hidden">
                  <button class="join-item btn btn-sm btn-ghost border-r border-gray-200 bg-white" data-action="decrement-home-fouls">-</button>
                  <button class="join-item btn btn-sm btn-active bg-gray-50 cursor-default w-12 text-gray-900 text-lg font-bold border-none" data-home-fouls>0</button>
@@ -155,11 +163,11 @@
           </div>
           <div class="grid grid-cols-2 gap-2 mt-2">
             <button class="btn h-10 bg-gray-50 hover:bg-gray-100 text-gray-600 border border-gray-200 text-sm font-bold rounded-lg" data-action="sub-away">-1</button>
-            <button class="btn h-10 bg-gray-50 hover:bg-red-50 text-red-500 border border-red-100 text-sm font-bold rounded-lg" data-action="reset-away-score">RESET</button>
+            <button class="btn h-10 bg-gray-50 hover:bg-red-50 text-red-500 border border-red-100 text-sm font-bold rounded-lg" data-action="reset-away-score">리셋</button>
           </div>
           <div class="flex justify-between items-center mt-2 px-2">
             <div class="flex items-center gap-2">
-               <span class="text-sm font-bold text-gray-400 uppercase">Fouls</span>
+               <span class="text-sm font-bold text-gray-400 uppercase">파울</span>
                <div class="join border border-gray-200 rounded-lg overflow-hidden">
                  <button class="join-item btn btn-sm btn-ghost border-r border-gray-200 bg-white" data-action="decrement-away-fouls">-</button>
                  <button class="join-item btn btn-sm btn-active bg-gray-50 cursor-default w-12 text-gray-900 text-lg font-bold border-none" data-away-fouls>0</button>
@@ -173,42 +181,49 @@
     </div>
 
     <!-- Footer Actions -->
-    <div class="mt-8 border-t border-gray-200 pt-6 flex justify-between items-start">
+    <div class="mt-8 border-t border-gray-200 pt-6">
       
-      <!-- Quick Actions -->
-      <% unless @match.id.to_s.start_with?("standalone_") %>
-        <div>
-          <h4 class="text-gray-500 text-[10px] tracking-[2px] font-bold mb-4 uppercase">Quick Actions</h4>
-          <div class="flex gap-4">
-            <button class="btn btn-sm border-gray-300 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-400 shadow-sm"
-                    data-action="next-quarter">NEXT QUARTER</button>
-            <button class="btn btn-sm border-red-200 bg-red-50 text-red-600 hover:bg-red-100 hover:border-red-300 shadow-sm"
-                    data-action="new-game">RESET GAME</button>
-            <button class="btn btn-sm border-green-300 bg-green-50 text-green-700 hover:bg-green-100 hover:border-green-400 shadow-sm font-bold"
+      <!-- Quick Actions Bar -->
+      <div class="flex items-center flex-wrap gap-8 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+        
+        <!-- Main Controls -->
+        <div class="flex items-center gap-3">
+          <button class="btn btn-md px-8 py-4 border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900 shadow-sm font-black text-xl h-14 flex items-center gap-2"
+                  data-action="buzzer">🔔 BUZZER</button>
+          <button class="btn btn-md px-6 border-red-100 bg-red-50 text-red-600 hover:bg-red-100 shadow-sm font-bold h-14"
+                  data-action="reset-all">🔄 전체 리셋</button>
+          <button class="btn btn-md px-6 border-blue-100 bg-blue-50 text-blue-600 hover:bg-blue-100 shadow-sm font-bold h-14"
+                  data-action="swap-sides">🔄 점수 바꾸기</button>
+        </div>
+
+        <% unless @match.id.to_s.start_with?("standalone_") %>
+          <div class="w-px h-10 bg-gray-200"></div>
+          
+          <!-- Match Progress Controls -->
+          <div class="flex items-center gap-3">
+            <button class="btn btn-md px-5 border-gray-200 bg-white text-gray-600 hover:bg-gray-50 shadow-sm font-bold h-14"
+                    data-action="next-quarter">다음 쿼터</button>
+            <button class="btn btn-md px-5 border-red-100 bg-red-50 text-red-600 hover:bg-red-100 shadow-sm font-bold h-14"
+                    data-action="new-game">경기 리셋</button>
+            <button class="btn btn-md px-6 border-green-200 bg-green-50 text-green-700 hover:bg-green-100 shadow-sm font-bold h-14"
                     data-action="finish-game">🏁 경기 종료</button>
           </div>
+        <% end %>
+
+        <div class="w-px h-10 bg-gray-200"></div>
+
+        <!-- Attack Direction (Possession) -->
+        <div class="flex items-center gap-4">
+          <span class="text-gray-500 text-xs font-bold uppercase tracking-widest">공격방향</span>
+          <div class="flex gap-2">
+            <button class="btn btn-md border-gray-200 bg-white text-gray-400 hover:bg-[#E53935] hover:text-white shadow-sm w-14 h-14 font-bold text-2xl"
+                    data-action="possession-home" data-possession-home-btn>◀</button>
+            <button class="btn btn-md border-gray-200 bg-white text-gray-400 hover:bg-[#3B82F6] hover:text-white shadow-sm w-14 h-14 font-bold text-2xl"
+                    data-action="possession-away" data-possession-away-btn>▶</button>
+          </div>
         </div>
-      <% end %>
 
-      <!-- Buzzer & Global Reset -->
-      <div class="flex items-center gap-4">
-        <button class="btn btn-md px-8 py-4 border-gray-300 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-400 shadow-sm font-black text-xl h-16"
-                data-action="buzzer">🔔 BUZZER</button>
-        <button class="btn btn-md px-6 border-red-200 bg-red-50 text-red-600 hover:bg-red-100 hover:border-red-300 shadow-sm font-bold h-16"
-                data-action="reset-all">🔄 전체 리셋</button>
       </div>
-
-      <!-- Possession -->
-      <div>
-        <h4 class="text-gray-500 text-[10px] tracking-[2px] font-bold mb-4 uppercase text-right">Possession</h4>
-        <div class="flex gap-2">
-          <button class="btn btn-sm border-gray-300 bg-white text-gray-400 hover:bg-[#E53935] hover:text-white hover:border-[#E53935] shadow-sm w-12 font-bold text-lg"
-                  data-action="possession-home" data-possession-home-btn>◀</button>
-          <button class="btn btn-sm border-gray-300 bg-white text-gray-400 hover:bg-[#3B82F6] hover:text-white hover:border-[#3B82F6] shadow-sm w-12 font-bold text-lg"
-                  data-action="possession-away" data-possession-away-btn>▶</button>
-        </div>
-      </div>
-
     </div>
 
     <!-- Footer Area: Score Table, Roster & Shortcuts -->
@@ -224,7 +239,7 @@
         <!-- Toggle Button -->
         <div class="mb-4">
              <button data-action="toggle-shortcuts" class="btn btn-xs bg-white border border-gray-300 shadow-sm text-gray-500 rounded-full px-4 hover:bg-gray-50 transition-all">
-                ⌨️ Hide Details
+                ⌨️ 상세 숨기기
              </button>
         </div>
 
@@ -238,18 +253,18 @@
                 <div class="flex flex-col gap-4">
                   <div class="flex items-center gap-4">
                     <kbd class="bg-gray-100 text-gray-900 px-3 py-1 rounded-lg font-black min-w-[60px] text-center shadow-sm border border-gray-300 border-b-4 text-lg">Space</kbd>
-                    <span class="text-base">Start / Stop Game Clock</span>
+                    <span class="text-base">경기 시간 시작 / 멈춤</span>
                   </div>
                   <div class="flex items-center gap-4">
                     <div class="flex gap-2">
                       <kbd class="bg-gray-100 text-gray-900 px-3 py-1 rounded-lg font-black min-w-[36px] text-center shadow-sm border border-gray-300 border-b-4 text-lg">Z</kbd>
                       <kbd class="bg-gray-100 text-gray-900 px-3 py-1 rounded-lg font-black min-w-[36px] text-center shadow-sm border border-gray-300 border-b-4 text-lg">X</kbd>
                     </div>
-                    <span class="text-base">Reset Shot Clock (14s / 24s)</span>
+                    <span class="text-base">샷클락 리셋 (14초 / 24초)</span>
                   </div>
                   <div class="flex items-center gap-4">
                     <kbd class="bg-gray-100 text-gray-900 px-3 py-1 rounded-lg font-black min-w-[36px] text-center shadow-sm border border-gray-300 border-b-4 text-lg">C</kbd>
-                    <span class="text-base">Stop Shot Clock</span>
+                    <span class="text-base">샷클락 멈춤 / 시작</span>
                   </div>
                 </div>
 
@@ -263,7 +278,7 @@
                       <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-lg">2</kbd>
                       <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-lg">3</kbd>
                     </div>
-                    <span class="text-base">Left Score (+1, +2, +3)</span>
+                    <span class="text-base">왼쪽 팀 득점 (+1, +2, +3)</span>
                   </div>
                   <div class="flex items-center gap-4">
                     <div class="flex gap-2">
@@ -271,7 +286,7 @@
                       <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-lg">9</kbd>
                       <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-lg">0</kbd>
                     </div>
-                    <span class="text-base">Right Score (+1, +2, +3)</span>
+                    <span class="text-base">오른쪽 팀 득점 (+1, +2, +3)</span>
                   </div>
                 </div>
 

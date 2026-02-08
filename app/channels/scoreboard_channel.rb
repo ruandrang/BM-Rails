@@ -91,7 +91,8 @@ class ScoreboardStore
           { "team1" => 0, "team2" => 0 }
         ],
         "quarter_history" => {},
-        "possession" => "away"
+        "possession" => "away",
+        "manual_swap" => false
       }
     end
 
