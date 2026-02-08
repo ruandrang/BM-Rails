@@ -3,6 +3,8 @@ class Match < ApplicationRecord
   has_many :teams, dependent: :destroy
   has_many :games, dependent: :destroy
 
+  before_create :generate_share_token
+
   validates :played_on, presence: true
   validates :teams_count, inclusion: { in: [ 2, 3 ] }
 
@@ -24,5 +26,11 @@ class Match < ApplicationRecord
 
   def finished?
     games.any? && games.all? { |g| g.result != "pending" }
+  end
+
+  private
+
+  def generate_share_token
+    self.share_token ||= SecureRandom.urlsafe_base64(16)
   end
 end

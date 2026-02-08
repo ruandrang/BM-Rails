@@ -1,3 +1,73 @@
+// HTML escape utility to prevent XSS via innerHTML
+const escapeHtml = (str) => {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
+// Reusable list sorting function (used by members, matches/new, stats views)
+function initSortableList(listSelector, itemSelector, defaultDirections) {
+  const POSITION_ORDER = { "PG": 1, "SG": 2, "SF": 3, "PF": 4, "C": 5 };
+
+  document.addEventListener("DOMContentLoaded", function() {
+    const sortButtons = document.querySelectorAll("[data-sort]");
+    const list = document.querySelector(listSelector);
+    if (!list) return;
+
+    const sortState = {};
+
+    sortButtons.forEach(btn => {
+      btn.addEventListener("click", function() {
+        const sortKey = this.dataset.sort;
+
+        if (!sortState[sortKey]) {
+          sortState[sortKey] = (defaultDirections && defaultDirections[sortKey]) || "desc";
+        } else {
+          sortState[sortKey] = sortState[sortKey] === "asc" ? "desc" : "asc";
+        }
+
+        const items = Array.from(list.querySelectorAll(itemSelector));
+
+        items.sort((a, b) => {
+          let aVal = a.dataset[sortKey];
+          let bVal = b.dataset[sortKey];
+
+          if (sortKey === "position") {
+            aVal = POSITION_ORDER[aVal] || 99;
+            bVal = POSITION_ORDER[bVal] || 99;
+          } else if (["height", "jersey", "games", "member-id"].includes(sortKey)) {
+            aVal = parseInt(aVal) || 0;
+            bVal = parseInt(bVal) || 0;
+          } else if (sortKey === "winrate") {
+            aVal = parseFloat(aVal) || 0.0;
+            bVal = parseFloat(bVal) || 0.0;
+          }
+
+          if (aVal === bVal) return 0;
+          const modifier = sortState[sortKey] === "asc" ? 1 : -1;
+          return aVal > bVal ? modifier : -modifier;
+        });
+
+        items.forEach(item => list.appendChild(item));
+
+        sortButtons.forEach(b => {
+          b.classList.remove("btn-active", "btn-primary", "text-primary-content");
+          const text = b.textContent.trim().split(" ")[0];
+          b.innerHTML = text;
+        });
+
+        this.classList.add("btn-active", "btn-primary", "text-primary-content");
+        const arrow = sortState[sortKey] === "asc" ? "↑" : "↓";
+        this.innerHTML += ` <span class="ml-1">${arrow}</span>`;
+      });
+    });
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   // Flash Messages Auto-dismiss
   const flashMessages = document.getElementById("flash-messages");
@@ -177,7 +247,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div style="background: ${COLORS.cardBg}; padding: 24px; border-radius: 2px;" data-team="home">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
             <span style="color: ${COLORS.homeAccent}; font-size: 10px; font-weight: 600; letter-spacing: 2px; font-family: Inter, sans-serif;">HOME</span>
-            <span style="color: ${COLORS.text}; font-size: 14px; font-weight: 600; font-family: Inter, sans-serif;">TEAM ${home.label}</span>
+            <span style="color: ${COLORS.text}; font-size: 14px; font-weight: 600; font-family: Inter, sans-serif;">TEAM ${escapeHtml(home.label)}</span>
           </div>
           <div style="display: flex; align-items: center; justify-content: center; gap: 24px; margin-bottom: 16px;">
             <button style="width: 48px; height: 48px; background: ${COLORS.bg}; border: 1px solid ${COLORS.border}; border-radius: 2px; display: flex; align-items: center; justify-content: center; cursor: pointer;" data-team-action="sub-home">
@@ -203,7 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div style="background: ${COLORS.cardBg}; padding: 24px; border-radius: 2px;" data-team="away">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
             <span style="color: ${COLORS.awayAccent}; font-size: 10px; font-weight: 600; letter-spacing: 2px; font-family: Inter, sans-serif;">AWAY</span>
-            <span style="color: ${COLORS.text}; font-size: 14px; font-weight: 600; font-family: Inter, sans-serif;">TEAM ${away.label}</span>
+            <span style="color: ${COLORS.text}; font-size: 14px; font-weight: 600; font-family: Inter, sans-serif;">TEAM ${escapeHtml(away.label)}</span>
           </div>
           <div style="display: flex; align-items: center; justify-content: center; gap: 24px; margin-bottom: 16px;">
             <button style="width: 48px; height: 48px; background: ${COLORS.bg}; border: 1px solid ${COLORS.border}; border-radius: 2px; display: flex; align-items: center; justify-content: center; cursor: pointer;" data-team-action="sub-away">
@@ -261,10 +331,10 @@ document.addEventListener("DOMContentLoaded", () => {
         <!-- Home Team -->
         <div style="width: 280px; height: 300px; background: ${COLORS.displayCardBg}; border: 1px solid ${COLORS.displayBorder}; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
           <div style="width: 72px; height: 72px; background: ${COLORS.homeLogoBg}; border: 2px solid #E53935; display: flex; align-items: center; justify-content: center;">
-            <span style="color: white; font-size: 22px; font-weight: 800; font-family: Inter, sans-serif;">${home.label}</span>
+            <span style="color: white; font-size: 22px; font-weight: 800; font-family: Inter, sans-serif;">${escapeHtml(home.label)}</span>
           </div>
           <span style="color: #999999; font-size: 11px; font-weight: 500; letter-spacing: 2px; font-family: Inter, sans-serif;">HOME TEAM</span>
-          <span style="color: white; font-size: 18px; font-weight: 700; letter-spacing: 1px; font-family: Inter, sans-serif;">TEAM ${home.label}</span>
+          <span style="color: white; font-size: 18px; font-weight: 700; letter-spacing: 1px; font-family: Inter, sans-serif;">TEAM ${escapeHtml(home.label)}</span>
           <span style="color: white; font-size: 80px; font-weight: 700; line-height: 1; font-family: 'JetBrains Mono', monospace;">${home.score}</span>
           <span style="color: #E53935; font-size: 10px; font-weight: 600; letter-spacing: 2px; font-family: Inter, sans-serif;">HOME</span>
           <div style="width: 40px; height: 40px; background: ${state.possession === 'home' ? '#E53935' : 'transparent'}; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: 8px;">
@@ -291,10 +361,10 @@ document.addEventListener("DOMContentLoaded", () => {
         <!-- Away Team -->
         <div style="width: 280px; height: 300px; background: ${COLORS.displayCardBg}; border: 1px solid ${COLORS.displayBorder}; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
           <div style="width: 72px; height: 72px; background: ${COLORS.awayLogoBg}; border: 2px solid ${COLORS.awayLogoBorder}; display: flex; align-items: center; justify-content: center;">
-            <span style="color: white; font-size: 22px; font-weight: 800; font-family: Inter, sans-serif;">${away.label}</span>
+            <span style="color: white; font-size: 22px; font-weight: 800; font-family: Inter, sans-serif;">${escapeHtml(away.label)}</span>
           </div>
           <span style="color: #999999; font-size: 11px; font-weight: 500; letter-spacing: 2px; font-family: Inter, sans-serif;">AWAY TEAM</span>
-          <span style="color: white; font-size: 18px; font-weight: 700; letter-spacing: 1px; font-family: Inter, sans-serif;">TEAM ${away.label}</span>
+          <span style="color: white; font-size: 18px; font-weight: 700; letter-spacing: 1px; font-family: Inter, sans-serif;">TEAM ${escapeHtml(away.label)}</span>
           <span style="color: white; font-size: 80px; font-weight: 700; line-height: 1; font-family: 'JetBrains Mono', monospace;">${away.score}</span>
           <span style="color: ${COLORS.awayLogoBorder}; font-size: 10px; font-weight: 600; letter-spacing: 2px; font-family: Inter, sans-serif;">AWAY</span>
           <div style="width: 40px; height: 40px; background: ${state.possession === 'away' ? COLORS.awayLogoBorder : 'transparent'}; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: 8px;">
@@ -306,7 +376,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const renderPreview = () => {
       const [home, away] = currentMatchup();
-      setText("[data-preview-matchup]", `팀 ${home.label} vs 팀 ${away.label}`);
+      setText("[data-preview-matchup]", `팀 ${escapeHtml(home.label)} vs 팀 ${escapeHtml(away.label)}`);
       setText("[data-preview-quarter]", `${state.quarter}Q`);
       setText("[data-preview-timer]", formatTime(state.period_seconds));
       setText("[data-preview-home]", home.score);
@@ -467,8 +537,8 @@ document.addEventListener("DOMContentLoaded", () => {
           if (!team || !team.members || team.members.length === 0) {
             return `<div class="flex-1 flex flex-col gap-4">
                       <div class="flex items-center gap-3 border-b border-gray-100 pb-2 mb-2">
-                        <span class="text-2xl">${team?.icon || '🛡️'}</span>
-                        <span class="font-black text-lg uppercase text-gray-900">${team?.label || '팀'} 명단</span>
+                        <span class="text-2xl">${escapeHtml(team?.icon) || '🛡️'}</span>
+                        <span class="font-black text-lg uppercase text-gray-900">${escapeHtml(team?.label) || '팀'} 명단</span>
                       </div>
                       <div class="text-gray-400 text-sm italic">명단 없음</div>
                     </div>`;
@@ -479,16 +549,16 @@ document.addEventListener("DOMContentLoaded", () => {
           return `
               <div class="flex-1 flex flex-col gap-3 min-w-[200px]">
                  <div class="flex items-center gap-2 border-b-2 border-gray-100 pb-2 mb-1">
-                    <span class="text-2xl">${team.icon || '🛡️'}</span>
-                    <span class="font-black text-lg uppercase text-gray-900 truncate">${team.label}</span>
+                    <span class="text-2xl">${escapeHtml(team.icon) || '🛡️'}</span>
+                    <span class="font-black text-lg uppercase text-gray-900 truncate">${escapeHtml(team.label)}</span>
                  </div>
                  <div class="grid grid-cols-2 gap-2">
                     ${sortedMembers.map(m => `
                       <div class="flex items-center justify-between bg-gray-50 border border-gray-100 rounded-lg px-2 py-2 shadow-sm">
-                        <span class="font-bold text-gray-800 text-xs truncate mr-1">${m.name}</span>
-                        <span class="px-2 py-0.5 rounded-full text-[8px] font-black text-white shadow-sm flex-shrink-0 border border-white/20" 
+                        <span class="font-bold text-gray-800 text-xs truncate mr-1">${escapeHtml(m.name)}</span>
+                        <span class="px-2 py-0.5 rounded-full text-[8px] font-black text-white shadow-sm flex-shrink-0 border border-white/20"
                               style="background-color: ${positionColors[m.position] || '#6B7280'}">
-                          ${m.position || '?'}
+                          ${escapeHtml(m.position) || '?'}
                         </span>
                       </div>
                     `).join('')}
@@ -566,12 +636,12 @@ document.addEventListener("DOMContentLoaded", () => {
                  <td class="p-4 text-left border-l-4 ${isActiveRow ? 'border-blue-500' : 'border-transparent'}">
                    <div class="flex flex-col gap-2">
                      <div class="flex items-center gap-2">
-                       <span class="text-xl">${t1.icon || '🛡️'}</span>
-                       <span class="font-bold text-gray-900 text-base">${t1.label}</span>
+                       <span class="text-xl">${escapeHtml(t1.icon) || '🛡️'}</span>
+                       <span class="font-bold text-gray-900 text-base">${escapeHtml(t1.label)}</span>
                      </div>
                      <div class="flex items-center gap-2">
-                       <span class="text-xl">${t2.icon || '🛡️'}</span>
-                       <span class="font-bold text-gray-500 text-base">${t2.label}</span>
+                       <span class="text-xl">${escapeHtml(t2.icon) || '🛡️'}</span>
+                       <span class="font-bold text-gray-500 text-base">${escapeHtml(t2.label)}</span>
                      </div>
                    </div>
                  </td>
@@ -671,12 +741,10 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         globalAudioContext = new AudioContext();
-        console.log("🎵 Global AudioContext initialized:", globalAudioContext.state);
 
         // Resume if suspended
         if (globalAudioContext.state === 'suspended') {
           globalAudioContext.resume().then(() => {
-            console.log("✅ AudioContext resumed on init");
           });
         }
       } catch (e) {
@@ -685,7 +753,6 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const playBuzzer = () => {
-      console.log("🔔 playBuzzer called! soundEnabled:", soundEnabled);
       if (!soundEnabled) return;
 
       // Initialize on first call
@@ -694,7 +761,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       try {
-        console.log("AudioContext state:", globalAudioContext?.state);
 
         if (!globalAudioContext || globalAudioContext.state === 'closed') {
           console.error("❌ AudioContext not available");
@@ -714,10 +780,8 @@ document.addEventListener("DOMContentLoaded", () => {
         oscillator.connect(gain);
         gain.connect(globalAudioContext.destination);
         oscillator.start();
-        console.log("✅ Buzzer started!");
         setTimeout(() => {
           oscillator.stop();
-          console.log("✅ Buzzer stopped!");
         }, 1500);
       } catch (error) {
         console.error("❌ Buzzer error:", error);
@@ -749,7 +813,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (state.shot_seconds > 0) {
           state.shot_seconds -= 1; // Decrement FIRST
 
-          console.log("⏱️ Shot clock:", state.shot_seconds);
 
           // Then speak if <= 5
           if (state.shot_seconds <= 5 && state.shot_seconds > 0) {
@@ -758,7 +821,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
           // Buzzer when reaching 0
           if (state.shot_seconds === 0) {
-            console.log("🔔 Shot clock reached 0! Playing buzzer...");
             state.shot_running = false;
             stopShotTimer();
             playBuzzer();
@@ -814,20 +876,16 @@ document.addEventListener("DOMContentLoaded", () => {
       silent.volume = 0;
       window.speechSynthesis.speak(silent);
       voiceInitialized = true;
-      console.log("✅ Voice initialized!");
     };
 
     const speakScore = () => {
-      console.log("🔊 speakScore called, role:", role);
 
       // Only speak if speech synthesis is supported and acting as control
       if (!window.speechSynthesis) {
-        console.warn("Speech synthesis not supported");
         return;
       }
 
       if (role !== "control") {
-        console.log("Not in control role, skipping speech");
         return;
       }
 
@@ -839,17 +897,14 @@ document.addEventListener("DOMContentLoaded", () => {
       initializeVoice();
 
       const [visualHome, visualAway] = currentMatchup();
-      console.log("Current matchup:", visualHome.label, "vs", visualAway.label);
 
       // visualHome and visualAway already have the score values from currentMatchup
       const homeScore = visualHome.score;
       const awayScore = visualAway.score;
 
-      console.log("Scores to announce:", homeScore, "vs", awayScore);
 
       // Format: "75 to 72" (Korean style: 75 대 72)
       const text = `${homeScore} 대 ${awayScore}`;
-      console.log("Speaking:", text);
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'ko-KR';
@@ -859,18 +914,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Get available voices and select Korean voice if available
       const voices = window.speechSynthesis.getVoices();
-      console.log("Available voices:", voices.length);
 
       const koreanVoice = voices.find(voice => voice.lang.startsWith('ko'));
       if (koreanVoice) {
         utterance.voice = koreanVoice;
-        console.log("Using Korean voice:", koreanVoice.name);
       } else {
-        console.warn("No Korean voice found, using default");
       }
 
       utterance.onstart = () => {
-        console.log("✅ Speech STARTED!");
       };
 
       utterance.onerror = (event) => {
@@ -878,12 +929,9 @@ document.addEventListener("DOMContentLoaded", () => {
       };
 
       utterance.onend = () => {
-        console.log("✅ Speech ended successfully");
       };
 
-      console.log("Calling speechSynthesis.speak()...");
       window.speechSynthesis.speak(utterance);
-      console.log("speak() called, speaking state:", window.speechSynthesis.speaking);
     };
 
     const handleTeamAction = (action) => {
@@ -1380,15 +1428,12 @@ document.addEventListener("DOMContentLoaded", () => {
 // 팀 멤버 드래그 앤 드롭 (SortableJS)
 // ==========================================
 const initDragAndDrop = () => {
-  console.log("initDragAndDrop called");
 
   // SortableJS가 로드되었는지 확인
   if (typeof Sortable === 'undefined') {
-    console.log("Sortable is undefined, retrying in 500ms...");
     // 혹시 CDN 로드가 늦어질 수 있으므로 0.5초 뒤 한 번 더 시도
     setTimeout(() => {
       if (typeof Sortable !== 'undefined') {
-        console.log("Sortable loaded on retry");
         initDragAndDrop();
       } else {
         console.error("Sortable failed to load");
@@ -1398,7 +1443,6 @@ const initDragAndDrop = () => {
   }
 
   const dragContainers = document.querySelectorAll('[data-team-id]');
-  console.log(`Found ${dragContainers.length} drag containers`);
 
   if (dragContainers.length === 0) return;
 
@@ -1406,11 +1450,9 @@ const initDragAndDrop = () => {
   // 간단히는 기존 인스턴스 파괴 후 재생성하거나, 클래스로 마킹
   dragContainers.forEach(container => {
     if (container.classList.contains('sortable-initialized')) {
-      console.log("Container already initialized");
       return;
     }
 
-    console.log("Initializing Sortable for container:", container);
     new Sortable(container, {
       group: 'shared', // 팀 간 이동 허용
       animation: 150,
@@ -1418,7 +1460,6 @@ const initDragAndDrop = () => {
       delay: 0,
       touchStartThreshold: 0,
       onEnd: async function (evt) {
-        console.log("Drag ended", evt);
         const { item, to, from } = evt;
 
         // 이동하지 않았거나 같은 팀 내 이동인 경우 무시
@@ -1427,7 +1468,6 @@ const initDragAndDrop = () => {
         const memberId = item.dataset.id;
         const targetTeamId = to.dataset.teamId;
 
-        console.log(`Moving member ${memberId} to team ${targetTeamId}`);
 
         // 매치 ID 찾기
         const matchContainer = document.querySelector('[data-match-drag-match-id-value]');
@@ -1463,7 +1503,7 @@ const initDragAndDrop = () => {
           }
 
           if (data.success) {
-            console.log("Member moved successfully");
+;
             // 통계 갱신을 위해 리로드
             window.location.reload();
           } else {

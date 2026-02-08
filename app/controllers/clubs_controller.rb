@@ -16,9 +16,7 @@ class ClubsController < ApplicationController
     @recent_matches = @club.matches.order(played_on: :desc).limit(5)
 
     # 승률 상위 12명 계산
-    member_stats = Rails.cache.fetch("club_#{@club.id}_member_stats", expires_in: 5.minutes) do
-      StatsCalculator.new(@club).member_stats
-    end
+    member_stats = cached_member_stats
 
     # 승률 내림차순, 경기 수 내림차순 정렬
     sorted_stats = member_stats.sort_by { |s| [ -s[:win_rate], -s[:games] ] }

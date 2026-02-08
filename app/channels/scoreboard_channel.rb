@@ -2,6 +2,7 @@ class ScoreboardChannel < ApplicationCable::Channel
   ALLOWED_PAYLOAD_KEYS = %w[
     quarter period_seconds shot_seconds running shot_running matchup_index
     teams rotation_step home_fouls away_fouls matchup_scores quarter_history possession
+    manual_swap
   ].freeze
   MAX_PAYLOAD_SIZE = 10_000
 

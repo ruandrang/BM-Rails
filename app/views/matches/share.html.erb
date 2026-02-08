@@ -18,32 +18,8 @@
       <!-- Team Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-<%= @teams.size %> gap-6 relative z-10">
         <% @teams.each do |team| %>
-          <%
-             # Calculate statistics for this team
-             wins = 0
-             draws = 0
-             losses = 0
-             
-             @games.each do |g|
-               if g.home_team_id == team.id
-                 if g.result == 'home_win'
-                   wins += 1
-                 elsif g.result == 'away_win'
-                   losses += 1
-                 elsif g.result == 'draw'
-                   draws += 1
-                 end
-               elsif g.away_team_id == team.id
-                 if g.result == 'away_win'
-                   wins += 1
-                 elsif g.result == 'home_win'
-                   losses += 1
-                 elsif g.result == 'draw'
-                   draws += 1
-                 end
-               end
-             end
-          %>
+          <% record = team_record(team, @games) %>
+          <% wins, draws, losses = record[:wins], record[:draws], record[:losses] %>
           
           <!-- Team Card -->
           <div class="bg-white rounded-2xl shadow-lg p-6 flex flex-col h-full border-t-8" style="border-color: <%= team.color %>">

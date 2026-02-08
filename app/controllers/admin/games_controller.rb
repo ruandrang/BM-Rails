@@ -1,6 +1,6 @@
 class Admin::GamesController < Admin::BaseController
   def index
-    @games = Game.includes({ match: :club }, :home_team, :away_team).order(:id)
+    @games = paginate(Game.includes({ match: :club }, :home_team, :away_team).order(:id))
   end
 
   def show

@@ -1,6 +1,6 @@
 class Admin::TeamMembersController < Admin::BaseController
   def index
-    @team_members = TeamMember.includes(:team, :member).order(:id)
+    @team_members = paginate(TeamMember.includes(:team, :member).order(:id))
   end
 
   def show

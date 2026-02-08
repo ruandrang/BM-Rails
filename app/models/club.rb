@@ -29,13 +29,13 @@ class Club < ApplicationRecord
     return if meeting_days.blank?
 
     unless meeting_days.is_a?(Array)
-      errors.add(:meeting_days, "must be an array")
+      errors.add(:meeting_days, "배열 형식이어야 합니다")
       return
     end
 
     invalid_days = meeting_days - MEETING_DAYS
     if invalid_days.any?
-      errors.add(:meeting_days, "contains invalid days: #{invalid_days.join(', ')}")
+      errors.add(:meeting_days, "잘못된 요일이 포함되어 있습니다: #{invalid_days.join(', ')}")
     end
   end
 end

@@ -26,4 +26,21 @@ module ApplicationHelper
   def position_display(position)
     Member::POSITION_NAMES[position] || position
   end
+
+  def team_record(team, games)
+    wins = draws = losses = 0
+    games.each do |game|
+      next if game.result == "pending"
+      if game.result == "draw"
+        draws += 1 if [ game.home_team_id, game.away_team_id ].include?(team.id)
+      elsif game.result == "home_win"
+        wins += 1 if game.home_team_id == team.id
+        losses += 1 if game.away_team_id == team.id
+      elsif game.result == "away_win"
+        wins += 1 if game.away_team_id == team.id
+        losses += 1 if game.home_team_id == team.id
+      end
+    end
+    { wins: wins, draws: draws, losses: losses }
+  end
 end

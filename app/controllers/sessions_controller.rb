@@ -1,5 +1,6 @@
 class SessionsController < ApplicationController
   skip_before_action :require_login
+  rate_limit to: 10, within: 1.minute, only: :create
 
   def new
   end

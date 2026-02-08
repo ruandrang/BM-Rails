@@ -204,13 +204,10 @@
 </div>
 
 <script>
-// 포지션 정렬 순서
-const POSITION_ORDER = { "PG": 1, "SG": 2, "SF": 3, "PF": 4, "C": 5 };
-
 document.addEventListener("DOMContentLoaded", function() {
   updateColorAvailability();
-  setupSorting();
 });
+initSortableList("#member-list", ".member-item", { name: "asc", position: "asc" });
 
 function handleColorChangeOnly(input, teamIndex) {
   const color = input.value;
@@ -277,64 +274,4 @@ function selectTopMembers(count) {
   });
 }
 
-function setupSorting() {
-  const memberList = document.getElementById("member-list");
-  if (!memberList) return;
-
-  const sortState = {};
-  const sortButtons = document.querySelectorAll("[data-sort]");
-
-  sortButtons.forEach(btn => {
-    btn.addEventListener("click", function() {
-      const sortKey = this.dataset.sort;
-      
-      // Default directions
-      if (!sortState[sortKey]) {
-        if (sortKey === "name" || sortKey === "position") sortState[sortKey] = "asc";
-        else sortState[sortKey] = "desc"; // Stats default to desc
-      } else {
-        // Toggle
-        sortState[sortKey] = sortState[sortKey] === "asc" ? "desc" : "asc";
-      }
-      
-      const items = Array.from(memberList.querySelectorAll(".member-item"));
-
-      items.sort((a, b) => {
-        let aVal = a.dataset[sortKey];
-        let bVal = b.dataset[sortKey];
-
-        // Type conversion & Custom Logic
-        if (sortKey === "position") {
-          aVal = POSITION_ORDER[aVal] || 99;
-          bVal = POSITION_ORDER[bVal] || 99;
-        } else if (sortKey === "height" || sortKey === "games" || sortKey === "member-id" || sortKey === "jersey") {
-          aVal = parseInt(aVal) || 0;
-          bVal = parseInt(bVal) || 0;
-        } else if (sortKey === "winrate") {
-          aVal = parseFloat(aVal) || 0.0;
-          bVal = parseFloat(bVal) || 0.0;
-        }
-
-        if (aVal === bVal) return 0;
-        
-        const modifier = sortState[sortKey] === "asc" ? 1 : -1;
-        return aVal > bVal ? modifier : -modifier;
-      });
-
-      items.forEach(item => memberList.appendChild(item));
-
-      // Update UI
-      sortButtons.forEach(b => {
-        b.classList.remove("btn-active", "btn-primary", "text-primary-content");
-        // Reset text
-        const text = b.textContent.trim().split(" ")[0]; 
-        b.innerHTML = text;
-      });
-      
-      this.classList.add("btn-active", "btn-primary", "text-primary-content");
-      const arrow = sortState[sortKey] === "asc" ? "↑" : "↓";
-      this.innerHTML += ` <span class="ml-1">${arrow}</span>`;
-    });
-  });
-}
 </script>

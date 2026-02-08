@@ -38,7 +38,7 @@
             </svg>
             수정
           <% end %>
-          <%= link_to share_club_match_path(@club, @match), class: "btn btn-ghost btn-sm", target: "_blank" do %>
+          <%= link_to share_club_match_path(@club, @match, token: @match.share_token), class: "btn btn-ghost btn-sm", target: "_blank" do %>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
             </svg>
@@ -49,8 +49,6 @@
     </div>
   </div>
 
-  <!-- 팀 카드들 -->
-  <% team_records = {} %>
   <!-- 팀 카드들 -->
   <% team_records = {} %>
   
@@ -73,20 +71,9 @@
        data-controller="match-drag"
        data-match-drag-match-id-value="<%= @match.id %>">
     <% @teams.each do |team| %>
-      <% wins = draws = losses = 0 %>
-      <% @games.each do |game| %>
-        <% next if game.result == "pending" %>
-        <% if game.result == "draw" %>
-          <% draws += 1 if [game.home_team_id, game.away_team_id].include?(team.id) %>
-        <% elsif game.result == "home_win" %>
-          <% wins += 1 if game.home_team_id == team.id %>
-          <% losses += 1 if game.away_team_id == team.id %>
-        <% elsif game.result == "away_win" %>
-          <% wins += 1 if game.away_team_id == team.id %>
-          <% losses += 1 if game.home_team_id == team.id %>
-        <% end %>
-      <% end %>
-      <% team_records[team.id] = { wins: wins, draws: draws, losses: losses } %>
+      <% record = team_record(team, @games) %>
+      <% wins, draws, losses = record[:wins], record[:draws], record[:losses] %>
+      <% team_records[team.id] = record %>
 
       <div class="card bg-base-100 shadow-xl overflow-hidden border-t-8" style="border-top-color: <%= team.color %>">
         <div class="card-body">

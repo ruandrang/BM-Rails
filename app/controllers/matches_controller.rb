@@ -397,10 +397,14 @@ class MatchesController < ApplicationController
     @match = @club.matches.find(params[:id])
   end
 
-  # share 액션용: 로그인 없이 공개 접근 가능
+  # share 액션용: 로그인 없이 공개 접근 가능 (토큰 검증 필수)
   def set_public_club_and_match
     @club = Club.find(params[:club_id])
     @match = @club.matches.find(params[:id])
+
+    unless params[:token].present? && ActiveSupport::SecurityUtils.secure_compare(params[:token].to_s, @match.share_token.to_s)
+      render plain: "공유 링크가 유효하지 않습니다.", status: :not_found
+    end
   end
 
   def match_params
@@ -424,16 +428,6 @@ class MatchesController < ApplicationController
     end
   end
 
-  def cached_member_stats
-    Rails.cache.fetch("club_#{@club.id}_member_stats", expires_in: 5.minutes) do
-      StatsCalculator.new(@club).member_stats
-    end
-  end
-
-  def expire_member_stats_cache
-    Rails.cache.delete("club_#{@club.id}_member_stats")
-  end
-
   # Strong parameters가 중첩 해시를 자동으로 처리하지 못할 때 안전하게 추출
   def extract_scores_from_params
     return nil unless params[:scores].respond_to?(:each)
@@ -441,7 +435,21 @@ class MatchesController < ApplicationController
     scores = {}
     params[:scores].each do |game_id, score_data|
       next unless game_id.to_s.match?(/\A\d+\z/)
-      scores[game_id] = score_data.respond_to?(:to_unsafe_h) ? score_data.to_unsafe_h : score_data.to_h
+
+      sanitized = {}
+      quarters = score_data[:quarters] || score_data["quarters"]
+      if quarters.respond_to?(:each)
+        sanitized_quarters = {}
+        quarters.each do |q_num, q_data|
+          next unless q_num.to_s.match?(/\A[1-5]\z/)
+          sanitized_quarters[q_num.to_s] = {
+            "home" => q_data[:home].to_i,
+            "away" => q_data[:away].to_i
+          }
+        end
+        sanitized["quarters"] = sanitized_quarters
+      end
+      scores[game_id] = sanitized
     end
     scores.presence
   end

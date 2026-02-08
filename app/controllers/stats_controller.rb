@@ -2,17 +2,13 @@ class StatsController < ApplicationController
   before_action :set_club
 
   def index
-    # 데이터 변경 감지를 위한 캐시 키 생성 (최근 경기 수정 시간)
-    last_update = @club.matches.maximum(:updated_at).to_i
-
-    # 전체 통계
-    stats = Rails.cache.fetch("club_#{@club.id}_member_stats_#{last_update}", expires_in: 1.hour) do
-      StatsCalculator.new(@club).member_stats
-    end
+    # 전체 통계 (공통 캐시 사용)
+    stats = cached_member_stats
 
     # 월간 MVP (지난달 기준)
     last_month = 1.month.ago
     month_range = last_month.beginning_of_month..last_month.end_of_month
+    last_update = @club.matches.maximum(:updated_at).to_i
 
     monthly_stats = Rails.cache.fetch("club_#{@club.id}_monthly_stats_#{last_month.strftime('%Y%m')}_#{last_update}", expires_in: 1.hour) do
       StatsCalculator.new(@club).member_stats(period: month_range)
