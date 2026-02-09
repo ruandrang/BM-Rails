@@ -57,9 +57,9 @@
         CSV 내보내기
       <% end %>
 
-      <%= form_with url: import_csv_club_members_path(@club), local: true, multipart: true, class: "flex items-center gap-2" do %>
-        <input type="file" name="file" accept=".csv,text/csv" class="file-input file-input-bordered file-input-xs w-full max-w-[150px]" />
-        <button type="submit" class="btn btn-ghost btn-xs">가져오기</button>
+      <%= form_with url: import_csv_club_members_path(@club), local: true, multipart: true, class: "flex flex-nowrap items-center gap-2" do %>
+        <input type="file" name="file" accept=".csv,text/csv" class="file-input file-input-bordered file-input-sm w-[260px] md:w-[320px]" />
+        <button type="submit" class="btn btn-ghost btn-sm whitespace-nowrap shrink-0">가져오기</button>
       <% end %>
     </div>
   </div>
@@ -164,5 +164,12 @@
 </div>
 
 <script>
-  initSortableList("#member-list", ".member-item", { name: "asc", position: "asc" });
+  const initMembersSort = () => {
+    if (typeof initSortableList === "function") {
+      initSortableList("#member-list", ".member-item", { name: "asc", position: "asc" });
+    }
+  };
+
+  document.addEventListener("turbo:load", initMembersSort);
+  document.addEventListener("DOMContentLoaded", initMembersSort);
 </script>

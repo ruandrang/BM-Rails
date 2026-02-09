@@ -12,58 +12,62 @@ const escapeHtml = (str) => {
 // Reusable list sorting function (used by members, matches/new, stats views)
 function initSortableList(listSelector, itemSelector, defaultDirections) {
   const POSITION_ORDER = { "PG": 1, "SG": 2, "SF": 3, "PF": 4, "C": 5 };
+  const list = document.querySelector(listSelector);
+  if (!list) return;
 
-  document.addEventListener("DOMContentLoaded", function() {
-    const sortButtons = document.querySelectorAll("[data-sort]");
-    const list = document.querySelector(listSelector);
-    if (!list) return;
+  const sortButtons = Array.from(document.querySelectorAll("[data-sort]"));
+  if (sortButtons.length === 0) return;
 
-    const sortState = {};
+  const sortState = {};
 
-    sortButtons.forEach(btn => {
-      btn.addEventListener("click", function() {
-        const sortKey = this.dataset.sort;
+  sortButtons.forEach(btn => {
+    if (btn.dataset.sortBoundFor === listSelector) return;
 
-        if (!sortState[sortKey]) {
-          sortState[sortKey] = (defaultDirections && defaultDirections[sortKey]) || "desc";
-        } else {
-          sortState[sortKey] = sortState[sortKey] === "asc" ? "desc" : "asc";
+    const baseLabel = btn.textContent.trim().split(" ")[0];
+    btn.dataset.sortBoundFor = listSelector;
+    btn.dataset.sortBaseLabel = baseLabel;
+
+    btn.addEventListener("click", function() {
+      const sortKey = this.dataset.sort;
+
+      if (!sortState[sortKey]) {
+        sortState[sortKey] = (defaultDirections && defaultDirections[sortKey]) || "desc";
+      } else {
+        sortState[sortKey] = sortState[sortKey] === "asc" ? "desc" : "asc";
+      }
+
+      const items = Array.from(list.querySelectorAll(itemSelector));
+
+      items.sort((a, b) => {
+        let aVal = a.dataset[sortKey];
+        let bVal = b.dataset[sortKey];
+
+        if (sortKey === "position") {
+          aVal = POSITION_ORDER[aVal] || 99;
+          bVal = POSITION_ORDER[bVal] || 99;
+        } else if (["height", "jersey", "games", "member-id"].includes(sortKey)) {
+          aVal = Number.parseInt(aVal, 10) || 0;
+          bVal = Number.parseInt(bVal, 10) || 0;
+        } else if (sortKey === "winrate") {
+          aVal = Number.parseFloat(aVal) || 0.0;
+          bVal = Number.parseFloat(bVal) || 0.0;
         }
 
-        const items = Array.from(list.querySelectorAll(itemSelector));
-
-        items.sort((a, b) => {
-          let aVal = a.dataset[sortKey];
-          let bVal = b.dataset[sortKey];
-
-          if (sortKey === "position") {
-            aVal = POSITION_ORDER[aVal] || 99;
-            bVal = POSITION_ORDER[bVal] || 99;
-          } else if (["height", "jersey", "games", "member-id"].includes(sortKey)) {
-            aVal = parseInt(aVal) || 0;
-            bVal = parseInt(bVal) || 0;
-          } else if (sortKey === "winrate") {
-            aVal = parseFloat(aVal) || 0.0;
-            bVal = parseFloat(bVal) || 0.0;
-          }
-
-          if (aVal === bVal) return 0;
-          const modifier = sortState[sortKey] === "asc" ? 1 : -1;
-          return aVal > bVal ? modifier : -modifier;
-        });
-
-        items.forEach(item => list.appendChild(item));
-
-        sortButtons.forEach(b => {
-          b.classList.remove("btn-active", "btn-primary", "text-primary-content");
-          const text = b.textContent.trim().split(" ")[0];
-          b.innerHTML = text;
-        });
-
-        this.classList.add("btn-active", "btn-primary", "text-primary-content");
-        const arrow = sortState[sortKey] === "asc" ? "↑" : "↓";
-        this.innerHTML += ` <span class="ml-1">${arrow}</span>`;
+        if (aVal === bVal) return 0;
+        const modifier = sortState[sortKey] === "asc" ? 1 : -1;
+        return aVal > bVal ? modifier : -modifier;
       });
+
+      items.forEach(item => list.appendChild(item));
+
+      sortButtons.forEach(b => {
+        b.classList.remove("btn-active", "btn-primary", "text-primary-content");
+        b.innerHTML = b.dataset.sortBaseLabel || b.textContent.trim().split(" ")[0];
+      });
+
+      this.classList.add("btn-active", "btn-primary", "text-primary-content");
+      const arrow = sortState[sortKey] === "asc" ? "↑" : "↓";
+      this.innerHTML = `${this.dataset.sortBaseLabel || baseLabel} <span class="ml-1">${arrow}</span>`;
     });
   });
 }
@@ -155,27 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }));
     };
 
-    const defaultState = () => ({
-      quarter: 1,
-      period_seconds: 480,
-      shot_seconds: 24,
-      running: false,
-      shot_running: false,
-      matchup_index: 0,
-      rotation_step: 0, // 0-11 (3 matchups * 4 quarters)
-      home_fouls: 0,
-      away_fouls: 0,
-      teams: defaultTeams().map((team) => ({ ...team, score: 0 })),
-      // Store scores for the 3 pairings: [A-B, B-C, C-A]
-      matchup_scores: [
-        { team1: 0, team2: 0 },
-        { team1: 0, team2: 0 },
-        { team1: 0, team2: 0 }
-      ],
-      quarter_history: {}, // { pairIdx: { quarterNum: { team1: score, team2: score } } }
-      possession: 'away', // 'home' or 'away'
-      manual_swap: false
-    });
+    const TOTAL_REGULAR_QUARTERS = 4;
 
     const formatTime = (seconds) => {
       const min = Math.floor(seconds / 60);
@@ -194,12 +178,70 @@ document.addEventListener("DOMContentLoaded", () => {
       ];
     };
 
+    const roundsPerQuarter = () => matchupPairs().length;
+
+    const maxRotationStep = () => (TOTAL_REGULAR_QUARTERS * roundsPerQuarter()) - 1;
+
+    const quarterForStep = (step) => Math.floor(step / roundsPerQuarter()) + 1;
+
+    const emptyMatchupScores = () => matchupPairs().map(() => ({ team1: 0, team2: 0 }));
+
+    const defaultState = () => ({
+      quarter: 1,
+      period_seconds: 480,
+      shot_seconds: 24,
+      running: false,
+      shot_running: false,
+      matchup_index: 0,
+      rotation_step: 0,
+      home_fouls: 0,
+      away_fouls: 0,
+      teams: defaultTeams().map((team) => ({ ...team, score: 0 })),
+      matchup_scores: emptyMatchupScores(),
+      quarter_history: {}, // { pairIdx: { quarterNum: { team1: score, team2: score } } }
+      possession: 'away', // 'home' or 'away'
+      manual_swap: false
+    });
+
+    const normalizeState = (incomingState) => {
+      const base = defaultState();
+      if (!incomingState || typeof incomingState !== "object") return base;
+
+      const normalized = { ...base, ...incomingState };
+
+      normalized.teams = Array.isArray(incomingState.teams) && incomingState.teams.length >= 2
+        ? incomingState.teams
+        : base.teams;
+
+      normalized.matchup_scores = matchupPairs().map((_, index) => {
+        const row = incomingState.matchup_scores?.[index];
+        return {
+          team1: Number.isFinite(Number(row?.team1)) ? Number(row.team1) : 0,
+          team2: Number.isFinite(Number(row?.team2)) ? Number(row.team2) : 0
+        };
+      });
+
+      normalized.quarter_history = incomingState.quarter_history && typeof incomingState.quarter_history === "object"
+        ? incomingState.quarter_history
+        : {};
+
+      const parsedStep = Number.parseInt(incomingState.rotation_step, 10);
+      normalized.rotation_step = Number.isFinite(parsedStep)
+        ? Math.max(0, Math.min(parsedStep, maxRotationStep()))
+        : 0;
+
+      const parsedQuarter = Number.parseInt(incomingState.quarter, 10);
+      normalized.quarter = Number.isFinite(parsedQuarter) ? parsedQuarter : quarterForStep(normalized.rotation_step);
+
+      return normalized;
+    };
+
     const currentMatchupIndex = () => {
-      return state.rotation_step % 3;
+      return state.rotation_step % roundsPerQuarter();
     };
 
     const currentQuarter = () => {
-      return Math.floor(state.rotation_step / 3) + 1;
+      return quarterForStep(state.rotation_step);
     };
 
     const isSidesSwapped = () => {
@@ -209,25 +251,21 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const currentMatchup = () => {
-      // 3 Teams: [A, B, C]
-      // Pairs: 0:[0,1] (A-B), 1:[1,2] (B-C), 2:[2,0] (C-A)
-      const pairs = [
-        [0, 1],
-        [1, 2],
-        [2, 0]
-      ];
-
+      const pairs = matchupPairs();
       const pairIdx = currentMatchupIndex();
-      let [idx1, idx2] = pairs[pairIdx];
+      const [idx1, idx2] = pairs[pairIdx] || pairs[0];
+      const fallbackTeams = defaultTeams().map((team) => ({ ...team, score: 0 }));
+      const firstTeam = state.teams[idx1] || fallbackTeams[0];
+      const secondTeam = state.teams[idx2] || fallbackTeams[1] || fallbackTeams[0];
 
       // Logic:
       // Q1/Q2: idx1 vs idx2 (e.g., A vs B)
       // Q3/Q4: idx2 vs idx1 (e.g., B vs A) -> Swapped
 
       if (isSidesSwapped()) {
-        return [state.teams[idx2], state.teams[idx1]]; // Visual Home is Team 2, Visual Away is Team 1
+        return [secondTeam, firstTeam]; // Visual Home is Team 2, Visual Away is Team 1
       }
-      return [state.teams[idx1], state.teams[idx2]]; // Visual Home is Team 1, Visual Away is Team 2
+      return [firstTeam, secondTeam]; // Visual Home is Team 1, Visual Away is Team 2
     };
 
     const setText = (selector, value) => {
@@ -474,14 +512,15 @@ document.addEventListener("DOMContentLoaded", () => {
       setText("[data-home-fouls]", state.home_fouls || 0);
       setText("[data-away-fouls]", state.away_fouls || 0);
 
-      // 12쿼터 종료 시 NEXT QUARTER 버튼 숨기기 및 마지막 단계 텍스트 변경
+      // 마지막 라운드 도달 시 NEXT QUARTER 버튼 상태 변경
       const nextQuarterBtn = scoreboardRoot.querySelector('[data-action="next-quarter"]');
       if (nextQuarterBtn) {
-        if (state.rotation_step === 11) {
+        const finalRotationStep = maxRotationStep();
+        if (state.rotation_step === finalRotationStep) {
           nextQuarterBtn.textContent = "점수 확정";
           nextQuarterBtn.classList.add("bg-red-600", "hover:bg-red-700"); // 스타일 강조 (선택사항)
           nextQuarterBtn.style.display = '';
-        } else if (state.rotation_step >= 12) {
+        } else if (state.rotation_step > finalRotationStep) {
           nextQuarterBtn.style.display = 'none';
         } else {
           nextQuarterBtn.textContent = "다음 쿼터";
@@ -581,13 +620,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const tableContainer = scoreboardRoot.querySelector("[data-quarter-table]");
         if (!tableContainer) return;
 
-        if (state.teams.length < 3) {
-          tableContainer.innerHTML = "<p class='text-center text-gray-500'>로테이션 표를 위해 3팀이 필요합니다.</p>";
+        if (state.teams.length < 2) {
+          tableContainer.innerHTML = "<p class='text-center text-gray-500'>점수표를 표시하려면 최소 2팀이 필요합니다.</p>";
           return;
         }
 
-        const pairs = [[0, 1], [1, 2], [2, 0]];
-        const pairNames = ["Team A vs B", "Team B vs C", "Team C vs A"]; // Fallback or dynamic icons
+        const pairs = matchupPairs();
 
         let html = `
            <table class="w-full text-center text-base border-collapse">
@@ -604,13 +642,16 @@ document.addEventListener("DOMContentLoaded", () => {
              <tbody class="divide-y divide-gray-200">
          `;
 
-        const activeMatchupIdx = state.rotation_step % 3;
-        const currentQ = state.quarter;
+        const activeMatchupIdx = currentMatchupIndex();
+        const currentQ = Number.isFinite(Number(state.quarter)) ? Number(state.quarter) : currentQuarter();
 
         pairs.forEach((pair, pairIdx) => {
           const t1 = state.teams[pair[0]];
           const t2 = state.teams[pair[1]];
+          if (!t1 || !t2) return;
+
           const scores = state.quarter_history[pairIdx] || {};
+          const finalScore = state.matchup_scores[pairIdx] || { team1: 0, team2: 0 };
           const isActiveRow = pairIdx === activeMatchupIdx;
 
           const getScoreCell = (q) => {
@@ -649,7 +690,12 @@ document.addEventListener("DOMContentLoaded", () => {
                  <td class="${getCellClass(2)}">${getScoreCell(2)}</td>
                  <td class="${getCellClass(3)}">${getScoreCell(3)}</td>
                  <td class="${getCellClass(4)}">${getScoreCell(4)}</td>
-                 <td class="p-4 text-gray-400 font-bold"></td> 
+                 <td class="p-4 font-bold">
+                   <div class="flex flex-col leading-none gap-1">
+                     <span class="text-gray-900 text-lg">${finalScore.team1}</span>
+                     <span class="text-gray-500 text-lg">${finalScore.team2}</span>
+                   </div>
+                 </td>
                </tr>
              `;
         });
@@ -943,6 +989,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // visualHome might be Team A (index 0) or Team B (index 1) depending on swap
       const homeIdx = state.teams.findIndex(t => t.id === visualHome.id);
       const awayIdx = state.teams.findIndex(t => t.id === visualAway.id);
+      if (homeIdx < 0 || awayIdx < 0) return;
 
       if (action === "add-home") state.teams[homeIdx].score += 1;
       else if (action === "sub-home") state.teams[homeIdx].score = Math.max(0, state.teams[homeIdx].score - 1);
@@ -1019,45 +1066,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 state.shot_seconds = 14;
                 state.shot_running = false;
                 break;
-              case "next-quarter":
-                // 1. Save current scores to matchup_scores
-                const currentPairIdx = currentMatchupIndex();
-                const [team1, team2] = currentMatchup();
-                // Ensure we save to the correct team slot based on who team1/team2 actually are
-                // team1 is Visual Home, team2 is Visual Away
-
-                // We need to map back to the 'matchup_scores' structure
-                // matchup_scores[0] is A vs B
-                // matchup_scores[1] is B vs C
-                // matchup_scores[2] is C vs A
-
-                // Let's rely on state.teams because that's what we modify in handleTeamAction
-                // But wait, handleTeamAction modifies state.teams DIRECTLY based on ID.
-                // So state.teams ALWAYS holds the latest scores for everyone.
-
-                // The issue is: When we switch to B vs C, we want A's score to be "hidden" or "reset" contextually?
-                // No, the user wants: "Save the score of A and B". "Then B and C start at 0:0 (or saved score)."
-                // The `state.teams` array holds global state.
-                // WE MUST NOT RESET state.teams scores globally if we want them to persist?
-                // actually, the requirement is: "B and C start 0:0 in Q1".
-                // This implies we DO need to reset `state.teams` scores when entering a new matchup, 
-                // loading from `matchup_scores`.
-
-                // SAVE:
-                // We need to identify which pairing we just finished.
-                const finishedPairIdx = state.rotation_step % 3;
-                const pairs = [[0, 1], [1, 2], [2, 0]];
-                const [p1, p2] = pairs[finishedPairIdx];
+              case "next-quarter": {
+                const pairs = matchupPairs();
+                const finishedPairIdx = currentMatchupIndex();
+                const [p1, p2] = pairs[finishedPairIdx] || [];
+                if (p1 === undefined || p2 === undefined || !state.teams[p1] || !state.teams[p2]) break;
 
                 state.matchup_scores[finishedPairIdx] = {
                   team1: state.teams[p1].score,
                   team2: state.teams[p2].score
                 };
 
-                // SAVE Quarter History
-                // Calculate which quarter just finished (1-based)
-                const finishedQuarter = Math.floor(state.rotation_step / 3) + 1;
-
+                const finishedQuarter = currentQuarter();
                 if (!state.quarter_history[finishedPairIdx]) {
                   state.quarter_history[finishedPairIdx] = {};
                 }
@@ -1066,11 +1086,12 @@ document.addEventListener("DOMContentLoaded", () => {
                   team2: state.teams[p2].score
                 };
 
-                // 서버로 쿼터 점수 전송
                 const saveQuarterScore = async () => {
                   const matchId = scoreboardRoot.dataset.matchId;
-                  const clubId = window.location.pathname.match(/\/clubs\/(\d+)/)[1];
+                  const clubMatch = window.location.pathname.match(/\/clubs\/(\d+)/);
+                  const clubId = clubMatch ? clubMatch[1] : null;
                   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                  if (!clubId) return;
 
                   try {
                     await fetch(`/clubs/${clubId}/matches/${matchId}/save_quarter_scores`, {
@@ -1080,20 +1101,13 @@ document.addEventListener("DOMContentLoaded", () => {
                         'X-CSRF-Token': csrfToken
                       },
                       body: JSON.stringify({
-                        home_team_id: teams[p1].id,
-                        away_team_id: teams[p2].id,
+                        home_team_id: state.teams[p1].id,
+                        away_team_id: state.teams[p2].id,
                         quarter: finishedQuarter,
                         home_score: state.teams[p1].score,
                         away_score: state.teams[p2].score
                       })
                     });
-
-                    if (state.rotation_step === 11) {
-                      // alert("모든 경기 점수가 저장되었습니다.");
-                      // window.location.reload(); 
-                      // 점수 확정 후 자동 리로드를 하지 않고, 사용자가 하단의 '경기 종료' 버튼을 누를 수 있도록 대기합니다.
-                      // 이미 render()를 막아두었으므로 화면 점수가 0으로 초기화되는 문제는 발생하지 않습니다.
-                    }
                   } catch (error) {
                     console.error('쿼터 점수 저장 중 오류:', error);
                   }
@@ -1101,44 +1115,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 saveQuarterScore();
 
-                // ADVANCE:
-                // 마지막 단계(11)였다면 12로 증가시키지 말고 멈춤 (화면 초기화 방지)
-                if (state.rotation_step === 11) {
+                if (state.rotation_step === maxRotationStep()) {
                   const nextQuarterBtn = scoreboardRoot.querySelector('[data-action="next-quarter"]');
                   if (nextQuarterBtn) {
                     nextQuarterBtn.textContent = "저장 완료";
                     nextQuarterBtn.disabled = true;
                     nextQuarterBtn.classList.add("opacity-50", "cursor-not-allowed");
                   }
-                  // state.rotation_step을 증가시키지 않음 -> render() 호출 안 함 -> 점수 유지됨
                   return;
                 }
 
                 state.rotation_step += 1;
 
-                // LOAD:
-                const nextPairIdx = state.rotation_step % 3;
-                const [n1, n2] = pairs[nextPairIdx];
+                const nextPairIdx = currentMatchupIndex();
+                const [n1, n2] = pairs[nextPairIdx] || [];
+                if (n1 === undefined || n2 === undefined || !state.teams[n1] || !state.teams[n2]) break;
 
-                // Load saved scores (or 0 if first time)
-                // We must update state.teams directly for the UI to reflect
-                state.teams[n1].score = state.matchup_scores[nextPairIdx].team1;
-                state.teams[n2].score = state.matchup_scores[nextPairIdx].team2;
+                const nextScores = state.matchup_scores[nextPairIdx] || { team1: 0, team2: 0 };
+                state.teams[n1].score = nextScores.team1;
+                state.teams[n2].score = nextScores.team2;
 
-                // Reset third team's score to 0 just to be clean? (Optional, but good for UI)
-                // usage: pairs has 3 indices total. find the one not in [n1, n2]
-                const allIdx = [0, 1, 2];
-                const thirdIdx = allIdx.find(i => i !== n1 && i !== n2);
-                state.teams[thirdIdx].score = 0;
+                if (teamsCount === 3) {
+                  const allIdx = [0, 1, 2];
+                  const thirdIdx = allIdx.find(i => i !== n1 && i !== n2);
+                  if (thirdIdx !== undefined && state.teams[thirdIdx]) {
+                    state.teams[thirdIdx].score = 0;
+                  }
+                }
 
-                // Reset Timers
                 state.quarter = currentQuarter();
                 state.period_seconds = 480;
                 state.shot_seconds = 24;
                 state.running = false;
                 state.shot_running = false;
                 break;
-              case "prev-quarter":
+              }
+              case "prev-quarter": {
                 // Previous quarter logic (Simplified reverse of next-quarter or just decrement quarter?)
                 // For now, let's just decrement logic carefully if needed, or simple decrement quarter
                 // Use simple decrement for now as full reverse logic is complex and rarely used perfectly
@@ -1146,23 +1158,30 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Ideally we should reverse rotation_step too, but user didn't explicitly ask for full undo support
                 // Let's implement basic undo for rotation_step
                 if (state.rotation_step > 0) {
+                  const pairs = matchupPairs();
                   // SAVE current (which matches nextPairIdx logic above)
-                  const curPairIdx = state.rotation_step % 3;
-                  const [c1, c2] = pairs[curPairIdx];
-                  state.matchup_scores[curPairIdx] = { team1: state.teams[c1].score, team2: state.teams[c2].score };
+                  const curPairIdx = currentMatchupIndex();
+                  const [c1, c2] = pairs[curPairIdx] || [];
+                  if (c1 !== undefined && c2 !== undefined && state.teams[c1] && state.teams[c2]) {
+                    state.matchup_scores[curPairIdx] = { team1: state.teams[c1].score, team2: state.teams[c2].score };
+                  }
 
                   state.rotation_step -= 1;
 
                   // LOAD prev
-                  const prevPairIdx = state.rotation_step % 3;
-                  const [pr1, pr2] = pairs[prevPairIdx];
-                  state.teams[pr1].score = state.matchup_scores[prevPairIdx].team1;
-                  state.teams[pr2].score = state.matchup_scores[prevPairIdx].team2;
+                  const prevPairIdx = currentMatchupIndex();
+                  const [pr1, pr2] = pairs[prevPairIdx] || [];
+                  if (pr1 !== undefined && pr2 !== undefined && state.teams[pr1] && state.teams[pr2]) {
+                    const prevScores = state.matchup_scores[prevPairIdx] || { team1: 0, team2: 0 };
+                    state.teams[pr1].score = prevScores.team1;
+                    state.teams[pr2].score = prevScores.team2;
+                  }
 
                   state.quarter = currentQuarter();
                   state.period_seconds = 480;
                 }
                 break;
+              }
               case "next-matchup":
                 state.matchup_index += 1;
                 break;
@@ -1267,18 +1286,20 @@ document.addEventListener("DOMContentLoaded", () => {
               case "new-game":
                 if (confirm("모든 경기 점수 데이터가 초기화 됩니다. 진행 하시겠습니까?")) {
                   // SAVE CURRENT QUARTER BEFORE RESET
-                  const currentPairIdx = state.rotation_step % 3;
-                  const pairs = [[0, 1], [1, 2], [2, 0]];
-                  const [p1, p2] = pairs[currentPairIdx];
-                  const currentQuarterNum = Math.floor(state.rotation_step / 3) + 1;
+                  const currentPairIdx = currentMatchupIndex();
+                  const pairs = matchupPairs();
+                  const [p1, p2] = pairs[currentPairIdx] || [];
+                  const currentQuarterNum = currentQuarter();
 
-                  if (!state.quarter_history[currentPairIdx]) {
-                    state.quarter_history[currentPairIdx] = {};
+                  if (p1 !== undefined && p2 !== undefined && state.teams[p1] && state.teams[p2]) {
+                    if (!state.quarter_history[currentPairIdx]) {
+                      state.quarter_history[currentPairIdx] = {};
+                    }
+                    state.quarter_history[currentPairIdx][currentQuarterNum] = {
+                      team1: state.teams[p1].score,
+                      team2: state.teams[p2].score
+                    };
                   }
-                  state.quarter_history[currentPairIdx][currentQuarterNum] = {
-                    team1: state.teams[p1].score,
-                    team2: state.teams[p2].score
-                  };
 
                   // IMPORTANT: Call render() to update the table with saved scores
                   render();
@@ -1371,9 +1392,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const ensureState = () => {
       if (!state) {
         state = defaultState();
-        render();
-        syncTimers();
+      } else {
+        state = normalizeState(state);
       }
+      render();
+      syncTimers();
     };
 
     ensureState();
@@ -1388,17 +1411,14 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.type === "ping" || data.type === "welcome") return;
       if (data.type === "confirm_subscription") {
         if (role === "control") {
-          state = state || defaultState();
+          state = normalizeState(state || defaultState());
           render();
           broadcast();
         }
         return;
       }
       if (data.message?.type === "state") {
-        state = data.message.payload;
-        if (!state.teams || state.teams.length === 0) {
-          state = defaultState();
-        }
+        state = normalizeState(data.message.payload);
         render();
         syncTimers();
       }
