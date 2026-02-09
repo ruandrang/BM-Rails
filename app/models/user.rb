@@ -2,6 +2,11 @@ class User < ApplicationRecord
   DEFAULT_GAME_MINUTES = 8
   MIN_GAME_MINUTES = 1
   MAX_GAME_MINUTES = 60
+  POSSESSION_SWITCH_PATTERNS = {
+    "q12_q34" => "1,2쿼터 / 3,4쿼터 공격권 전환",
+    "q13_q24" => "1,3쿼터 / 2,4쿼터 공격권 전환"
+  }.freeze
+  DEFAULT_POSSESSION_SWITCH_PATTERN = "q12_q34"
 
   has_secure_password
 
@@ -20,6 +25,7 @@ class User < ApplicationRecord
   }
   validates :scoreboard_sound_enabled, inclusion: { in: [ true, false ] }
   validates :voice_announcement_enabled, inclusion: { in: [ true, false ] }
+  validates :possession_switch_pattern, inclusion: { in: POSSESSION_SWITCH_PATTERNS.keys }
 
   before_validation { self.email = email.to_s.downcase.strip }
 

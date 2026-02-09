@@ -6,7 +6,8 @@
      data-teams-count="<%= @match.teams.count %>"
      data-default-period-seconds="<%= current_user.default_period_seconds %>"
      data-sound-enabled="<%= current_user.scoreboard_sound_enabled %>"
-     data-voice-enabled="<%= current_user.voice_announcement_enabled %>">
+     data-voice-enabled="<%= current_user.voice_announcement_enabled %>"
+     data-possession-switch-pattern="<%= current_user.possession_switch_pattern %>">
 
   <div class="max-w-[1400px] mx-auto">
     <!-- Header -->
@@ -208,8 +209,6 @@
           
           <!-- Match Progress Controls -->
           <div class="flex items-center gap-2 shrink-0">
-            <button class="btn btn-sm px-4 border-gray-200 bg-white text-gray-600 hover:bg-gray-50 shadow-sm font-bold h-11 shrink-0"
-                    data-action="next-quarter">다음 쿼터</button>
             <button class="btn btn-sm px-4 border-red-100 bg-red-50 text-red-600 hover:bg-red-100 shadow-sm font-bold h-11 shrink-0"
                     data-action="new-game">경기 리셋</button>
             <button class="btn btn-sm px-4 border-green-200 bg-green-50 text-green-700 hover:bg-green-100 shadow-sm font-bold h-11 shrink-0"
@@ -223,26 +222,23 @@
         <div class="flex items-center gap-2 shrink-0">
           <span class="text-gray-500 text-xs font-bold uppercase tracking-widest">공격방향</span>
           <div class="flex gap-2">
-            <button class="btn btn-sm border-gray-200 bg-white text-gray-400 hover:bg-[#E53935] hover:text-white shadow-sm w-10 h-10 min-h-0 font-bold text-lg"
-                    data-action="possession-home" data-possession-home-btn>◀</button>
             <button class="btn btn-sm border-gray-200 bg-white text-gray-400 hover:bg-[#3B82F6] hover:text-white shadow-sm w-10 h-10 min-h-0 font-bold text-lg"
-                    data-action="possession-away" data-possession-away-btn>▶</button>
+                    data-action="possession-away" data-possession-away-btn>◀</button>
+            <button class="btn btn-sm border-gray-200 bg-white text-gray-400 hover:bg-[#E53935] hover:text-white shadow-sm w-10 h-10 min-h-0 font-bold text-lg"
+                    data-action="possession-home" data-possession-home-btn>▶</button>
           </div>
         </div>
+
+        <% unless @match.id.to_s.start_with?("standalone_") %>
+          <button class="btn px-8 h-14 min-h-0 ml-auto bg-blue-600 border-blue-600 text-white hover:bg-blue-700 shadow-md font-extrabold text-base tracking-wide shrink-0"
+                  data-action="next-quarter">다음 쿼터</button>
+        <% end %>
 
       </div>
     </div>
 
     <!-- Footer Area: Score Table, Roster & Shortcuts -->
     <div class="mt-12 w-full pb-16 flex flex-col items-center">
-        
-        <% unless @match.id.to_s.start_with?("standalone_") %>
-          <!-- Quarterly Score Table (Always Visible) -->
-          <div data-quarter-table class="w-full bg-white border border-gray-200 rounded-2xl p-8 shadow-sm mb-8">
-             <!-- Table injected by JS -->
-          </div>
-        <% end %>
-
         <!-- Toggle Button -->
         <div class="mb-4">
              <button data-action="toggle-shortcuts" class="btn btn-xs bg-white border border-gray-300 shadow-sm text-gray-500 rounded-full px-4 hover:bg-gray-50 transition-all">
@@ -250,12 +246,34 @@
              </button>
         </div>
 
-        <!-- Collapsible Panel: Shortcuts + Roster -->
-        <div data-shortcuts-panel class="w-full flex flex-col gap-8 animate-in slide-in-from-bottom-4 fade-in duration-200">
+        <!-- Collapsible Panel: Draggable Cards -->
+        <div data-shortcuts-panel data-detail-sort-container class="w-full flex flex-col gap-8 animate-in slide-in-from-bottom-4 fade-in duration-200">
+
+            <% unless @match.id.to_s.start_with?("standalone_") %>
+              <!-- Quarterly Score Table -->
+              <div data-detail-sort-item data-detail-sort-key="matchup" class="w-full bg-white border border-gray-200 rounded-2xl shadow-sm">
+                <div class="flex items-center justify-between px-6 pt-5 pb-2 border-b border-gray-100">
+                  <p class="text-xs font-bold tracking-widest uppercase text-gray-400">경기 Matchup</p>
+                  <button type="button" data-detail-drag-handle class="btn btn-xs btn-ghost text-gray-400 hover:text-gray-700 min-h-0 h-7 px-2 cursor-move" aria-label="경기 순서 변경">
+                    ↕ 드래그
+                  </button>
+                </div>
+                <div data-quarter-table class="w-full p-8">
+                   <!-- Table injected by JS -->
+                </div>
+              </div>
+            <% end %>
             
             <!-- Shortcuts -->
-            <div class="bg-white border border-gray-200 rounded-2xl px-12 py-6 shadow-sm">
-              <div class="flex gap-16 text-gray-700 text-base font-bold font-sans">
+            <div data-detail-sort-item data-detail-sort-key="shortcuts" class="w-full bg-white border border-gray-200 rounded-2xl shadow-sm">
+              <div class="flex items-center justify-between px-6 pt-5 pb-2 border-b border-gray-100">
+                <p class="text-xs font-bold tracking-widest uppercase text-gray-400">키보드 단축키</p>
+                <button type="button" data-detail-drag-handle class="btn btn-xs btn-ghost text-gray-400 hover:text-gray-700 min-h-0 h-7 px-2 cursor-move" aria-label="단축키 순서 변경">
+                  ↕ 드래그
+                </button>
+              </div>
+              <div class="px-12 py-6">
+                <div class="flex gap-16 text-gray-700 text-base font-bold font-sans">
                 <!-- Column 1: Timers -->
                 <div class="flex flex-col gap-4">
                   <div class="flex items-center gap-4">
@@ -298,14 +316,8 @@
                 </div>
 
               </div>
-            </div>
-
-            <% unless @match.id.to_s.start_with?("standalone_") %>
-              <!-- Roster Display -->
-              <div data-roster-display class="bg-white border border-gray-200 rounded-2xl px-12 py-8 shadow-sm">
-                  <!-- Roster content injected by JS -->
               </div>
-            <% end %>
+            </div>
 
         </div>
 

@@ -1,10 +1,10 @@
 class ScoreboardChannel < ApplicationCable::Channel
   ALLOWED_PAYLOAD_KEYS = %w[
     quarter period_seconds shot_seconds running shot_running matchup_index
-    teams rotation_step home_fouls away_fouls matchup_scores quarter_history possession
-    manual_swap
+    teams rotation_step home_fouls away_fouls matchup_scores matchup_order quarter_history possession
+    manual_swap sound_enabled voice_enabled base_possession possession_switch_pattern
   ].freeze
-  MAX_PAYLOAD_SIZE = 10_000
+  MAX_PAYLOAD_SIZE = 50_000
 
   def subscribed
     @match_id = params[:match_id]
@@ -13,22 +13,27 @@ class ScoreboardChannel < ApplicationCable::Channel
       return
     end
     stream_from(stream_name)
-    transmit(type: "state", payload: ScoreboardStore.fetch(@match_id, period_seconds: current_user.default_period_seconds))
+    transmit(
+      type: "state",
+      payload: ScoreboardStore.fetch(
+        @match_id,
+        period_seconds: current_user.default_period_seconds,
+        possession_switch_pattern: current_user.possession_switch_pattern
+      )
+    )
   end
 
   def update(data)
-    payload = data["payload"]
+    payload = sanitize_payload(data["payload"])
     return if payload.blank?
-    return unless valid_payload?(payload)
 
     ScoreboardStore.update(@match_id, payload)
     ActionCable.server.broadcast(stream_name, { type: "state", payload: payload })
   end
 
   def reset(data)
-    payload = data["payload"]
+    payload = sanitize_payload(data["payload"])
     return if payload.blank?
-    return unless valid_payload?(payload)
 
     ScoreboardStore.update(@match_id, payload)
     ActionCable.server.broadcast(stream_name, { type: "state", payload: payload })
@@ -52,10 +57,14 @@ class ScoreboardChannel < ApplicationCable::Channel
     end
   end
 
-  def valid_payload?(payload)
-    return false unless payload.is_a?(Hash)
-    return false if payload.to_json.bytesize > MAX_PAYLOAD_SIZE
-    payload.keys.all? { |key| ALLOWED_PAYLOAD_KEYS.include?(key) }
+  def sanitize_payload(payload)
+    return nil unless payload.is_a?(Hash)
+
+    sanitized = payload.slice(*ALLOWED_PAYLOAD_KEYS)
+    return nil if sanitized.blank?
+    return nil if sanitized.to_json.bytesize > MAX_PAYLOAD_SIZE
+
+    sanitized
   end
 end
 
@@ -64,9 +73,9 @@ class ScoreboardStore
   CACHE_EXPIRY = 24.hours
 
   class << self
-    def fetch(match_id, period_seconds: 480)
+    def fetch(match_id, period_seconds: 480, possession_switch_pattern: User::DEFAULT_POSSESSION_SWITCH_PATTERN)
       Rails.cache.fetch(cache_key(match_id), expires_in: CACHE_EXPIRY) do
-        default_state(period_seconds: period_seconds)
+        default_state(period_seconds: period_seconds, possession_switch_pattern: possession_switch_pattern)
       end
     end
 
@@ -78,9 +87,11 @@ class ScoreboardStore
       Rails.cache.delete(cache_key(match_id))
     end
 
-    def default_state(period_seconds: 480)
+    def default_state(period_seconds: 480, possession_switch_pattern: User::DEFAULT_POSSESSION_SWITCH_PATTERN)
       sanitized_period_seconds = period_seconds.to_i
       sanitized_period_seconds = 480 if sanitized_period_seconds <= 0
+      sanitized_possession_switch_pattern =
+        User::POSSESSION_SWITCH_PATTERNS.key?(possession_switch_pattern) ? possession_switch_pattern : User::DEFAULT_POSSESSION_SWITCH_PATTERN
 
       {
         "quarter" => 1,
@@ -98,9 +109,14 @@ class ScoreboardStore
           { "team1" => 0, "team2" => 0 },
           { "team1" => 0, "team2" => 0 }
         ],
+        "matchup_order" => [],
         "quarter_history" => {},
         "possession" => "away",
-        "manual_swap" => false
+        "base_possession" => "away",
+        "possession_switch_pattern" => sanitized_possession_switch_pattern,
+        "manual_swap" => false,
+        "sound_enabled" => true,
+        "voice_enabled" => true
       }
     end
 

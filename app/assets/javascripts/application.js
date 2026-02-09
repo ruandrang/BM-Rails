@@ -128,6 +128,10 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     const defaultSoundEnabled = parseBooleanDataset(scoreboardRoot.dataset.soundEnabled, true);
     const defaultVoiceEnabled = parseBooleanDataset(scoreboardRoot.dataset.voiceEnabled, true);
+    const POSSESSION_SWITCH_PATTERNS = ["q12_q34", "q13_q24"];
+    const defaultPossessionSwitchPattern = POSSESSION_SWITCH_PATTERNS.includes(scoreboardRoot.dataset.possessionSwitchPattern)
+      ? scoreboardRoot.dataset.possessionSwitchPattern
+      : "q12_q34";
 
     const cableUrl =
       (window.location.protocol === "https:" ? "wss://" : "ws://") +
@@ -138,6 +142,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let state = null;
     let mainTimer = null;
     let shotTimer = null;
+    let matchupSortInstance = null;
+    let isMatchupDragging = false;
 
     // Colors
     const COLORS = {
@@ -177,6 +183,57 @@ document.addEventListener("DOMContentLoaded", () => {
       return `${min}:${sec.toString().padStart(2, "0")}`;
     };
 
+    const parseColorToRgb = (color) => {
+      if (!color || typeof color !== "string") return null;
+      const value = color.trim().toLowerCase();
+
+      if (value === "white") return { r: 255, g: 255, b: 255 };
+      if (value === "black") return { r: 0, g: 0, b: 0 };
+
+      const hex = value.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+      if (hex) {
+        const raw = hex[1];
+        const normalized = raw.length === 3
+          ? raw.split("").map((ch) => ch + ch).join("")
+          : raw;
+        return {
+          r: parseInt(normalized.slice(0, 2), 16),
+          g: parseInt(normalized.slice(2, 4), 16),
+          b: parseInt(normalized.slice(4, 6), 16)
+        };
+      }
+
+      const rgb = value.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (rgb) {
+        return {
+          r: Number.parseInt(rgb[1], 10),
+          g: Number.parseInt(rgb[2], 10),
+          b: Number.parseInt(rgb[3], 10)
+        };
+      }
+
+      return null;
+    };
+
+    const isLightColor = (color) => {
+      const rgb = parseColorToRgb(color);
+      if (!rgb) return false;
+      const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
+      return luminance > 0.85;
+    };
+
+    const applyTeamIconColor = (iconEl, color) => {
+      if (!iconEl) return;
+      const iconColor = String(color || "#111827").trim();
+      const isExplicitWhite = /^(white|#fff|#ffffff)$/i.test(iconColor);
+      const light = isExplicitWhite || isLightColor(iconColor);
+
+      iconEl.textContent = "";
+      iconEl.style.backgroundColor = iconColor;
+      iconEl.style.borderColor = light ? "#111827" : iconColor;
+      iconEl.style.boxShadow = "0 1px 3px rgba(15, 23, 42, 0.15)";
+    };
+
     const matchupPairs = () => {
       if (teamsCount === 2) {
         return [[0, 1]];
@@ -194,6 +251,101 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const quarterForStep = (step) => Math.floor(step / roundsPerQuarter()) + 1;
 
+    const normalizePossession = (value, fallback = "away") => {
+      if (value === "home" || value === "away") return value;
+      return fallback;
+    };
+
+    const normalizePossessionSwitchPattern = (value) => {
+      return POSSESSION_SWITCH_PATTERNS.includes(value) ? value : defaultPossessionSwitchPattern;
+    };
+
+    const oppositePossession = (value) => (value === "home" ? "away" : "home");
+
+    const isPossessionSwappedQuarter = (quarter, pattern) => {
+      const quarterNumber = Number.parseInt(quarter, 10);
+      const safeQuarter = Number.isFinite(quarterNumber) && quarterNumber > 0 ? quarterNumber : 1;
+
+      if (pattern === "q13_q24") {
+        return safeQuarter % 2 === 0;
+      }
+
+      return safeQuarter >= 3;
+    };
+
+    const possessionForQuarter = (quarter, basePossession, pattern) => {
+      const safeBasePossession = normalizePossession(basePossession, "away");
+      const safePattern = normalizePossessionSwitchPattern(pattern);
+      if (!isPossessionSwappedQuarter(quarter, safePattern)) return safeBasePossession;
+      return oppositePossession(safeBasePossession);
+    };
+
+    const basePossessionForSelectedQuarterDirection = (quarter, selectedPossession, pattern) => {
+      const safeSelected = normalizePossession(selectedPossession, "away");
+      const safePattern = normalizePossessionSwitchPattern(pattern);
+      if (!isPossessionSwappedQuarter(quarter, safePattern)) return safeSelected;
+      return oppositePossession(safeSelected);
+    };
+
+    const defaultMatchupOrder = () => matchupPairs().map((_, index) => index);
+
+    const normalizeMatchupOrder = (rawOrder) => {
+      const fallback = defaultMatchupOrder();
+      if (!Array.isArray(rawOrder)) return fallback;
+
+      const seen = new Set();
+      const normalized = [];
+
+      rawOrder.forEach((value) => {
+        const index = Number.parseInt(value, 10);
+        if (!Number.isInteger(index)) return;
+        if (index < 0 || index >= fallback.length) return;
+        if (seen.has(index)) return;
+        seen.add(index);
+        normalized.push(index);
+      });
+
+      fallback.forEach((index) => {
+        if (!seen.has(index)) {
+          normalized.push(index);
+          seen.add(index);
+        }
+      });
+
+      return normalized;
+    };
+
+    const matchupPairById = (matchupId) => {
+      const pairs = matchupPairs();
+      return pairs[matchupId] || pairs[0] || [ 0, 1 ];
+    };
+
+    const matchupIdForStep = (step = state?.rotation_step || 0) => {
+      const order = normalizeMatchupOrder(state?.matchup_order);
+      const rounds = roundsPerQuarter();
+      const slot = ((step % rounds) + rounds) % rounds;
+      return order[slot] ?? defaultMatchupOrder()[slot] ?? 0;
+    };
+
+    const syncScoresForActiveMatchup = () => {
+      if (!state || !Array.isArray(state.teams)) return;
+
+      const activeMatchupId = matchupIdForStep(state.rotation_step || 0);
+      const [team1Idx, team2Idx] = matchupPairById(activeMatchupId);
+      const savedScores = state.matchup_scores?.[activeMatchupId] || { team1: 0, team2: 0 };
+
+      if (state.teams[team1Idx]) state.teams[team1Idx].score = Number(savedScores.team1) || 0;
+      if (state.teams[team2Idx]) state.teams[team2Idx].score = Number(savedScores.team2) || 0;
+
+      if (teamsCount === 3) {
+        [ 0, 1, 2 ].forEach((index) => {
+          if (index !== team1Idx && index !== team2Idx && state.teams[index]) {
+            state.teams[index].score = 0;
+          }
+        });
+      }
+    };
+
     const emptyMatchupScores = () => matchupPairs().map(() => ({ team1: 0, team2: 0 }));
 
     const defaultState = () => ({
@@ -210,8 +362,11 @@ document.addEventListener("DOMContentLoaded", () => {
       away_fouls: 0,
       teams: defaultTeams().map((team) => ({ ...team, score: 0 })),
       matchup_scores: emptyMatchupScores(),
+      matchup_order: defaultMatchupOrder(),
       quarter_history: {}, // { pairIdx: { quarterNum: { team1: score, team2: score } } }
-      possession: 'away', // 'home' or 'away'
+      base_possession: "away",
+      possession_switch_pattern: defaultPossessionSwitchPattern,
+      possession: "away", // 'home' or 'away'
       manual_swap: false
     });
 
@@ -236,9 +391,15 @@ document.addEventListener("DOMContentLoaded", () => {
         };
       });
 
+      normalized.matchup_order = normalizeMatchupOrder(incomingState.matchup_order);
+
       normalized.quarter_history = incomingState.quarter_history && typeof incomingState.quarter_history === "object"
         ? incomingState.quarter_history
         : {};
+
+      normalized.possession_switch_pattern = normalizePossessionSwitchPattern(
+        incomingState.possession_switch_pattern || normalized.possession_switch_pattern
+      );
 
       const parsedStep = Number.parseInt(incomingState.rotation_step, 10);
       normalized.rotation_step = Number.isFinite(parsedStep)
@@ -247,6 +408,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const parsedQuarter = Number.parseInt(incomingState.quarter, 10);
       normalized.quarter = Number.isFinite(parsedQuarter) ? parsedQuarter : quarterForStep(normalized.rotation_step);
+      if (incomingState.base_possession === "home" || incomingState.base_possession === "away") {
+        normalized.base_possession = incomingState.base_possession;
+      } else {
+        normalized.base_possession = basePossessionForSelectedQuarterDirection(
+          normalized.quarter,
+          normalizePossession(incomingState.possession, "away"),
+          normalized.possession_switch_pattern
+        );
+      }
+      normalized.possession = possessionForQuarter(
+        normalized.quarter,
+        normalized.base_possession,
+        normalized.possession_switch_pattern
+      );
 
       return normalized;
     };
@@ -255,8 +430,20 @@ document.addEventListener("DOMContentLoaded", () => {
       return state.rotation_step % roundsPerQuarter();
     };
 
+    const currentMatchupId = () => {
+      return matchupIdForStep(state.rotation_step || 0);
+    };
+
     const currentQuarter = () => {
       return quarterForStep(state.rotation_step);
+    };
+
+    const applyQuarterPossession = (quarter = currentQuarter()) => {
+      state.possession = possessionForQuarter(
+        quarter,
+        state.base_possession,
+        state.possession_switch_pattern
+      );
     };
 
     const isSidesSwapped = () => {
@@ -266,9 +453,8 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const currentMatchup = () => {
-      const pairs = matchupPairs();
-      const pairIdx = currentMatchupIndex();
-      const [idx1, idx2] = pairs[pairIdx] || pairs[0];
+      const pairIdx = currentMatchupId();
+      const [idx1, idx2] = matchupPairById(pairIdx);
       const fallbackTeams = defaultTeams().map((team) => ({ ...team, score: 0 }));
       const firstTeam = state.teams[idx1] || fallbackTeams[0];
       const secondTeam = state.teams[idx2] || fallbackTeams[1] || fallbackTeams[0];
@@ -353,8 +539,7 @@ document.addEventListener("DOMContentLoaded", () => {
       wrapper.querySelectorAll("[data-team-action]").forEach((btn) => {
         btn.addEventListener("click", () => {
           const action = btn.dataset.teamAction;
-          const pairs = matchupPairs();
-          const [homeIdx, awayIdx] = pairs[state.matchup_index % pairs.length];
+          const [homeIdx, awayIdx] = matchupPairById(currentMatchupId());
 
           if (action === "add-home") state.teams[homeIdx].score += 1;
           else if (action === "sub-home") state.teams[homeIdx].score = Math.max(0, state.teams[homeIdx].score - 1);
@@ -456,6 +641,28 @@ document.addEventListener("DOMContentLoaded", () => {
       setText("[data-team-name-left]", leftTeam.name || `TEAM ${leftTeam.label}`);
       setText("[data-team-name-right]", rightTeam.name || `TEAM ${rightTeam.label}`);
 
+      const applyDisplayBadgeStyle = (selector, team) => {
+        const badge = scoreboardRoot.querySelector(selector);
+        if (!badge) return;
+        const teamColor = String(team?.color || "").trim();
+        if (!teamColor) return;
+
+        const isExplicitWhite = /^(white|#fff|#ffffff)$/i.test(teamColor);
+        const light = isExplicitWhite || isLightColor(teamColor);
+        badge.style.backgroundColor = teamColor;
+        badge.style.borderColor = light ? "#111827" : teamColor;
+
+        const label = badge.querySelector("span");
+        if (label) {
+          label.style.color = light ? "#111827" : "#ffffff";
+        }
+      };
+
+      if (isDisplayPage) {
+        applyDisplayBadgeStyle(".team-badge-left", leftTeam);
+        applyDisplayBadgeStyle(".team-badge-right", rightTeam);
+      }
+
       // Scores (new display)
       setText("[data-score-left]", leftTeam.score);
       setText("[data-score-right]", rightTeam.score);
@@ -498,12 +705,14 @@ document.addEventListener("DOMContentLoaded", () => {
         arrows.forEach(a => a.classList.toggle('hidden', !show));
       };
 
-      if (state.possession === 'home') {
-        showArrows(arrowsLeft, true);
-        showArrows(arrowsRight, false);
-      } else if (state.possession === 'away') {
-        showArrows(arrowsLeft, false);
-        showArrows(arrowsRight, true);
+      if (state.possession === 'home' || state.possession === 'away') {
+        // Control page uses direction-based UI (left=away, right=home)
+        // Display page keeps existing team-based rendering.
+        const showLeft = role === 'control'
+          ? state.possession === 'away'
+          : state.possession === 'home';
+        showArrows(arrowsLeft, showLeft);
+        showArrows(arrowsRight, !showLeft);
       } else {
         showArrows(arrowsLeft, false);
         showArrows(arrowsRight, false);
@@ -515,14 +724,12 @@ document.addEventListener("DOMContentLoaded", () => {
       setText("[data-away-name]", away.name || `TEAM ${away.label}`);
       const homeIconEl = scoreboardRoot.querySelector("[data-home-icon]");
       if (homeIconEl) {
-        homeIconEl.textContent = home.icon || "●";
-        homeIconEl.style.color = home.color || "#333";
+        applyTeamIconColor(homeIconEl, home.color);
       }
 
       const awayIconEl = scoreboardRoot.querySelector("[data-away-icon]");
       if (awayIconEl) {
-        awayIconEl.textContent = away.icon || "●";
-        awayIconEl.style.color = away.color || "#333";
+        applyTeamIconColor(awayIconEl, away.color);
       }
       setText("[data-home-fouls]", state.home_fouls || 0);
       setText("[data-away-fouls]", state.away_fouls || 0);
@@ -641,6 +848,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const pairs = matchupPairs();
+        const orderedMatchupIds = normalizeMatchupOrder(state.matchup_order);
 
         let html = `
            <table class="w-full text-center text-base border-collapse">
@@ -654,13 +862,14 @@ document.addEventListener("DOMContentLoaded", () => {
                  <th class="p-4 w-24">최종</th>
                </tr>
              </thead>
-             <tbody class="divide-y divide-gray-200">
+             <tbody class="divide-y divide-gray-200" data-matchup-tbody>
          `;
 
-        const activeMatchupIdx = currentMatchupIndex();
+        const activeMatchupIdx = currentMatchupId();
         const currentQ = Number.isFinite(Number(state.quarter)) ? Number(state.quarter) : currentQuarter();
 
-        pairs.forEach((pair, pairIdx) => {
+        orderedMatchupIds.forEach((pairIdx) => {
+          const pair = pairs[pairIdx];
           const t1 = state.teams[pair[0]];
           const t2 = state.teams[pair[1]];
           if (!t1 || !t2) return;
@@ -687,17 +896,67 @@ document.addEventListener("DOMContentLoaded", () => {
             return base + (q % 2 === 0 ? "bg-gray-50/50" : "bg-white/50");
           };
 
+          const formatTeamLabel = (label) => {
+            const raw = String(label || "").trim();
+            if (!raw) return "Team";
+            return /^team\s+/i.test(raw) ? raw : `Team ${raw}`;
+          };
+
+          const getTeamNameStyle = (team, fallbackColor = "#111827") => {
+            const rawColor = String(team?.color || "").trim();
+            const color = rawColor || fallbackColor;
+            const isExplicitWhite = /^(white|#fff|#ffffff)$/i.test(color);
+
+            if (isExplicitWhite || isLightColor(color)) {
+              return "color:#111827; text-shadow:0 0 1px #9ca3af;";
+            }
+
+            return `color:${color};`;
+          };
+
+          const getTeamDotStyle = (team, fallbackColor = "#111827") => {
+            const rawColor = String(team?.color || "").trim();
+            const color = rawColor || fallbackColor;
+            const isExplicitWhite = /^(white|#fff|#ffffff)$/i.test(color);
+            const borderColor = (isExplicitWhite || isLightColor(color)) ? "#111827" : color;
+            return `background-color:${color}; border-color:${borderColor}; box-shadow:0 1px 3px rgba(15, 23, 42, 0.15);`;
+          };
+
+          const getMemberChips = (team) => {
+            if (!team || !Array.isArray(team.members) || team.members.length === 0) {
+              return `<span class="text-xs text-gray-400 italic">명단 없음</span>`;
+            }
+
+            const sortedMembers = [ ...team.members ].sort((a, b) => (a.back_number || 999) - (b.back_number || 999));
+            const names = sortedMembers.map((member) => escapeHtml(member?.name || "이름없음"));
+            return `
+              <div class="flex items-center gap-2 overflow-x-auto whitespace-nowrap py-1">
+                ${names.map((name) => `<span class="text-sm font-semibold text-gray-700 shrink-0">${name}</span>`).join('<span class="text-gray-300 shrink-0">·</span>')}
+              </div>
+            `;
+          };
+
           html += `
-               <tr class="${isActiveRow ? 'bg-gray-100/80 shadow-inner' : 'hover:bg-gray-50'} transition-all duration-300">
+               <tr data-matchup-id="${pairIdx}" class="${isActiveRow ? 'bg-gray-100/80 shadow-inner' : 'hover:bg-gray-50'} transition-all duration-300 cursor-move">
                  <td class="p-4 text-left border-l-4 ${isActiveRow ? 'border-blue-500' : 'border-transparent'}">
-                   <div class="flex flex-col gap-2">
-                     <div class="flex items-center gap-2">
-                       <span class="text-xl">${escapeHtml(t1.icon) || '🛡️'}</span>
-                       <span class="font-bold text-gray-900 text-base">${escapeHtml(t1.label)}</span>
+                   <div class="flex flex-col gap-3">
+                     <div class="flex items-center gap-10">
+                       <div class="flex items-center gap-3 min-w-[172px]">
+                         <span class="inline-flex w-6 h-6 rounded-full border-2 shrink-0" style="${getTeamDotStyle(t1, "#111827")}"></span>
+                         <span class="font-black text-base uppercase tracking-tight" style="${getTeamNameStyle(t1, "#111827")}">${escapeHtml(formatTeamLabel(t1.label))}</span>
+                       </div>
+                       <div class="min-w-0 flex-1">
+                         ${getMemberChips(t1)}
+                       </div>
                      </div>
-                     <div class="flex items-center gap-2">
-                       <span class="text-xl">${escapeHtml(t2.icon) || '🛡️'}</span>
-                       <span class="font-bold text-gray-500 text-base">${escapeHtml(t2.label)}</span>
+                     <div class="flex items-center gap-10">
+                       <div class="flex items-center gap-3 min-w-[172px]">
+                         <span class="inline-flex w-6 h-6 rounded-full border-2 shrink-0" style="${getTeamDotStyle(t2, "#6B7280")}"></span>
+                         <span class="font-black text-base uppercase tracking-tight" style="${getTeamNameStyle(t2, "#6B7280")}">${escapeHtml(formatTeamLabel(t2.label))}</span>
+                       </div>
+                       <div class="min-w-0 flex-1">
+                         ${getMemberChips(t2)}
+                       </div>
                      </div>
                    </div>
                  </td>
@@ -717,9 +976,56 @@ document.addEventListener("DOMContentLoaded", () => {
 
         html += `</tbody></table>`;
         tableContainer.innerHTML = html;
+
+        if (role !== "control" || typeof Sortable === "undefined") return;
+
+        const tbody = tableContainer.querySelector("[data-matchup-tbody]");
+        if (!tbody) return;
+
+        const rows = tbody.querySelectorAll("tr[data-matchup-id]");
+        if (rows.length < 2) return;
+
+        if (matchupSortInstance) {
+          matchupSortInstance.destroy();
+          matchupSortInstance = null;
+        }
+
+        matchupSortInstance = new Sortable(tbody, {
+          animation: 150,
+          draggable: "tr[data-matchup-id]",
+          ghostClass: "opacity-60",
+          chosenClass: "ring-2",
+          dragClass: "cursor-grabbing",
+          onStart: () => {
+            isMatchupDragging = true;
+          },
+          onEnd: () => {
+            isMatchupDragging = false;
+            const previousMatchupId = currentMatchupId();
+            const [prevTeam1Idx, prevTeam2Idx] = matchupPairById(previousMatchupId);
+            if (state.teams[prevTeam1Idx] && state.teams[prevTeam2Idx]) {
+              state.matchup_scores[previousMatchupId] = {
+                team1: state.teams[prevTeam1Idx].score,
+                team2: state.teams[prevTeam2Idx].score
+              };
+            }
+
+            const newOrder = Array.from(tbody.querySelectorAll("tr[data-matchup-id]"))
+              .map((row) => Number.parseInt(row.dataset.matchupId, 10))
+              .filter((index) => Number.isInteger(index));
+
+            state.matchup_order = normalizeMatchupOrder(newOrder);
+            syncScoresForActiveMatchup();
+            render();
+            syncTimers();
+            broadcast();
+          }
+        });
       };
 
-      renderQuarterTable();
+      if (!isMatchupDragging) {
+        renderQuarterTable();
+      }
 
       // --- Team Foul Visuals (Control Page) ---
       const updateFoulVisuals = (team, count) => {
@@ -805,6 +1111,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       renderPreview();
+
+      // Allow page-specific scripts (e.g. display theme widgets) to react to latest scoreboard state
+      document.dispatchEvent(new CustomEvent("scoreboard:updated", {
+        detail: { matchId, role, state }
+      }));
     };
 
     const stopMainTimer = () => {
@@ -1108,9 +1419,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 state.shot_running = false;
                 break;
               case "next-quarter": {
-                const pairs = matchupPairs();
-                const finishedPairIdx = currentMatchupIndex();
-                const [p1, p2] = pairs[finishedPairIdx] || [];
+                const finishedPairIdx = currentMatchupId();
+                const [p1, p2] = matchupPairById(finishedPairIdx);
                 if (p1 === undefined || p2 === undefined || !state.teams[p1] || !state.teams[p2]) break;
 
                 state.matchup_scores[finishedPairIdx] = {
@@ -1168,8 +1478,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 state.rotation_step += 1;
 
-                const nextPairIdx = currentMatchupIndex();
-                const [n1, n2] = pairs[nextPairIdx] || [];
+                const nextPairIdx = currentMatchupId();
+                const [n1, n2] = matchupPairById(nextPairIdx);
                 if (n1 === undefined || n2 === undefined || !state.teams[n1] || !state.teams[n2]) break;
 
                 const nextScores = state.matchup_scores[nextPairIdx] || { team1: 0, team2: 0 };
@@ -1187,6 +1497,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 state.quarter = currentQuarter();
                 state.period_seconds = defaultPeriodSeconds;
                 state.shot_seconds = 24;
+                state.home_fouls = 0;
+                state.away_fouls = 0;
+                applyQuarterPossession(state.quarter);
                 state.running = false;
                 state.shot_running = false;
                 break;
@@ -1199,10 +1512,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Ideally we should reverse rotation_step too, but user didn't explicitly ask for full undo support
                 // Let's implement basic undo for rotation_step
                 if (state.rotation_step > 0) {
-                  const pairs = matchupPairs();
                   // SAVE current (which matches nextPairIdx logic above)
-                  const curPairIdx = currentMatchupIndex();
-                  const [c1, c2] = pairs[curPairIdx] || [];
+                  const curPairIdx = currentMatchupId();
+                  const [c1, c2] = matchupPairById(curPairIdx);
                   if (c1 !== undefined && c2 !== undefined && state.teams[c1] && state.teams[c2]) {
                     state.matchup_scores[curPairIdx] = { team1: state.teams[c1].score, team2: state.teams[c2].score };
                   }
@@ -1210,8 +1522,8 @@ document.addEventListener("DOMContentLoaded", () => {
                   state.rotation_step -= 1;
 
                   // LOAD prev
-                  const prevPairIdx = currentMatchupIndex();
-                  const [pr1, pr2] = pairs[prevPairIdx] || [];
+                  const prevPairIdx = currentMatchupId();
+                  const [pr1, pr2] = matchupPairById(prevPairIdx);
                   if (pr1 !== undefined && pr2 !== undefined && state.teams[pr1] && state.teams[pr2]) {
                     const prevScores = state.matchup_scores[prevPairIdx] || { team1: 0, team2: 0 };
                     state.teams[pr1].score = prevScores.team1;
@@ -1220,6 +1532,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                   state.quarter = currentQuarter();
                   state.period_seconds = defaultPeriodSeconds;
+                  applyQuarterPossession(state.quarter);
                 }
                 break;
               }
@@ -1257,10 +1570,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 playBuzzer();
                 break;
               case "possession-home":
-                state.possession = 'home';
+                state.base_possession = basePossessionForSelectedQuarterDirection(
+                  currentQuarter(),
+                  "home",
+                  state.possession_switch_pattern
+                );
+                state.possession = "home";
                 break;
               case "possession-away":
-                state.possession = 'away';
+                state.base_possession = basePossessionForSelectedQuarterDirection(
+                  currentQuarter(),
+                  "away",
+                  state.possession_switch_pattern
+                );
+                state.possession = "away";
                 break;
               case "finish-game":
                 // 경기 종료 - 현재 점수를 서버로 전송
@@ -1328,9 +1651,8 @@ document.addEventListener("DOMContentLoaded", () => {
               case "new-game":
                 if (confirm("모든 경기 점수 데이터가 초기화 됩니다. 진행 하시겠습니까?")) {
                   // SAVE CURRENT QUARTER BEFORE RESET
-                  const currentPairIdx = currentMatchupIndex();
-                  const pairs = matchupPairs();
-                  const [p1, p2] = pairs[currentPairIdx] || [];
+                  const currentPairIdx = currentMatchupId();
+                  const [p1, p2] = matchupPairById(currentPairIdx);
                   const currentQuarterNum = currentQuarter();
 
                   if (p1 !== undefined && p2 !== undefined && state.teams[p1] && state.teams[p2]) {
@@ -1358,6 +1680,7 @@ document.addEventListener("DOMContentLoaded", () => {
               case "overtime":
                 state.quarter = 5;
                 state.period_seconds = 300;
+                applyQuarterPossession(state.quarter);
                 break;
               default:
                 break;
@@ -1430,6 +1753,65 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     };
 
+    const initDetailPanelSort = () => {
+      if (role !== "control" || typeof Sortable === "undefined") return;
+
+      try {
+        const panel = scoreboardRoot.querySelector("[data-detail-sort-container]");
+        if (!panel || panel.dataset.sortableInitialized === "true") return;
+
+        const cards = Array.from(panel.querySelectorAll("[data-detail-sort-item]"));
+        if (cards.length < 2) return;
+
+        const storageKey = `scoreboard:detail-order:${matchId}`;
+        const readSavedOrder = () => {
+          try {
+            const raw = window.localStorage.getItem(storageKey);
+            if (!raw) return [];
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : [];
+          } catch (error) {
+            console.warn("상세 패널 순서 복원 실패:", error);
+            return [];
+          }
+        };
+
+        const saveCurrentOrder = () => {
+          try {
+            const order = Array.from(panel.querySelectorAll("[data-detail-sort-item]"))
+              .map((item) => item.dataset.detailSortKey)
+              .filter(Boolean);
+            window.localStorage.setItem(storageKey, JSON.stringify(order));
+          } catch (error) {
+            console.warn("상세 패널 순서 저장 실패:", error);
+          }
+        };
+
+        const savedOrder = readSavedOrder();
+        if (savedOrder.length > 0) {
+          const cardMap = new Map(cards.map((card) => [card.dataset.detailSortKey, card]));
+          savedOrder.forEach((key) => {
+            const card = cardMap.get(key);
+            if (card) panel.appendChild(card);
+          });
+        }
+
+        new Sortable(panel, {
+          animation: 180,
+          draggable: "[data-detail-sort-item]",
+          handle: "[data-detail-drag-handle]",
+          ghostClass: "opacity-60",
+          chosenClass: "ring-2",
+          dragClass: "cursor-grabbing",
+          onEnd: saveCurrentOrder
+        });
+
+        panel.dataset.sortableInitialized = "true";
+      } catch (error) {
+        console.warn("상세 패널 드래그 초기화 실패:", error);
+      }
+    };
+
 
     const ensureState = () => {
       if (!state) {
@@ -1483,6 +1865,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
     }
+
+    // 상세 패널 정렬 기능은 실패해도 점수판 실시간 동기화에 영향 주지 않도록 마지막에 초기화
+    initDetailPanelSort();
   }
 });
 

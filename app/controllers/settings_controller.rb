@@ -8,6 +8,10 @@ class SettingsController < ApplicationController
     minutes = normalized_default_game_minutes
     sound_enabled = normalized_boolean(setting_params[:scoreboard_sound_enabled], default: @user.scoreboard_sound_enabled)
     voice_enabled = normalized_boolean(setting_params[:voice_announcement_enabled], default: @user.voice_announcement_enabled)
+    possession_switch_pattern = normalized_possession_switch_pattern(
+      setting_params[:possession_switch_pattern],
+      default: @user.possession_switch_pattern
+    )
 
     unless minutes
       @user.assign_attributes(setting_params)
@@ -20,6 +24,7 @@ class SettingsController < ApplicationController
       default_game_minutes: minutes,
       scoreboard_sound_enabled: sound_enabled,
       voice_announcement_enabled: voice_enabled,
+      possession_switch_pattern: possession_switch_pattern,
       updated_at: Time.current
     )
     clear_scoreboard_state_cache!
@@ -29,7 +34,12 @@ class SettingsController < ApplicationController
   private
 
   def setting_params
-    params.require(:user).permit(:default_game_minutes, :scoreboard_sound_enabled, :voice_announcement_enabled)
+    params.require(:user).permit(
+      :default_game_minutes,
+      :scoreboard_sound_enabled,
+      :voice_announcement_enabled,
+      :possession_switch_pattern
+    )
   end
 
   def clear_scoreboard_state_cache!
@@ -57,5 +67,12 @@ class SettingsController < ApplicationController
 
     casted = ActiveModel::Type::Boolean.new.cast(value)
     casted.nil? ? default : casted
+  end
+
+  def normalized_possession_switch_pattern(value, default:)
+    candidate = value.presence || default
+    return candidate if User::POSSESSION_SWITCH_PATTERNS.key?(candidate)
+
+    User::DEFAULT_POSSESSION_SWITCH_PATTERN
   end
 end

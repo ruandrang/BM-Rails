@@ -111,31 +111,12 @@ class MatchesController < ApplicationController
 
   def show
     @teams = @match.teams.includes(:members).order(:label)
-    @games = @match.games.includes(:home_team, :away_team)
-
-    if @match.teams_count == 3
-      # 3팀 게임을 생성 순서(Rotational) 기준으로 정렬
-      team_labels = @teams.map(&:label)
-      if team_labels.size == 3
-        expected_matchups = [
-          [ team_labels[0], team_labels[1] ],
-          [ team_labels[1], team_labels[2] ],
-          [ team_labels[2], team_labels[0] ]
-        ]
-
-        sorted_games = expected_matchups.filter_map do |home_label, away_label|
-          @games.find { |g| g.home_team.label == home_label && g.away_team.label == away_label }
-        end
-
-        remaining = @games - sorted_games
-        @games = sorted_games + remaining
-      end
-    end
+    @games = ordered_games_for_display(@match.games.includes(:home_team, :away_team).to_a)
   end
 
   def share
     @teams = @match.teams.includes(:members).order(:label)
-    @games = @match.games.includes(:home_team, :away_team)
+    @games = ordered_games_for_display(@match.games.includes(:home_team, :away_team).to_a)
     render template: "matches/share", layout: "share"
   end
 
@@ -462,5 +443,59 @@ class MatchesController < ApplicationController
       scores[game_id] = sanitized
     end
     scores.presence
+  end
+
+  def ordered_games_for_display(games)
+    return games unless @match.teams_count == 3
+
+    teams_in_rotation = @match.teams.order(:id).to_a
+    return games if teams_in_rotation.size < 3
+
+    default_order = [ 0, 1, 2 ]
+    cached_state = Rails.cache.read("scoreboard_state_#{@match.id}")
+    raw_order = if cached_state.is_a?(Hash)
+      cached_state["matchup_order"] || cached_state[:matchup_order]
+    end
+    matchup_order = normalize_matchup_order(raw_order, default_order)
+
+    matchup_pairs = [
+      [ teams_in_rotation[0].id, teams_in_rotation[1].id ],
+      [ teams_in_rotation[1].id, teams_in_rotation[2].id ],
+      [ teams_in_rotation[2].id, teams_in_rotation[0].id ]
+    ]
+
+    sorted = matchup_order.filter_map do |pair_index|
+      pair = matchup_pairs[pair_index]
+      next unless pair
+
+      games.find do |game|
+        (game.home_team_id == pair[0] && game.away_team_id == pair[1]) ||
+          (game.home_team_id == pair[1] && game.away_team_id == pair[0])
+      end
+    end
+
+    sorted + (games - sorted)
+  end
+
+  def normalize_matchup_order(raw_order, fallback)
+    return fallback unless raw_order.is_a?(Array)
+
+    seen = {}
+    normalized = []
+
+    raw_order.each do |value|
+      index = value.to_i
+      next unless fallback.include?(index)
+      next if seen[index]
+
+      seen[index] = true
+      normalized << index
+    end
+
+    fallback.each do |index|
+      normalized << index unless seen[index]
+    end
+
+    normalized
   end
 end
