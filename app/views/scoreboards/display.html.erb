@@ -5,7 +5,8 @@
      data-scoreboard-role="display"
      data-match-id="<%= @match.id %>"
      data-teams="<%= @match.teams.to_json %>"
-     data-teams-count="<%= @match.teams.count %>">
+     data-teams-count="<%= @match.teams.count %>"
+     data-default-period-seconds="<%= current_user.default_period_seconds %>">
 
   <%# Top Bar - Team Names and Timer %>
   <div class="h-[25%] bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] border-b-4 border-[#333] flex items-center justify-between px-12 relative overflow-visible">

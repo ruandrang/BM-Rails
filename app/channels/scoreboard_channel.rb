@@ -13,7 +13,7 @@ class ScoreboardChannel < ApplicationCable::Channel
       return
     end
     stream_from(stream_name)
-    transmit(type: "state", payload: ScoreboardStore.fetch(@match_id))
+    transmit(type: "state", payload: ScoreboardStore.fetch(@match_id, period_seconds: current_user.default_period_seconds))
   end
 
   def update(data)
@@ -64,9 +64,9 @@ class ScoreboardStore
   CACHE_EXPIRY = 24.hours
 
   class << self
-    def fetch(match_id)
+    def fetch(match_id, period_seconds: 480)
       Rails.cache.fetch(cache_key(match_id), expires_in: CACHE_EXPIRY) do
-        default_state
+        default_state(period_seconds: period_seconds)
       end
     end
 
@@ -74,10 +74,17 @@ class ScoreboardStore
       Rails.cache.write(cache_key(match_id), payload, expires_in: CACHE_EXPIRY)
     end
 
-    def default_state
+    def delete(match_id)
+      Rails.cache.delete(cache_key(match_id))
+    end
+
+    def default_state(period_seconds: 480)
+      sanitized_period_seconds = period_seconds.to_i
+      sanitized_period_seconds = 480 if sanitized_period_seconds <= 0
+
       {
         "quarter" => 1,
-        "period_seconds" => 480,
+        "period_seconds" => sanitized_period_seconds,
         "shot_seconds" => 24,
         "running" => false,
         "shot_running" => false,
