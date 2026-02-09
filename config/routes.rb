@@ -4,6 +4,7 @@ Rails.application.routes.draw do
 
   resource :session, only: [ :new, :create, :destroy ]
   resource :registration, only: [ :new, :create ]
+  resource :setting, only: [ :show, :update ]
   resources :scoreboards, only: [ :index ]
 
   resources :clubs do

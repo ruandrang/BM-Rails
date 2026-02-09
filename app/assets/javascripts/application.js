@@ -117,6 +117,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const matchId = scoreboardRoot.dataset.matchId;
     const teams = JSON.parse(scoreboardRoot.dataset.teams || "[]");
     const teamsCount = parseInt(scoreboardRoot.dataset.teamsCount || "2", 10);
+    const parsedDefaultPeriodSeconds = parseInt(scoreboardRoot.dataset.defaultPeriodSeconds || "480", 10);
+    const defaultPeriodSeconds = Number.isFinite(parsedDefaultPeriodSeconds) && parsedDefaultPeriodSeconds > 0 ? parsedDefaultPeriodSeconds : 480;
 
     const cableUrl =
       (window.location.protocol === "https:" ? "wss://" : "ws://") +
@@ -188,7 +190,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const defaultState = () => ({
       quarter: 1,
-      period_seconds: 480,
+      period_seconds: defaultPeriodSeconds,
       shot_seconds: 24,
       running: false,
       shot_running: false,
@@ -1033,13 +1035,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 state.shot_running = false;
                 break;
               case "reset-main":
-                state.period_seconds = 480;
+                state.period_seconds = defaultPeriodSeconds;
                 state.running = false;
                 state.shot_running = false;
                 break;
               case "reset-all":
                 if (confirm("정말로 모든 점수와 시간을 초기화하시겠습니까?")) {
-                  state.period_seconds = 480;
+                  state.period_seconds = defaultPeriodSeconds;
                   state.shot_seconds = 24;
                   state.running = false;
                   state.shot_running = false;
@@ -1144,7 +1146,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
                 state.quarter = currentQuarter();
-                state.period_seconds = 480;
+                state.period_seconds = defaultPeriodSeconds;
                 state.shot_seconds = 24;
                 state.running = false;
                 state.shot_running = false;
@@ -1178,7 +1180,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   }
 
                   state.quarter = currentQuarter();
-                  state.period_seconds = 480;
+                  state.period_seconds = defaultPeriodSeconds;
                 }
                 break;
               }

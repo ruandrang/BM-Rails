@@ -3,7 +3,8 @@
      data-scoreboard-role="control"
      data-match-id="<%= @match.id %>"
      data-teams="<%= @match.teams.respond_to?(:includes) ? @match.teams.includes(:members).to_json(include: :members) : @match.teams.to_json %>"
-     data-teams-count="<%= @match.teams.count %>">
+     data-teams-count="<%= @match.teams.count %>"
+     data-default-period-seconds="<%= current_user.default_period_seconds %>">
 
   <div class="max-w-[1400px] mx-auto">
     <!-- Header -->
