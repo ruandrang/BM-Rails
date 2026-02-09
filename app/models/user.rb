@@ -18,6 +18,8 @@ class User < ApplicationRecord
     greater_than_or_equal_to: MIN_GAME_MINUTES,
     less_than_or_equal_to: MAX_GAME_MINUTES
   }
+  validates :scoreboard_sound_enabled, inclusion: { in: [ true, false ] }
+  validates :voice_announcement_enabled, inclusion: { in: [ true, false ] }
 
   before_validation { self.email = email.to_s.downcase.strip }
 

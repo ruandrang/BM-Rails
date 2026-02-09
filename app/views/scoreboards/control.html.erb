@@ -4,7 +4,9 @@
      data-match-id="<%= @match.id %>"
      data-teams="<%= @match.teams.respond_to?(:includes) ? @match.teams.includes(:members).to_json(include: :members) : @match.teams.to_json %>"
      data-teams-count="<%= @match.teams.count %>"
-     data-default-period-seconds="<%= current_user.default_period_seconds %>">
+     data-default-period-seconds="<%= current_user.default_period_seconds %>"
+     data-sound-enabled="<%= current_user.scoreboard_sound_enabled %>"
+     data-voice-enabled="<%= current_user.voice_announcement_enabled %>">
 
   <div class="max-w-[1400px] mx-auto">
     <!-- Header -->
@@ -185,41 +187,45 @@
     <div class="mt-8 border-t border-gray-200 pt-6">
       
       <!-- Quick Actions Bar -->
-      <div class="flex items-center flex-wrap gap-8 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+      <div class="flex items-center flex-nowrap gap-3 overflow-x-auto bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
         
         <!-- Main Controls -->
-        <div class="flex items-center gap-3">
-          <button class="btn btn-md px-8 py-4 border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900 shadow-sm font-black text-xl h-14 flex items-center gap-2"
+        <div class="flex items-center gap-2 shrink-0">
+          <button class="btn btn-sm px-5 border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900 shadow-sm font-black text-lg h-11 flex items-center gap-2 shrink-0"
                   data-action="buzzer">🔔 BUZZER</button>
-          <button class="btn btn-md px-6 border-red-100 bg-red-50 text-red-600 hover:bg-red-100 shadow-sm font-bold h-14"
+          <button class="btn btn-sm px-3 bg-white hover:bg-gray-50 shadow-sm font-bold h-11 shrink-0"
+                  data-action="toggle-sound">🔊 사운드 ON</button>
+          <button class="btn btn-sm px-3 bg-white hover:bg-gray-50 shadow-sm font-bold h-11 shrink-0"
+                  data-action="toggle-voice">🗣️ 음성 ON</button>
+          <button class="btn btn-sm px-4 border-red-100 bg-red-50 text-red-600 hover:bg-red-100 shadow-sm font-bold h-11 shrink-0"
                   data-action="reset-all">🔄 전체 리셋</button>
-          <button class="btn btn-md px-6 border-blue-100 bg-blue-50 text-blue-600 hover:bg-blue-100 shadow-sm font-bold h-14"
+          <button class="btn btn-sm px-4 border-blue-100 bg-blue-50 text-blue-600 hover:bg-blue-100 shadow-sm font-bold h-11 shrink-0"
                   data-action="swap-sides">🔄 점수 바꾸기</button>
         </div>
 
         <% unless @match.id.to_s.start_with?("standalone_") %>
-          <div class="w-px h-10 bg-gray-200"></div>
+          <div class="w-px h-8 bg-gray-200 shrink-0"></div>
           
           <!-- Match Progress Controls -->
-          <div class="flex items-center gap-3">
-            <button class="btn btn-md px-5 border-gray-200 bg-white text-gray-600 hover:bg-gray-50 shadow-sm font-bold h-14"
+          <div class="flex items-center gap-2 shrink-0">
+            <button class="btn btn-sm px-4 border-gray-200 bg-white text-gray-600 hover:bg-gray-50 shadow-sm font-bold h-11 shrink-0"
                     data-action="next-quarter">다음 쿼터</button>
-            <button class="btn btn-md px-5 border-red-100 bg-red-50 text-red-600 hover:bg-red-100 shadow-sm font-bold h-14"
+            <button class="btn btn-sm px-4 border-red-100 bg-red-50 text-red-600 hover:bg-red-100 shadow-sm font-bold h-11 shrink-0"
                     data-action="new-game">경기 리셋</button>
-            <button class="btn btn-md px-6 border-green-200 bg-green-50 text-green-700 hover:bg-green-100 shadow-sm font-bold h-14"
+            <button class="btn btn-sm px-4 border-green-200 bg-green-50 text-green-700 hover:bg-green-100 shadow-sm font-bold h-11 shrink-0"
                     data-action="finish-game">🏁 경기 종료</button>
           </div>
         <% end %>
 
-        <div class="w-px h-10 bg-gray-200"></div>
+        <div class="w-px h-8 bg-gray-200 shrink-0"></div>
 
         <!-- Attack Direction (Possession) -->
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2 shrink-0">
           <span class="text-gray-500 text-xs font-bold uppercase tracking-widest">공격방향</span>
           <div class="flex gap-2">
-            <button class="btn btn-md border-gray-200 bg-white text-gray-400 hover:bg-[#E53935] hover:text-white shadow-sm w-14 h-14 font-bold text-2xl"
+            <button class="btn btn-sm border-gray-200 bg-white text-gray-400 hover:bg-[#E53935] hover:text-white shadow-sm w-10 h-10 min-h-0 font-bold text-lg"
                     data-action="possession-home" data-possession-home-btn>◀</button>
-            <button class="btn btn-md border-gray-200 bg-white text-gray-400 hover:bg-[#3B82F6] hover:text-white shadow-sm w-14 h-14 font-bold text-2xl"
+            <button class="btn btn-sm border-gray-200 bg-white text-gray-400 hover:bg-[#3B82F6] hover:text-white shadow-sm w-10 h-10 min-h-0 font-bold text-lg"
                     data-action="possession-away" data-possession-away-btn>▶</button>
           </div>
         </div>
@@ -232,7 +238,7 @@
         
         <% unless @match.id.to_s.start_with?("standalone_") %>
           <!-- Quarterly Score Table (Always Visible) -->
-          <div data-quarter-table class="w-full max-w-5xl bg-white border border-gray-200 rounded-2xl p-8 shadow-sm mb-8">
+          <div data-quarter-table class="w-full bg-white border border-gray-200 rounded-2xl p-8 shadow-sm mb-8">
              <!-- Table injected by JS -->
           </div>
         <% end %>
@@ -245,7 +251,7 @@
         </div>
 
         <!-- Collapsible Panel: Shortcuts + Roster -->
-        <div data-shortcuts-panel class="w-full max-w-5xl flex flex-col gap-8 animate-in slide-in-from-bottom-4 fade-in duration-200">
+        <div data-shortcuts-panel class="w-full flex flex-col gap-8 animate-in slide-in-from-bottom-4 fade-in duration-200">
             
             <!-- Shortcuts -->
             <div class="bg-white border border-gray-200 rounded-2xl px-12 py-6 shadow-sm">

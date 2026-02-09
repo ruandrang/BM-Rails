@@ -151,8 +151,12 @@ class MatchesController < ApplicationController
   end
 
   def destroy
-    @match.destroy
-    redirect_to club_matches_path(@club), notice: "경기가 삭제되었습니다."
+    if @match.destroy
+      expire_member_stats_cache
+      redirect_to club_matches_path(@club), notice: "경기가 삭제되었습니다."
+    else
+      redirect_to club_matches_path(@club), alert: "경기 삭제에 실패했습니다."
+    end
   end
 
   def record_results
@@ -175,17 +179,23 @@ class MatchesController < ApplicationController
 
   def save_game_scores
     game_id = params[:game_id]
+    home_team_id = params[:home_team_id]
+    away_team_id = params[:away_team_id]
     home_score = params[:home_score].to_i
     away_score = params[:away_score].to_i
 
     game = if game_id.present?
       @match.games.find(game_id)
-    else
+    elsif home_team_id.present? && away_team_id.present?
+      @match.games.find_by(home_team_id: home_team_id, away_team_id: away_team_id) ||
+      @match.games.find_by(home_team_id: away_team_id, away_team_id: home_team_id)
+    elsif @match.games.size == 1
       @match.games.first
+    else
+      nil
     end
 
     if game
-      home_team_id = params[:home_team_id]
       # 클라이언트에서 보낸 home_team_id가 실제 게임의 away_team_id라면 점수를 스왑해야 함
       if home_team_id.present? && game.home_team_id.to_s != home_team_id.to_s
         actual_home_score = away_score

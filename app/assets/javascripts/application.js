@@ -119,6 +119,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const teamsCount = parseInt(scoreboardRoot.dataset.teamsCount || "2", 10);
     const parsedDefaultPeriodSeconds = parseInt(scoreboardRoot.dataset.defaultPeriodSeconds || "480", 10);
     const defaultPeriodSeconds = Number.isFinite(parsedDefaultPeriodSeconds) && parsedDefaultPeriodSeconds > 0 ? parsedDefaultPeriodSeconds : 480;
+    const parseBooleanDataset = (value, fallback = true) => {
+      if (value === undefined || value === null || value === "") return fallback;
+      const normalized = String(value).trim().toLowerCase();
+      if (["true", "1", "yes", "on"].includes(normalized)) return true;
+      if (["false", "0", "no", "off"].includes(normalized)) return false;
+      return fallback;
+    };
+    const defaultSoundEnabled = parseBooleanDataset(scoreboardRoot.dataset.soundEnabled, true);
+    const defaultVoiceEnabled = parseBooleanDataset(scoreboardRoot.dataset.voiceEnabled, true);
 
     const cableUrl =
       (window.location.protocol === "https:" ? "wss://" : "ws://") +
@@ -129,7 +138,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let state = null;
     let mainTimer = null;
     let shotTimer = null;
-    let soundEnabled = true;
 
     // Colors
     const COLORS = {
@@ -194,6 +202,8 @@ document.addEventListener("DOMContentLoaded", () => {
       shot_seconds: 24,
       running: false,
       shot_running: false,
+      sound_enabled: defaultSoundEnabled,
+      voice_enabled: defaultVoiceEnabled,
       matchup_index: 0,
       rotation_step: 0,
       home_fouls: 0,
@@ -204,6 +214,9 @@ document.addEventListener("DOMContentLoaded", () => {
       possession: 'away', // 'home' or 'away'
       manual_swap: false
     });
+
+    const isSoundEnabled = () => state?.sound_enabled !== false;
+    const isVoiceEnabled = () => state?.voice_enabled !== false;
 
     const normalizeState = (incomingState) => {
       const base = defaultState();
@@ -540,7 +553,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const toggleShotBtn = scoreboardRoot.querySelector('[data-action="toggle-shot"]');
       if (toggleShotBtn) {
-        toggleShotBtn.textContent = state.shot_running ? "샷클락 멈춤" : "샷클락 시작";
+        toggleShotBtn.textContent = state.shot_running ? "멈춤" : "시작";
       }
 
       const possHomeBtn = scoreboardRoot.querySelector('[data-possession-home-btn]');
@@ -760,11 +773,35 @@ document.addEventListener("DOMContentLoaded", () => {
       if (shotToggleBtn) {
         if (state.shot_running) {
           shotToggleBtn.classList.add("btn-active");
-          shotToggleBtn.textContent = "STOP";
+          shotToggleBtn.textContent = "멈춤";
         } else {
           shotToggleBtn.classList.remove("btn-active");
-          shotToggleBtn.textContent = "ALIVE";
+          shotToggleBtn.textContent = "시작";
         }
+      }
+
+      const soundToggleBtn = scoreboardRoot.querySelector('[data-action="toggle-sound"]');
+      if (soundToggleBtn) {
+        const enabled = isSoundEnabled();
+        soundToggleBtn.textContent = enabled ? "🔊 사운드 ON" : "🔇 사운드 OFF";
+        soundToggleBtn.classList.toggle("bg-green-50", enabled);
+        soundToggleBtn.classList.toggle("text-green-700", enabled);
+        soundToggleBtn.classList.toggle("border-green-200", enabled);
+        soundToggleBtn.classList.toggle("bg-gray-100", !enabled);
+        soundToggleBtn.classList.toggle("text-gray-500", !enabled);
+        soundToggleBtn.classList.toggle("border-gray-300", !enabled);
+      }
+
+      const voiceToggleBtn = scoreboardRoot.querySelector('[data-action="toggle-voice"]');
+      if (voiceToggleBtn) {
+        const enabled = isVoiceEnabled();
+        voiceToggleBtn.textContent = enabled ? "🗣️ 음성 ON" : "🤫 음성 OFF";
+        voiceToggleBtn.classList.toggle("bg-green-50", enabled);
+        voiceToggleBtn.classList.toggle("text-green-700", enabled);
+        voiceToggleBtn.classList.toggle("border-green-200", enabled);
+        voiceToggleBtn.classList.toggle("bg-gray-100", !enabled);
+        voiceToggleBtn.classList.toggle("text-gray-500", !enabled);
+        voiceToggleBtn.classList.toggle("border-gray-300", !enabled);
       }
 
       renderPreview();
@@ -801,7 +838,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const playBuzzer = () => {
-      if (!soundEnabled) return;
+      if (!isSoundEnabled()) return;
 
       // Initialize on first call
       if (!globalAudioContext) {
@@ -880,15 +917,15 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const speak = (text) => {
-      if ('speechSynthesis' in window) {
-        // Cancel any previous speech to prevent duplicates
-        window.speechSynthesis.cancel();
+      if (!isVoiceEnabled() || !("speechSynthesis" in window)) return;
 
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'ko-KR';
-        utterance.rate = 1.0;
-        window.speechSynthesis.speak(utterance);
-      }
+      // Cancel any previous speech to prevent duplicates
+      window.speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "ko-KR";
+      utterance.rate = 1.0;
+      window.speechSynthesis.speak(utterance);
     };
 
 
@@ -917,16 +954,18 @@ document.addEventListener("DOMContentLoaded", () => {
     let voiceInitialized = false;
 
     const initializeVoice = () => {
+      if (!isVoiceEnabled() || !("speechSynthesis" in window)) return;
       if (voiceInitialized) return;
 
       // Play a silent utterance to activate speech synthesis
-      const silent = new SpeechSynthesisUtterance('');
+      const silent = new SpeechSynthesisUtterance("");
       silent.volume = 0;
       window.speechSynthesis.speak(silent);
       voiceInitialized = true;
     };
 
     const speakScore = () => {
+      if (!isVoiceEnabled()) return;
 
       // Only speak if speech synthesis is supported and acting as control
       if (!window.speechSynthesis) {
@@ -1191,7 +1230,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 state.matchup_index = Math.max(0, state.matchup_index - 1);
                 break;
               case "toggle-sound":
-                soundEnabled = !soundEnabled;
+                state.sound_enabled = !isSoundEnabled();
+                break;
+              case "toggle-voice":
+                state.voice_enabled = !isVoiceEnabled();
                 break;
               case "increment-home-fouls":
                 state.home_fouls = (state.home_fouls || 0) + 1;
@@ -1224,17 +1266,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 // 경기 종료 - 현재 점수를 서버로 전송
                 const saveGameScore = async () => {
                   const [home, away] = currentMatchup();
-                  const pairs = matchupPairs();
-                  const currentPairIdx = state.matchup_index % pairs.length;
-                  const [homeIdx, awayIdx] = pairs[currentPairIdx];
-
-                  // 현재 매치 ID
                   const matchId = scoreboardRoot.dataset.matchId;
-
-                  // teams 정보를 기반으로 게임 찾기 (첫 번째 게임 사용)
-                  // 실제로는 home_team과 away_team을 매칭해야 하지만, 
-                  // 2팀 경기인 경우 게임이 하나뿐이므로 단순화
-                  const clubId = window.location.pathname.match(/\/clubs\/(\d+)/)[1];
+                  const clubMatch = window.location.pathname.match(/\/clubs\/(\d+)/);
+                  const clubId = clubMatch ? clubMatch[1] : null;
+                  if (!clubId) {
+                    alert("클럽 정보를 찾을 수 없습니다.");
+                    return;
+                  }
 
                   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
@@ -1246,6 +1284,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         'X-CSRF-Token': csrfToken
                       },
                       body: JSON.stringify({
+                        home_team_id: home.id,
+                        away_team_id: away.id,
                         home_score: home.score,
                         away_score: away.score
                       })

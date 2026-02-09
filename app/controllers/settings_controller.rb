@@ -6,6 +6,8 @@ class SettingsController < ApplicationController
   def update
     @user = current_user
     minutes = normalized_default_game_minutes
+    sound_enabled = normalized_boolean(setting_params[:scoreboard_sound_enabled], default: @user.scoreboard_sound_enabled)
+    voice_enabled = normalized_boolean(setting_params[:voice_announcement_enabled], default: @user.voice_announcement_enabled)
 
     unless minutes
       @user.assign_attributes(setting_params)
@@ -14,7 +16,12 @@ class SettingsController < ApplicationController
       return
     end
 
-    @user.update_columns(default_game_minutes: minutes, updated_at: Time.current)
+    @user.update_columns(
+      default_game_minutes: minutes,
+      scoreboard_sound_enabled: sound_enabled,
+      voice_announcement_enabled: voice_enabled,
+      updated_at: Time.current
+    )
     clear_scoreboard_state_cache!
     redirect_to setting_path, notice: "세팅이 저장되었습니다."
   end
@@ -22,7 +29,7 @@ class SettingsController < ApplicationController
   private
 
   def setting_params
-    params.require(:user).permit(:default_game_minutes)
+    params.require(:user).permit(:default_game_minutes, :scoreboard_sound_enabled, :voice_announcement_enabled)
   end
 
   def clear_scoreboard_state_cache!
@@ -43,5 +50,12 @@ class SettingsController < ApplicationController
     return nil unless minutes.between?(User::MIN_GAME_MINUTES, User::MAX_GAME_MINUTES)
 
     minutes
+  end
+
+  def normalized_boolean(value, default:)
+    return default if value.nil?
+
+    casted = ActiveModel::Type::Boolean.new.cast(value)
+    casted.nil? ? default : casted
   end
 end
