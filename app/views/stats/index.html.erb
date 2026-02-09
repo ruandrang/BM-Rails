@@ -175,5 +175,12 @@
 </div>
 
 <script>
-  initSortableList("#stats-list", ".stats-row", { name: "asc", position: "asc" });
+  const initStatsSort = () => {
+    if (typeof initSortableList === "function") {
+      initSortableList("#stats-list", ".stats-row", { name: "asc", position: "asc" });
+    }
+  };
+
+  document.addEventListener("turbo:load", initStatsSort);
+  document.addEventListener("DOMContentLoaded", initStatsSort);
 </script>

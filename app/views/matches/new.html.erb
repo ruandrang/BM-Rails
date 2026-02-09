@@ -204,11 +204,6 @@
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-  updateColorAvailability();
-});
-initSortableList("#member-list", ".member-item", { name: "asc", position: "asc" });
-
 function handleColorChangeOnly(input, teamIndex) {
   const color = input.value;
   // 미리보기 업데이트
@@ -273,5 +268,15 @@ function selectTopMembers(count) {
     checkbox.checked = index < count;
   });
 }
+
+function initNewMatchPageHelpers() {
+  updateColorAvailability();
+  if (typeof initSortableList === "function") {
+    initSortableList("#member-list", ".member-item", { name: "asc", position: "asc" });
+  }
+}
+
+document.addEventListener("turbo:load", initNewMatchPageHelpers);
+document.addEventListener("DOMContentLoaded", initNewMatchPageHelpers);
 
 </script>
