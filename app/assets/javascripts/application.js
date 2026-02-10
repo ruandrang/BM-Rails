@@ -128,6 +128,14 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     const defaultSoundEnabled = parseBooleanDataset(scoreboardRoot.dataset.soundEnabled, true);
     const defaultVoiceEnabled = parseBooleanDataset(scoreboardRoot.dataset.voiceEnabled, true);
+    const VOICE_ANNOUNCEMENT_RATES = [1.0, 1.1, 0.9];
+    const normalizeVoiceRate = (value, fallback = 1.0) => {
+      const parsed = Number.parseFloat(value);
+      if (!Number.isFinite(parsed)) return fallback;
+      const rounded = Math.round(parsed * 10) / 10;
+      return VOICE_ANNOUNCEMENT_RATES.includes(rounded) ? rounded : fallback;
+    };
+    const defaultVoiceRate = normalizeVoiceRate(scoreboardRoot.dataset.voiceRate, 1.0);
     const POSSESSION_SWITCH_PATTERNS = ["q12_q34", "q13_q24"];
     const defaultPossessionSwitchPattern = POSSESSION_SWITCH_PATTERNS.includes(scoreboardRoot.dataset.possessionSwitchPattern)
       ? scoreboardRoot.dataset.possessionSwitchPattern
@@ -356,6 +364,7 @@ document.addEventListener("DOMContentLoaded", () => {
       shot_running: false,
       sound_enabled: defaultSoundEnabled,
       voice_enabled: defaultVoiceEnabled,
+      voice_rate: defaultVoiceRate,
       matchup_index: 0,
       rotation_step: 0,
       home_fouls: 0,
@@ -372,6 +381,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const isSoundEnabled = () => state?.sound_enabled !== false;
     const isVoiceEnabled = () => state?.voice_enabled !== false;
+    const currentVoiceRate = () => normalizeVoiceRate(state?.voice_rate, defaultVoiceRate);
 
     const normalizeState = (incomingState) => {
       const base = defaultState();
@@ -400,6 +410,7 @@ document.addEventListener("DOMContentLoaded", () => {
       normalized.possession_switch_pattern = normalizePossessionSwitchPattern(
         incomingState.possession_switch_pattern || normalized.possession_switch_pattern
       );
+      normalized.voice_rate = normalizeVoiceRate(incomingState.voice_rate, base.voice_rate);
 
       const parsedStep = Number.parseInt(incomingState.rotation_step, 10);
       normalized.rotation_step = Number.isFinite(parsedStep)
@@ -643,7 +654,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const rightFouls = isDisplayPage ? (state.home_fouls || 0) : (state.away_fouls || 0);
 
       // Quarter and timers
-      setText("[data-scoreboard-quarter]", state.quarter);
+      const quarterLabel = role === "control" ? `${state.quarter}Q` : state.quarter;
+      setText("[data-scoreboard-quarter]", quarterLabel);
       setText("[data-scoreboard-timer]", formatTime(state.period_seconds));
       setText("[data-scoreboard-shot]", state.shot_seconds);
 
@@ -1242,7 +1254,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = "ko-KR";
-      utterance.rate = 1.0;
+      utterance.rate = currentVoiceRate();
       window.speechSynthesis.speak(utterance);
     };
 
@@ -1282,6 +1294,34 @@ document.addEventListener("DOMContentLoaded", () => {
       voiceInitialized = true;
     };
 
+    const toSinoKoreanNumber = (value) => {
+      const parsed = Number.parseInt(value, 10);
+      if (!Number.isFinite(parsed)) return "영";
+
+      const number = Math.max(0, Math.min(parsed, 999));
+      if (number === 0) return "영";
+
+      const digits = ["", "일", "이", "삼", "사", "오", "육", "칠", "팔", "구"];
+      const hundreds = Math.floor(number / 100);
+      const tens = Math.floor((number % 100) / 10);
+      const ones = number % 10;
+      let result = "";
+
+      if (hundreds > 0) {
+        result += hundreds === 1 ? "백" : `${digits[hundreds]}백`;
+      }
+
+      if (tens > 0) {
+        result += tens === 1 ? "십" : `${digits[tens]}십`;
+      }
+
+      if (ones > 0) {
+        result += digits[ones];
+      }
+
+      return result;
+    };
+
     const speakScore = () => {
       if (!isVoiceEnabled()) return;
 
@@ -1308,12 +1348,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const awayScore = visualAway.score;
 
 
-      // Format: "75 to 72" (Korean style: 75 대 72)
-      const text = `${homeScore} 대 ${awayScore}`;
+      // Use sino-korean numerals to avoid native-korean reading like "열"
+      const homeScoreText = toSinoKoreanNumber(homeScore);
+      const awayScoreText = toSinoKoreanNumber(awayScore);
+      const text = `${homeScoreText} 대 ${awayScoreText}`;
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'ko-KR';
-      utterance.rate = 1.0;
+      utterance.rate = currentVoiceRate();
       utterance.volume = 1.0;
       utterance.pitch = 1.0;
 

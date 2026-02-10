@@ -7,6 +7,13 @@ class User < ApplicationRecord
     "q13_q24" => "1,3쿼터 / 2,4쿼터 공격권 전환"
   }.freeze
   DEFAULT_POSSESSION_SWITCH_PATTERN = "q12_q34"
+  VOICE_ANNOUNCEMENT_RATES = [ 1.0, 1.1, 0.9 ].freeze
+  DEFAULT_VOICE_ANNOUNCEMENT_RATE = 1.0
+  VOICE_ANNOUNCEMENT_RATE_OPTIONS = {
+    "보통" => 1.0,
+    "빠르게" => 1.1,
+    "느리게" => 0.9
+  }.freeze
 
   has_secure_password
 
@@ -26,6 +33,7 @@ class User < ApplicationRecord
   validates :scoreboard_sound_enabled, inclusion: { in: [ true, false ] }
   validates :voice_announcement_enabled, inclusion: { in: [ true, false ] }
   validates :possession_switch_pattern, inclusion: { in: POSSESSION_SWITCH_PATTERNS.keys }
+  validates :voice_announcement_rate, inclusion: { in: VOICE_ANNOUNCEMENT_RATES }
 
   before_validation { self.email = email.to_s.downcase.strip }
 

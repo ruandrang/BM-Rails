@@ -3,8 +3,7 @@
  * 필요한 경우 아래 주석을 해제하여 사용
  */
 
-/* 한글 폰트 (선택사항 - Tailwind에서도 사용 가능) */
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap");
+/* 오프라인 동작을 위해 외부 폰트 @import 미사용 */
 
 /*
  * ============================================

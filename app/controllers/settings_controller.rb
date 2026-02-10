@@ -8,6 +8,10 @@ class SettingsController < ApplicationController
     minutes = normalized_default_game_minutes
     sound_enabled = normalized_boolean(setting_params[:scoreboard_sound_enabled], default: @user.scoreboard_sound_enabled)
     voice_enabled = normalized_boolean(setting_params[:voice_announcement_enabled], default: @user.voice_announcement_enabled)
+    voice_rate = normalized_voice_announcement_rate(
+      setting_params[:voice_announcement_rate],
+      default: @user.voice_announcement_rate
+    )
     possession_switch_pattern = normalized_possession_switch_pattern(
       setting_params[:possession_switch_pattern],
       default: @user.possession_switch_pattern
@@ -24,6 +28,7 @@ class SettingsController < ApplicationController
       default_game_minutes: minutes,
       scoreboard_sound_enabled: sound_enabled,
       voice_announcement_enabled: voice_enabled,
+      voice_announcement_rate: voice_rate,
       possession_switch_pattern: possession_switch_pattern,
       updated_at: Time.current
     )
@@ -38,6 +43,7 @@ class SettingsController < ApplicationController
       :default_game_minutes,
       :scoreboard_sound_enabled,
       :voice_announcement_enabled,
+      :voice_announcement_rate,
       :possession_switch_pattern
     )
   end
@@ -74,5 +80,13 @@ class SettingsController < ApplicationController
     return candidate if User::POSSESSION_SWITCH_PATTERNS.key?(candidate)
 
     User::DEFAULT_POSSESSION_SWITCH_PATTERN
+  end
+
+  def normalized_voice_announcement_rate(value, default:)
+    candidate = value.presence || default
+    rate = candidate.to_f.round(1)
+    return rate if User::VOICE_ANNOUNCEMENT_RATES.include?(rate)
+
+    User::DEFAULT_VOICE_ANNOUNCEMENT_RATE
   end
 end

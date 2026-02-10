@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_10_101500) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_10_173000) do
   create_table "clubs", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
@@ -94,6 +94,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_10_101500) do
     t.boolean "scoreboard_sound_enabled", default: true, null: false
     t.datetime "updated_at", null: false
     t.boolean "voice_announcement_enabled", default: true, null: false
+    t.float "voice_announcement_rate", default: 1.0, null: false
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
