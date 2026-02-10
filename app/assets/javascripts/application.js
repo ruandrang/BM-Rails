@@ -474,6 +474,16 @@ document.addEventListener("DOMContentLoaded", () => {
       if (el) el.textContent = value;
     };
 
+    const setTextOrValue = (selector, value) => {
+      const el = scoreboardRoot.querySelector(selector);
+      if (!el) return;
+      if ("value" in el) {
+        el.value = value;
+      } else {
+        el.textContent = value;
+      }
+    };
+
     // Control page: Render teams with inline styles
     const renderTeamsControl = () => {
       const wrapper = scoreboardRoot.querySelector("[data-scoreboard-teams]");
@@ -763,22 +773,19 @@ document.addEventListener("DOMContentLoaded", () => {
         toggleShotBtn.textContent = state.shot_running ? "멈춤" : "시작";
       }
 
-      const possHomeBtn = scoreboardRoot.querySelector('[data-possession-home-btn]');
-      const possAwayBtn = scoreboardRoot.querySelector('[data-possession-away-btn]');
-
-      if (possHomeBtn && possAwayBtn) {
-        if (state.possession === 'home') {
-          possHomeBtn.classList.remove("text-gray-400", "bg-white");
-          possHomeBtn.classList.add("bg-[#E53935]", "text-white", "border-[#E53935]");
-
-          possAwayBtn.classList.add("text-gray-400", "bg-white", "border-gray-300");
-          possAwayBtn.classList.remove("bg-[#3B82F6]", "text-white", "border-[#3B82F6]");
+      const possToggleBtn = scoreboardRoot.querySelector('[data-possession-toggle-btn]');
+      if (possToggleBtn) {
+        const currentPossession = normalizePossession(state.possession, "away");
+        const directionLabel = currentPossession === "home" ? "오른쪽" : "왼쪽";
+        possToggleBtn.textContent = `공격 전환 (${directionLabel})`;
+        possToggleBtn.style.color = "#FFFFFF";
+        possToggleBtn.style.textShadow = "0 1px 1px rgba(0,0,0,0.25)";
+        if (currentPossession === "home") {
+          possToggleBtn.style.backgroundColor = "#E53935";
+          possToggleBtn.style.borderColor = "#E53935";
         } else {
-          possAwayBtn.classList.remove("text-gray-400", "bg-white");
-          possAwayBtn.classList.add("bg-[#3B82F6]", "text-white", "border-[#3B82F6]");
-
-          possHomeBtn.classList.add("text-gray-400", "bg-white", "border-gray-300");
-          possHomeBtn.classList.remove("bg-[#E53935]", "text-white", "border-[#E53935]");
+          possToggleBtn.style.backgroundColor = "#2563EB";
+          possToggleBtn.style.borderColor = "#2563EB";
         }
       }
 
@@ -1049,8 +1056,8 @@ document.addEventListener("DOMContentLoaded", () => {
       updateFoulVisuals("away", state.away_fouls || 0);
 
       // Display page specific updates
-      setText("[data-home-score]", home.score);
-      setText("[data-away-score]", away.score);
+      setTextOrValue("[data-home-score]", home.score);
+      setTextOrValue("[data-away-score]", away.score);
       setText("[data-home-fouls-display]", state.home_fouls || 0);
       setText("[data-away-fouls-display]", state.away_fouls || 0);
       setText("[data-scoreboard-quarter-num]", state.quarter);
@@ -1332,6 +1339,28 @@ document.addEventListener("DOMContentLoaded", () => {
       window.speechSynthesis.speak(utterance);
     };
 
+    const normalizeScoreValue = (rawValue) => {
+      const parsed = Number.parseInt(rawValue, 10);
+      if (!Number.isFinite(parsed) || parsed < 0) return 0;
+      return Math.min(parsed, 999);
+    };
+
+    const setScoreByVisualSide = (side, rawValue) => {
+      const [visualHome, visualAway] = currentMatchup();
+      const homeIdx = state.teams.findIndex((team) => team.id === visualHome.id);
+      const awayIdx = state.teams.findIndex((team) => team.id === visualAway.id);
+      if (homeIdx < 0 || awayIdx < 0) return false;
+
+      const nextScore = normalizeScoreValue(rawValue);
+      if (side === "home") {
+        state.teams[homeIdx].score = nextScore;
+      } else {
+        state.teams[awayIdx].score = nextScore;
+      }
+
+      return true;
+    };
+
     const handleTeamAction = (action) => {
       // "Home" action targets the Visually Left team
       // "Away" action targets the Visually Right team
@@ -1359,6 +1388,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const attachControlHandlers = () => {
       if (role !== "control") return;
+
+      const bindDirectScoreInput = (selector, side) => {
+        const input = scoreboardRoot.querySelector(selector);
+        if (!input || input.dataset.scoreInputBound === "true") return;
+        input.dataset.scoreInputBound = "true";
+
+        const commit = (announce) => {
+          if (!setScoreByVisualSide(side, input.value)) return;
+          render();
+          broadcast();
+          if (announce) {
+            speakScore();
+          }
+        };
+
+        input.addEventListener("change", () => {
+          commit(true);
+        });
+
+        input.addEventListener("blur", () => {
+          if (input.value === "") {
+            input.value = "0";
+            commit(false);
+          }
+        });
+
+        input.addEventListener("keydown", (event) => {
+          if (event.key !== "Enter") return;
+          event.preventDefault();
+          input.blur();
+        });
+      };
+
+      bindDirectScoreInput("[data-home-score-input]", "home");
+      bindDirectScoreInput("[data-away-score-input]", "away");
+
       scoreboardRoot.querySelectorAll("[data-action]").forEach((btn) => {
         btn.addEventListener("click", () => {
           // Initialize AudioContext on first user interaction
@@ -1585,6 +1650,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 );
                 state.possession = "away";
                 break;
+              case "toggle-possession": {
+                const currentPossession = normalizePossession(state.possession, "away");
+                const nextPossession = currentPossession === "home" ? "away" : "home";
+                state.base_possession = basePossessionForSelectedQuarterDirection(
+                  currentQuarter(),
+                  nextPossession,
+                  state.possession_switch_pattern
+                );
+                state.possession = nextPossession;
+                break;
+              }
               case "finish-game":
                 // 경기 종료 - 현재 점수를 서버로 전송
                 const saveGameScore = async () => {
@@ -1889,9 +1965,75 @@ const initDragAndDrop = () => {
     return;
   }
 
+  const matchContainer = document.querySelector('[data-match-drag-match-id-value]');
   const dragContainers = document.querySelectorAll('[data-team-id]');
+  const trashZone = document.querySelector('[data-member-trash-zone]');
 
   if (dragContainers.length === 0) return;
+
+  const matchId = matchContainer ? matchContainer.dataset.matchDragMatchIdValue : null;
+  const clubId = matchContainer?.dataset.clubId || window.location.pathname.match(/\/clubs\/(\d+)/)?.[1];
+  const moveUrl = matchContainer?.dataset.moveMemberUrl || (clubId && matchId ? `/clubs/${clubId}/matches/${matchId}/move_member` : null);
+  const removeUrl = matchContainer?.dataset.removeMemberUrl || (clubId && matchId ? `/clubs/${clubId}/matches/${matchId}/remove_member` : null);
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+  const showTrashZone = () => {
+    if (!trashZone) return;
+    trashZone.classList.remove('hidden', 'opacity-0', 'translate-y-2', 'pointer-events-none');
+    trashZone.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+  };
+
+  const hideTrashZone = () => {
+    if (!trashZone) return;
+    trashZone.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+    trashZone.classList.add('opacity-0', 'translate-y-2', 'pointer-events-none');
+    setTimeout(() => {
+      if (!trashZone.classList.contains('opacity-100')) {
+        trashZone.classList.add('hidden');
+      }
+    }, 150);
+  };
+
+  if (trashZone && !trashZone.dataset.sortableInitialized) {
+    new Sortable(trashZone, {
+      group: 'shared',
+      animation: 150,
+      sort: false,
+      onAdd: async function(evt) {
+        hideTrashZone();
+
+        const memberId = evt.item?.dataset?.id;
+        if (!memberId || !removeUrl) {
+          window.location.reload();
+          return;
+        }
+
+        try {
+          const response = await fetch(removeUrl, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': csrfToken
+            },
+            body: JSON.stringify({ member_id: memberId })
+          });
+
+          const data = await response.json();
+          if (!response.ok || !data.success) {
+            throw new Error(data.error || `Server Error: ${response.status}`);
+          }
+
+          window.location.reload();
+        } catch (error) {
+          console.error("Delete failed:", error);
+          alert(`멤버 삭제 실패: ${error.message}\n페이지를 새로고침합니다.`);
+          window.location.reload();
+        }
+      }
+    });
+
+    trashZone.dataset.sortableInitialized = 'true';
+  }
 
   // 이미 Sortable이 적용된 경우 중복 적용 방지 (Sortable 객체가 expando 속성으로 저장되지만 명시적으로 체크)
   // 간단히는 기존 인스턴스 파괴 후 재생성하거나, 클래스로 마킹
@@ -1906,32 +2048,29 @@ const initDragAndDrop = () => {
       cursor: 'move',
       delay: 0,
       touchStartThreshold: 0,
+      onStart: function() {
+        showTrashZone();
+      },
       onEnd: async function (evt) {
         const { item, to, from } = evt;
+        hideTrashZone();
 
         // 이동하지 않았거나 같은 팀 내 이동인 경우 무시
         if (to === from) return;
 
+        // 휴지통으로 이동한 경우: 삭제 로직은 trashZone onAdd에서 처리
+        if (to && to.hasAttribute('data-member-trash-zone')) return;
+
         const memberId = item.dataset.id;
         const targetTeamId = to.dataset.teamId;
-
-
-        // 매치 ID 찾기
-        const matchContainer = document.querySelector('[data-match-drag-match-id-value]');
-        const matchId = matchContainer ? matchContainer.dataset.matchDragMatchIdValue : null;
-
-        if (!matchId) {
-          console.error("Match ID not found");
-          alert("오류: Match ID를 찾을 수 없습니다.");
+        if (!memberId || !targetTeamId || !moveUrl) {
+          console.error("Invalid drag target");
+          alert("오류: 이동 대상을 확인할 수 없습니다.");
           return;
         }
 
-        const clubId = window.location.pathname.match(/\/clubs\/(\d+)/)[1];
-        const url = `/clubs/${clubId}/matches/${matchId}/move_member`;
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-
         try {
-          const response = await fetch(url, {
+          const response = await fetch(moveUrl, {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',
@@ -1950,7 +2089,6 @@ const initDragAndDrop = () => {
           }
 
           if (data.success) {
-;
             // 통계 갱신을 위해 리로드
             window.location.reload();
           } else {

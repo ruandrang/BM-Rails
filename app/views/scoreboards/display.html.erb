@@ -109,9 +109,10 @@
       <span class="text-gray-400 text-sm font-['JetBrains_Mono']"><%= @match.respond_to?(:date) ? @match.date.strftime("%Y.%m.%d") : Time.current.strftime("%Y.%m.%d") %> — Standalone Mode</span>
     </div>
 
-    <%# Bottom Center Logo %>
-    <div class="absolute left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none">
+    <%# Bottom Center Logos %>
+    <div class="absolute left-1/2 -translate-x-1/2 flex items-center justify-center gap-3 pointer-events-none">
       <%= image_tag "manpo.png", alt: "Manpo", class: "h-14 md:h-16 w-auto opacity-85 object-contain" %>
+      <%= image_tag "hongkong.png", alt: "Hongkong", class: "h-14 md:h-16 w-auto opacity-85 object-contain" %>
     </div>
 
     <%# Fullscreen Button %>

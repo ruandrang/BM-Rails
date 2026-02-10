@@ -1,8 +1,9 @@
 class MatchesController < ApplicationController
   skip_before_action :require_login, only: [ :share ]
   before_action :set_club, except: [ :share ]
-  before_action :set_match, only: [ :show, :edit, :update, :destroy, :record_results, :save_game_scores, :save_quarter_scores, :move_member, :shuffle_teams, :update_scores ]
+  before_action :set_match, only: [ :show, :edit, :update, :destroy, :record_results, :save_game_scores, :save_quarter_scores, :move_member, :add_member, :remove_member, :shuffle_teams, :update_scores ]
   before_action :set_public_club_and_match, only: [ :share ]
+  TEAM_MEMBER_LIMIT = 6
 
   def index
     @matches = @club.matches.order(played_on: :desc, created_at: :desc)
@@ -112,6 +113,8 @@ class MatchesController < ApplicationController
   def show
     @teams = @match.teams.includes(:members).order(:label)
     @games = ordered_games_for_display(@match.games.includes(:home_team, :away_team).to_a)
+    assigned_member_ids = TeamMember.joins(:team).where(teams: { match_id: @match.id }).distinct.pluck(:member_id)
+    @available_members_for_match = @club.members.where.not(id: assigned_member_ids).order(:sort_order, :id)
   end
 
   def share
@@ -332,6 +335,10 @@ class MatchesController < ApplicationController
     target_team = @match.teams.find(params[:target_team_id])
     member = @club.members.find(params[:member_id])
 
+    if target_team.team_members.count >= TEAM_MEMBER_LIMIT
+      return render json: { success: false, error: "팀 정원(#{TEAM_MEMBER_LIMIT}명)을 초과할 수 없습니다." }, status: :unprocessable_entity
+    end
+
     team_member = TeamMember.joins(:team).where(teams: { match_id: @match.id }, member_id: member.id).first
 
     if team_member
@@ -342,6 +349,43 @@ class MatchesController < ApplicationController
     end
   rescue StandardError
     render json: { success: false, error: "멤버 이동에 실패했습니다." }, status: :unprocessable_entity
+  end
+
+  def add_member
+    target_team = @match.teams.find(params[:target_team_id])
+    member = @club.members.find(params[:member_id])
+
+    if target_team.team_members.count >= TEAM_MEMBER_LIMIT
+      return respond_member_update_error("팀 정원(#{TEAM_MEMBER_LIMIT}명)을 초과할 수 없습니다.")
+    end
+
+    existing_team_member = TeamMember.joins(:team).where(teams: { match_id: @match.id }, member_id: member.id).first
+    if existing_team_member
+      return respond_member_update_error("이미 이 경기의 다른 팀에 배정된 멤버입니다.")
+    end
+
+    target_team.team_members.create!(member: member)
+    respond_member_update_success("멤버가 팀에 추가되었습니다.")
+  rescue ActiveRecord::RecordInvalid => e
+    respond_member_update_error(e.record.errors.full_messages.first || "멤버 추가에 실패했습니다.")
+  rescue StandardError => e
+    Rails.logger.error("멤버 추가 실패: #{e.class} - #{e.message}")
+    respond_member_update_error("멤버 추가에 실패했습니다.")
+  end
+
+  def remove_member
+    member = @club.members.find(params[:member_id])
+    team_member = TeamMember.joins(:team).where(teams: { match_id: @match.id }, member_id: member.id).first
+
+    unless team_member
+      return render json: { success: false, error: "이 경기에서 멤버를 찾을 수 없습니다." }, status: :unprocessable_entity
+    end
+
+    team_member.destroy!
+    render json: { success: true }
+  rescue StandardError => e
+    Rails.logger.error("멤버 삭제 실패: #{e.class} - #{e.message}")
+    render json: { success: false, error: "멤버 삭제에 실패했습니다." }, status: :unprocessable_entity
   end
 
   def shuffle_teams
@@ -497,5 +541,19 @@ class MatchesController < ApplicationController
     end
 
     normalized
+  end
+
+  def respond_member_update_success(message)
+    respond_to do |format|
+      format.html { redirect_to club_match_path(@club, @match), notice: message }
+      format.json { render json: { success: true, message: message } }
+    end
+  end
+
+  def respond_member_update_error(message)
+    respond_to do |format|
+      format.html { redirect_to club_match_path(@club, @match), alert: message }
+      format.json { render json: { success: false, error: message }, status: :unprocessable_entity }
+    end
   end
 end

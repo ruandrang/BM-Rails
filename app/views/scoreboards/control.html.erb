@@ -115,14 +115,20 @@
         <!-- Home Team -->
         <div class="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col gap-4 text-center shadow-sm relative overflow-hidden group">
           <div class="flex items-center justify-center gap-3 border-b border-gray-100 pb-4">
-             <span class="text-3xl" data-home-icon><%= @match.home_team.icon %></span>
+             <span class="inline-flex h-10 w-10 shrink-0 rounded-full border-2 border-gray-300 bg-gray-200 shadow-sm" data-home-icon aria-hidden="true"></span>
              <h3 class="font-black text-2xl uppercase text-gray-900" data-home-name><%= @match.home_team.name %></h3>
           </div>
           
           <div class="flex-1 flex flex-col items-center justify-center py-6">
-            <span class="text-9xl font-black text-gray-900 tracking-tighter leading-none" 
-                  id="control-home-score" 
-                  data-home-score>0</span>
+            <input type="number"
+                   min="0"
+                   step="1"
+                   inputmode="numeric"
+                   value="0"
+                   id="control-home-score"
+                   data-home-score
+                   data-home-score-input
+                   class="score-input-no-stepper w-full max-w-[300px] bg-transparent text-center text-9xl font-black text-gray-900 tracking-tighter leading-none border-none outline-none [appearance:textfield]" />
           </div>
 
           <div class="grid grid-cols-3 gap-2">
@@ -150,14 +156,20 @@
         <!-- Away Team -->
         <div class="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col gap-4 text-center shadow-sm relative overflow-hidden group">
           <div class="flex items-center justify-center gap-3 border-b border-gray-100 pb-4">
-             <span class="text-3xl" data-away-icon><%= @match.away_team.icon %></span>
+             <span class="inline-flex h-10 w-10 shrink-0 rounded-full border-2 border-gray-300 bg-gray-200 shadow-sm" data-away-icon aria-hidden="true"></span>
              <h3 class="font-black text-2xl uppercase text-gray-900" data-away-name><%= @match.away_team.name %></h3>
           </div>
           
           <div class="flex-1 flex flex-col items-center justify-center py-6">
-            <span class="text-9xl font-black text-gray-900 tracking-tighter leading-none" 
-                  id="control-away-score" 
-                  data-away-score>0</span>
+            <input type="number"
+                   min="0"
+                   step="1"
+                   inputmode="numeric"
+                   value="0"
+                   id="control-away-score"
+                   data-away-score
+                   data-away-score-input
+                   class="score-input-no-stepper w-full max-w-[300px] bg-transparent text-center text-9xl font-black text-gray-900 tracking-tighter leading-none border-none outline-none [appearance:textfield]" />
           </div>
 
           <div class="grid grid-cols-3 gap-2">
@@ -220,13 +232,11 @@
 
         <!-- Attack Direction (Possession) -->
         <div class="flex items-center gap-2 shrink-0">
-          <span class="text-gray-500 text-xs font-bold uppercase tracking-widest">공격방향</span>
-          <div class="flex gap-2">
-            <button class="btn btn-sm border-gray-200 bg-white text-gray-400 hover:bg-[#3B82F6] hover:text-white shadow-sm w-10 h-10 min-h-0 font-bold text-lg"
-                    data-action="possession-away" data-possession-away-btn>◀</button>
-            <button class="btn btn-sm border-gray-200 bg-white text-gray-400 hover:bg-[#E53935] hover:text-white shadow-sm w-10 h-10 min-h-0 font-bold text-lg"
-                    data-action="possession-home" data-possession-home-btn>▶</button>
-          </div>
+          <button class="btn btn-sm px-4 border-gray-200 bg-white text-gray-700 hover:bg-gray-50 shadow-sm h-10 min-h-0 font-bold whitespace-nowrap"
+                  data-action="toggle-possession"
+                  data-possession-toggle-btn>
+            공격 전환
+          </button>
         </div>
 
         <% unless @match.id.to_s.start_with?("standalone_") %>

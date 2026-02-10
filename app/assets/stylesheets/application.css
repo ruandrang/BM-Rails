@@ -531,3 +531,15 @@ a {
 }
 
 */
+
+/* Score number inputs: hide native spin buttons */
+.score-input-no-stepper {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.score-input-no-stepper::-webkit-outer-spin-button,
+.score-input-no-stepper::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

@@ -28,6 +28,8 @@ Rails.application.routes.draw do
         get :scoreboard, to: "scoreboards#control"
         get :share
         patch :move_member # 멤버 이동
+        patch :add_member # 멤버 추가
+        patch :remove_member # 멤버 제거
         patch :record_results
         patch :save_game_scores
         patch :save_quarter_scores

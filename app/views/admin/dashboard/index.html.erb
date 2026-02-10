@@ -52,6 +52,129 @@
     </div>
   </div>
 
+  <!-- DB 대시보드 -->
+  <div class="card bg-base-100 shadow-xl mb-8">
+    <div class="card-body">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+        <div>
+          <h2 class="card-title">DB 내용 대시보드</h2>
+          <p class="text-sm text-base-content/60">
+            어댑터: <span class="font-semibold"><%= @database_adapter %></span>
+            <% if @database_name.present? %>
+              · DB: <span class="font-mono"><%= @database_name %></span>
+            <% end %>
+          </p>
+        </div>
+        <div class="stats stats-horizontal shadow bg-base-200/60">
+          <div class="stat py-2 px-4">
+            <div class="stat-title text-xs">테이블 수</div>
+            <div class="stat-value text-2xl"><%= @db_tables.size %></div>
+          </div>
+          <div class="stat py-2 px-4">
+            <div class="stat-title text-xs">미리보기 행</div>
+            <div class="stat-value text-2xl"><%= @selected_rows.size %></div>
+          </div>
+        </div>
+      </div>
+
+      <% if @db_tables.any? %>
+        <div class="mb-4">
+          <div class="text-xs font-bold uppercase tracking-widest opacity-50 mb-2">테이블별 행 수</div>
+          <div class="flex flex-wrap gap-2">
+            <% @table_counts.each do |table_name, row_count| %>
+              <% active = table_name == @selected_table %>
+              <%= link_to admin_root_path(table: table_name, limit: @selected_limit),
+                  class: "badge badge-lg #{active ? 'badge-primary' : 'badge-outline'} gap-2" do %>
+                <span><%= table_name %></span>
+                <span class="font-bold"><%= row_count %></span>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+
+        <%= form_with url: admin_root_path, method: :get, local: true, class: "flex flex-wrap items-end gap-3 mb-4" do %>
+          <div class="form-control min-w-[220px]">
+            <label class="label pb-1">
+              <span class="label-text text-xs font-bold uppercase tracking-widest opacity-60">테이블 선택</span>
+            </label>
+            <%= select_tag :table,
+                options_for_select(@db_tables, @selected_table),
+                class: "select select-bordered select-sm" %>
+          </div>
+
+          <div class="form-control w-28">
+            <label class="label pb-1">
+              <span class="label-text text-xs font-bold uppercase tracking-widest opacity-60">행 수</span>
+            </label>
+            <%= number_field_tag :limit, @selected_limit, min: 10, max: 200, class: "input input-bordered input-sm" %>
+          </div>
+
+          <%= submit_tag "조회", class: "btn btn-primary btn-sm" %>
+        <% end %>
+
+        <% admin_links = {
+          "users" => admin_users_path,
+          "clubs" => admin_clubs_path,
+          "members" => admin_members_path,
+          "matches" => admin_matches_path,
+          "teams" => admin_teams_path,
+          "team_members" => admin_team_members_path,
+          "games" => admin_games_path
+        } %>
+
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-bold">
+            <%= @selected_table %> 최근 <%= @selected_limit %>건
+          </h3>
+          <% if admin_links[@selected_table].present? %>
+            <%= link_to "전체 목록 보기", admin_links[@selected_table], class: "btn btn-ghost btn-xs" %>
+          <% end %>
+        </div>
+
+        <div class="overflow-x-auto border border-base-300 rounded-box">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <% @selected_columns.each do |column_name| %>
+                  <th class="whitespace-nowrap"><%= column_name %></th>
+                <% end %>
+              </tr>
+            </thead>
+            <tbody>
+              <% if @selected_rows.any? %>
+                <% @selected_rows.each do |row| %>
+                  <tr>
+                    <% @selected_columns.each do |column_name| %>
+                      <% value = row[column_name] %>
+                      <% rendered = case value
+                        when Hash, Array then value.to_json
+                        when NilClass then "-"
+                        else value.to_s
+                      end %>
+                      <td class="max-w-[260px]">
+                        <div class="truncate" title="<%= rendered %>"><%= rendered %></div>
+                      </td>
+                    <% end %>
+                  </tr>
+                <% end %>
+              <% else %>
+                <tr>
+                  <td colspan="<%= @selected_columns.size %>" class="text-center py-8 text-base-content/50">
+                    표시할 데이터가 없습니다.
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <div class="alert">
+          <span>조회 가능한 테이블이 없습니다.</span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
   <!-- 상세 데이터 관리 카드 -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     <% [
