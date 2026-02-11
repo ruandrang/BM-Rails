@@ -37,6 +37,11 @@ class ClubImporter
       raise ArgumentError, "경기 #{idx + 1}의 날짜가 필요합니다" if match["played_on"].blank?
       teams_count = (match["teams_count"] || 2).to_i
       raise ArgumentError, "경기 #{idx + 1}의 팀 수가 올바르지 않습니다" unless [ 2, 3 ].include?(teams_count)
+
+      games_per_match = normalize_games_per_match(teams_count, match["games_per_match"])
+      unless (teams_count == 3 && games_per_match == 1) || (teams_count == 2 && (1..3).include?(games_per_match))
+        raise ArgumentError, "경기 #{idx + 1}의 2팀 경기 수 설정이 올바르지 않습니다"
+      end
     end
   end
 
@@ -95,7 +100,7 @@ class ClubImporter
 
     @club.matches.includes(teams: :members).each do |match|
       member_names = match.teams.flat_map { |t| t.members.map { |m| m.name.to_s.strip.downcase } }.sort
-      fingerprints << "#{match.played_on}|#{match.teams_count}|#{member_names.join(',')}"
+      fingerprints << "#{match.played_on}|#{match.teams_count}|#{match.games_per_match}|#{member_names.join(',')}"
     end
 
     fingerprints
@@ -105,6 +110,7 @@ class ClubImporter
   def build_import_match_fingerprint(match_data)
     played_on = match_data["played_on"]
     teams_count = (match_data["teams_count"] || 2).to_i
+    games_per_match = normalize_games_per_match(teams_count, match_data["games_per_match"])
 
     member_names = Array(match_data["teams"]).flat_map do |team_data|
       Array(team_data["member_export_ids"]).filter_map do |export_id|
@@ -112,13 +118,17 @@ class ClubImporter
       end
     end.sort
 
-    "#{played_on}|#{teams_count}|#{member_names.join(',')}"
+    "#{played_on}|#{teams_count}|#{games_per_match}|#{member_names.join(',')}"
   end
 
   def create_match_from_data!(match_data)
+    teams_count = (match_data["teams_count"] || 2).to_i
+    games_per_match = normalize_games_per_match(teams_count, match_data["games_per_match"])
+
     match = @club.matches.create!(
       played_on: match_data["played_on"],
-      teams_count: (match_data["teams_count"] || 2).to_i,
+      teams_count: teams_count,
+      games_per_match: games_per_match,
       note: match_data["note"]
     )
 
@@ -150,5 +160,13 @@ class ClubImporter
         quarter_scores: game_data["quarter_scores"]
       )
     end
+  end
+
+  def normalize_games_per_match(teams_count, raw_value)
+    value = raw_value.to_i
+    value = 1 if value <= 0
+    return 1 if teams_count.to_i == 3
+
+    [ value, 3 ].min
   end
 end

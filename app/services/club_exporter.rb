@@ -31,6 +31,7 @@ class ClubExporter
         {
           played_on: match.played_on,
           teams_count: match.teams_count,
+          games_per_match: match.games_per_match,
           note: match.note,
           teams: match.teams.map do |team|
             {
@@ -39,7 +40,7 @@ class ClubExporter
               member_export_ids: team.members.map { |member| export_ids[member.id] }.compact
             }
           end,
-          games: match.games.map do |game|
+          games: match.games.order(:id).map do |game|
             {
               home_label: game.home_team.label,
               away_label: game.away_team.label,

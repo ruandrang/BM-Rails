@@ -113,9 +113,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (scoreboardRoot) {
 
+    const parseJsonDataset = (raw, fallback = []) => {
+      if (!raw) return fallback;
+      try {
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : fallback;
+      } catch (error) {
+        console.warn("JSON dataset parse failed", error);
+        return fallback;
+      }
+    };
+
     const role = scoreboardRoot.dataset.scoreboardRole;
     const matchId = scoreboardRoot.dataset.matchId;
-    const teams = JSON.parse(scoreboardRoot.dataset.teams || "[]");
+    const teams = parseJsonDataset(scoreboardRoot.dataset.teams, []);
+    const games = parseJsonDataset(scoreboardRoot.dataset.games, []);
     const teamsCount = parseInt(scoreboardRoot.dataset.teamsCount || "2", 10);
     const parsedDefaultPeriodSeconds = parseInt(scoreboardRoot.dataset.defaultPeriodSeconds || "480", 10);
     const defaultPeriodSeconds = Number.isFinite(parsedDefaultPeriodSeconds) && parsedDefaultPeriodSeconds > 0 ? parsedDefaultPeriodSeconds : 480;
@@ -242,22 +254,134 @@ document.addEventListener("DOMContentLoaded", () => {
       iconEl.style.boxShadow = "0 1px 3px rgba(15, 23, 42, 0.15)";
     };
 
-    const matchupPairs = () => {
-      if (teamsCount === 2) {
-        return [[0, 1]];
+    const fallbackMatchupSlots = (sourceTeams) => {
+      const safeTeams = Array.isArray(sourceTeams) && sourceTeams.length >= 2 ? sourceTeams : defaultTeams();
+      if (safeTeams.length <= 2) {
+        return [ { id: 0, gameId: null, team1Idx: 0, team2Idx: 1 } ];
       }
+
       return [
-        [0, 1],
-        [1, 2],
-        [2, 0],
+        { id: 0, gameId: null, team1Idx: 0, team2Idx: 1 },
+        { id: 1, gameId: null, team1Idx: 1, team2Idx: 2 },
+        { id: 2, gameId: null, team1Idx: 2, team2Idx: 0 }
       ];
     };
 
-    const roundsPerQuarter = () => matchupPairs().length;
+    const buildMatchupSlotsFromGames = (sourceTeams) => {
+      const safeTeams = Array.isArray(sourceTeams) && sourceTeams.length >= 2 ? sourceTeams : defaultTeams();
+      if (!Array.isArray(games) || games.length === 0) return [];
 
-    const maxRotationStep = () => (TOTAL_REGULAR_QUARTERS * roundsPerQuarter()) - 1;
+      return games.map((game, index) => {
+        const team1Idx = safeTeams.findIndex((team) => String(team?.id) === String(game.home_team_id));
+        const team2Idx = safeTeams.findIndex((team) => String(team?.id) === String(game.away_team_id));
+        if (team1Idx < 0 || team2Idx < 0) return null;
 
-    const quarterForStep = (step) => Math.floor(step / roundsPerQuarter()) + 1;
+        return {
+          id: index,
+          gameId: game.id ?? null,
+          team1Idx,
+          team2Idx
+        };
+      }).filter((slot) => slot);
+    };
+
+    const normalizeMatchupSlots = (rawSlots, sourceTeams) => {
+      if (!Array.isArray(rawSlots)) return [];
+
+      const safeTeams = Array.isArray(sourceTeams) && sourceTeams.length >= 2 ? sourceTeams : defaultTeams();
+      return rawSlots.map((slot, index) => {
+        if (!slot || typeof slot !== "object") return null;
+
+        const team1IdxRaw = slot.team1Idx ?? slot.team1_idx;
+        const team2IdxRaw = slot.team2Idx ?? slot.team2_idx;
+        const gameId = slot.gameId ?? slot.game_id ?? null;
+
+        const team1Idx = Number.parseInt(team1IdxRaw, 10);
+        const team2Idx = Number.parseInt(team2IdxRaw, 10);
+        if (!Number.isInteger(team1Idx) || !Number.isInteger(team2Idx)) return null;
+        if (team1Idx < 0 || team2Idx < 0 || team1Idx >= safeTeams.length || team2Idx >= safeTeams.length) return null;
+
+        return {
+          id: Number.parseInt(slot.id, 10) || index,
+          gameId,
+          team1Idx,
+          team2Idx
+        };
+      }).filter((slot) => slot);
+    };
+
+    const serializeMatchupSlots = (slots) => {
+      return slots.map((slot, index) => ({
+        id: Number.isInteger(slot.id) ? slot.id : index,
+        game_id: slot.gameId ?? null,
+        team1_idx: slot.team1Idx,
+        team2_idx: slot.team2Idx
+      }));
+    };
+
+    const initialMatchupSlots = (sourceTeams) => {
+      const fromGames = buildMatchupSlotsFromGames(sourceTeams);
+      if (fromGames.length > 0) return fromGames;
+      return fallbackMatchupSlots(sourceTeams);
+    };
+
+    const matchupSlots = () => {
+      const sourceTeams = Array.isArray(state?.teams) && state.teams.length >= 2 ? state.teams : defaultTeams();
+      const fromState = normalizeMatchupSlots(state?.matchup_slots, sourceTeams);
+      if (fromState.length > 0) return fromState;
+      return initialMatchupSlots(sourceTeams);
+    };
+
+    const roundsPerQuarter = () => Math.max(1, matchupSlots().length);
+    const isTwoTeamMode = () => teamsCount === 2;
+
+    const maxRotationStepForRounds = (rounds) => (TOTAL_REGULAR_QUARTERS * Math.max(1, rounds)) - 1;
+
+    const maxRotationStep = () => maxRotationStepForRounds(roundsPerQuarter());
+
+    const quarterForStepWithRounds = (step, rounds) => {
+      const safeRounds = Math.max(1, rounds);
+      const parsedStep = Number.parseInt(step, 10);
+      const safeStep = Number.isFinite(parsedStep) ? Math.max(0, parsedStep) : 0;
+
+      if (isTwoTeamMode()) {
+        return (safeStep % TOTAL_REGULAR_QUARTERS) + 1;
+      }
+
+      return Math.floor(safeStep / safeRounds) + 1;
+    };
+
+    const matchupSlotForStepWithRounds = (step, rounds) => {
+      const safeRounds = Math.max(1, rounds);
+      const parsedStep = Number.parseInt(step, 10);
+      const safeStep = Number.isFinite(parsedStep) ? Math.max(0, parsedStep) : 0;
+
+      if (isTwoTeamMode()) {
+        return Math.floor(safeStep / TOTAL_REGULAR_QUARTERS) % safeRounds;
+      }
+
+      return ((safeStep % safeRounds) + safeRounds) % safeRounds;
+    };
+
+    const rotationStepForPosition = (quarter, matchupSlot, rounds) => {
+      const safeRounds = Math.max(1, rounds);
+      const parsedQuarter = Number.parseInt(quarter, 10);
+      const safeQuarter = Number.isFinite(parsedQuarter)
+        ? Math.max(1, Math.min(TOTAL_REGULAR_QUARTERS, parsedQuarter))
+        : 1;
+      const parsedSlot = Number.parseInt(matchupSlot, 10);
+      const safeSlot = Number.isFinite(parsedSlot)
+        ? Math.max(0, Math.min(safeRounds - 1, parsedSlot))
+        : 0;
+
+      if (isTwoTeamMode()) {
+        return (safeSlot * TOTAL_REGULAR_QUARTERS) + (safeQuarter - 1);
+      }
+
+      return ((safeQuarter - 1) * safeRounds) + safeSlot;
+    };
+
+    const quarterForStep = (step) => quarterForStepWithRounds(step, roundsPerQuarter());
 
     const normalizePossession = (value, fallback = "away") => {
       if (value === "home" || value === "away") return value;
@@ -295,10 +419,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return oppositePossession(safeSelected);
     };
 
-    const defaultMatchupOrder = () => matchupPairs().map((_, index) => index);
+    const defaultMatchupOrder = (slots = matchupSlots()) => slots.map((_, index) => index);
 
-    const normalizeMatchupOrder = (rawOrder) => {
-      const fallback = defaultMatchupOrder();
+    const normalizeMatchupOrder = (rawOrder, fallback = defaultMatchupOrder()) => {
       if (!Array.isArray(rawOrder)) return fallback;
 
       const seen = new Set();
@@ -323,15 +446,25 @@ document.addEventListener("DOMContentLoaded", () => {
       return normalized;
     };
 
+    const matchupSlotById = (matchupId) => {
+      const slots = matchupSlots();
+      return slots[matchupId] || slots[0] || { id: 0, gameId: null, team1Idx: 0, team2Idx: 1 };
+    };
+
     const matchupPairById = (matchupId) => {
-      const pairs = matchupPairs();
-      return pairs[matchupId] || pairs[0] || [ 0, 1 ];
+      const slot = matchupSlotById(matchupId);
+      return [ slot.team1Idx, slot.team2Idx ];
+    };
+
+    const matchupGameIdById = (matchupId) => {
+      const slot = matchupSlotById(matchupId);
+      return slot?.gameId ?? null;
     };
 
     const matchupIdForStep = (step = state?.rotation_step || 0) => {
       const order = normalizeMatchupOrder(state?.matchup_order);
       const rounds = roundsPerQuarter();
-      const slot = ((step % rounds) + rounds) % rounds;
+      const slot = matchupSlotForStepWithRounds(step, rounds);
       return order[slot] ?? defaultMatchupOrder()[slot] ?? 0;
     };
 
@@ -354,30 +487,37 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     };
 
-    const emptyMatchupScores = () => matchupPairs().map(() => ({ team1: 0, team2: 0 }));
+    const emptyMatchupScores = () => matchupSlots().map(() => ({ team1: 0, team2: 0 }));
 
-    const defaultState = () => ({
-      quarter: 1,
-      period_seconds: defaultPeriodSeconds,
-      shot_seconds: 24,
-      running: false,
-      shot_running: false,
-      sound_enabled: defaultSoundEnabled,
-      voice_enabled: defaultVoiceEnabled,
-      voice_rate: defaultVoiceRate,
-      matchup_index: 0,
-      rotation_step: 0,
-      home_fouls: 0,
-      away_fouls: 0,
-      teams: defaultTeams().map((team) => ({ ...team, score: 0 })),
-      matchup_scores: emptyMatchupScores(),
-      matchup_order: defaultMatchupOrder(),
-      quarter_history: {}, // { pairIdx: { quarterNum: { team1: score, team2: score } } }
-      base_possession: "away",
-      possession_switch_pattern: defaultPossessionSwitchPattern,
-      possession: "away", // 'home' or 'away'
-      manual_swap: false
-    });
+    const defaultState = () => {
+      const seededTeams = defaultTeams().map((team) => ({ ...team, score: 0 }));
+      const seededSlots = initialMatchupSlots(seededTeams);
+
+      return {
+        quarter: 1,
+        period_seconds: defaultPeriodSeconds,
+        shot_seconds: 24,
+        running: false,
+        shot_running: false,
+        sound_enabled: defaultSoundEnabled,
+        voice_enabled: defaultVoiceEnabled,
+        voice_rate: defaultVoiceRate,
+        matchup_index: 0,
+        rotation_step: 0,
+        home_fouls: 0,
+        away_fouls: 0,
+        teams: seededTeams,
+        matchup_slots: serializeMatchupSlots(seededSlots),
+        matchup_scores: seededSlots.map(() => ({ team1: 0, team2: 0 })),
+        matchup_order: defaultMatchupOrder(seededSlots),
+        quarter_history: {}, // { pairIdx: { quarterNum: { team1: score, team2: score } } }
+        progression_mode: isTwoTeamMode() ? "by_game" : "by_quarter",
+        base_possession: "away",
+        possession_switch_pattern: defaultPossessionSwitchPattern,
+        possession: "away", // 'home' or 'away'
+        manual_swap: false
+      };
+    };
 
     const isSoundEnabled = () => state?.sound_enabled !== false;
     const isVoiceEnabled = () => state?.voice_enabled !== false;
@@ -393,7 +533,11 @@ document.addEventListener("DOMContentLoaded", () => {
         ? incomingState.teams
         : base.teams;
 
-      normalized.matchup_scores = matchupPairs().map((_, index) => {
+      const slotsFromPayload = normalizeMatchupSlots(incomingState.matchup_slots, normalized.teams);
+      const slotsForState = slotsFromPayload.length > 0 ? slotsFromPayload : initialMatchupSlots(normalized.teams);
+      normalized.matchup_slots = serializeMatchupSlots(slotsForState);
+
+      normalized.matchup_scores = slotsForState.map((_, index) => {
         const row = incomingState.matchup_scores?.[index];
         return {
           team1: Number.isFinite(Number(row?.team1)) ? Number(row.team1) : 0,
@@ -401,7 +545,10 @@ document.addEventListener("DOMContentLoaded", () => {
         };
       });
 
-      normalized.matchup_order = normalizeMatchupOrder(incomingState.matchup_order);
+      normalized.matchup_order = normalizeMatchupOrder(
+        incomingState.matchup_order,
+        defaultMatchupOrder(slotsForState)
+      );
 
       normalized.quarter_history = incomingState.quarter_history && typeof incomingState.quarter_history === "object"
         ? incomingState.quarter_history
@@ -413,12 +560,40 @@ document.addEventListener("DOMContentLoaded", () => {
       normalized.voice_rate = normalizeVoiceRate(incomingState.voice_rate, base.voice_rate);
 
       const parsedStep = Number.parseInt(incomingState.rotation_step, 10);
+      const roundsForState = Math.max(1, slotsForState.length);
+      const maxStepForState = maxRotationStepForRounds(roundsForState);
       normalized.rotation_step = Number.isFinite(parsedStep)
-        ? Math.max(0, Math.min(parsedStep, maxRotationStep()))
+        ? Math.max(0, Math.min(parsedStep, maxStepForState))
         : 0;
+      normalized.progression_mode = isTwoTeamMode() ? "by_game" : "by_quarter";
+
+      const incomingProgressionMode = incomingState.progression_mode;
+      if (isTwoTeamMode() && incomingProgressionMode !== "by_game") {
+        // Backward compatibility: convert old quarter-first step sequencing to game-first.
+        // Guard: if incoming quarter already matches by-game progression, skip conversion.
+        const legacyStep = normalized.rotation_step;
+        const legacyQuarter = Math.floor(legacyStep / roundsForState) + 1;
+        const legacySlot = ((legacyStep % roundsForState) + roundsForState) % roundsForState;
+        const byGameQuarter = (legacyStep % TOTAL_REGULAR_QUARTERS) + 1;
+        const incomingQuarter = Number.parseInt(incomingState.quarter, 10);
+        const hasIncomingQuarter = Number.isFinite(incomingQuarter) && incomingQuarter > 0;
+        const looksLikeByGameState =
+          hasIncomingQuarter &&
+          incomingQuarter === byGameQuarter &&
+          incomingQuarter !== legacyQuarter;
+
+        if (!looksLikeByGameState) {
+          const convertedStep = rotationStepForPosition(legacyQuarter, legacySlot, roundsForState);
+          normalized.rotation_step = Math.max(0, Math.min(convertedStep, maxStepForState));
+        }
+      }
 
       const parsedQuarter = Number.parseInt(incomingState.quarter, 10);
-      normalized.quarter = Number.isFinite(parsedQuarter) ? parsedQuarter : quarterForStep(normalized.rotation_step);
+      if (Number.isFinite(parsedQuarter) && parsedQuarter > TOTAL_REGULAR_QUARTERS) {
+        normalized.quarter = parsedQuarter;
+      } else {
+        normalized.quarter = quarterForStepWithRounds(normalized.rotation_step, roundsForState);
+      }
       if (incomingState.base_possession === "home" || incomingState.base_possession === "away") {
         normalized.base_possession = incomingState.base_possession;
       } else {
@@ -438,7 +613,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const currentMatchupIndex = () => {
-      return state.rotation_step % roundsPerQuarter();
+      return matchupSlotForStepWithRounds(state.rotation_step, roundsPerQuarter());
     };
 
     const currentMatchupId = () => {
@@ -773,6 +948,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
+      const addGameBtn = scoreboardRoot.querySelector('[data-action="add-game"]');
+      if (addGameBtn) {
+        const currentGames = matchupSlots().length;
+        const maxGames = 3;
+        const canAddGame = teamsCount === 2 && currentGames < maxGames;
+        addGameBtn.disabled = !canAddGame;
+        addGameBtn.textContent = canAddGame
+          ? `+ 경기 추가 (${currentGames}/${maxGames})`
+          : `경기 추가 완료 (${maxGames}/${maxGames})`;
+        addGameBtn.classList.toggle("opacity-50", !canAddGame);
+        addGameBtn.classList.toggle("cursor-not-allowed", !canAddGame);
+      }
+
       const toggleMainBtn = scoreboardRoot.querySelector('[data-action="toggle-main"]');
       if (toggleMainBtn) {
         const span = toggleMainBtn.querySelector('span');
@@ -866,7 +1054,7 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        const pairs = matchupPairs();
+        const slots = matchupSlots();
         const orderedMatchupIds = normalizeMatchupOrder(state.matchup_order);
 
         let html = `
@@ -888,9 +1076,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const currentQ = Number.isFinite(Number(state.quarter)) ? Number(state.quarter) : currentQuarter();
 
         orderedMatchupIds.forEach((pairIdx) => {
-          const pair = pairs[pairIdx];
-          const t1 = state.teams[pair[0]];
-          const t2 = state.teams[pair[1]];
+          const slot = slots[pairIdx];
+          if (!slot) return;
+
+          const t1 = state.teams[slot.team1Idx];
+          const t2 = state.teams[slot.team2Idx];
           if (!t1 || !t2) return;
 
           const scores = state.quarter_history[pairIdx] || {};
@@ -1403,6 +1593,33 @@ document.addEventListener("DOMContentLoaded", () => {
       return true;
     };
 
+    const appendMatchupSlotForGame = (gameData) => {
+      const sourceTeams = Array.isArray(state?.teams) && state.teams.length >= 2 ? state.teams : defaultTeams();
+      const nextGameId = gameData?.id ?? null;
+      const team1Idx = sourceTeams.findIndex((team) => String(team?.id) === String(gameData?.home_team_id));
+      const team2Idx = sourceTeams.findIndex((team) => String(team?.id) === String(gameData?.away_team_id));
+      if (team1Idx < 0 || team2Idx < 0) return false;
+
+      const currentSlots = matchupSlots();
+      if (currentSlots.some((slot) => String(slot.gameId) === String(nextGameId))) return false;
+
+      const nextSlots = [
+        ...currentSlots,
+        { id: currentSlots.length, gameId: nextGameId, team1Idx, team2Idx }
+      ];
+
+      state.matchup_slots = serializeMatchupSlots(nextSlots);
+      state.matchup_scores = nextSlots.map((_, index) => {
+        const row = state.matchup_scores?.[index];
+        return {
+          team1: Number.isFinite(Number(row?.team1)) ? Number(row.team1) : 0,
+          team2: Number.isFinite(Number(row?.team2)) ? Number(row.team2) : 0
+        };
+      });
+      state.matchup_order = normalizeMatchupOrder(state.matchup_order, defaultMatchupOrder(nextSlots));
+      return true;
+    };
+
     const handleTeamAction = (action) => {
       // "Home" action targets the Visually Left team
       // "Away" action targets the Visually Right team
@@ -1525,10 +1742,72 @@ document.addEventListener("DOMContentLoaded", () => {
                 state.shot_seconds = 14;
                 state.shot_running = false;
                 break;
+              case "add-game": {
+                if (teamsCount !== 2) break;
+                if (String(matchId).startsWith("standalone_")) break;
+
+                const previousQuarterNumber = currentQuarter();
+                const previousSlotIndex = currentMatchupIndex();
+
+                const clubMatch = window.location.pathname.match(/\/clubs\/(\d+)/);
+                const clubId = clubMatch ? clubMatch[1] : null;
+                if (!clubId) {
+                  alert("클럽 정보를 찾을 수 없습니다.");
+                  return;
+                }
+
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                const triggerButton = btn;
+                if (triggerButton) triggerButton.disabled = true;
+
+                const addGameRequest = async () => {
+                  try {
+                    const response = await fetch(`/clubs/${clubId}/matches/${matchId}/add_game`, {
+                      method: "PATCH",
+                      headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-Token": csrfToken
+                      }
+                    });
+                    const data = await response.json();
+
+                    if (!response.ok || !data.success) {
+                      alert(data.error || "경기 추가에 실패했습니다.");
+                      return;
+                    }
+
+                    if (data.game) {
+                      games.push(data.game);
+                      appendMatchupSlotForGame(data.game);
+                      state = normalizeState(state);
+                      const newRounds = roundsPerQuarter();
+                      state.rotation_step = Math.min(
+                        maxRotationStep(),
+                        Math.max(0, rotationStepForPosition(previousQuarterNumber, previousSlotIndex, newRounds))
+                      );
+                      state.quarter = currentQuarter();
+                      applyQuarterPossession(state.quarter);
+                      syncScoresForActiveMatchup();
+                      render();
+                      syncTimers();
+                      broadcast();
+                    }
+                  } catch (error) {
+                    console.error("경기 추가 중 오류:", error);
+                    alert("경기 추가 중 오류가 발생했습니다.");
+                  } finally {
+                    render();
+                  }
+                };
+
+                addGameRequest();
+                return;
+              }
               case "next-quarter": {
                 const finishedPairIdx = currentMatchupId();
                 const [p1, p2] = matchupPairById(finishedPairIdx);
                 if (p1 === undefined || p2 === undefined || !state.teams[p1] || !state.teams[p2]) break;
+                const finishedGameId = matchupGameIdById(finishedPairIdx);
 
                 state.matchup_scores[finishedPairIdx] = {
                   team1: state.teams[p1].score,
@@ -1559,6 +1838,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         'X-CSRF-Token': csrfToken
                       },
                       body: JSON.stringify({
+                        game_id: finishedGameId,
                         home_team_id: state.teams[p1].id,
                         away_team_id: state.teams[p2].id,
                         quarter: finishedQuarter,
@@ -1706,6 +1986,8 @@ document.addEventListener("DOMContentLoaded", () => {
               case "finish-game":
                 // 경기 종료 - 현재 점수를 서버로 전송
                 const saveGameScore = async () => {
+                  const activePairIdx = currentMatchupId();
+                  const activeGameId = matchupGameIdById(activePairIdx);
                   const [home, away] = currentMatchup();
                   const matchId = scoreboardRoot.dataset.matchId;
                   const clubMatch = window.location.pathname.match(/\/clubs\/(\d+)/);
@@ -1725,6 +2007,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         'X-CSRF-Token': csrfToken
                       },
                       body: JSON.stringify({
+                        game_id: activeGameId,
                         home_team_id: home.id,
                         away_team_id: away.id,
                         home_score: home.score,

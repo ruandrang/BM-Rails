@@ -1,9 +1,8 @@
 class MatchesController < ApplicationController
   skip_before_action :require_login, only: [ :share ]
   before_action :set_club, except: [ :share ]
-  before_action :set_match, only: [ :show, :edit, :update, :destroy, :record_results, :save_game_scores, :save_quarter_scores, :move_member, :add_member, :remove_member, :shuffle_teams, :update_scores ]
+  before_action :set_match, only: [ :show, :edit, :update, :destroy, :record_results, :save_game_scores, :save_quarter_scores, :move_member, :add_member, :remove_member, :add_game, :remove_game, :shuffle_teams, :update_scores ]
   before_action :set_public_club_and_match, only: [ :share ]
-  TEAM_MEMBER_LIMIT = 6
 
   def index
     @matches = @club.matches.order(played_on: :desc, created_at: :desc)
@@ -31,7 +30,7 @@ class MatchesController < ApplicationController
       end
     end
 
-    @match = @club.matches.new(played_on: default_date, teams_count: 3)
+    @match = @club.matches.new(played_on: default_date, teams_count: 3, games_per_match: 1)
     @members = @club.members.order(:sort_order, :id)
 
     # 승률 계산 (뷰에서 정렬용)
@@ -48,6 +47,9 @@ class MatchesController < ApplicationController
     selected_members = @club.members.where(id: selected_ids)
     min_required = teams_count * 2
     max_allowed = teams_count * 6
+    games_per_match = @match.games_per_match.to_i
+    games_per_match = 1 if games_per_match <= 0
+    games_per_match = [ games_per_match, 3 ].min
 
     if selected_members.size != selected_ids.size
       flash.now[:alert] = "선택한 멤버를 찾을 수 없습니다."
@@ -97,8 +99,8 @@ class MatchesController < ApplicationController
           @match.games.create!(home_team: home, away_team: away, result: "pending")
         end
       else
-        teams.combination(2).each do |home, away|
-          @match.games.create!(home_team: home, away_team: away, result: "pending")
+        games_per_match.times do
+          @match.games.create!(home_team: teams[0], away_team: teams[1], result: "pending")
         end
       end
     end
@@ -335,10 +337,6 @@ class MatchesController < ApplicationController
     target_team = @match.teams.find(params[:target_team_id])
     member = @club.members.find(params[:member_id])
 
-    if target_team.team_members.count >= TEAM_MEMBER_LIMIT
-      return render json: { success: false, error: "팀 정원(#{TEAM_MEMBER_LIMIT}명)을 초과할 수 없습니다." }, status: :unprocessable_entity
-    end
-
     team_member = TeamMember.joins(:team).where(teams: { match_id: @match.id }, member_id: member.id).first
 
     if team_member
@@ -354,10 +352,6 @@ class MatchesController < ApplicationController
   def add_member
     target_team = @match.teams.find(params[:target_team_id])
     member = @club.members.find(params[:member_id])
-
-    if target_team.team_members.count >= TEAM_MEMBER_LIMIT
-      return respond_member_update_error("팀 정원(#{TEAM_MEMBER_LIMIT}명)을 초과할 수 없습니다.")
-    end
 
     existing_team_member = TeamMember.joins(:team).where(teams: { match_id: @match.id }, member_id: member.id).first
     if existing_team_member
@@ -386,6 +380,71 @@ class MatchesController < ApplicationController
   rescue StandardError => e
     Rails.logger.error("멤버 삭제 실패: #{e.class} - #{e.message}")
     render json: { success: false, error: "멤버 삭제에 실패했습니다." }, status: :unprocessable_entity
+  end
+
+  def add_game
+    unless @match.teams_count == 2
+      return render json: { success: false, error: "2팀 경기에서만 경기 추가가 가능합니다." }, status: :unprocessable_entity
+    end
+
+    if @match.games.count >= 3
+      return render json: { success: false, error: "최대 3게임(총 12쿼터)까지 추가할 수 있습니다." }, status: :unprocessable_entity
+    end
+
+    teams = @match.teams.order(:id).to_a
+    unless teams.size == 2
+      return render json: { success: false, error: "팀 정보가 올바르지 않습니다." }, status: :unprocessable_entity
+    end
+
+    game = nil
+    ActiveRecord::Base.transaction do
+      game = @match.games.create!(home_team: teams[0], away_team: teams[1], result: "pending")
+      @match.update!(games_per_match: @match.games.count)
+    end
+
+    render json: {
+      success: true,
+      game: {
+        id: game.id,
+        home_team_id: game.home_team_id,
+        away_team_id: game.away_team_id
+      },
+      games_per_match: @match.games.count
+    }
+  rescue StandardError => e
+    Rails.logger.error("경기 추가 실패: #{e.class} - #{e.message}")
+    render json: { success: false, error: "경기 추가에 실패했습니다." }, status: :unprocessable_entity
+  end
+
+  def remove_game
+    unless @match.teams_count == 2
+      redirect_to club_match_path(@club, @match), alert: "2팀 경기에서만 경기 삭제가 가능합니다."
+      return
+    end
+
+    if @match.games.count <= 1
+      redirect_to club_match_path(@club, @match), alert: "최소 1경기는 유지되어야 합니다."
+      return
+    end
+
+    game = @match.games.find(params[:game_id])
+    if game_started?(game)
+      redirect_to club_match_path(@club, @match), alert: "이미 진행된 경기는 삭제할 수 없습니다."
+      return
+    end
+
+    ActiveRecord::Base.transaction do
+      game.destroy!
+      @match.update!(games_per_match: [ @match.games.count, 1 ].max)
+    end
+
+    Rails.cache.delete("scoreboard_state_#{@match.id}")
+    redirect_to club_match_path(@club, @match), notice: "미진행 경기를 삭제했습니다."
+  rescue ActiveRecord::RecordNotFound
+    redirect_to club_match_path(@club, @match), alert: "삭제할 경기를 찾을 수 없습니다."
+  rescue StandardError => e
+    Rails.logger.error("경기 삭제 실패: #{e.class} - #{e.message}")
+    redirect_to club_match_path(@club, @match), alert: "경기 삭제에 실패했습니다."
   end
 
   def shuffle_teams
@@ -443,7 +502,7 @@ class MatchesController < ApplicationController
   end
 
   def match_params
-    params.require(:match).permit(:played_on, :teams_count, :note)
+    params.require(:match).permit(:played_on, :teams_count, :games_per_match, :note)
   end
 
   def match_update_params
@@ -460,6 +519,18 @@ class MatchesController < ApplicationController
 
     colors.map do |color|
       Team::COLORS.include?(color) ? color : Team::COLORS.first
+    end
+  end
+
+  def game_started?(game)
+    return true if game.result != "pending"
+    return true if game.home_score.to_i > 0 || game.away_score.to_i > 0
+
+    quarter_scores = game.quarter_scores
+    return false if quarter_scores.blank?
+
+    quarter_scores.values.any? do |score|
+      score.is_a?(Hash) && (score["home"].to_i > 0 || score["away"].to_i > 0)
     end
   end
 
@@ -490,35 +561,21 @@ class MatchesController < ApplicationController
   end
 
   def ordered_games_for_display(games)
-    return games unless @match.teams_count == 3
+    ordered_games = games.sort_by(&:id)
+    return ordered_games if ordered_games.size < 2
 
-    teams_in_rotation = @match.teams.order(:id).to_a
-    return games if teams_in_rotation.size < 3
-
-    default_order = [ 0, 1, 2 ]
+    default_order = (0...ordered_games.size).to_a
     cached_state = Rails.cache.read("scoreboard_state_#{@match.id}")
     raw_order = if cached_state.is_a?(Hash)
       cached_state["matchup_order"] || cached_state[:matchup_order]
     end
     matchup_order = normalize_matchup_order(raw_order, default_order)
 
-    matchup_pairs = [
-      [ teams_in_rotation[0].id, teams_in_rotation[1].id ],
-      [ teams_in_rotation[1].id, teams_in_rotation[2].id ],
-      [ teams_in_rotation[2].id, teams_in_rotation[0].id ]
-    ]
-
-    sorted = matchup_order.filter_map do |pair_index|
-      pair = matchup_pairs[pair_index]
-      next unless pair
-
-      games.find do |game|
-        (game.home_team_id == pair[0] && game.away_team_id == pair[1]) ||
-          (game.home_team_id == pair[1] && game.away_team_id == pair[0])
-      end
+    sorted = matchup_order.filter_map do |game_index|
+      ordered_games[game_index]
     end
 
-    sorted + (games - sorted)
+    sorted + (ordered_games - sorted)
   end
 
   def normalize_matchup_order(raw_order, fallback)

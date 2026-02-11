@@ -21,6 +21,10 @@
   <div class="card bg-base-100 shadow-xl">
     <div class="card-body">
       <%= form_with model: [@club, @match], local: true, class: "space-y-6" do |form| %>
+        <% selected_teams_count = @match.teams_count.to_i.in?([2, 3]) ? @match.teams_count.to_i : 3 %>
+        <% selected_games_per_match = @match.games_per_match.to_i %>
+        <% selected_games_per_match = 1 if selected_games_per_match <= 0 %>
+        <% selected_games_per_match = 3 if selected_games_per_match > 3 %>
 
         <!-- 기본 정보 -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -45,6 +49,29 @@
               <% end %>
             </div>
           </div>
+
+          <div class="form-control w-full col-span-1 md:col-span-2 <%= selected_teams_count == 2 ? '' : 'hidden' %>" data-games-per-match-control>
+            <%= form.label :games_per_match, "2팀 경기 수 (4쿼터 기준)", class: "label" %>
+            <%= form.hidden_field :games_per_match, value: selected_games_per_match, data: { games_per_match_input: true } %>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2" data-games-per-match-options>
+              <% [
+                [1, "1게임 (기본, 총 4쿼터)"],
+                [2, "2게임 (총 8쿼터)"],
+                [3, "3게임 (총 12쿼터)"]
+              ].each do |value, label| %>
+                <button type="button"
+                        class="btn w-full <%= selected_games_per_match == value ? 'btn-primary' : 'btn-outline' %>"
+                        data-games-per-match-option
+                        data-value="<%= value %>"
+                        aria-pressed="<%= selected_games_per_match == value %>">
+                  <%= label %>
+                </button>
+              <% end %>
+            </div>
+            <label class="label">
+              <span class="label-text-alt text-base-content/60">3팀 모드는 기존과 동일하게 3개 매치업(각 4쿼터)으로 진행됩니다.</span>
+            </label>
+          </div>
         </div>
 
         <!-- 메모 -->
@@ -61,24 +88,35 @@
             <span class="label-text font-medium text-lg">팀 설정</span>
             <span class="label-text-alt text-base-content/60">이름과 색상을 지정하세요</span>
           </label>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="grid grid-cols-1 <%= selected_teams_count == 2 ? 'md:grid-cols-2' : 'md:grid-cols-3' %> gap-6" data-team-settings-grid>
             <% labels = %w[A B C] %>
             <% 3.times do |index| %>
-              <div class="card bg-base-200 border border-base-300">
+              <% is_visible = index < selected_teams_count %>
+              <div class="card bg-base-200 border border-base-300 <%= is_visible ? '' : 'hidden' %>"
+                   data-team-setting-card
+                   data-team-index="<%= index %>">
                 <div class="card-body p-4">
                   <h3 class="font-bold text-sm mb-2 opacity-50">TEAM <%= labels[index] %></h3>
                   
                   <!-- 팀/색상 설정 -->
                   <div class="form-control mb-3">
                     <label class="label py-0 mb-1"><span class="label-text text-xs">팀 이름</span></label>
-                    <input type="text" name="team_names[]" placeholder="팀 <%= labels[index] %>" class="input input-sm input-bordered w-full" value="<%= labels[index] %>">
+                    <input type="text"
+                           name="team_names[]"
+                           placeholder="팀 <%= labels[index] %>"
+                           class="input input-sm input-bordered w-full"
+                           value="<%= labels[index] %>"
+                           <%= "disabled" unless is_visible %>>
                   </div>
 
                   <div class="form-control">
                     <label class="label py-0 mb-1"><span class="label-text text-xs">팀 색상</span></label>
                     
                     <!-- 색상 선택 트리거 버튼 -->
-                    <button type="button" class="btn btn-sm btn-outline w-full justify-center gap-2 border-base-content/20 font-normal" onclick="document.getElementById('color_modal_<%= index %>').showModal()">
+                    <button type="button"
+                            class="btn btn-sm btn-outline w-full justify-center gap-2 border-base-content/20 font-normal"
+                            onclick="document.getElementById('color_modal_<%= index %>').showModal()"
+                            <%= "disabled" unless is_visible %>>
                       <div class="w-6 h-6 rounded-full bg-current border border-base-content/10" style="background-color: <%= Team::COLORS[index] %>" id="color-preview-<%= index %>"></div>
                     </button>
 
@@ -90,8 +128,9 @@
                         <div class="grid grid-cols-5 gap-4 justify-items-center py-4">
                           <% Team::COLORS.each do |color| %>
                             <label class="cursor-pointer color-option flex items-center justify-center p-1" data-color="<%= color %>" data-team-index="<%= index %>">
-                              <input type="radio" name="team_colors[<%= index %>]" value="<%= color %>" class="hidden peer" 
+                              <input type="radio" name="team_colors[<%= index %>]" value="<%= color %>" class="hidden peer"
                                      <%= "checked" if Team::COLORS[index] == color %>
+                                     <%= "disabled" unless is_visible %>
                                      onchange="handleColorChangeOnly(this, <%= index %>)">
                               <div class="w-12 h-12 rounded-full border-4 border-transparent peer-checked:border-primary peer-checked:scale-110 shadow-sm transition-transform hover:scale-105 peer-disabled:opacity-20 peer-disabled:cursor-not-allowed" 
                                    style="background-color: <%= color %>"></div>
@@ -123,8 +162,11 @@
               <button type="button" class="btn btn-sm btn-ghost text-error" onclick="selectTopMembers(0)">
                 전체 해제
               </button>
-              <button type="button" class="btn btn-sm btn-secondary" onclick="selectTopMembers(18)">
-                상위 18명 선택
+              <button type="button"
+                      class="btn btn-sm btn-secondary"
+                      data-top-members-trigger
+                      onclick="selectRecommendedTopMembers()">
+                상위 <%= selected_teams_count == 2 ? 12 : 18 %>명 선택
               </button>
             </div>
           </div>
@@ -221,7 +263,7 @@ function handleColorChangeOnly(input, teamIndex) {
 function updateColorAvailability() {
   // 현재 선택된 색상들 수집
   const selectedColors = {};
-  document.querySelectorAll('input[name^="team_colors"]:checked').forEach(input => {
+  document.querySelectorAll('input[name^="team_colors"]:checked:not(:disabled)').forEach(input => {
     // name="team_colors[0]" -> index 0
     const match = input.name.match(/\[(\d+)\]/);
     if (match) {
@@ -231,6 +273,12 @@ function updateColorAvailability() {
 
   // 모든 옵션 순회하며 비활성화 처리
   document.querySelectorAll('.color-option input[type="radio"]').forEach(input => {
+    const teamCard = input.closest("[data-team-setting-card]");
+    if (teamCard && teamCard.classList.contains("hidden")) {
+      input.disabled = true;
+      return;
+    }
+
     const parentLabel = input.closest('label');
     const myTeamIndex = parentLabel.dataset.teamIndex;
     const myColor = parentLabel.dataset.color;
@@ -258,6 +306,93 @@ function updateColorAvailability() {
   });
 }
 
+function selectedTeamsCount() {
+  const selected = document.querySelector('input[name="match[teams_count]"]:checked');
+  const count = Number.parseInt(selected?.value || "3", 10);
+  return [2, 3].includes(count) ? count : 3;
+}
+
+function sanitizeGamesPerMatch(value) {
+  const parsed = Number.parseInt(value, 10);
+  return [1, 2, 3].includes(parsed) ? parsed : 1;
+}
+
+function updateGamesPerMatchButtons() {
+  const input = document.querySelector('input[name="match[games_per_match]"]');
+  if (!input) return;
+
+  const selected = sanitizeGamesPerMatch(input.value);
+  input.value = String(selected);
+
+  document.querySelectorAll("[data-games-per-match-option]").forEach((button) => {
+    const optionValue = sanitizeGamesPerMatch(button.dataset.value);
+    const active = optionValue === selected;
+
+    button.classList.toggle("btn-primary", active);
+    button.classList.toggle("btn-outline", !active);
+    button.setAttribute("aria-pressed", active ? "true" : "false");
+  });
+}
+
+function setGamesPerMatch(value) {
+  const input = document.querySelector('input[name="match[games_per_match]"]');
+  if (!input) return;
+  input.value = String(sanitizeGamesPerMatch(value));
+  updateGamesPerMatchButtons();
+}
+
+function recommendedTopMembersCount() {
+  return selectedTeamsCount() === 2 ? 12 : 18;
+}
+
+function updateRecommendedTopMembersButtonLabel() {
+  const trigger = document.querySelector("[data-top-members-trigger]");
+  if (!trigger) return;
+  trigger.textContent = `상위 ${recommendedTopMembersCount()}명 선택`;
+}
+
+function selectRecommendedTopMembers() {
+  selectTopMembers(recommendedTopMembersCount());
+}
+
+function updateTeamConfigurationVisibility() {
+  const teamsCount = selectedTeamsCount();
+  const settingsGrid = document.querySelector("[data-team-settings-grid]");
+
+  if (settingsGrid) {
+    settingsGrid.classList.toggle("md:grid-cols-2", teamsCount === 2);
+    settingsGrid.classList.toggle("md:grid-cols-3", teamsCount === 3);
+  }
+
+  document.querySelectorAll("[data-team-setting-card]").forEach((card) => {
+    const teamIndex = Number.parseInt(card.dataset.teamIndex || "0", 10);
+    const visible = teamIndex < teamsCount;
+
+    card.classList.toggle("hidden", !visible);
+    card.querySelectorAll("input, button, select, textarea").forEach((field) => {
+      field.disabled = !visible;
+    });
+  });
+
+  const gamesPerMatchControl = document.querySelector("[data-games-per-match-control]");
+  const gamesPerMatchInput = gamesPerMatchControl?.querySelector('input[name="match[games_per_match]"]');
+  if (gamesPerMatchControl && gamesPerMatchInput) {
+    const isTwoTeamMode = teamsCount === 2;
+    gamesPerMatchControl.classList.toggle("hidden", !isTwoTeamMode);
+    gamesPerMatchInput.disabled = !isTwoTeamMode;
+    gamesPerMatchControl.querySelectorAll("[data-games-per-match-option]").forEach((button) => {
+      button.disabled = !isTwoTeamMode;
+    });
+    if (!isTwoTeamMode) {
+      gamesPerMatchInput.value = "1";
+    }
+  }
+
+  updateGamesPerMatchButtons();
+  updateRecommendedTopMembersButtonLabel();
+  updateColorAvailability();
+}
+
 function selectTopMembers(count) {
   const checkboxes = document.querySelectorAll('input[name="member_ids[]"]');
   // 현재 화면에 보이는 순서대로 체크
@@ -270,10 +405,22 @@ function selectTopMembers(count) {
 }
 
 function initNewMatchPageHelpers() {
-  updateColorAvailability();
+  document.querySelectorAll("[data-games-per-match-option]").forEach((button) => {
+    if (button.dataset.bound === "true") return;
+    button.dataset.bound = "true";
+    button.addEventListener("click", () => setGamesPerMatch(button.dataset.value));
+  });
+
+  updateTeamConfigurationVisibility();
   if (typeof initSortableList === "function") {
     initSortableList("#member-list", ".member-item", { name: "asc", position: "asc" });
   }
+
+  document.querySelectorAll('input[name="match[teams_count]"]').forEach((radio) => {
+    if (radio.dataset.visibilityBound === "true") return;
+    radio.dataset.visibilityBound = "true";
+    radio.addEventListener("change", updateTeamConfigurationVisibility);
+  });
 }
 
 document.addEventListener("turbo:load", initNewMatchPageHelpers);

@@ -1,4 +1,5 @@
 <% content_for :title, "#{@match.played_on.strftime('%Y-%m-%d')} 경기 - #{@club.name}" %>
+<% undersized_teams = @teams.select { |team| team.members.size < 5 } %>
 
 <div class="max-w-7xl mx-auto">
   <!-- 뒤로가기 -->
@@ -24,13 +25,27 @@
           <% end %>
         </div>
         <div class="flex gap-2">
-          <%= link_to scoreboard_club_match_path(@club, @match), 
-              class: "btn btn-primary btn-sm gap-2 #{@match.finished? ? 'btn-disabled' : ''}",
-              disabled: @match.finished? do %>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-            </svg>
-            <%= @match.finished? ? "경기 종료됨" : "스코어보드" %>
+          <% if @match.finished? %>
+            <button type="button" class="btn btn-primary btn-sm gap-2 btn-disabled" disabled>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+              </svg>
+              경기 종료됨
+            </button>
+          <% elsif undersized_teams.any? %>
+            <button type="button" class="btn btn-primary btn-sm gap-2" onclick="document.getElementById('scoreboard_team_size_warning_modal').showModal()">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+              </svg>
+              스코어보드
+            </button>
+          <% else %>
+            <%= link_to scoreboard_club_match_path(@club, @match), class: "btn btn-primary btn-sm gap-2" do %>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+              </svg>
+              스코어보드
+            <% end %>
           <% end %>
           <%= link_to edit_club_match_path(@club, @match), class: "btn btn-ghost btn-sm" do %>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -49,9 +64,34 @@
     </div>
   </div>
 
+  <% if !@match.finished? && undersized_teams.any? %>
+    <dialog id="scoreboard_team_size_warning_modal" class="modal modal-bottom sm:modal-middle text-base-content">
+      <div class="modal-box">
+        <h3 class="font-bold text-lg mb-3">팀 인원 경고</h3>
+        <p class="text-sm text-base-content/70 mb-3">아래 팀은 인원이 5명 미만입니다. 그대로 스코어 입력을 진행할까요?</p>
+        <div class="rounded-lg bg-base-200 border border-base-300 p-3 mb-4">
+          <ul class="space-y-1 text-sm">
+            <% undersized_teams.each do |team| %>
+              <li class="flex items-center justify-between">
+                <span class="font-semibold">TEAM <%= team.label %></span>
+                <span class="badge badge-warning"><%= team.members.size %>명</span>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+        <div class="modal-action">
+          <button type="button" class="btn" onclick="document.getElementById('scoreboard_team_size_warning_modal').close()">취소</button>
+          <%= link_to "계속 진행", scoreboard_club_match_path(@club, @match), class: "btn btn-warning" %>
+        </div>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+      </form>
+    </dialog>
+  <% end %>
+
   <!-- 팀 카드들 -->
   <% team_records = {} %>
-  <% max_team_members = 6 %>
   
   <!-- 팀 랜덤 재배치 버튼 (게임 기록 없을 때만) -->
   <% if @match.games.none? { |g| g.result != 'pending' || g.home_score > 0 || g.away_score > 0 } %>
@@ -79,7 +119,7 @@
       <% wins, draws, losses = record[:wins], record[:draws], record[:losses] %>
       <% team_records[team.id] = record %>
       <% team_size = team.members.size %>
-      <% can_add_member = team_size < max_team_members && @available_members_for_match.any? %>
+      <% can_add_member = @available_members_for_match.any? %>
 
       <div class="card bg-base-100 shadow-xl overflow-hidden border-t-8" style="border-top-color: <%= team.color %>">
         <div class="card-body">
@@ -89,7 +129,7 @@
               TEAM <%= team.label %>
             </h2>
             <div class="flex items-center gap-2">
-              <div class="badge badge-ghost badge-sm"><%= team_size %>/<%= max_team_members %>명</div>
+              <div class="badge badge-ghost badge-sm"><%= team_size %>명</div>
               <div class="badge badge-lg gap-2 font-bold ring-1 ring-black/5" style="background-color: <%= team.color %>; border-color: <%= team.color %>; color: <%= team.color.downcase == '#ffffff' || team.color.downcase == 'white' ? '#000000' : 'white' %>;">
                 <%= team.color %>
               </div>
@@ -132,8 +172,6 @@
               <button type="button" class="btn btn-xs btn-outline" onclick="document.getElementById('add_member_modal_<%= team.id %>').showModal()">
                 + 멤버 추가
               </button>
-            <% elsif team_size >= max_team_members %>
-              <span class="badge badge-ghost badge-sm">정원 <%= max_team_members %>명</span>
             <% else %>
               <span class="badge badge-ghost badge-sm">추가 가능 멤버 없음</span>
             <% end %>
@@ -144,9 +182,9 @@
       <dialog id="add_member_modal_<%= team.id %>" class="modal modal-bottom sm:modal-middle text-base-content">
         <div class="modal-box">
           <h3 class="font-bold text-lg mb-2">TEAM <%= team.label %> 멤버 추가</h3>
-          <p class="text-sm text-base-content/60 mb-4">현재 <%= team_size %>/<%= max_team_members %>명</p>
+          <p class="text-sm text-base-content/60 mb-4">현재 <%= team_size %>명</p>
 
-          <% if @available_members_for_match.any? && team_size < max_team_members %>
+          <% if @available_members_for_match.any? %>
             <div class="space-y-2 max-h-[360px] overflow-y-auto pr-1">
               <% @available_members_for_match.each do |member| %>
                 <%= button_to add_member_club_match_path(@club, @match),
@@ -157,10 +195,6 @@
                   <span class="badge badge-xs text-white" style="<%= position_badge_style(member.position) %>"><%= member.position %></span>
                 <% end %>
               <% end %>
-            </div>
-          <% elsif team_size >= max_team_members %>
-            <div class="alert alert-info">
-              <span>이 팀은 이미 정원(<%= max_team_members %>명)에 도달했습니다.</span>
             </div>
           <% else %>
             <div class="alert">
@@ -208,10 +242,29 @@
                 <div class="bg-primary/20 text-primary text-[10px] font-black px-2 py-1 rounded tracking-widest">
                   GAME <%= index + 1 %>
                 </div>
-                <div class="text-[10px] font-bold text-white/20 uppercase tracking-widest">
-                  Match Result
+                  <div class="flex items-center gap-2">
+                    <div class="text-[10px] font-bold text-white/20 uppercase tracking-widest">
+                      Match Result
+                    </div>
+                    <% quarter_has_points = (game.quarter_scores || {}).values.any? do |score|
+                         score.is_a?(Hash) && (score["home"].to_i > 0 || score["away"].to_i > 0)
+                       end %>
+                    <% game_deletable = @match.teams_count == 2 &&
+                                       @games.size > 1 &&
+                                       game.result == "pending" &&
+                                       game.home_score.to_i.zero? &&
+                                       game.away_score.to_i.zero? &&
+                                       !quarter_has_points %>
+                    <% if game_deletable %>
+                      <%= button_to "미진행 게임 삭제",
+                          remove_game_club_match_path(@club, @match),
+                          method: :patch,
+                          params: { game_id: game.id },
+                          class: "btn btn-xs btn-outline btn-error",
+                          data: { turbo_confirm: "이 미진행 게임을 삭제할까요?" } %>
+                    <% end %>
+                  </div>
                 </div>
-              </div>
 
               <div class="flex flex-col gap-6 pt-2">
                 <!-- 상단: 점수판 메인 -->
@@ -295,8 +348,11 @@
                         current_q_score = game.quarter_scores&.dig(q.to_s, "home") || 0
                         prev_q_score = q > 1 ? (game.quarter_scores&.dig((q-1).to_s, "home") || 0) : 0
                         delta = current_q_score - prev_q_score
+                        current_q_score_away = game.quarter_scores&.dig(q.to_s, "away") || 0
+                        prev_q_score_away = q > 1 ? (game.quarter_scores&.dig((q-1).to_s, "away") || 0) : 0
+                        away_delta = current_q_score_away - prev_q_score_away
                       %>
-                      <div class="font-mono text-lg md:text-xl font-bold <%= 'text-yellow-400' if (game.quarter_scores&.dig(q.to_s, "home") || 0) > (game.quarter_scores&.dig(q.to_s, "away") || 0) %>">
+                      <div class="font-mono text-lg md:text-xl font-bold <%= 'text-yellow-400' if delta > away_delta %>">
                         <%= delta %>
                       </div>
                     <% end %>
@@ -312,8 +368,11 @@
                         current_q_score = game.quarter_scores&.dig(q.to_s, "away") || 0
                         prev_q_score = q > 1 ? (game.quarter_scores&.dig((q-1).to_s, "away") || 0) : 0
                         delta = current_q_score - prev_q_score
+                        current_q_score_home = game.quarter_scores&.dig(q.to_s, "home") || 0
+                        prev_q_score_home = q > 1 ? (game.quarter_scores&.dig((q-1).to_s, "home") || 0) : 0
+                        home_delta = current_q_score_home - prev_q_score_home
                       %>
-                      <div class="font-mono text-lg md:text-xl font-bold <%= 'text-yellow-400' if (game.quarter_scores&.dig(q.to_s, "away") || 0) > (game.quarter_scores&.dig(q.to_s, "home") || 0) %>">
+                      <div class="font-mono text-lg md:text-xl font-bold <%= 'text-yellow-400' if delta > home_delta %>">
                         <%= delta %>
                       </div>
                     <% end %>

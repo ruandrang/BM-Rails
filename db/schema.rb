@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_10_173000) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_10_200000) do
   create_table "clubs", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
@@ -34,13 +34,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_10_173000) do
     t.datetime "updated_at", null: false
     t.index ["away_team_id"], name: "index_games_on_away_team_id"
     t.index ["home_team_id"], name: "index_games_on_home_team_id"
-    t.index ["match_id", "home_team_id", "away_team_id"], name: "index_games_on_match_id_and_home_team_id_and_away_team_id", unique: true
+    t.index ["match_id", "home_team_id", "away_team_id"], name: "index_games_on_match_id_and_home_team_id_and_away_team_id"
     t.index ["match_id"], name: "index_games_on_match_id"
   end
 
   create_table "matches", force: :cascade do |t|
     t.integer "club_id", null: false
     t.datetime "created_at", null: false
+    t.integer "games_per_match", default: 1, null: false
     t.text "note"
     t.date "played_on", null: false
     t.string "share_token"

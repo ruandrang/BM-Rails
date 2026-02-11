@@ -15,6 +15,7 @@ class ScoreboardsController < ApplicationController
       Date.today
     )
     @match.teams = [ @match.home_team, @match.away_team ]
+    @games_for_scoreboard = []
     render :control
   end
 
@@ -28,15 +29,18 @@ class ScoreboardsController < ApplicationController
     )
     @match.teams = [ @match.home_team, @match.away_team ]
     @teams = @match.teams
+    @games_for_scoreboard = []
     render :display, layout: "scoreboard_display"
   end
 
   def control
     @teams = @match.teams.order(:label).includes(:members)
+    @games_for_scoreboard = @match.games.order(:id).select(:id, :home_team_id, :away_team_id)
   end
 
   def display
     @teams = @match.teams.order(:label)
+    @games_for_scoreboard = @match.games.order(:id).select(:id, :home_team_id, :away_team_id)
     render layout: "scoreboard_display"
   end
 

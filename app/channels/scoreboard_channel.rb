@@ -1,8 +1,8 @@
 class ScoreboardChannel < ApplicationCable::Channel
   ALLOWED_PAYLOAD_KEYS = %w[
     quarter period_seconds shot_seconds running shot_running matchup_index
-    teams rotation_step home_fouls away_fouls matchup_scores matchup_order quarter_history possession
-    manual_swap sound_enabled voice_enabled voice_rate base_possession possession_switch_pattern
+    teams rotation_step home_fouls away_fouls matchup_scores matchup_order matchup_slots quarter_history possession
+    manual_swap sound_enabled voice_enabled voice_rate base_possession possession_switch_pattern progression_mode
   ].freeze
   MAX_PAYLOAD_SIZE = 50_000
 
@@ -107,6 +107,7 @@ class ScoreboardStore
         "home_fouls" => 0,
         "away_fouls" => 0,
         "teams" => [],
+        "matchup_slots" => [],
         "matchup_scores" => [
           { "team1" => 0, "team2" => 0 },
           { "team1" => 0, "team2" => 0 },
@@ -117,6 +118,7 @@ class ScoreboardStore
         "possession" => "away",
         "base_possession" => "away",
         "possession_switch_pattern" => sanitized_possession_switch_pattern,
+        "progression_mode" => "by_quarter",
         "manual_swap" => false,
         "sound_enabled" => true,
         "voice_enabled" => true,
