@@ -140,6 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     const defaultSoundEnabled = parseBooleanDataset(scoreboardRoot.dataset.soundEnabled, true);
     const defaultVoiceEnabled = parseBooleanDataset(scoreboardRoot.dataset.voiceEnabled, true);
+    const defaultAnnouncementsEnabled = defaultSoundEnabled && defaultVoiceEnabled;
     const VOICE_ANNOUNCEMENT_RATES = [1.0, 1.1, 0.9];
     const normalizeVoiceRate = (value, fallback = 1.0) => {
       const parsed = Number.parseFloat(value);
@@ -499,8 +500,8 @@ document.addEventListener("DOMContentLoaded", () => {
         shot_seconds: 24,
         running: false,
         shot_running: false,
-        sound_enabled: defaultSoundEnabled,
-        voice_enabled: defaultVoiceEnabled,
+        sound_enabled: defaultAnnouncementsEnabled,
+        voice_enabled: defaultAnnouncementsEnabled,
         voice_rate: defaultVoiceRate,
         matchup_index: 0,
         rotation_step: 0,
@@ -521,6 +522,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const isSoundEnabled = () => state?.sound_enabled !== false;
     const isVoiceEnabled = () => state?.voice_enabled !== false;
+    const isAnnouncementsEnabled = () => isSoundEnabled() && isVoiceEnabled();
     const currentVoiceRate = () => normalizeVoiceRate(state?.voice_rate, defaultVoiceRate);
 
     const normalizeState = (incomingState) => {
@@ -558,6 +560,9 @@ document.addEventListener("DOMContentLoaded", () => {
         incomingState.possession_switch_pattern || normalized.possession_switch_pattern
       );
       normalized.voice_rate = normalizeVoiceRate(incomingState.voice_rate, base.voice_rate);
+      const announcementsEnabled = normalized.sound_enabled !== false && normalized.voice_enabled !== false;
+      normalized.sound_enabled = announcementsEnabled;
+      normalized.voice_enabled = announcementsEnabled;
 
       const parsedStep = Number.parseInt(incomingState.rotation_step, 10);
       const roundsForState = Math.max(1, slotsForState.length);
@@ -1295,28 +1300,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      const soundToggleBtn = scoreboardRoot.querySelector('[data-action="toggle-sound"]');
-      if (soundToggleBtn) {
-        const enabled = isSoundEnabled();
-        soundToggleBtn.textContent = enabled ? "🔊 사운드 ON" : "🔇 사운드 OFF";
-        soundToggleBtn.classList.toggle("bg-green-50", enabled);
-        soundToggleBtn.classList.toggle("text-green-700", enabled);
-        soundToggleBtn.classList.toggle("border-green-200", enabled);
-        soundToggleBtn.classList.toggle("bg-gray-100", !enabled);
-        soundToggleBtn.classList.toggle("text-gray-500", !enabled);
-        soundToggleBtn.classList.toggle("border-gray-300", !enabled);
-      }
-
-      const voiceToggleBtn = scoreboardRoot.querySelector('[data-action="toggle-voice"]');
-      if (voiceToggleBtn) {
-        const enabled = isVoiceEnabled();
-        voiceToggleBtn.textContent = enabled ? "🗣️ 음성 ON" : "🤫 음성 OFF";
-        voiceToggleBtn.classList.toggle("bg-green-50", enabled);
-        voiceToggleBtn.classList.toggle("text-green-700", enabled);
-        voiceToggleBtn.classList.toggle("border-green-200", enabled);
-        voiceToggleBtn.classList.toggle("bg-gray-100", !enabled);
-        voiceToggleBtn.classList.toggle("text-gray-500", !enabled);
-        voiceToggleBtn.classList.toggle("border-gray-300", !enabled);
+      const announcementsToggleBtn = scoreboardRoot.querySelector('[data-action="toggle-announcements"]');
+      if (announcementsToggleBtn) {
+        const enabled = isAnnouncementsEnabled();
+        announcementsToggleBtn.textContent = enabled ? "🔊 안내 ON" : "🔇 안내 OFF";
+        announcementsToggleBtn.classList.toggle("bg-green-50", enabled);
+        announcementsToggleBtn.classList.toggle("text-green-700", enabled);
+        announcementsToggleBtn.classList.toggle("border-green-200", enabled);
+        announcementsToggleBtn.classList.toggle("bg-gray-100", !enabled);
+        announcementsToggleBtn.classList.toggle("text-gray-500", !enabled);
+        announcementsToggleBtn.classList.toggle("border-gray-300", !enabled);
       }
 
       renderPreview();
@@ -1929,12 +1922,14 @@ document.addEventListener("DOMContentLoaded", () => {
               case "prev-matchup":
                 state.matchup_index = Math.max(0, state.matchup_index - 1);
                 break;
+              case "toggle-announcements":
               case "toggle-sound":
-                state.sound_enabled = !isSoundEnabled();
+              case "toggle-voice": {
+                const nextEnabled = !isAnnouncementsEnabled();
+                state.sound_enabled = nextEnabled;
+                state.voice_enabled = nextEnabled;
                 break;
-              case "toggle-voice":
-                state.voice_enabled = !isVoiceEnabled();
-                break;
+              }
               case "increment-home-fouls":
                 state.home_fouls = (state.home_fouls || 0) + 1;
                 break;
@@ -2096,6 +2091,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Keyboard Shortcuts
       document.addEventListener("keydown", (e) => {
         if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
 
         // Helper to click button by action
         const clickAction = (action) => {
@@ -2129,6 +2125,14 @@ document.addEventListener("DOMContentLoaded", () => {
           case "Numpad3":
             clickAction("add-home-3");
             break;
+          case "Digit5":
+          case "Numpad5":
+            clickAction("sub-home");
+            break;
+          case "Digit6":
+          case "Numpad6":
+            clickAction("sub-away");
+            break;
           case "Digit8":
           case "Numpad8":
             clickAction("add-away-1");
@@ -2149,6 +2153,34 @@ document.addEventListener("DOMContentLoaded", () => {
             break;
           case "KeyC":
             clickAction("toggle-shot");
+            break;
+          case "KeyB":
+            if (!isAnnouncementsEnabled()) {
+              clickAction("toggle-announcements");
+            }
+            break;
+          case "KeyV":
+            if (isAnnouncementsEnabled()) {
+              clickAction("toggle-announcements");
+            }
+            break;
+          case "KeyD":
+            clickAction("buzzer");
+            break;
+          case "KeyA":
+            clickAction("decrement-home-fouls");
+            break;
+          case "KeyS":
+            clickAction("increment-home-fouls");
+            break;
+          case "KeyK":
+            clickAction("decrement-away-fouls");
+            break;
+          case "KeyL":
+            clickAction("increment-away-fouls");
+            break;
+          case "KeyN":
+            clickAction("next-quarter");
             break;
         }
       });

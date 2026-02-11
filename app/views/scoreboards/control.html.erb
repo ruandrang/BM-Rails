@@ -209,9 +209,7 @@
           <button class="btn btn-sm px-5 border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900 shadow-sm font-black text-lg h-11 flex items-center gap-2 shrink-0"
                   data-action="buzzer">🔔 BUZZER</button>
           <button class="btn btn-sm px-3 bg-white hover:bg-gray-50 shadow-sm font-bold h-11 shrink-0"
-                  data-action="toggle-sound">🔊 사운드 ON</button>
-          <button class="btn btn-sm px-3 bg-white hover:bg-gray-50 shadow-sm font-bold h-11 shrink-0"
-                  data-action="toggle-voice">🗣️ 음성 ON</button>
+                  data-action="toggle-announcements">🔊 안내 ON</button>
           <button class="btn btn-sm px-4 border-red-100 bg-red-50 text-red-600 hover:bg-red-100 shadow-sm font-bold h-11 shrink-0"
                   data-action="reset-all">🔄 전체 리셋</button>
           <button class="btn btn-sm px-4 border-blue-100 bg-blue-50 text-blue-600 hover:bg-blue-100 shadow-sm font-bold h-11 shrink-0"
@@ -307,6 +305,17 @@
                     <kbd class="bg-gray-100 text-gray-900 px-3 py-1 rounded-lg font-black min-w-[36px] text-center shadow-sm border border-gray-300 border-b-4 text-lg">C</kbd>
                     <span class="text-base">샷클락 멈춤 / 시작</span>
                   </div>
+                  <div class="flex items-center gap-4">
+                    <div class="flex gap-2">
+                      <kbd class="bg-gray-100 text-gray-900 px-3 py-1 rounded-lg font-black min-w-[36px] text-center shadow-sm border border-gray-300 border-b-4 text-lg">B</kbd>
+                      <kbd class="bg-gray-100 text-gray-900 px-3 py-1 rounded-lg font-black min-w-[36px] text-center shadow-sm border border-gray-300 border-b-4 text-lg">V</kbd>
+                    </div>
+                    <span class="text-base">B: 안내 ON / V: 안내 OFF</span>
+                  </div>
+                  <div class="flex items-center gap-4">
+                    <kbd class="bg-gray-100 text-gray-900 px-3 py-1 rounded-lg font-black min-w-[36px] text-center shadow-sm border border-gray-300 border-b-4 text-lg">D</kbd>
+                    <span class="text-base">부저 울리기</span>
+                  </div>
                 </div>
 
                 <div class="w-px bg-gray-300"></div>
@@ -328,6 +337,26 @@
                       <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-lg">0</kbd>
                     </div>
                     <span class="text-base">오른쪽 팀 득점 (+1, +2, +3)</span>
+                  </div>
+                  <div class="flex items-center gap-4">
+                    <div class="flex gap-2">
+                      <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-lg">5</kbd>
+                      <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-lg">6</kbd>
+                    </div>
+                    <span class="text-base">5: 오른쪽 팀 -1 / 6: 왼쪽 팀 -1</span>
+                  </div>
+                  <div class="flex items-center gap-4">
+                    <div class="flex gap-2">
+                      <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-lg">A</kbd>
+                      <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-lg">S</kbd>
+                      <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-lg">K</kbd>
+                      <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-lg">L</kbd>
+                    </div>
+                    <span class="text-base">A/S: 오른쪽 파울 -, + · K/L: 왼쪽 파울 -, +</span>
+                  </div>
+                  <div class="flex items-center gap-4">
+                    <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-lg">N</kbd>
+                    <span class="text-base">다음 쿼터로 이동</span>
                   </div>
                 </div>
 

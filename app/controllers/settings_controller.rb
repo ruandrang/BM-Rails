@@ -6,8 +6,7 @@ class SettingsController < ApplicationController
   def update
     @user = current_user
     minutes = normalized_default_game_minutes
-    sound_enabled = normalized_boolean(setting_params[:scoreboard_sound_enabled], default: @user.scoreboard_sound_enabled)
-    voice_enabled = normalized_boolean(setting_params[:voice_announcement_enabled], default: @user.voice_announcement_enabled)
+    announcements_enabled = normalized_announcements_enabled
     voice_rate = normalized_voice_announcement_rate(
       setting_params[:voice_announcement_rate],
       default: @user.voice_announcement_rate
@@ -18,7 +17,7 @@ class SettingsController < ApplicationController
     )
 
     unless minutes
-      @user.assign_attributes(setting_params)
+      @user.assign_attributes(setting_params.except(:announcements_enabled))
       @user.errors.add(:default_game_minutes, "는 #{User::MIN_GAME_MINUTES}~#{User::MAX_GAME_MINUTES}분 사이여야 합니다.")
       render :show, status: :unprocessable_entity
       return
@@ -26,8 +25,8 @@ class SettingsController < ApplicationController
 
     @user.update_columns(
       default_game_minutes: minutes,
-      scoreboard_sound_enabled: sound_enabled,
-      voice_announcement_enabled: voice_enabled,
+      scoreboard_sound_enabled: announcements_enabled,
+      voice_announcement_enabled: announcements_enabled,
       voice_announcement_rate: voice_rate,
       possession_switch_pattern: possession_switch_pattern,
       updated_at: Time.current
@@ -41,6 +40,7 @@ class SettingsController < ApplicationController
   def setting_params
     params.require(:user).permit(
       :default_game_minutes,
+      :announcements_enabled,
       :scoreboard_sound_enabled,
       :voice_announcement_enabled,
       :voice_announcement_rate,
@@ -73,6 +73,23 @@ class SettingsController < ApplicationController
 
     casted = ActiveModel::Type::Boolean.new.cast(value)
     casted.nil? ? default : casted
+  end
+
+  def normalized_announcements_enabled
+    default = @user.scoreboard_sound_enabled && @user.voice_announcement_enabled
+
+    if setting_params.key?(:announcements_enabled)
+      return normalized_boolean(setting_params[:announcements_enabled], default: default)
+    end
+
+    sound_param = setting_params[:scoreboard_sound_enabled]
+    voice_param = setting_params[:voice_announcement_enabled]
+
+    return default if sound_param.nil? && voice_param.nil?
+    return normalized_boolean(sound_param, default: default) if voice_param.nil?
+    return normalized_boolean(voice_param, default: default) if sound_param.nil?
+
+    normalized_boolean(sound_param, default: default) && normalized_boolean(voice_param, default: default)
   end
 
   def normalized_possession_switch_pattern(value, default:)

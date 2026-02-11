@@ -64,30 +64,28 @@
           <% selected_voice_rate = @user.voice_announcement_rate.to_f.round(1) %>
           <% selected_voice_rate = User::DEFAULT_VOICE_ANNOUNCEMENT_RATE unless User::VOICE_ANNOUNCEMENT_RATES.include?(selected_voice_rate) %>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <label class="cursor-pointer rounded-xl border border-base-300 bg-base-200/30 p-4 flex items-center justify-between gap-4 hover:border-primary/40 transition-colors">
-              <div>
-                <p class="font-semibold">점수판 사운드</p>
-                <p class="text-sm text-base-content/60">버저 효과음을 재생합니다.</p>
-              </div>
-              <div class="flex items-center gap-2">
-                <span id="sound-status" class="badge badge-sm">ON</span>
-                <%= form.check_box :scoreboard_sound_enabled, { class: "toggle toggle-primary", data: { setting_toggle: true, status_target: "sound-status" } }, "1", "0" %>
-              </div>
-            </label>
+          <div class="grid grid-cols-1 gap-4">
+            <% announcements_enabled = @user.scoreboard_sound_enabled && @user.voice_announcement_enabled %>
+            <%= hidden_field_tag "user[announcements_enabled]", announcements_enabled ? "1" : "0", data: { announcements_hidden: true } %>
+            <%= hidden_field_tag "user[scoreboard_sound_enabled]", announcements_enabled ? "1" : "0", data: { announcements_hidden: true } %>
+            <%= hidden_field_tag "user[voice_announcement_enabled]", announcements_enabled ? "1" : "0", data: { announcements_hidden: true } %>
 
             <label class="cursor-pointer rounded-xl border border-base-300 bg-base-200/30 p-4 flex items-center justify-between gap-4 hover:border-primary/40 transition-colors">
               <div>
-                <p class="font-semibold">음성 안내</p>
-                <p class="text-sm text-base-content/60">카운트다운과 점수 음성 안내를 재생합니다.</p>
+                <p class="font-semibold">안내 기능 (사운드 + 음성)</p>
+                <p class="text-sm text-base-content/60">제어 패널과 동일하게 버저/음성 안내를 한 번에 ON/OFF 합니다.</p>
               </div>
               <div class="flex items-center gap-2">
-                <span id="voice-status" class="badge badge-sm">ON</span>
-                <%= form.check_box :voice_announcement_enabled, { class: "toggle toggle-primary", data: { setting_toggle: true, status_target: "voice-status" } }, "1", "0" %>
+                <span id="announcements-status" class="badge badge-sm">ON</span>
+                <input
+                  type="checkbox"
+                  class="toggle toggle-primary"
+                  data-announcements-toggle
+                  <%= "checked" if announcements_enabled %>>
               </div>
             </label>
 
-            <div class="rounded-xl border border-base-300 bg-base-200/30 p-4 md:col-span-2">
+            <div class="rounded-xl border border-base-300 bg-base-200/30 p-4">
               <p class="font-semibold">음성 안내 속도</p>
               <p class="text-sm text-base-content/60 mt-1">카운트다운과 점수 안내 음성 속도를 설정합니다.</p>
 
@@ -194,21 +192,29 @@
         });
       });
 
-      form.querySelectorAll("[data-setting-toggle]").forEach((toggle) => {
-        const statusId = toggle.dataset.statusTarget;
-        const status = statusId ? document.getElementById(statusId) : null;
-        if (!status) return;
+      const announcementsToggle = form.querySelector("[data-announcements-toggle]");
+      const announcementsStatus = document.getElementById("announcements-status");
+      const announcementHiddenInputs = Array.from(form.querySelectorAll("[data-announcements-hidden]"));
 
-        const refresh = () => {
-          const enabled = toggle.checked;
-          status.textContent = enabled ? "ON" : "OFF";
-          status.classList.toggle("badge-success", enabled);
-          status.classList.toggle("badge-ghost", !enabled);
-        };
+      const refreshAnnouncementsState = () => {
+        if (!announcementsToggle) return;
+        const enabled = announcementsToggle.checked;
 
-        toggle.addEventListener("change", refresh);
-        refresh();
-      });
+        if (announcementsStatus) {
+          announcementsStatus.textContent = enabled ? "ON" : "OFF";
+          announcementsStatus.classList.toggle("badge-success", enabled);
+          announcementsStatus.classList.toggle("badge-ghost", !enabled);
+        }
+
+        announcementHiddenInputs.forEach((input) => {
+          input.value = enabled ? "1" : "0";
+        });
+      };
+
+      if (announcementsToggle) {
+        announcementsToggle.addEventListener("change", refreshAnnouncementsState);
+      }
+      refreshAnnouncementsState();
 
       const voiceRateTestButton = form.querySelector("[data-voice-rate-test]");
       if (voiceRateTestButton) {
