@@ -3,6 +3,7 @@ class ScoreboardChannel < ApplicationCable::Channel
     quarter period_seconds shot_seconds running shot_running matchup_index
     teams rotation_step home_fouls away_fouls matchup_scores matchup_order matchup_slots quarter_history possession
     manual_swap sound_enabled voice_enabled voice_rate base_possession possession_switch_pattern progression_mode
+    quarter_score_reset_enabled regular_quarters
   ].freeze
   MAX_PAYLOAD_SIZE = 50_000
 
@@ -19,7 +20,8 @@ class ScoreboardChannel < ApplicationCable::Channel
         @match_id,
         period_seconds: current_user.default_period_seconds,
         voice_rate: current_user.voice_announcement_rate,
-        possession_switch_pattern: current_user.possession_switch_pattern
+        possession_switch_pattern: current_user.possession_switch_pattern,
+        regular_quarters: regular_quarters_for_match(@match_id)
       )
     )
   end
@@ -67,6 +69,13 @@ class ScoreboardChannel < ApplicationCable::Channel
 
     sanitized
   end
+
+  def regular_quarters_for_match(match_id)
+    return 4 if match_id.to_s.start_with?("standalone_")
+
+    value = Match.where(id: match_id.to_i).pick(:regular_quarters).to_i
+    [ 3, 4 ].include?(value) ? value : 4
+  end
 end
 
 class ScoreboardStore
@@ -74,9 +83,14 @@ class ScoreboardStore
   CACHE_EXPIRY = 24.hours
 
   class << self
-    def fetch(match_id, period_seconds: 480, voice_rate: User::DEFAULT_VOICE_ANNOUNCEMENT_RATE, possession_switch_pattern: User::DEFAULT_POSSESSION_SWITCH_PATTERN)
+    def fetch(match_id, period_seconds: 480, voice_rate: User::DEFAULT_VOICE_ANNOUNCEMENT_RATE, possession_switch_pattern: User::DEFAULT_POSSESSION_SWITCH_PATTERN, regular_quarters: 4)
       Rails.cache.fetch(cache_key(match_id), expires_in: CACHE_EXPIRY) do
-        default_state(period_seconds: period_seconds, voice_rate: voice_rate, possession_switch_pattern: possession_switch_pattern)
+        default_state(
+          period_seconds: period_seconds,
+          voice_rate: voice_rate,
+          possession_switch_pattern: possession_switch_pattern,
+          regular_quarters: regular_quarters
+        )
       end
     end
 
@@ -88,16 +102,19 @@ class ScoreboardStore
       Rails.cache.delete(cache_key(match_id))
     end
 
-    def default_state(period_seconds: 480, voice_rate: User::DEFAULT_VOICE_ANNOUNCEMENT_RATE, possession_switch_pattern: User::DEFAULT_POSSESSION_SWITCH_PATTERN)
+    def default_state(period_seconds: 480, voice_rate: User::DEFAULT_VOICE_ANNOUNCEMENT_RATE, possession_switch_pattern: User::DEFAULT_POSSESSION_SWITCH_PATTERN, regular_quarters: 4)
       sanitized_period_seconds = period_seconds.to_i
       sanitized_period_seconds = 480 if sanitized_period_seconds <= 0
       sanitized_voice_rate = voice_rate.to_f.round(1)
       sanitized_voice_rate = User::DEFAULT_VOICE_ANNOUNCEMENT_RATE unless User::VOICE_ANNOUNCEMENT_RATES.include?(sanitized_voice_rate)
       sanitized_possession_switch_pattern =
         User::POSSESSION_SWITCH_PATTERNS.key?(possession_switch_pattern) ? possession_switch_pattern : User::DEFAULT_POSSESSION_SWITCH_PATTERN
+      sanitized_regular_quarters = regular_quarters.to_i
+      sanitized_regular_quarters = 4 unless [ 3, 4 ].include?(sanitized_regular_quarters)
 
       {
         "quarter" => 1,
+        "regular_quarters" => sanitized_regular_quarters,
         "period_seconds" => sanitized_period_seconds,
         "shot_seconds" => 24,
         "running" => false,
@@ -120,6 +137,7 @@ class ScoreboardStore
         "possession_switch_pattern" => sanitized_possession_switch_pattern,
         "progression_mode" => "by_quarter",
         "manual_swap" => false,
+        "quarter_score_reset_enabled" => sanitized_regular_quarters == 3,
         "sound_enabled" => true,
         "voice_enabled" => true,
         "voice_rate" => sanitized_voice_rate

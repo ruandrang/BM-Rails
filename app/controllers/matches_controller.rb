@@ -30,7 +30,9 @@ class MatchesController < ApplicationController
       end
     end
 
-    @match = @club.matches.new(played_on: default_date, teams_count: 3, games_per_match: 1)
+    default_attributes = { played_on: default_date, teams_count: 3, games_per_match: 1 }
+    default_attributes[:regular_quarters] = 4 if Match.column_names.include?("regular_quarters")
+    @match = @club.matches.new(default_attributes)
     @members = @club.members.order(:sort_order, :id)
 
     # 승률 계산 (뷰에서 정렬용)
@@ -276,7 +278,9 @@ class MatchesController < ApplicationController
           cum_home = 0
           cum_away = 0
 
-          (1..4).each do |q|
+          regular_quarters = regular_quarters_count(@match)
+
+          (1..regular_quarters).each do |q|
             q_s = q.to_s
             h_val = 0
             a_val = 0
@@ -307,8 +311,9 @@ class MatchesController < ApplicationController
 
           # 총점 계산 (마지막 쿼터 기준 또는 합산)
           if input_mode == "cumulative" || input_mode == "delta"
-            game.home_score = temp_scores["4"]["home"]
-            game.away_score = temp_scores["4"]["away"]
+            latest_quarter_key = regular_quarters.to_s
+            game.home_score = temp_scores.dig(latest_quarter_key, "home").to_i
+            game.away_score = temp_scores.dig(latest_quarter_key, "away").to_i
           else
             # "per_quarter" 가 선택된 경우 (현재 기본은 아님)
             # 사실 위 loop에서 cum_* 방식이 per_quarter와 충돌할 수 있음.
@@ -388,7 +393,8 @@ class MatchesController < ApplicationController
     end
 
     if @match.games.count >= 3
-      return render json: { success: false, error: "최대 3게임(총 12쿼터)까지 추가할 수 있습니다." }, status: :unprocessable_entity
+      total_quarters = 3 * regular_quarters_count(@match)
+      return render json: { success: false, error: "최대 3게임(총 #{total_quarters}쿼터)까지 추가할 수 있습니다." }, status: :unprocessable_entity
     end
 
     teams = @match.teams.order(:id).to_a
@@ -502,7 +508,9 @@ class MatchesController < ApplicationController
   end
 
   def match_params
-    params.require(:match).permit(:played_on, :teams_count, :games_per_match, :note)
+    permitted = [ :played_on, :teams_count, :games_per_match, :note ]
+    permitted << :regular_quarters if Match.column_names.include?("regular_quarters")
+    params.require(:match).permit(*permitted)
   end
 
   def match_update_params
@@ -538,6 +546,7 @@ class MatchesController < ApplicationController
   def extract_scores_from_params
     return nil unless params[:scores].respond_to?(:each)
 
+    max_regular_quarters = regular_quarters_count(@match)
     scores = {}
     params[:scores].each do |game_id, score_data|
       next unless game_id.to_s.match?(/\A\d+\z/)
@@ -547,8 +556,11 @@ class MatchesController < ApplicationController
       if quarters.respond_to?(:each)
         sanitized_quarters = {}
         quarters.each do |q_num, q_data|
-          next unless q_num.to_s.match?(/\A[1-5]\z/)
-          sanitized_quarters[q_num.to_s] = {
+          next unless q_num.to_s.match?(/\A\d+\z/)
+          quarter_number = q_num.to_i
+          next unless quarter_number.between?(1, max_regular_quarters)
+
+          sanitized_quarters[quarter_number.to_s] = {
             "home" => q_data[:home].to_i,
             "away" => q_data[:away].to_i
           }
@@ -612,5 +624,12 @@ class MatchesController < ApplicationController
       format.html { redirect_to club_match_path(@club, @match), alert: message }
       format.json { render json: { success: false, error: message }, status: :unprocessable_entity }
     end
+  end
+
+  def regular_quarters_count(match)
+    return 4 unless match.respond_to?(:regular_quarters)
+
+    value = match.regular_quarters.to_i
+    [ 3, 4 ].include?(value) ? value : 4
   end
 end

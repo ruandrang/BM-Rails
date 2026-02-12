@@ -7,12 +7,13 @@ class ScoreboardsController < ApplicationController
   end
 
   def standalone_control
-    @match = Struct.new(:id, :home_team, :away_team, :teams, :date).new(
+    @match = Struct.new(:id, :home_team, :away_team, :teams, :date, :regular_quarters).new(
       "standalone_u#{current_user.id}",
       Struct.new(:id, :name, :icon, :color, :label).new(1, "HOME", "🏀", "#1e40af", "HOME"),
       Struct.new(:id, :name, :icon, :color, :label).new(2, "AWAY", "🏀", "#dc2626", "AWAY"),
       [],
-      Date.today
+      Date.today,
+      4
     )
     @match.teams = [ @match.home_team, @match.away_team ]
     @games_for_scoreboard = []
@@ -20,12 +21,13 @@ class ScoreboardsController < ApplicationController
   end
 
   def standalone_display
-    @match = Struct.new(:id, :home_team, :away_team, :teams, :date).new(
+    @match = Struct.new(:id, :home_team, :away_team, :teams, :date, :regular_quarters).new(
       "standalone_u#{current_user.id}",
       Struct.new(:id, :name, :icon, :color, :label).new(1, "HOME", "🏀", "#1e40af", "HOME"),
       Struct.new(:id, :name, :icon, :color, :label).new(2, "AWAY", "🏀", "#dc2626", "AWAY"),
       [],
-      Date.today
+      Date.today,
+      4
     )
     @match.teams = [ @match.home_team, @match.away_team ]
     @teams = @match.teams

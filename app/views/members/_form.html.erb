@@ -54,10 +54,11 @@
     </label>
     <div class="grid grid-cols-5 gap-3">
       <% Member::POSITIONS.each do |pos| %>
-        <label class="cursor-pointer">
-          <%= form.radio_button :position, pos, class: "hidden peer", required: true %>
-          <div class="card hover:opacity-80 transition-all duration-200 text-center py-3 border-2 border-transparent peer-checked:ring-2 peer-checked:ring-offset-2 shadow-sm text-white"
+        <label class="cursor-pointer position-option">
+          <%= form.radio_button :position, pos, class: "hidden position-option-input", required: true %>
+          <div class="position-option-card text-center py-3 shadow-sm text-white"
                style="background-color: <%= Member::POSITION_COLORS[pos] %>;">
+            <span class="position-option-check" aria-hidden="true">✓</span>
             <span class="text-sm font-black"><%= pos %></span>
             <span class="text-[10px] opacity-80 block"><%= Member::POSITION_NAMES[pos] %></span>
           </div>

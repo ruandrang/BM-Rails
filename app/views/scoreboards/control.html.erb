@@ -5,6 +5,7 @@
      data-teams="<%= @match.teams.respond_to?(:includes) ? @match.teams.includes(:members).to_json(include: :members) : @match.teams.to_json %>"
      data-games="<%= @games_for_scoreboard.to_json %>"
      data-teams-count="<%= @match.teams.count %>"
+     data-regular-quarters="<%= @match.respond_to?(:regular_quarters) ? @match.regular_quarters : 4 %>"
      data-default-period-seconds="<%= current_user.default_period_seconds %>"
      data-sound-enabled="<%= current_user.scoreboard_sound_enabled %>"
      data-voice-enabled="<%= current_user.voice_announcement_enabled %>"
@@ -33,6 +34,11 @@
         <% else %>
           <%= link_to "디스플레이 열기", scoreboard_display_club_match_path(@club, @match), target: "_blank", class: "btn btn-sm btn-outline border-gray-300 text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-400" %>
         <% end %>
+        <button
+          class="btn btn-sm px-3 bg-white border border-gray-300 text-gray-600 hover:bg-gray-50 shadow-sm font-bold"
+          data-action="toggle-quarter-score-reset">
+          쿼터별 점수 리셋 OFF
+        </button>
         <div class="px-3 py-1 rounded border border-[#22C55E]/30 bg-[#22C55E]/10 text-[#22C55E] text-xs font-bold tracking-wider">
           라이브
         </div>
@@ -268,9 +274,25 @@
               <div data-detail-sort-item data-detail-sort-key="matchup" class="w-full bg-white border border-gray-200 rounded-2xl shadow-sm">
                 <div class="flex items-center justify-between px-6 pt-5 pb-2 border-b border-gray-100">
                   <p class="text-xs font-bold tracking-widest uppercase text-gray-400">경기 Matchup</p>
-                  <button type="button" data-detail-drag-handle class="btn btn-xs btn-ghost text-gray-400 hover:text-gray-700 min-h-0 h-7 px-2 cursor-move" aria-label="경기 순서 변경">
-                    ↕ 드래그
-                  </button>
+                  <div class="flex items-center gap-2">
+                    <div class="join border border-gray-200 rounded-lg overflow-hidden">
+                      <button
+                        type="button"
+                        class="join-item btn btn-xs bg-gray-900 text-white border-0 h-7 min-h-0 px-3"
+                        data-action="set-quarter-view-cumulative">
+                        누적
+                      </button>
+                      <button
+                        type="button"
+                        class="join-item btn btn-xs bg-white text-gray-500 border-0 h-7 min-h-0 px-3"
+                        data-action="set-quarter-view-per-quarter">
+                        쿼터별
+                      </button>
+                    </div>
+                    <button type="button" data-detail-drag-handle class="btn btn-xs btn-ghost text-gray-400 hover:text-gray-700 min-h-0 h-7 px-2 cursor-move" aria-label="경기 순서 변경">
+                      ↕ 드래그
+                    </button>
+                  </div>
                 </div>
                 <div data-quarter-table class="w-full p-8">
                    <!-- Table injected by JS -->

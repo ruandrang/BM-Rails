@@ -36,6 +36,7 @@
             <div class="flex items-center justify-between mb-4">
               <div class="flex items-center gap-2">
                 <div class="badge badge-primary badge-lg"><%= match.teams_count %>팀</div>
+                <div class="badge badge-outline"><%= match.regular_quarters_count %>쿼터</div>
                 <% completed_games = match.games.where.not(result: "pending").count rescue 0 %>
                 <% total_games = match.games.count rescue 0 %>
                 <% if total_games > 0 && completed_games == total_games %>

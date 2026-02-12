@@ -25,6 +25,7 @@
         <% selected_games_per_match = @match.games_per_match.to_i %>
         <% selected_games_per_match = 1 if selected_games_per_match <= 0 %>
         <% selected_games_per_match = 3 if selected_games_per_match > 3 %>
+        <% selected_regular_quarters = @match.respond_to?(:regular_quarters_count) ? @match.regular_quarters_count : 4 %>
 
         <!-- 기본 정보 -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -51,25 +52,51 @@
           </div>
 
           <div class="form-control w-full col-span-1 md:col-span-2 <%= selected_teams_count == 2 ? '' : 'hidden' %>" data-games-per-match-control>
-            <%= form.label :games_per_match, "2팀 경기 수 (4쿼터 기준)", class: "label" %>
+            <%= form.label :games_per_match, "2팀 경기 수", class: "label" %>
             <%= form.hidden_field :games_per_match, value: selected_games_per_match, data: { games_per_match_input: true } %>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2" data-games-per-match-options>
-              <% [
-                [1, "1게임 (기본, 총 4쿼터)"],
-                [2, "2게임 (총 8쿼터)"],
-                [3, "3게임 (총 12쿼터)"]
-              ].each do |value, label| %>
+              <% [1, 2, 3].each do |value| %>
+                <% total_quarters = selected_regular_quarters * value %>
+                <% label = if value == 1
+                  "1게임 (기본, 총 #{total_quarters}쿼터)"
+                else
+                  "#{value}게임 (총 #{total_quarters}쿼터)"
+                end %>
                 <button type="button"
                         class="btn w-full <%= selected_games_per_match == value ? 'btn-primary' : 'btn-outline' %>"
                         data-games-per-match-option
                         data-value="<%= value %>"
                         aria-pressed="<%= selected_games_per_match == value %>">
+                  <span data-games-per-match-label="<%= value %>"><%= label %></span>
+                </button>
+              <% end %>
+            </div>
+            <label class="label">
+              <span class="label-text-alt text-base-content/60" data-three-team-quarter-note>
+                3팀 모드는 3개 매치업 × <%= selected_regular_quarters %>쿼터 (총 <%= selected_regular_quarters * 3 %>쿼터)로 진행됩니다.
+              </span>
+            </label>
+          </div>
+
+          <div class="form-control w-full col-span-1 md:col-span-2">
+            <%= form.label :regular_quarters, "정규 쿼터 수", class: "label" %>
+            <%= form.hidden_field :regular_quarters, value: selected_regular_quarters, data: { regular_quarters_input: true } %>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" data-regular-quarters-options>
+              <% [
+                [4, "기본 4쿼터 경기"],
+                [3, "3쿼터만 경기 하기"]
+              ].each do |value, label| %>
+                <button type="button"
+                        class="btn w-full <%= selected_regular_quarters == value ? 'btn-primary' : 'btn-outline' %>"
+                        data-regular-quarters-option
+                        data-value="<%= value %>"
+                        aria-pressed="<%= selected_regular_quarters == value %>">
                   <%= label %>
                 </button>
               <% end %>
             </div>
             <label class="label">
-              <span class="label-text-alt text-base-content/60">3팀 모드는 기존과 동일하게 3개 매치업(각 4쿼터)으로 진행됩니다.</span>
+              <span class="label-text-alt text-base-content/60">3팀 운영 시 A:B → B:C → C:A 순서가 쿼터마다 반복되어 3쿼터 선택 시 총 9쿼터로 진행됩니다.</span>
             </label>
           </div>
         </div>
@@ -317,12 +344,40 @@ function sanitizeGamesPerMatch(value) {
   return [1, 2, 3].includes(parsed) ? parsed : 1;
 }
 
+function sanitizeRegularQuarters(value) {
+  const parsed = Number.parseInt(value, 10);
+  return [3, 4].includes(parsed) ? parsed : 4;
+}
+
+function selectedRegularQuarters() {
+  const input = document.querySelector('input[name="match[regular_quarters]"]');
+  return sanitizeRegularQuarters(input?.value);
+}
+
+function updateGamesPerMatchOptionLabels() {
+  const regularQuarters = selectedRegularQuarters();
+  const threeTeamNote = document.querySelector("[data-three-team-quarter-note]");
+
+  document.querySelectorAll("[data-games-per-match-label]").forEach((label) => {
+    const gameCount = sanitizeGamesPerMatch(label.dataset.gamesPerMatchLabel);
+    const totalQuarters = regularQuarters * gameCount;
+    label.textContent = gameCount === 1
+      ? `1게임 (기본, 총 ${totalQuarters}쿼터)`
+      : `${gameCount}게임 (총 ${totalQuarters}쿼터)`;
+  });
+
+  if (threeTeamNote) {
+    threeTeamNote.textContent = `3팀 모드는 3개 매치업 × ${regularQuarters}쿼터 (총 ${regularQuarters * 3}쿼터)로 진행됩니다.`;
+  }
+}
+
 function updateGamesPerMatchButtons() {
   const input = document.querySelector('input[name="match[games_per_match]"]');
   if (!input) return;
 
   const selected = sanitizeGamesPerMatch(input.value);
   input.value = String(selected);
+  updateGamesPerMatchOptionLabels();
 
   document.querySelectorAll("[data-games-per-match-option]").forEach((button) => {
     const optionValue = sanitizeGamesPerMatch(button.dataset.value);
@@ -339,6 +394,32 @@ function setGamesPerMatch(value) {
   if (!input) return;
   input.value = String(sanitizeGamesPerMatch(value));
   updateGamesPerMatchButtons();
+}
+
+function updateRegularQuartersButtons() {
+  const input = document.querySelector('input[name="match[regular_quarters]"]');
+  if (!input) return;
+
+  const selected = sanitizeRegularQuarters(input.value);
+  input.value = String(selected);
+
+  document.querySelectorAll("[data-regular-quarters-option]").forEach((button) => {
+    const optionValue = sanitizeRegularQuarters(button.dataset.value);
+    const active = optionValue === selected;
+
+    button.classList.toggle("btn-primary", active);
+    button.classList.toggle("btn-outline", !active);
+    button.setAttribute("aria-pressed", active ? "true" : "false");
+  });
+
+  updateGamesPerMatchOptionLabels();
+}
+
+function setRegularQuarters(value) {
+  const input = document.querySelector('input[name="match[regular_quarters]"]');
+  if (!input) return;
+  input.value = String(sanitizeRegularQuarters(value));
+  updateRegularQuartersButtons();
 }
 
 function recommendedTopMembersCount() {
@@ -410,8 +491,14 @@ function initNewMatchPageHelpers() {
     button.dataset.bound = "true";
     button.addEventListener("click", () => setGamesPerMatch(button.dataset.value));
   });
+  document.querySelectorAll("[data-regular-quarters-option]").forEach((button) => {
+    if (button.dataset.bound === "true") return;
+    button.dataset.bound = "true";
+    button.addEventListener("click", () => setRegularQuarters(button.dataset.value));
+  });
 
   updateTeamConfigurationVisibility();
+  updateRegularQuartersButtons();
   if (typeof initSortableList === "function") {
     initSortableList("#member-list", ".member-item", { name: "asc", position: "asc" });
   }

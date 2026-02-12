@@ -126,6 +126,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const role = scoreboardRoot.dataset.scoreboardRole;
     const matchId = scoreboardRoot.dataset.matchId;
+    const quarterScoreViewStorageKey = `scoreboard:quarter-score-view:${matchId}`;
+    const QUARTER_SCORE_VIEW_MODES = ["cumulative", "per_quarter"];
     const teams = parseJsonDataset(scoreboardRoot.dataset.teams, []);
     const games = parseJsonDataset(scoreboardRoot.dataset.games, []);
     const teamsCount = parseInt(scoreboardRoot.dataset.teamsCount || "2", 10);
@@ -138,9 +140,15 @@ document.addEventListener("DOMContentLoaded", () => {
       if (["false", "0", "no", "off"].includes(normalized)) return false;
       return fallback;
     };
+    const parseRegularQuarters = (value, fallback = 4) => {
+      const parsed = Number.parseInt(value, 10);
+      if ([3, 4].includes(parsed)) return parsed;
+      return [3, 4].includes(fallback) ? fallback : 4;
+    };
     const defaultSoundEnabled = parseBooleanDataset(scoreboardRoot.dataset.soundEnabled, true);
     const defaultVoiceEnabled = parseBooleanDataset(scoreboardRoot.dataset.voiceEnabled, true);
     const defaultAnnouncementsEnabled = defaultSoundEnabled && defaultVoiceEnabled;
+    const defaultRegularQuarters = parseRegularQuarters(scoreboardRoot.dataset.regularQuarters, 4);
     const VOICE_ANNOUNCEMENT_RATES = [1.0, 1.1, 0.9];
     const normalizeVoiceRate = (value, fallback = 1.0) => {
       const parsed = Number.parseFloat(value);
@@ -153,6 +161,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const defaultPossessionSwitchPattern = POSSESSION_SWITCH_PATTERNS.includes(scoreboardRoot.dataset.possessionSwitchPattern)
       ? scoreboardRoot.dataset.possessionSwitchPattern
       : "q12_q34";
+    const readQuarterScoreViewMode = () => {
+      try {
+        const raw = window.localStorage.getItem(quarterScoreViewStorageKey);
+        return QUARTER_SCORE_VIEW_MODES.includes(raw) ? raw : "cumulative";
+      } catch (error) {
+        return "cumulative";
+      }
+    };
+    let quarterScoreViewMode = readQuarterScoreViewMode();
 
     const cableUrl =
       (window.location.protocol === "https:" ? "wss://" : "ws://") +
@@ -196,7 +213,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }));
     };
 
-    const TOTAL_REGULAR_QUARTERS = 4;
+    const regularQuartersForState = (sourceState = state) => parseRegularQuarters(sourceState?.regular_quarters, defaultRegularQuarters);
+    const totalRegularQuarters = () => regularQuartersForState(state);
 
     const formatTime = (seconds) => {
       const min = Math.floor(seconds / 60);
@@ -336,39 +354,45 @@ document.addEventListener("DOMContentLoaded", () => {
     const roundsPerQuarter = () => Math.max(1, matchupSlots().length);
     const isTwoTeamMode = () => teamsCount === 2;
 
-    const maxRotationStepForRounds = (rounds) => (TOTAL_REGULAR_QUARTERS * Math.max(1, rounds)) - 1;
+    const maxRotationStepForRounds = (rounds, regularQuarters = totalRegularQuarters()) => {
+      const safeRegularQuarters = parseRegularQuarters(regularQuarters, totalRegularQuarters());
+      return (safeRegularQuarters * Math.max(1, rounds)) - 1;
+    };
 
     const maxRotationStep = () => maxRotationStepForRounds(roundsPerQuarter());
 
-    const quarterForStepWithRounds = (step, rounds) => {
+    const quarterForStepWithRounds = (step, rounds, regularQuarters = totalRegularQuarters()) => {
       const safeRounds = Math.max(1, rounds);
+      const safeRegularQuarters = parseRegularQuarters(regularQuarters, totalRegularQuarters());
       const parsedStep = Number.parseInt(step, 10);
       const safeStep = Number.isFinite(parsedStep) ? Math.max(0, parsedStep) : 0;
 
       if (isTwoTeamMode()) {
-        return (safeStep % TOTAL_REGULAR_QUARTERS) + 1;
+        return (safeStep % safeRegularQuarters) + 1;
       }
 
       return Math.floor(safeStep / safeRounds) + 1;
     };
 
-    const matchupSlotForStepWithRounds = (step, rounds) => {
+    const matchupSlotForStepWithRounds = (step, rounds, regularQuarters = totalRegularQuarters()) => {
       const safeRounds = Math.max(1, rounds);
+      const safeRegularQuarters = parseRegularQuarters(regularQuarters, totalRegularQuarters());
       const parsedStep = Number.parseInt(step, 10);
       const safeStep = Number.isFinite(parsedStep) ? Math.max(0, parsedStep) : 0;
 
       if (isTwoTeamMode()) {
-        return Math.floor(safeStep / TOTAL_REGULAR_QUARTERS) % safeRounds;
+        return Math.floor(safeStep / safeRegularQuarters) % safeRounds;
       }
 
       return ((safeStep % safeRounds) + safeRounds) % safeRounds;
     };
 
-    const rotationStepForPosition = (quarter, matchupSlot, rounds) => {
+    const rotationStepForPosition = (quarter, matchupSlot, rounds, regularQuarters = totalRegularQuarters()) => {
       const safeRounds = Math.max(1, rounds);
+      const safeRegularQuarters = parseRegularQuarters(regularQuarters, totalRegularQuarters());
       const parsedQuarter = Number.parseInt(quarter, 10);
       const safeQuarter = Number.isFinite(parsedQuarter)
-        ? Math.max(1, Math.min(TOTAL_REGULAR_QUARTERS, parsedQuarter))
+        ? Math.max(1, Math.min(safeRegularQuarters, parsedQuarter))
         : 1;
       const parsedSlot = Number.parseInt(matchupSlot, 10);
       const safeSlot = Number.isFinite(parsedSlot)
@@ -376,7 +400,7 @@ document.addEventListener("DOMContentLoaded", () => {
         : 0;
 
       if (isTwoTeamMode()) {
-        return (safeSlot * TOTAL_REGULAR_QUARTERS) + (safeQuarter - 1);
+        return (safeSlot * safeRegularQuarters) + (safeQuarter - 1);
       }
 
       return ((safeQuarter - 1) * safeRounds) + safeSlot;
@@ -496,6 +520,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       return {
         quarter: 1,
+        regular_quarters: defaultRegularQuarters,
         period_seconds: defaultPeriodSeconds,
         shot_seconds: 24,
         running: false,
@@ -516,14 +541,42 @@ document.addEventListener("DOMContentLoaded", () => {
         base_possession: "away",
         possession_switch_pattern: defaultPossessionSwitchPattern,
         possession: "away", // 'home' or 'away'
-        manual_swap: false
+        manual_swap: false,
+        quarter_score_reset_enabled: totalRegularQuarters() === 3
       };
     };
 
     const isSoundEnabled = () => state?.sound_enabled !== false;
     const isVoiceEnabled = () => state?.voice_enabled !== false;
     const isAnnouncementsEnabled = () => isSoundEnabled() && isVoiceEnabled();
+    const isQuarterScoreResetEnabled = () => state?.quarter_score_reset_enabled === true;
     const currentVoiceRate = () => normalizeVoiceRate(state?.voice_rate, defaultVoiceRate);
+    const isPerQuarterScoreView = () => quarterScoreViewMode === "per_quarter";
+    const setQuarterScoreViewMode = (nextMode) => {
+      if (!QUARTER_SCORE_VIEW_MODES.includes(nextMode)) return;
+      quarterScoreViewMode = nextMode;
+      try {
+        window.localStorage.setItem(quarterScoreViewStorageKey, nextMode);
+      } catch (error) {
+        // ignore storage failures
+      }
+    };
+    const buildQuarterTotalsForStorage = (pairIdx, quarterNumber, team1DisplayScore, team2DisplayScore) => {
+      const currentTeam1 = Number(team1DisplayScore) || 0;
+      const currentTeam2 = Number(team2DisplayScore) || 0;
+
+      if (!isQuarterScoreResetEnabled()) {
+        return { team1: currentTeam1, team2: currentTeam2 };
+      }
+
+      const previous = state.quarter_history?.[pairIdx]?.[quarterNumber - 1];
+      const previousTeam1 = Number(previous?.team1) || 0;
+      const previousTeam2 = Number(previous?.team2) || 0;
+      return {
+        team1: previousTeam1 + currentTeam1,
+        team2: previousTeam2 + currentTeam2
+      };
+    };
 
     const normalizeState = (incomingState) => {
       const base = defaultState();
@@ -555,6 +608,7 @@ document.addEventListener("DOMContentLoaded", () => {
       normalized.quarter_history = incomingState.quarter_history && typeof incomingState.quarter_history === "object"
         ? incomingState.quarter_history
         : {};
+      normalized.regular_quarters = parseRegularQuarters(incomingState.regular_quarters, base.regular_quarters);
 
       normalized.possession_switch_pattern = normalizePossessionSwitchPattern(
         incomingState.possession_switch_pattern || normalized.possession_switch_pattern
@@ -563,10 +617,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const announcementsEnabled = normalized.sound_enabled !== false && normalized.voice_enabled !== false;
       normalized.sound_enabled = announcementsEnabled;
       normalized.voice_enabled = announcementsEnabled;
+      normalized.quarter_score_reset_enabled = parseBooleanDataset(normalized.quarter_score_reset_enabled, false);
 
       const parsedStep = Number.parseInt(incomingState.rotation_step, 10);
       const roundsForState = Math.max(1, slotsForState.length);
-      const maxStepForState = maxRotationStepForRounds(roundsForState);
+      const regularQuartersForIncoming = normalized.regular_quarters;
+      const maxStepForState = maxRotationStepForRounds(roundsForState, regularQuartersForIncoming);
       normalized.rotation_step = Number.isFinite(parsedStep)
         ? Math.max(0, Math.min(parsedStep, maxStepForState))
         : 0;
@@ -579,7 +635,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const legacyStep = normalized.rotation_step;
         const legacyQuarter = Math.floor(legacyStep / roundsForState) + 1;
         const legacySlot = ((legacyStep % roundsForState) + roundsForState) % roundsForState;
-        const byGameQuarter = (legacyStep % TOTAL_REGULAR_QUARTERS) + 1;
+        const byGameQuarter = (legacyStep % regularQuartersForIncoming) + 1;
         const incomingQuarter = Number.parseInt(incomingState.quarter, 10);
         const hasIncomingQuarter = Number.isFinite(incomingQuarter) && incomingQuarter > 0;
         const looksLikeByGameState =
@@ -588,16 +644,16 @@ document.addEventListener("DOMContentLoaded", () => {
           incomingQuarter !== legacyQuarter;
 
         if (!looksLikeByGameState) {
-          const convertedStep = rotationStepForPosition(legacyQuarter, legacySlot, roundsForState);
+          const convertedStep = rotationStepForPosition(legacyQuarter, legacySlot, roundsForState, regularQuartersForIncoming);
           normalized.rotation_step = Math.max(0, Math.min(convertedStep, maxStepForState));
         }
       }
 
       const parsedQuarter = Number.parseInt(incomingState.quarter, 10);
-      if (Number.isFinite(parsedQuarter) && parsedQuarter > TOTAL_REGULAR_QUARTERS) {
+      if (Number.isFinite(parsedQuarter) && parsedQuarter > regularQuartersForIncoming) {
         normalized.quarter = parsedQuarter;
       } else {
-        normalized.quarter = quarterForStepWithRounds(normalized.rotation_step, roundsForState);
+        normalized.quarter = quarterForStepWithRounds(normalized.rotation_step, roundsForState, regularQuartersForIncoming);
       }
       if (incomingState.base_possession === "home" || incomingState.base_possession === "away") {
         normalized.base_possession = incomingState.base_possession;
@@ -953,6 +1009,34 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
+      const quarterScoreResetBtn = scoreboardRoot.querySelector('[data-action="toggle-quarter-score-reset"]');
+      if (quarterScoreResetBtn) {
+        const enabled = isQuarterScoreResetEnabled();
+        quarterScoreResetBtn.textContent = enabled ? "쿼터별 점수 리셋 ON" : "쿼터별 점수 리셋 OFF";
+        quarterScoreResetBtn.classList.toggle("bg-green-50", enabled);
+        quarterScoreResetBtn.classList.toggle("text-green-700", enabled);
+        quarterScoreResetBtn.classList.toggle("border-green-200", enabled);
+        quarterScoreResetBtn.classList.toggle("bg-white", !enabled);
+        quarterScoreResetBtn.classList.toggle("text-gray-600", !enabled);
+        quarterScoreResetBtn.classList.toggle("border-gray-300", !enabled);
+      }
+
+      const cumulativeViewBtn = scoreboardRoot.querySelector('[data-action="set-quarter-view-cumulative"]');
+      const perQuarterViewBtn = scoreboardRoot.querySelector('[data-action="set-quarter-view-per-quarter"]');
+      if (cumulativeViewBtn && perQuarterViewBtn) {
+        const cumulativeActive = !isPerQuarterScoreView();
+
+        cumulativeViewBtn.classList.toggle("bg-gray-900", cumulativeActive);
+        cumulativeViewBtn.classList.toggle("text-white", cumulativeActive);
+        cumulativeViewBtn.classList.toggle("bg-white", !cumulativeActive);
+        cumulativeViewBtn.classList.toggle("text-gray-500", !cumulativeActive);
+
+        perQuarterViewBtn.classList.toggle("bg-gray-900", !cumulativeActive);
+        perQuarterViewBtn.classList.toggle("text-white", !cumulativeActive);
+        perQuarterViewBtn.classList.toggle("bg-white", cumulativeActive);
+        perQuarterViewBtn.classList.toggle("text-gray-500", cumulativeActive);
+      }
+
       const addGameBtn = scoreboardRoot.querySelector('[data-action="add-game"]');
       if (addGameBtn) {
         const currentGames = matchupSlots().length;
@@ -964,6 +1048,12 @@ document.addEventListener("DOMContentLoaded", () => {
           : `경기 추가 완료 (${maxGames}/${maxGames})`;
         addGameBtn.classList.toggle("opacity-50", !canAddGame);
         addGameBtn.classList.toggle("cursor-not-allowed", !canAddGame);
+      }
+
+      const finishGameBtn = scoreboardRoot.querySelector('[data-action="finish-game"]');
+      if (finishGameBtn) {
+        const hasRemainingGames = isTwoTeamMode() && currentMatchupIndex() < (roundsPerQuarter() - 1);
+        finishGameBtn.textContent = hasRemainingGames ? "🏁 현재 경기 종료" : "🏁 경기 종료";
       }
 
       const toggleMainBtn = scoreboardRoot.querySelector('[data-action="toggle-main"]');
@@ -1061,16 +1151,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const slots = matchupSlots();
         const orderedMatchupIds = normalizeMatchupOrder(state.matchup_order);
+        const regularQuarterCount = totalRegularQuarters();
+        const quarterHeaderHtml = Array.from({ length: regularQuarterCount }, (_, index) => {
+          const quarterNumber = index + 1;
+          return `<th class="p-4 w-20">${quarterNumber}Q</th>`;
+        }).join("");
 
         let html = `
            <table class="w-full text-center text-base border-collapse">
              <thead>
                <tr class="bg-gray-100 border-b border-gray-200 text-gray-600 font-bold uppercase tracking-wider text-sm">
                  <th class="p-4 text-left">경기 (Matchup)</th>
-                 <th class="p-4 w-20">1Q</th>
-                 <th class="p-4 w-20">2Q</th>
-                 <th class="p-4 w-20">3Q</th>
-                 <th class="p-4 w-20">4Q</th>
+                 ${quarterHeaderHtml}
                  <th class="p-4 w-24">최종</th>
                </tr>
              </thead>
@@ -1092,18 +1184,38 @@ document.addEventListener("DOMContentLoaded", () => {
           const finalScore = state.matchup_scores[pairIdx] || { team1: 0, team2: 0 };
           const isActiveRow = pairIdx === activeMatchupIdx;
 
+          const getQuarterScoresForDisplay = (q) => {
+            const score = scores[q];
+            if (!score) return null;
+
+            const currentTeam1 = Number(score.team1) || 0;
+            const currentTeam2 = Number(score.team2) || 0;
+            if (!isPerQuarterScoreView()) {
+              return { team1: currentTeam1, team2: currentTeam2 };
+            }
+
+            const prevScore = scores[q - 1];
+            const previousTeam1 = Number(prevScore?.team1) || 0;
+            const previousTeam2 = Number(prevScore?.team2) || 0;
+            return {
+              team1: currentTeam1 - previousTeam1,
+              team2: currentTeam2 - previousTeam2
+            };
+          };
+
           const getScoreCell = (q) => {
-            if (scores[q]) {
+            const displayScore = getQuarterScoresForDisplay(q);
+            if (displayScore) {
               return `<div class="flex flex-col leading-none gap-1">
-                             <span class="font-bold text-gray-900 text-lg">${scores[q].team1}</span>
-                             <span class="font-bold text-gray-500 text-lg">${scores[q].team2}</span>
+                             <span class="font-bold text-gray-900 text-lg">${displayScore.team1}</span>
+                             <span class="font-bold text-gray-500 text-lg">${displayScore.team2}</span>
                            </div>`;
             }
             return `<span class="text-gray-300 text-lg">-</span>`;
           };
 
           const getCellClass = (q) => {
-            let base = "p-4 ";
+            const base = "p-4 ";
             if (isActiveRow && currentQ === q) {
               return base + "bg-blue-50 border-x-2 border-blue-200 ring-2 ring-blue-500/20 z-10 relative";
             }
@@ -1150,6 +1262,11 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
           };
 
+          const quarterCellsHtml = Array.from({ length: regularQuarterCount }, (_, index) => {
+            const quarterNumber = index + 1;
+            return `<td class="${getCellClass(quarterNumber)}">${getScoreCell(quarterNumber)}</td>`;
+          }).join("");
+
           html += `
                <tr data-matchup-id="${pairIdx}" class="${isActiveRow ? 'bg-gray-100/80 shadow-inner' : 'hover:bg-gray-50'} transition-all duration-300 cursor-move">
                  <td class="p-4 text-left border-l-4 ${isActiveRow ? 'border-blue-500' : 'border-transparent'}">
@@ -1174,10 +1291,7 @@ document.addEventListener("DOMContentLoaded", () => {
                      </div>
                    </div>
                  </td>
-                 <td class="${getCellClass(1)}">${getScoreCell(1)}</td>
-                 <td class="${getCellClass(2)}">${getScoreCell(2)}</td>
-                 <td class="${getCellClass(3)}">${getScoreCell(3)}</td>
-                 <td class="${getCellClass(4)}">${getScoreCell(4)}</td>
+                 ${quarterCellsHtml}
                  <td class="p-4 font-bold">
                    <div class="flex flex-col leading-none gap-1">
                      <span class="text-gray-900 text-lg">${finalScore.team1}</span>
@@ -1801,19 +1915,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 const [p1, p2] = matchupPairById(finishedPairIdx);
                 if (p1 === undefined || p2 === undefined || !state.teams[p1] || !state.teams[p2]) break;
                 const finishedGameId = matchupGameIdById(finishedPairIdx);
+                const finishedQuarter = currentQuarter();
+                const finishedTotals = buildQuarterTotalsForStorage(
+                  finishedPairIdx,
+                  finishedQuarter,
+                  state.teams[p1].score,
+                  state.teams[p2].score
+                );
 
                 state.matchup_scores[finishedPairIdx] = {
-                  team1: state.teams[p1].score,
-                  team2: state.teams[p2].score
+                  team1: finishedTotals.team1,
+                  team2: finishedTotals.team2
                 };
 
-                const finishedQuarter = currentQuarter();
                 if (!state.quarter_history[finishedPairIdx]) {
                   state.quarter_history[finishedPairIdx] = {};
                 }
                 state.quarter_history[finishedPairIdx][finishedQuarter] = {
-                  team1: state.teams[p1].score,
-                  team2: state.teams[p2].score
+                  team1: finishedTotals.team1,
+                  team2: finishedTotals.team2
                 };
 
                 const saveQuarterScore = async () => {
@@ -1835,8 +1955,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         home_team_id: state.teams[p1].id,
                         away_team_id: state.teams[p2].id,
                         quarter: finishedQuarter,
-                        home_score: state.teams[p1].score,
-                        away_score: state.teams[p2].score
+                        home_score: finishedTotals.team1,
+                        away_score: finishedTotals.team2
                       })
                     });
                   } catch (error) {
@@ -1862,9 +1982,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 const [n1, n2] = matchupPairById(nextPairIdx);
                 if (n1 === undefined || n2 === undefined || !state.teams[n1] || !state.teams[n2]) break;
 
-                const nextScores = state.matchup_scores[nextPairIdx] || { team1: 0, team2: 0 };
-                state.teams[n1].score = nextScores.team1;
-                state.teams[n2].score = nextScores.team2;
+                if (isQuarterScoreResetEnabled()) {
+                  state.teams[n1].score = 0;
+                  state.teams[n2].score = 0;
+                } else {
+                  const nextScores = state.matchup_scores[nextPairIdx] || { team1: 0, team2: 0 };
+                  state.teams[n1].score = nextScores.team1;
+                  state.teams[n2].score = nextScores.team2;
+                }
 
                 if (teamsCount === 3) {
                   const allIdx = [0, 1, 2];
@@ -1921,6 +2046,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 break;
               case "prev-matchup":
                 state.matchup_index = Math.max(0, state.matchup_index - 1);
+                break;
+              case "set-quarter-view-cumulative":
+                setQuarterScoreViewMode("cumulative");
+                break;
+              case "set-quarter-view-per-quarter":
+                setQuarterScoreViewMode("per_quarter");
+                break;
+              case "toggle-quarter-score-reset":
+                state.quarter_score_reset_enabled = !isQuarterScoreResetEnabled();
                 break;
               case "toggle-announcements":
               case "toggle-sound":
@@ -1979,11 +2113,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 break;
               }
               case "finish-game":
-                // 경기 종료 - 현재 점수를 서버로 전송
-                const saveGameScore = async () => {
+              {
+                const finishCurrentGame = async () => {
                   const activePairIdx = currentMatchupId();
+                  const [team1Idx, team2Idx] = matchupPairById(activePairIdx);
+                  if (team1Idx === undefined || team2Idx === undefined) return;
+
+                  const team1 = state.teams[team1Idx];
+                  const team2 = state.teams[team2Idx];
+                  if (!team1 || !team2) return;
+
                   const activeGameId = matchupGameIdById(activePairIdx);
-                  const [home, away] = currentMatchup();
                   const matchId = scoreboardRoot.dataset.matchId;
                   const clubMatch = window.location.pathname.match(/\/clubs\/(\d+)/);
                   const clubId = clubMatch ? clubMatch[1] : null;
@@ -1992,7 +2132,49 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                   }
 
+                  const currentQuarterNumber = currentQuarter();
+                  const finishedTotals = buildQuarterTotalsForStorage(
+                    activePairIdx,
+                    currentQuarterNumber,
+                    team1.score,
+                    team2.score
+                  );
+                  state.matchup_scores[activePairIdx] = {
+                    team1: finishedTotals.team1,
+                    team2: finishedTotals.team2
+                  };
+                  if (!state.quarter_history[activePairIdx]) {
+                    state.quarter_history[activePairIdx] = {};
+                  }
+                  state.quarter_history[activePairIdx][currentQuarterNumber] = {
+                    team1: finishedTotals.team1,
+                    team2: finishedTotals.team2
+                  };
+
+                  render();
+                  broadcast();
+
                   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+                  try {
+                    await fetch(`/clubs/${clubId}/matches/${matchId}/save_quarter_scores`, {
+                      method: 'PATCH',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken
+                      },
+                      body: JSON.stringify({
+                        game_id: activeGameId,
+                        home_team_id: team1.id,
+                        away_team_id: team2.id,
+                        quarter: currentQuarterNumber,
+                        home_score: finishedTotals.team1,
+                        away_score: finishedTotals.team2
+                      })
+                    });
+                  } catch (error) {
+                    console.error('쿼터 점수 저장 중 오류:', error);
+                  }
 
                   try {
                     const response = await fetch(`/clubs/${clubId}/matches/${matchId}/save_game_scores`, {
@@ -2003,31 +2185,82 @@ document.addEventListener("DOMContentLoaded", () => {
                       },
                       body: JSON.stringify({
                         game_id: activeGameId,
-                        home_team_id: home.id,
-                        away_team_id: away.id,
-                        home_score: home.score,
-                        away_score: away.score
+                        home_team_id: team1.id,
+                        away_team_id: team2.id,
+                        home_score: finishedTotals.team1,
+                        away_score: finishedTotals.team2
                       })
                     });
 
                     const data = await response.json();
-
-                    if (data.success) {
-                      alert(`경기 종료!\n최종 점수: ${home.label} ${home.score} : ${away.score} ${away.label}\n결과: ${data.result}`);
-                      window.location.href = `/clubs/${clubId}/matches/${matchId}`;
-                    } else {
+                    if (!data.success) {
                       alert('점수 저장 실패: ' + (data.error || '알 수 없는 오류'));
+                      return;
                     }
+
+                    const slotIndex = currentMatchupIndex();
+                    const rounds = roundsPerQuarter();
+                    const hasNextGame = isTwoTeamMode() && slotIndex < (rounds - 1);
+
+                    if (hasNextGame) {
+                      const nextStep = rotationStepForPosition(1, slotIndex + 1, rounds);
+                      state.rotation_step = Math.max(0, Math.min(nextStep, maxRotationStep()));
+
+                      const nextPairIdx = currentMatchupId();
+                      const [nextTeam1Idx, nextTeam2Idx] = matchupPairById(nextPairIdx);
+                      if (nextTeam1Idx !== undefined && nextTeam2Idx !== undefined && state.teams[nextTeam1Idx] && state.teams[nextTeam2Idx]) {
+                        if (isQuarterScoreResetEnabled()) {
+                          state.teams[nextTeam1Idx].score = 0;
+                          state.teams[nextTeam2Idx].score = 0;
+                        } else {
+                          const nextScores = state.matchup_scores[nextPairIdx] || { team1: 0, team2: 0 };
+                          state.teams[nextTeam1Idx].score = nextScores.team1;
+                          state.teams[nextTeam2Idx].score = nextScores.team2;
+                        }
+                      }
+
+                      if (teamsCount === 3) {
+                        const allIdx = [0, 1, 2];
+                        const thirdIdx = allIdx.find(i => i !== nextTeam1Idx && i !== nextTeam2Idx);
+                        if (thirdIdx !== undefined && state.teams[thirdIdx]) {
+                          state.teams[thirdIdx].score = 0;
+                        }
+                      }
+
+                      state.quarter = currentQuarter();
+                      state.period_seconds = defaultPeriodSeconds;
+                      state.shot_seconds = 24;
+                      state.home_fouls = 0;
+                      state.away_fouls = 0;
+                      applyQuarterPossession(state.quarter);
+                      state.running = false;
+                      state.shot_running = false;
+
+                      render();
+                      syncTimers();
+                      broadcast();
+                      alert(`현재 경기 종료!\n최종 점수: ${team1.label} ${finishedTotals.team1} : ${finishedTotals.team2} ${team2.label}\n다음 경기로 이동합니다.`);
+                      return;
+                    }
+
+                    alert(`경기 종료!\n최종 점수: ${team1.label} ${finishedTotals.team1} : ${finishedTotals.team2} ${team2.label}\n결과: ${data.result}`);
+                    window.location.href = `/clubs/${clubId}/matches/${matchId}`;
                   } catch (error) {
                     console.error('점수 저장 중 오류:', error);
                     alert('점수 저장 중 오류가 발생했습니다.');
                   }
                 };
 
-                if (confirm('경기를 종료하고 현재 점수를 저장하시겠습니까?')) {
-                  saveGameScore();
+                const hasRemainingGames = isTwoTeamMode() && currentMatchupIndex() < (roundsPerQuarter() - 1);
+                const message = hasRemainingGames
+                  ? "현재 경기를 종료하고 점수를 저장한 뒤 다음 경기로 이동하시겠습니까?"
+                  : "경기를 종료하고 현재 점수를 저장하시겠습니까?";
+
+                if (confirm(message)) {
+                  finishCurrentGame();
                 }
                 break;
+              }
               case "toggle-shortcuts":
                 const panel = document.querySelector("[data-shortcuts-panel]");
                 if (panel) {

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_10_200000) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_11_105326) do
   create_table "clubs", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
@@ -44,6 +44,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_10_200000) do
     t.integer "games_per_match", default: 1, null: false
     t.text "note"
     t.date "played_on", null: false
+    t.integer "regular_quarters", default: 4, null: false
     t.string "share_token"
     t.integer "teams_count", default: 2, null: false
     t.datetime "updated_at", null: false

@@ -542,3 +542,56 @@ a {
   -webkit-appearance: none;
   margin: 0;
 }
+
+/* Member form: position selection visibility */
+.position-option-card {
+  position: relative;
+  border: 2px solid transparent;
+  border-radius: 0.75rem;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, opacity 0.16s ease;
+}
+
+.position-option:hover .position-option-card {
+  opacity: 0.88;
+}
+
+.position-option-check {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.96);
+  color: #111827;
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.7);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
+}
+
+.position-option-input:checked + .position-option-card {
+  border-color: rgba(255, 255, 255, 0.98);
+  box-shadow:
+    0 0 0 3px rgba(17, 24, 39, 0.72),
+    0 8px 16px rgba(0, 0, 0, 0.22);
+  transform: translateY(-1px) scale(1.02);
+  opacity: 1;
+}
+
+.position-option-input:checked + .position-option-card .position-option-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.position-option-input:focus-visible + .position-option-card {
+  box-shadow:
+    0 0 0 4px rgba(37, 99, 235, 0.5),
+    0 8px 16px rgba(0, 0, 0, 0.2);
+}

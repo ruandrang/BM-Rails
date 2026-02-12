@@ -7,6 +7,7 @@
      data-teams="<%= @match.teams.to_json %>"
      data-games="<%= @games_for_scoreboard.to_json %>"
      data-teams-count="<%= @match.teams.count %>"
+     data-regular-quarters="<%= @match.respond_to?(:regular_quarters) ? @match.regular_quarters : 4 %>"
      data-default-period-seconds="<%= current_user.default_period_seconds %>"
      data-sound-enabled="<%= current_user.scoreboard_sound_enabled %>"
      data-voice-enabled="<%= current_user.voice_announcement_enabled %>"

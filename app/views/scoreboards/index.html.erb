@@ -55,12 +55,13 @@
                   <div class="card-body p-5">
                     <!-- 경기 날짜 -->
                     <div class="flex items-center justify-between mb-3">
-                      <div class="badge badge-primary badge-lg font-bold">
-                        <%= match.played_on.strftime("%m/%d") %>
+                      <div class="flex items-center gap-2">
+                        <div class="badge badge-primary badge-lg font-bold">
+                          <%= match.played_on.strftime("%m/%d") %>
+                        </div>
+                        <div class="badge badge-outline"><%= match.regular_quarters_count %>쿼터</div>
                       </div>
-                      <div class="badge badge-outline">
-                        <%= match.teams_count %>팀 경기
-                      </div>
+                      <div class="badge badge-outline"><%= match.teams_count %>팀 경기</div>
                     </div>
 
                     <!-- 경기 정보 -->
