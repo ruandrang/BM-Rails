@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Linear Theme — Design System Mockup</title>
+<title>Basketball Theme — Design System Mockup</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   /* ─── CSS Variables from Linear Theme ─── */
@@ -26,10 +26,10 @@
     --border-subtle: rgba(255, 255, 255, 0.05);
     --border-strong: rgba(255, 255, 255, 0.15);
 
-    --accent: #5E6AD2;
-    --accent-hover: #7B84E0;
-    --accent-secondary: #6E79D6;
-    --accent-dark: #4850A8;
+    --accent: #FF6B00;
+    --accent-hover: #FF8533;
+    --accent-secondary: #FF7919;
+    --accent-dark: #CC5500;
 
     --status-success: #4ADE80;
     --status-warning: #F59E0B;
@@ -44,7 +44,7 @@
     --label-orange: #F2994A;
     --label-yellow: #F2C94C;
     --label-green: #6FCF97;
-    --label-blue: #5E6AD2;
+    --label-blue: #FF6B00;
     --label-purple: #BB87FC;
     --label-pink: #ED6FBB;
     --label-gray: #787882;
@@ -69,7 +69,7 @@
     --shadow-md: 0 2px 8px rgba(0,0,0,0.4);
     --shadow-lg: 0 4px 16px rgba(0,0,0,0.5);
     --shadow-xl: 0 8px 32px rgba(0,0,0,0.6);
-    --shadow-glow: 0 0 20px rgba(94,106,210,0.15);
+    --shadow-glow: 0 0 20px rgba(255,107,0,0.15);
   }
 
   /* ─── Reset & Base ─── */
@@ -109,7 +109,7 @@
     transform: translateX(-50%);
     width: 1200px;
     height: 600px;
-    background: radial-gradient(ellipse 80% 50% at 50% 50%, rgba(94, 106, 210, 0.12), transparent);
+    background: radial-gradient(ellipse 80% 50% at 50% 50%, rgba(255, 107, 0, 0.12), transparent);
     pointer-events: none;
     z-index: 0;
   }
@@ -230,7 +230,7 @@
     width: 6px; height: 6px;
     border-radius: 50%;
     background: var(--accent);
-    box-shadow: 0 0 8px rgba(94,106,210,0.5);
+    box-shadow: 0 0 8px rgba(255,107,0,0.5);
     animation: pulse 2s ease infinite;
   }
   .hero h1 {
@@ -270,7 +270,7 @@
     color: #fff;
     box-shadow: var(--shadow-glow);
   }
-  .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 0 28px rgba(94,106,210,0.25); }
+  .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 0 28px rgba(255,107,0,0.25); }
   .btn-secondary {
     background: rgba(255,255,255,0.06);
     color: var(--fg-primary);
@@ -401,7 +401,7 @@
     transition: all 0.15s ease;
   }
   .input::placeholder { color: var(--fg-quaternary); }
-  .input:focus { border-color: var(--accent); background: rgba(255,255,255,0.06); box-shadow: 0 0 0 3px rgba(94,106,210,0.15); }
+  .input:focus { border-color: var(--accent); background: rgba(255,255,255,0.06); box-shadow: 0 0 0 3px rgba(255,107,0,0.15); }
 
   /* ─── Badges ─── */
   .badge {
@@ -416,7 +416,7 @@
     width: 6px; height: 6px;
     border-radius: 50%;
   }
-  .badge-accent { background: rgba(94,106,210,0.15); color: #848AE8; }
+  .badge-accent { background: rgba(255,107,0,0.15); color: #FF8533; }
   .badge-success { background: rgba(74,222,128,0.12); color: var(--status-success); }
   .badge-warning { background: rgba(245,158,11,0.12); color: var(--status-warning); }
   .badge-error { background: rgba(239,68,68,0.12); color: var(--status-error); }
@@ -830,7 +830,7 @@
     height: 240px;
     border-radius: var(--radius-xl);
     overflow: hidden;
-    background: linear-gradient(135deg, rgba(94,106,210,0.2) 0%, rgba(187,135,252,0.1) 50%, rgba(94,106,210,0.15) 100%);
+    background: linear-gradient(135deg, rgba(255,107,0,0.2) 0%, rgba(255,133,51,0.1) 50%, rgba(255,107,0,0.15) 100%);
   }
   .glass-card {
     position: absolute;
@@ -859,12 +859,12 @@
   }
   .glass-orb-1 {
     width: 200px; height: 200px;
-    background: rgba(94,106,210,0.4);
+    background: rgba(255,107,0,0.4);
     top: -40px; left: -20px;
   }
   .glass-orb-2 {
     width: 150px; height: 150px;
-    background: rgba(187,135,252,0.3);
+    background: rgba(255,133,51,0.3);
     bottom: -30px; right: -10px;
   }
 
@@ -900,8 +900,8 @@
 <!-- NAV -->
 <nav class="nav">
   <a href="#" class="nav-logo">
-    <svg viewBox="0 0 100 100" fill="none"><path d="M21.3 72.4a42.5 42.5 0 0 1 6.3-50.7 42.5 42.5 0 0 1 50.7-6.3L21.3 72.4Z" fill="#5E6AD2"/><path d="M78.7 27.6a42.5 42.5 0 0 1-6.3 50.7 42.5 42.5 0 0 1-50.7 6.3L78.7 27.6Z" fill="#5E6AD2" opacity=".5"/></svg>
-    Linear Theme
+    <svg viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="45" stroke="#FF6B00" stroke-width="6" fill="none"/><path d="M50 5 Q80 50 50 95 Q20 50 50 5" stroke="#FF6B00" stroke-width="3" fill="none"/><line x1="5" y1="50" x2="95" y2="50" stroke="#FF6B00" stroke-width="3"/></svg>
+    Basketball Theme
   </a>
   <div class="nav-links">
     <a href="#colors">Colors</a>
@@ -925,8 +925,8 @@
         Design System v1.0
       </div>
     </div>
-    <h1 class="animate-in delay-1">Linear Theme<br>Design System</h1>
-    <p class="animate-in delay-2">dark-first 미니멀 UI 테마의 모든 디자인 토큰을 시각화한 인터랙티브 목업 페이지입니다.</p>
+    <h1 class="animate-in delay-1">Basketball Theme<br>Design System</h1>
+    <p class="animate-in delay-2">농구 앱을 위한 dark-first 미니멀 UI 테마의 모든 디자인 토큰을 시각화한 인터랙티브 목업 페이지입니다.</p>
     <div class="hero-buttons animate-in delay-3">
       <button class="btn btn-primary">Download JSON</button>
       <button class="btn btn-secondary">View on GitHub</button>
@@ -969,10 +969,10 @@
     <div class="palette-group animate-in delay-3">
       <div class="palette-group-title">Accent & Brand</div>
       <div class="palette-grid">
-        <div class="swatch"><div class="swatch-color" style="background:#5E6AD2"></div><div class="swatch-info"><div class="swatch-name">Accent Primary</div><div class="swatch-value">#5E6AD2</div></div></div>
-        <div class="swatch"><div class="swatch-color" style="background:#7B84E0"></div><div class="swatch-info"><div class="swatch-name">Accent Hover</div><div class="swatch-value">#7B84E0</div></div></div>
-        <div class="swatch"><div class="swatch-color" style="background:#4850A8"></div><div class="swatch-info"><div class="swatch-name">Accent Dark</div><div class="swatch-value">#4850A8</div></div></div>
-        <div class="swatch"><div class="swatch-color" style="background:linear-gradient(135deg, #5E6AD2 0%, #8B5CF6 100%)"></div><div class="swatch-info"><div class="swatch-name">Accent Gradient</div><div class="swatch-value">→ #8B5CF6</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#FF6B00"></div><div class="swatch-info"><div class="swatch-name">Accent Primary</div><div class="swatch-value">#FF6B00</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#FF8533"></div><div class="swatch-info"><div class="swatch-name">Accent Hover</div><div class="swatch-value">#FF8533</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#CC5500"></div><div class="swatch-info"><div class="swatch-name">Accent Dark</div><div class="swatch-value">#CC5500</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:linear-gradient(135deg, #FF6B00 0%, #FF8533 100%)"></div><div class="swatch-info"><div class="swatch-name">Accent Gradient</div><div class="swatch-value">→ #FF8533</div></div></div>
       </div>
     </div>
 
@@ -984,7 +984,7 @@
         <div class="color-dot-item"><div class="color-dot" style="background:#F2994A"></div>Orange</div>
         <div class="color-dot-item"><div class="color-dot" style="background:#F2C94C"></div>Yellow</div>
         <div class="color-dot-item"><div class="color-dot" style="background:#6FCF97"></div>Green</div>
-        <div class="color-dot-item"><div class="color-dot" style="background:#5E6AD2"></div>Blue</div>
+        <div class="color-dot-item"><div class="color-dot" style="background:#FF6B00"></div>Orange (Primary)</div>
         <div class="color-dot-item"><div class="color-dot" style="background:#BB87FC"></div>Purple</div>
         <div class="color-dot-item"><div class="color-dot" style="background:#ED6FBB"></div>Pink</div>
         <div class="color-dot-item"><div class="color-dot" style="background:#787882"></div>Gray</div>
@@ -1097,7 +1097,7 @@
           <span class="badge badge-error">Bug</span>
         </div>
         <div class="flex gap-2" style="flex-wrap:wrap">
-          <span class="issue-label" style="background:rgba(94,106,210,0.15);color:#848AE8">AI</span>
+          <span class="issue-label" style="background:rgba(255,107,0,0.15);color:#FF8533">AI</span>
           <span class="issue-label" style="background:rgba(235,87,87,0.12);color:#EB5757">Bug</span>
           <span class="issue-label" style="background:rgba(111,207,151,0.12);color:#6FCF97">Performance</span>
           <span class="issue-label" style="background:rgba(187,135,252,0.12);color:#BB87FC">Design</span>
@@ -1163,7 +1163,7 @@
             <div class="issue-id">ENG-2074</div>
             <div class="issue-title">Clean up deprecated APIs from v2 migration</div>
             <div class="issue-labels">
-              <span class="issue-label" style="background:rgba(94,106,210,0.15);color:#848AE8">API</span>
+              <span class="issue-label" style="background:rgba(255,107,0,0.15);color:#FF8533">API</span>
             </div>
             <div class="priority-low issue-priority"><div class="issue-priority-bar"><span style="height:4px"></span><span style="height:7px"></span><span style="height:10px;opacity:0.3"></span><span style="height:12px;opacity:0.3"></span></div></div>
             <div class="issue-avatar">JK</div>
@@ -1407,7 +1407,7 @@
               <div class="issue-status todo"></div>
               <div class="issue-id">ENG-318</div>
               <div class="issue-title">Add keyboard shortcuts documentation</div>
-              <div class="issue-labels"><span class="issue-label" style="background:rgba(94,106,210,0.15);color:#848AE8">Docs</span></div>
+              <div class="issue-labels"><span class="issue-label" style="background:rgba(255,107,0,0.15);color:#FF8533">Docs</span></div>
               <div class="issue-avatar">MK</div>
             </div>
           </div>
@@ -1435,7 +1435,7 @@
 
   <!-- FOOTER -->
   <footer class="footer">
-    <p>Linear Theme Design System · Built with vanilla CSS</p>
+    <p>Basketball Theme Design System · Built with vanilla CSS</p>
     <p style="margin-top:8px"><a href="#">GitHub</a> · <a href="#">Figma</a> · <a href="#">Documentation</a></p>
   </footer>
 
