@@ -1,4 +1,9 @@
 pt:
+  date:
+    formats:
+      default: "%d/%m/%Y"
+      long: "%d de %B de %Y"
+      short: "%d/%m"
   app:
     name: "Gerenciador de Clube de Basquete"
   auth:

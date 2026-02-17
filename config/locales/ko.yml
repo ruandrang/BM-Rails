@@ -1,4 +1,9 @@
 ko:
+  date:
+    formats:
+      default: "%Y-%m-%d"
+      long: "%Y년 %m월 %d일"
+      short: "%m/%d"
   app:
     name: "농구 클럽 매니저"
   auth:

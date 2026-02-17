@@ -1,4 +1,9 @@
 fr:
+  date:
+    formats:
+      default: "%d/%m/%Y"
+      long: "%d %B %Y"
+      short: "%d/%m"
   app:
     name: "Gestionnaire de Club Basket"
   auth:

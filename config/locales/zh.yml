@@ -1,4 +1,9 @@
 zh:
+  date:
+    formats:
+      default: "%Y-%m-%d"
+      long: "%Y年%m月%d日"
+      short: "%m/%d"
   app:
     name: "篮球俱乐部管理器"
   auth:

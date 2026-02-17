@@ -1,4 +1,9 @@
 tl:
+  date:
+    formats:
+      default: "%m/%d/%Y"
+      long: "%B %d, %Y"
+      short: "%m/%d"
   app:
     name: "Basketball Club Manager"
   auth:
