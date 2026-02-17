@@ -518,7 +518,12 @@ class MatchesController < ApplicationController
   end
 
   def normalize_team_colors(raw_colors, teams_count)
-    colors = Array(raw_colors).map { |value| value.to_s.strip }
+    colors = if raw_colors.is_a?(Hash) || raw_colors.is_a?(ActionController::Parameters)
+      # { "0" => "Red", "1" => "Blue" } 형태의 params 처리
+      (0...teams_count).map { |i| raw_colors[i.to_s].to_s.strip }
+    else
+      Array(raw_colors).map { |value| value.to_s.strip }
+    end
     colors = colors.first(teams_count)
 
     while colors.size < teams_count

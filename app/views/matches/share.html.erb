@@ -22,16 +22,12 @@
           <% wins, draws, losses = record[:wins], record[:draws], record[:losses] %>
           
           <!-- Team Card -->
-          <div class="bg-white rounded-2xl shadow-lg p-6 flex flex-col h-full border-t-8" style="border-color: <%= team.color %>">
-            
+          <div class="bg-white rounded-2xl shadow-lg p-6 flex flex-col h-full border-t-8" style="border-color: <%= team.css_color %>">
+
             <!-- Header -->
             <div class="flex items-center justify-between mb-6">
               <h2 class="text-2xl font-black italic tracking-tight text-gray-900">TEAM <%= team.label %></h2>
-              <% 
-                 is_bright = ['white', '#ffffff', '#fff', 'yellow'].include?(team.color.downcase)
-                 badge_text = is_bright ? 'text-gray-900 border border-gray-200' : 'text-white'
-              %>
-              <span class="px-3 py-1 rounded-full text-xs font-bold shadow-sm <%= badge_text %>" style="background-color: <%= team.color %>">
+              <span class="px-3 py-1 rounded-full text-xs font-bold shadow-sm" style="background-color: <%= team.css_color %>; color: <%= team.css_text_color %>;">
                 <%= team.color.upcase %>
               </span>
             </div>
@@ -103,7 +99,7 @@
                 <!-- 홈팀 정보 -->
                 <div class="flex flex-col items-start min-w-0">
                   <div class="flex items-center gap-2 mb-1">
-                    <div class="w-1.5 h-8 rounded-sm" style="background-color: <%= game.home_team.color %>"></div>
+                    <div class="w-1.5 h-8 rounded-sm" style="background-color: <%= game.home_team.css_color %>"></div>
                     <span class="text-xs md:text-sm font-bold text-white/40 tracking-[0.2em]">HOME</span>
                   </div>
                   <div class="text-2xl md:text-4xl font-black italic text-slate-100 truncate w-full leading-none"><%= game.home_team.label %></div>
@@ -148,7 +144,7 @@
                 <div class="flex flex-col items-end min-w-0">
                   <div class="flex items-center gap-2 mb-1 justify-end">
                     <span class="text-xs md:text-sm font-bold text-white/40 tracking-[0.2em]">AWAY</span>
-                    <div class="w-1.5 h-8 rounded-sm" style="background-color: <%= game.away_team.color %>"></div>
+                    <div class="w-1.5 h-8 rounded-sm" style="background-color: <%= game.away_team.css_color %>"></div>
                   </div>
                   <div class="text-2xl md:text-4xl font-black italic text-slate-100 truncate w-full text-right leading-none"><%= game.away_team.label %></div>
                 </div>
@@ -170,7 +166,7 @@
 
                   <!-- Home Row -->
                   <div class="text-left font-bold text-slate-100 truncate pl-2 flex items-center gap-2">
-                    <div class="w-1 h-3 rounded-full" style="background-color: <%= game.home_team.color %>"></div>
+                    <div class="w-1 h-3 rounded-full" style="background-color: <%= game.home_team.css_color %>"></div>
                     <%= game.home_team.label %>
                   </div>
                   <% (1..4).each do |q| %>
@@ -187,7 +183,7 @@
 
                   <!-- Away Row -->
                   <div class="text-left font-bold text-slate-100 truncate pl-2 flex items-center gap-2">
-                     <div class="w-1 h-3 rounded-full" style="background-color: <%= game.away_team.color %>"></div>
+                     <div class="w-1 h-3 rounded-full" style="background-color: <%= game.away_team.css_color %>"></div>
                      <%= game.away_team.label %>
                   </div>
                   <% (1..4).each do |q| %>

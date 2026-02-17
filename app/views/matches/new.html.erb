@@ -127,13 +127,12 @@
 
                   <!-- 팀/색상 설정 -->
                   <div class="form-control mb-3">
-                    <label class="label py-0 mb-1"><span class="label-text text-xs"><%= t('matches.new.team_name') %></span></label>
-                    <input type="text"
-                           name="team_names[]"
-                           placeholder="<%= t('common.team') %> <%= labels[index] %>"
-                           class="input input-sm input-bordered w-full"
-                           value="<%= labels[index] %>"
-                           <%= "disabled" unless is_visible %>>
+                    <div class="text-xs opacity-70 mb-1"><%= t('matches.new.team_name') %></div>
+                    <% if is_visible %>
+                      <input type="text" name="team_names[]" placeholder="<%= "#{t('common.team')} #{labels[index]}" %>" class="input input-sm input-bordered w-full" value="<%= labels[index] %>">
+                    <% else %>
+                      <input type="text" name="team_names[]" placeholder="<%= "#{t('common.team')} #{labels[index]}" %>" class="input input-sm input-bordered w-full" value="<%= labels[index] %>" disabled>
+                    <% end %>
                   </div>
 
                   <div class="form-control">
