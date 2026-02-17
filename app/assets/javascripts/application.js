@@ -1014,6 +1014,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let shotLastTickAtMs = null;
     let matchupSortInstance = null;
     let isMatchupDragging = false;
+    let displayAnimFrame = null;
 
     // Colors
     const COLORS = {
@@ -1049,8 +1050,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalRegularQuarters = () => regularQuartersForState(state);
 
     const formatTime = (seconds) => {
-      const min = Math.floor(seconds / 60);
-      const sec = Math.max(seconds % 60, 0);
+      const totalSeconds = Math.max(0, seconds);
+      const min = Math.floor(totalSeconds / 60);
+
+      // Under 1 minute: show SS.s format (seconds with deciseconds)
+      if (min < 1 && totalSeconds < 60) {
+        const sec = Math.floor(totalSeconds);
+        const deciseconds = Math.floor((totalSeconds - sec) * 10);
+        return `${sec.toString().padStart(2, "0")}.${deciseconds}`;
+      }
+
+      // 1 minute or more: show m:ss format
+      const sec = Math.floor(totalSeconds % 60);
       return `${min}:${sec.toString().padStart(2, "0")}`;
     };
 
@@ -1376,6 +1387,11 @@ document.addEventListener("DOMContentLoaded", () => {
         shot_seconds: 24,
         running: false,
         shot_running: false,
+        // Timer sync references for smooth display
+        main_ref_at_ms: 0,
+        main_ref_value: defaultPeriodSeconds,
+        shot_ref_at_ms: 0,
+        shot_ref_value: 24,
         sound_enabled: defaultAnnouncementsEnabled,
         voice_enabled: defaultAnnouncementsEnabled,
         voice_rate: defaultVoiceRate,
@@ -1655,6 +1671,9 @@ document.addEventListener("DOMContentLoaded", () => {
           const action = btn.dataset.teamAction;
           const [homeIdx, awayIdx] = matchupPairById(currentMatchupId());
 
+          const isScoreAddAction = ["add-home", "add-home-1", "add-home-2", "add-home-3",
+                                    "add-away", "add-away-1", "add-away-2", "add-away-3"].includes(action);
+
           if (action === "add-home") state.teams[homeIdx].score += 1;
           else if (action === "sub-home") state.teams[homeIdx].score = Math.max(0, state.teams[homeIdx].score - 1);
           else if (action === "add-home-1") state.teams[homeIdx].score += 1;
@@ -1665,6 +1684,16 @@ document.addEventListener("DOMContentLoaded", () => {
           else if (action === "add-away-1") state.teams[awayIdx].score += 1;
           else if (action === "add-away-2") state.teams[awayIdx].score += 2;
           else if (action === "add-away-3") state.teams[awayIdx].score += 3;
+
+          // Reset shot clock to 24 when score is added (or disable if game time < 24)
+          if (isScoreAddAction) {
+            if (state.period_seconds < 24) {
+              state.shot_seconds = -1; // Disable shot clock
+            } else {
+              state.shot_seconds = 24;
+            }
+            state.shot_running = false;
+          }
 
           render();
           broadcast();
@@ -1733,7 +1762,9 @@ document.addEventListener("DOMContentLoaded", () => {
       setText("[data-preview-timer]", formatTime(state.period_seconds));
       setText("[data-preview-home]", home.score);
       setText("[data-preview-away]", away.score);
-      setText("[data-preview-shot]", state.shot_seconds);
+      // Show "--" for shot clock when disabled (shot_seconds < 0)
+      const previewShotDisplay = state.shot_seconds < 0 ? "--" : state.shot_seconds;
+      setText("[data-preview-shot]", previewShotDisplay);
     };
 
     const render = () => {
@@ -1750,7 +1781,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const quarterLabel = role === "control" ? `${state.quarter}Q` : state.quarter;
       setText("[data-scoreboard-quarter]", quarterLabel);
       setText("[data-scoreboard-timer]", formatTime(state.period_seconds));
-      setText("[data-scoreboard-shot]", state.shot_seconds);
+
+      // Show "--" for shot clock when disabled (shot_seconds < 0)
+      const shotClockDisplay = state.shot_seconds < 0 ? "--" : state.shot_seconds;
+      setText("[data-scoreboard-shot]", shotClockDisplay);
 
       // Team names (for new sports display)
       setText("[data-team-name-left]", formatTeamName(leftTeam));
@@ -1923,6 +1957,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const toggleShotBtn = scoreboardRoot.querySelector('[data-action="toggle-shot"]');
       if (toggleShotBtn) {
         toggleShotBtn.textContent = state.shot_running ? i18nForScoreboard("main_stop") : i18nForScoreboard("main_start");
+        toggleShotBtn.style.backgroundColor = state.shot_running ? '#ef4444' : '#22C55E';
+        toggleShotBtn.style.color = '#FFFFFF';
       }
 
       const possToggleBtn = scoreboardRoot.querySelector('[data-possession-toggle-btn]');
@@ -2263,15 +2299,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      // Update Shot Clock Toggle Icon/Text (optional, but requested implicitly)
+      // Update Shot Clock Toggle Icon/Text with color
       const shotToggleBtn = scoreboardRoot.querySelector('[data-action="toggle-shot"]');
       if (shotToggleBtn) {
         if (state.shot_running) {
           shotToggleBtn.classList.add("btn-active");
           shotToggleBtn.textContent = i18nForScoreboard("main_stop");
+          shotToggleBtn.style.backgroundColor = '#ef4444'; // Red for Stop
+          shotToggleBtn.style.color = '#FFFFFF';
         } else {
           shotToggleBtn.classList.remove("btn-active");
           shotToggleBtn.textContent = i18nForScoreboard("main_start");
+          shotToggleBtn.style.backgroundColor = '#22C55E'; // Green for Start
+          shotToggleBtn.style.color = '#FFFFFF';
         }
       }
 
@@ -2363,6 +2403,32 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     };
 
+    // Returns elapsed time in seconds (with decimals for precision)
+    const consumeElapsedTime = (lastTickAtMs, usePrecision = false) => {
+      const now = Date.now();
+      if (!Number.isFinite(lastTickAtMs) || lastTickAtMs <= 0) {
+        return { elapsedTime: 0, nextTickAtMs: now };
+      }
+
+      const elapsedMs = now - lastTickAtMs;
+      if (usePrecision) {
+        // Return precise elapsed time in seconds (with decimals)
+        const elapsedTime = elapsedMs / 1000;
+        if (elapsedTime < 0.01) {
+          return { elapsedTime: 0, nextTickAtMs: lastTickAtMs };
+        }
+        return { elapsedTime, nextTickAtMs: now };
+      } else {
+        // Return whole seconds only (original behavior)
+        const elapsedSeconds = Math.floor(elapsedMs / 1000);
+        if (elapsedSeconds <= 0) {
+          return { elapsedTime: 0, nextTickAtMs: lastTickAtMs };
+        }
+        return { elapsedTime: elapsedSeconds, nextTickAtMs: lastTickAtMs + (elapsedSeconds * 1000) };
+      }
+    };
+
+    // Legacy function for backward compatibility
     const consumeElapsedSeconds = (lastTickAtMs) => {
       const now = Date.now();
       if (!Number.isFinite(lastTickAtMs) || lastTickAtMs <= 0) {
@@ -2395,16 +2461,28 @@ document.addEventListener("DOMContentLoaded", () => {
       if (mainTimer) return;
       mainLastTickAtMs = Date.now();
       mainTimer = setInterval(() => {
-        const { elapsedSeconds, nextTickAtMs } = consumeElapsedSeconds(mainLastTickAtMs);
+        const currentSeconds = Math.max(0, Number.parseFloat(state.period_seconds) || 0);
+        const usePrecision = currentSeconds < 60; // Use precision timing under 1 minute
+
+        const { elapsedTime, nextTickAtMs } = consumeElapsedTime(mainLastTickAtMs, usePrecision);
         mainLastTickAtMs = nextTickAtMs;
-        if (elapsedSeconds <= 0) return;
+        if (elapsedTime <= 0) return;
 
-        const previousSeconds = Math.max(0, Number.parseInt(state.period_seconds, 10) || 0);
-        const nextSeconds = Math.max(0, previousSeconds - elapsedSeconds);
-        state.period_seconds = nextSeconds;
-        speakCountdownIfNeeded(previousSeconds, nextSeconds);
+        const previousSeconds = currentSeconds;
+        const nextSeconds = Math.max(0, previousSeconds - elapsedTime);
 
-        if (nextSeconds === 0) {
+        // Round to 2 decimal places for precision mode, otherwise keep as integer-ish
+        state.period_seconds = usePrecision ? Math.round(nextSeconds * 100) / 100 : Math.floor(nextSeconds);
+
+        // Speak countdown only on whole second boundaries
+        const prevWholeSecond = Math.floor(previousSeconds);
+        const nextWholeSecond = Math.floor(nextSeconds);
+        if (prevWholeSecond !== nextWholeSecond) {
+          speakCountdownIfNeeded(prevWholeSecond, nextWholeSecond);
+        }
+
+        if (nextSeconds <= 0) {
+          state.period_seconds = 0;
           state.running = false;
           state.shot_running = false;
           stopMainTimer();
@@ -2412,9 +2490,13 @@ document.addEventListener("DOMContentLoaded", () => {
           playBuzzer();
         }
 
+        // Update timer reference for display sync
+        state.main_ref_at_ms = Date.now();
+        state.main_ref_value = state.period_seconds;
+
         render();
         broadcast();
-      }, 250);
+      }, 100); // 100ms interval for smooth centisecond display
     };
 
     const startShotTimer = () => {
@@ -2434,27 +2516,59 @@ document.addEventListener("DOMContentLoaded", () => {
           state.shot_running = false;
           stopShotTimer();
           playBuzzer();
+
+          // If game time < 24 seconds, disable shot clock (set to -1)
+          if (state.period_seconds < 24) {
+            state.shot_seconds = -1;
+          }
         }
+
+        // Update shot timer reference for display sync
+        state.shot_ref_at_ms = Date.now();
+        state.shot_ref_value = state.shot_seconds;
 
         render();
         broadcast();
       }, 250);
     };
 
+    // Track last spoken countdown to avoid duplicates
+    let lastSpokenCountdown = -1;
+
+    const safeSpeak = (utterance) => {
+      if (!window.speechSynthesis) return;
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+      }
+      window.speechSynthesis.speak(utterance);
+    };
+
     const speak = (text) => {
       if (!isVoiceEnabled() || !("speechSynthesis" in window)) return;
 
-      // Cancel any previous speech to prevent duplicates
-      window.speechSynthesis.cancel();
+      // Avoid speaking the same number twice in a row
+      const numText = Number(text);
+      if (numText === lastSpokenCountdown) return;
+      lastSpokenCountdown = numText;
+
+      // Reset tracker when countdown resets
+      setTimeout(() => {
+        if (lastSpokenCountdown === numText) {
+          lastSpokenCountdown = -1;
+        }
+      }, 2000);
 
       const utterance = new SpeechSynthesisUtterance(i18nForScoreboard("voice_countdown_pattern", { count: text }));
       utterance.lang = scoreboardVoiceLang;
       utterance.rate = currentVoiceRate();
+      utterance.volume = 1.0;
+
       const langPrefix = String(scoreboardVoiceLang || "").toLowerCase().split("-")[0];
       const voices = window.speechSynthesis.getVoices();
       const matchingVoice = voices.find((voice) => String(voice.lang || "").toLowerCase().startsWith(langPrefix));
       if (matchingVoice) utterance.voice = matchingVoice;
-      window.speechSynthesis.speak(utterance);
+
+      safeSpeak(utterance);
     };
 
 
@@ -2471,6 +2585,46 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (shotTimer) {
         stopShotTimer();
       }
+    };
+
+    // Display-only: smooth timer interpolation using reference timestamps
+    const startDisplayTimerSync = () => {
+      if (role !== "display") return;
+      if (displayAnimFrame) return;
+
+      const updateDisplayTimers = () => {
+        if (!state) {
+          displayAnimFrame = requestAnimationFrame(updateDisplayTimers);
+          return;
+        }
+
+        const now = Date.now();
+
+        // Interpolate main timer
+        if (state.running && state.main_ref_at_ms > 0) {
+          const elapsed = (now - state.main_ref_at_ms) / 1000;
+          const currentValue = Math.max(0, state.main_ref_value - elapsed);
+          // Update display only (don't modify state.period_seconds as that comes from control)
+          const timerEl = document.querySelector("[data-scoreboard-timer]");
+          if (timerEl) {
+            timerEl.textContent = formatTime(currentValue);
+          }
+        }
+
+        // Interpolate shot timer
+        if (state.shot_running && state.shot_ref_at_ms > 0 && state.shot_seconds > 0) {
+          const elapsed = (now - state.shot_ref_at_ms) / 1000;
+          const currentValue = Math.max(0, state.shot_ref_value - elapsed);
+          const shotEl = document.querySelector("[data-scoreboard-shot]");
+          if (shotEl) {
+            shotEl.textContent = Math.ceil(currentValue);
+          }
+        }
+
+        displayAnimFrame = requestAnimationFrame(updateDisplayTimers);
+      };
+
+      displayAnimFrame = requestAnimationFrame(updateDisplayTimers);
     };
 
     const refreshLocalStateVersion = (sourceState = state) => {
@@ -2556,22 +2710,38 @@ document.addEventListener("DOMContentLoaded", () => {
       return String(Math.max(0, Number.parseInt(value, 10) || 0));
     };
 
+    // Debounce for score announcements to prevent rapid-fire cancellations
+    let speakScoreTimeout = null;
+
     const speakScore = () => {
-      if (!isVoiceEnabled()) return;
+      if (!isVoiceEnabled()) {
+        console.log("🔇 Voice disabled - state.voice_enabled:", state?.voice_enabled);
+        return;
+      }
 
       // Only speak if speech synthesis is supported and acting as control
       if (!window.speechSynthesis) {
+        console.log("🔇 Speech synthesis not supported");
         return;
       }
 
       if (role !== "control") {
+        console.log("🔇 Not control role:", role);
         return;
       }
 
-      // Reset speech synthesis to prevent stuck state
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.resume();
+      // Debounce: if called multiple times quickly, only speak the latest score
+      if (speakScoreTimeout) {
+        clearTimeout(speakScoreTimeout);
+      }
 
+      speakScoreTimeout = setTimeout(() => {
+        speakScoreTimeout = null;
+        doSpeakScore();
+      }, 50); // 50ms debounce
+    };
+
+    const doSpeakScore = () => {
       // Initialize voice on first call (browser autoplay policy workaround)
       initializeVoice();
 
@@ -2581,11 +2751,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const homeScore = visualHome.score;
       const awayScore = visualAway.score;
 
-
       // Use sino-korean numerals to avoid native-korean reading like "열"
       const homeScoreText = spokenNumber(homeScore);
       const awayScoreText = spokenNumber(awayScore);
       const text = i18nForScoreboard("voice_score_pattern", { home: homeScoreText, away: awayScoreText });
+
+      console.log("🔊 Speaking score:", text);
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = scoreboardVoiceLang;
@@ -2594,22 +2765,54 @@ document.addEventListener("DOMContentLoaded", () => {
       utterance.pitch = 1.0;
 
       // Match a voice by selected locale when available.
-      const voices = window.speechSynthesis.getVoices();
-      const langPrefix = String(scoreboardVoiceLang || "").toLowerCase().split("-")[0];
-      const matchingVoice = voices.find((voice) => String(voice.lang || "").toLowerCase().startsWith(langPrefix));
-      if (matchingVoice) utterance.voice = matchingVoice;
+      const speakWithVoice = () => {
+        const voices = window.speechSynthesis.getVoices();
+        const langPrefix = String(scoreboardVoiceLang || "").toLowerCase().split("-")[0];
+        const matchingVoice = voices.find((voice) => String(voice.lang || "").toLowerCase().startsWith(langPrefix));
+        if (matchingVoice) {
+          utterance.voice = matchingVoice;
+          console.log("🔊 Using voice:", matchingVoice.name, matchingVoice.lang);
+        } else {
+          console.log("🔊 No matching voice found for:", langPrefix, "- using default");
+        }
 
-      utterance.onstart = () => {
+        utterance.onstart = () => {
+          console.log("🔊 Speech started");
+        };
+
+        utterance.onerror = (event) => {
+          if (event.error !== "canceled") {
+            console.error("❌ Speech error:", event.error, event);
+          }
+        };
+
+        utterance.onend = () => {
+          console.log("🔊 Speech ended");
+        };
+
+        safeSpeak(utterance);
       };
 
-      utterance.onerror = (event) => {
-        console.error("❌ Speech error:", event.error, event);
-      };
-
-      utterance.onend = () => {
-      };
-
-      window.speechSynthesis.speak(utterance);
+      // Check if voices are already loaded
+      if (window.speechSynthesis.getVoices().length > 0) {
+        speakWithVoice();
+      } else {
+        // Wait for voices to load with a timeout fallback
+        let spoken = false;
+        const handleVoicesLoaded = () => {
+          if (spoken) return;
+          spoken = true;
+          speakWithVoice();
+        };
+        window.speechSynthesis.addEventListener("voiceschanged", handleVoicesLoaded, { once: true });
+        // Fallback timeout in case voiceschanged never fires
+        setTimeout(() => {
+          if (!spoken) {
+            console.log("🔊 Voices load timeout, speaking with default voice");
+            handleVoicesLoaded();
+          }
+        }, 100);
+      }
     };
 
     const normalizeScoreValue = (rawValue) => {
@@ -2672,6 +2875,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const awayIdx = state.teams.findIndex(t => t.id === visualAway.id);
       if (homeIdx < 0 || awayIdx < 0) return;
 
+      const isScoreAddAction = ["add-home", "add-home-1", "add-home-2", "add-home-3",
+                                "add-away", "add-away-1", "add-away-2", "add-away-3"].includes(action);
+
       if (action === "add-home") state.teams[homeIdx].score += 1;
       else if (action === "sub-home") state.teams[homeIdx].score = Math.max(0, state.teams[homeIdx].score - 1);
       else if (action === "add-home-1") state.teams[homeIdx].score += 1;
@@ -2684,6 +2890,16 @@ document.addEventListener("DOMContentLoaded", () => {
       else if (action === "add-away-2") state.teams[awayIdx].score += 2;
       else if (action === "add-away-3") state.teams[awayIdx].score += 3;
       else if (action === "reset-away-score") state.teams[awayIdx].score = 0;
+
+      // Reset shot clock to 24 when score is added (or disable if game time < 24)
+      if (isScoreAddAction) {
+        if (state.period_seconds < 24) {
+          state.shot_seconds = -1; // Disable shot clock
+        } else {
+          state.shot_seconds = 24;
+        }
+        state.shot_running = false;
+      }
     };
 
     const attachControlHandlers = () => {
@@ -2741,16 +2957,31 @@ document.addEventListener("DOMContentLoaded", () => {
             speakScore();
           } else {
             switch (action) {
-              case "toggle-main":
+              case "toggle-main": {
+                const now = Date.now();
                 state.running = !state.running;
-                state.shot_running = state.running && state.shot_seconds > 0;
+                if (state.running) {
+                  // Update timer references for sync
+                  state.main_ref_at_ms = now;
+                  state.main_ref_value = state.period_seconds;
+                  // Start shot clock together if it has a valid value
+                  if (state.shot_seconds > 0) {
+                    state.shot_running = true;
+                    state.shot_ref_at_ms = now;
+                    state.shot_ref_value = state.shot_seconds;
+                  }
+                } else {
+                  state.shot_running = false;
+                }
                 break;
+              }
               case "pause-main":
                 state.running = false;
                 state.shot_running = false;
                 break;
               case "reset-main":
                 state.period_seconds = defaultPeriodSeconds;
+                state.main_ref_value = defaultPeriodSeconds;
                 state.running = false;
                 state.shot_running = false;
                 break;
@@ -2758,6 +2989,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (confirm(i18nForScoreboard("confirm_reset_all"))) {
                   state.period_seconds = defaultPeriodSeconds;
                   state.shot_seconds = 24;
+                  state.main_ref_value = defaultPeriodSeconds;
+                  state.shot_ref_value = 24;
                   state.running = false;
                   state.shot_running = false;
                   state.home_fouls = 0;
@@ -2773,14 +3006,39 @@ document.addEventListener("DOMContentLoaded", () => {
                 state.period_seconds += 60;
                 break;
               case "toggle-shot":
+                // Don't start shot clock if:
+                // - game clock is not running
+                // - shot clock is disabled (-1)
+                // - game time is under 24 seconds
+                if (!state.shot_running && (!state.running || state.shot_seconds < 0 || state.period_seconds < 24)) {
+                  break;
+                }
                 state.shot_running = !state.shot_running;
+                if (state.shot_running) {
+                  state.shot_ref_at_ms = Date.now();
+                  state.shot_ref_value = state.shot_seconds;
+                }
                 break;
               case "reset-shot-24":
-                state.shot_seconds = 24;
+                // If game time < 24 seconds, disable shot clock instead of resetting
+                if (state.period_seconds < 24) {
+                  state.shot_seconds = -1;
+                } else {
+                  state.shot_seconds = 24;
+                  state.shot_ref_value = 24;
+                }
+                // Shot clock stops on reset - user must manually start
                 state.shot_running = false;
                 break;
               case "reset-shot-14":
-                state.shot_seconds = 14;
+                // If game time < 14 seconds, disable shot clock instead of resetting
+                if (state.period_seconds < 14) {
+                  state.shot_seconds = -1;
+                } else {
+                  state.shot_seconds = 14;
+                  state.shot_ref_value = 14;
+                }
+                // Shot clock stops on reset - user must manually start
                 state.shot_running = false;
                 break;
               case "add-game": {
@@ -3451,6 +3709,9 @@ document.addEventListener("DOMContentLoaded", () => {
           refreshLocalStateVersion(state);
           render();
           broadcast();
+        } else if (role === "display") {
+          // Start smooth timer interpolation for display
+          startDisplayTimerSync();
         }
         return;
       }
@@ -3461,6 +3722,10 @@ document.addEventListener("DOMContentLoaded", () => {
         refreshLocalStateVersion(state);
         render();
         syncTimers();
+        // Ensure display timer sync is running
+        if (role === "display") {
+          startDisplayTimerSync();
+        }
       }
     });
 
