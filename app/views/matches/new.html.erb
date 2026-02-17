@@ -1,4 +1,4 @@
-<% content_for :title, "새 경기 만들기 - #{@club.name}" %>
+<% content_for :title, t('matches.new.page_title', club_name: @club.name) %>
 
 <div class="max-w-7xl mx-auto">
   <!-- 뒤로가기 -->
@@ -7,14 +7,14 @@
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg>
-      뒤로가기
+      <%= t('common.back') %>
     <% end %>
   </div>
 
   <!-- 페이지 헤더 -->
   <div class="mb-8">
-    <h1 class="text-4xl font-bold text-base-content mb-2">새 경기 만들기</h1>
-    <p class="text-base-content/60">선수를 선택하고 팀 밸런싱을 진행합니다</p>
+    <h1 class="text-4xl font-bold text-base-content mb-2"><%= t('matches.new.title') %></h1>
+    <p class="text-base-content/60"><%= t('matches.new.subtitle') %></p>
   </div>
 
   <!-- 폼 카드 -->
@@ -30,21 +30,21 @@
         <!-- 기본 정보 -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="form-control w-full">
-            <%= form.label :played_on, "경기 날짜", class: "label" %>
+            <%= form.label :played_on, t('matches.new.match_date'), class: "label" %>
             <%= form.date_field :played_on,
                 required: true,
                 class: "input input-bordered w-full" %>
           </div>
 
           <div class="form-control w-full col-span-1 md:col-span-2">
-            <%= form.label :teams_count, "팀 수 선택", class: "label" %>
+            <%= form.label :teams_count, t('matches.new.teams_count'), class: "label" %>
             <div class="grid grid-cols-2 gap-10">
               <% [2, 3].each do |count| %>
                 <label class="cursor-pointer group">
                   <%= form.radio_button :teams_count, count, class: "hidden peer", required: true %>
                   <div class="card bg-base-200 peer-checked:bg-primary peer-checked:text-primary-content hover:bg-base-300 peer-checked:hover:bg-primary transition-all duration-200 text-center py-6 border-2 border-transparent peer-checked:border-primary shadow-sm peer-checked:shadow-lg peer-checked:scale-105">
-                    <span class="text-2xl font-bold"><%= count %>팀</span>
-                    <span class="text-xs opacity-60 mt-1 block font-medium"><%= count == 2 ? "A vs B" : "리그전 (A/B/C)" %></span>
+                    <span class="text-2xl font-bold"><%= count == 2 ? t('matches.new.teams_2') : t('matches.new.teams_3') %></span>
+                    <span class="text-xs opacity-60 mt-1 block font-medium"><%= count == 2 ? t('matches.new.teams_2_desc') : t('matches.new.teams_3_desc') %></span>
                   </div>
                 </label>
               <% end %>
@@ -52,15 +52,15 @@
           </div>
 
           <div class="form-control w-full col-span-1 md:col-span-2 <%= selected_teams_count == 2 ? '' : 'hidden' %>" data-games-per-match-control>
-            <%= form.label :games_per_match, "2팀 경기 수", class: "label" %>
+            <%= form.label :games_per_match, t('matches.new.games_per_match'), class: "label" %>
             <%= form.hidden_field :games_per_match, value: selected_games_per_match, data: { games_per_match_input: true } %>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2" data-games-per-match-options>
               <% [1, 2, 3].each do |value| %>
                 <% total_quarters = selected_regular_quarters * value %>
                 <% label = if value == 1
-                  "1게임 (기본, 총 #{total_quarters}쿼터)"
+                  t('matches.new.game_1', quarters: total_quarters)
                 else
-                  "#{value}게임 (총 #{total_quarters}쿼터)"
+                  t('matches.new.game_n', count: value, quarters: total_quarters)
                 end %>
                 <button type="button"
                         class="btn w-full <%= selected_games_per_match == value ? 'btn-primary' : 'btn-outline' %>"
@@ -73,18 +73,18 @@
             </div>
             <label class="label">
               <span class="label-text-alt text-base-content/60" data-three-team-quarter-note>
-                3팀 모드는 3개 매치업 × <%= selected_regular_quarters %>쿼터 (총 <%= selected_regular_quarters * 3 %>쿼터)로 진행됩니다.
+                <%= t('matches.new.three_team_note', quarters: selected_regular_quarters, total: selected_regular_quarters * 3) %>
               </span>
             </label>
           </div>
 
           <div class="form-control w-full col-span-1 md:col-span-2">
-            <%= form.label :regular_quarters, "정규 쿼터 수", class: "label" %>
+            <%= form.label :regular_quarters, t('matches.new.regular_quarters'), class: "label" %>
             <%= form.hidden_field :regular_quarters, value: selected_regular_quarters, data: { regular_quarters_input: true } %>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" data-regular-quarters-options>
               <% [
-                [4, "기본 4쿼터 경기"],
-                [3, "3쿼터만 경기 하기"]
+                [4, t('matches.new.quarters_4')],
+                [3, t('matches.new.quarters_3')]
               ].each do |value, label| %>
                 <button type="button"
                         class="btn w-full <%= selected_regular_quarters == value ? 'btn-primary' : 'btn-outline' %>"
@@ -96,24 +96,24 @@
               <% end %>
             </div>
             <label class="label">
-              <span class="label-text-alt text-base-content/60">3팀 운영 시 A:B → B:C → C:A 순서가 쿼터마다 반복되어 3쿼터 선택 시 총 9쿼터로 진행됩니다.</span>
+              <span class="label-text-alt text-base-content/60"><%= t('matches.new.quarters_note') %></span>
             </label>
           </div>
         </div>
 
         <!-- 메모 -->
         <div class="form-control w-full">
-          <%= form.label :note, "메모", class: "label" %>
+          <%= form.label :note, t('matches.new.memo'), class: "label" %>
           <%= form.text_field :note,
-              placeholder: "예: 2월 정기 경기",
+              placeholder: t('matches.new.memo_placeholder'),
               class: "input input-bordered w-full" %>
         </div>
 
         <!-- 팀 설정 (이름 & 색상) -->
         <div class="form-control w-full">
           <label class="label">
-            <span class="label-text font-medium text-lg">팀 설정</span>
-            <span class="label-text-alt text-base-content/60">이름과 색상을 지정하세요</span>
+            <span class="label-text font-medium text-lg"><%= t('matches.new.team_settings') %></span>
+            <span class="label-text-alt text-base-content/60"><%= t('matches.new.team_settings_hint') %></span>
           </label>
           <div class="grid grid-cols-1 <%= selected_teams_count == 2 ? 'md:grid-cols-2' : 'md:grid-cols-3' %> gap-6" data-team-settings-grid>
             <% labels = %w[A B C] %>
@@ -124,21 +124,21 @@
                    data-team-index="<%= index %>">
                 <div class="card-body p-4">
                   <h3 class="font-bold text-sm mb-2 opacity-50">TEAM <%= labels[index] %></h3>
-                  
+
                   <!-- 팀/색상 설정 -->
                   <div class="form-control mb-3">
-                    <label class="label py-0 mb-1"><span class="label-text text-xs">팀 이름</span></label>
+                    <label class="label py-0 mb-1"><span class="label-text text-xs"><%= t('matches.new.team_name') %></span></label>
                     <input type="text"
                            name="team_names[]"
-                           placeholder="팀 <%= labels[index] %>"
+                           placeholder="<%= t('common.team') %> <%= labels[index] %>"
                            class="input input-sm input-bordered w-full"
                            value="<%= labels[index] %>"
                            <%= "disabled" unless is_visible %>>
                   </div>
 
                   <div class="form-control">
-                    <label class="label py-0 mb-1"><span class="label-text text-xs">팀 색상</span></label>
-                    
+                    <label class="label py-0 mb-1"><span class="label-text text-xs"><%= t('matches.new.team_color') %></span></label>
+
                     <!-- 색상 선택 트리거 버튼 -->
                     <button type="button"
                             class="btn btn-sm btn-outline w-full justify-center gap-2 border-base-content/20 font-normal"
@@ -150,8 +150,8 @@
                     <!-- 색상 선택 모달 -->
                     <dialog id="color_modal_<%= index %>" class="modal modal-bottom sm:modal-middle" onclick="if(event.target === this) this.close()">
                       <div class="modal-box">
-                        <h3 class="font-bold text-lg mb-4 text-center">팀 <%= labels[index] %> 색상 선택</h3>
-                        
+                        <h3 class="font-bold text-lg mb-4 text-center"><%= t('matches.new.team_color_select', label: labels[index]) %></h3>
+
                         <div class="grid grid-cols-5 gap-4 justify-items-center py-4">
                           <% Team::COLORS.each do |color| %>
                             <label class="cursor-pointer color-option flex items-center justify-center p-1" data-color="<%= color %>" data-team-index="<%= index %>">
@@ -159,14 +159,14 @@
                                      <%= "checked" if Team::COLORS[index] == color %>
                                      <%= "disabled" unless is_visible %>
                                      onchange="handleColorChangeOnly(this, <%= index %>)">
-                              <div class="w-12 h-12 rounded-full border-4 border-transparent peer-checked:border-primary peer-checked:scale-110 shadow-sm transition-transform hover:scale-105 peer-disabled:opacity-20 peer-disabled:cursor-not-allowed" 
+                              <div class="w-12 h-12 rounded-full border-4 border-transparent peer-checked:border-primary peer-checked:scale-110 shadow-sm transition-transform hover:scale-105 peer-disabled:opacity-20 peer-disabled:cursor-not-allowed"
                                    style="background-color: <%= color %>"></div>
                             </label>
                           <% end %>
                         </div>
 
                         <div class="modal-action">
-                          <button type="button" class="btn btn-block" onclick="this.closest('dialog').close()">닫기</button>
+                          <button type="button" class="btn btn-block" onclick="this.closest('dialog').close()"><%= t('matches.new.close') %></button>
                         </div>
                       </div>
                     </dialog>
@@ -181,39 +181,39 @@
         <div class="form-control w-full">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
             <label class="label p-0">
-              <span class="label-text font-medium text-lg">참가 멤버 선택</span>
-              <span class="label-text-alt ml-2">총 <span id="member-count"><%= @members.count %></span>명</span>
+              <span class="label-text font-medium text-lg"><%= t('matches.new.select_members') %></span>
+              <span class="label-text-alt ml-2"><%= t('matches.new.total_members', count: @members.count) %></span>
             </label>
-            
+
             <div class="flex items-center gap-2">
               <button type="button" class="btn btn-sm btn-ghost text-error" onclick="selectTopMembers(0)">
-                전체 해제
+                <%= t('matches.new.deselect_all') %>
               </button>
               <button type="button"
                       class="btn btn-sm btn-secondary"
                       data-top-members-trigger
                       onclick="selectRecommendedTopMembers()">
-                상위 <%= selected_teams_count == 2 ? 12 : 18 %>명 선택
+                <%= t('matches.new.select_top', count: selected_teams_count == 2 ? 12 : 18) %>
               </button>
             </div>
           </div>
-          
+
           <!-- 정렬 컨트롤 -->
           <div class="flex flex-wrap items-center gap-2 mb-4 p-2 bg-base-200 rounded-lg justify-end">
-            <span class="text-xs font-bold opacity-50 px-2 mr-auto">정렬:</span>
-            <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="name">이름</button>
-            <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="position">포지션</button>
-            <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="height">키</button>
-            <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="winrate">승률</button>
-            <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="games">경기수</button>
-            <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="jersey">등번호</button>
+            <span class="text-xs font-bold opacity-50 px-2 mr-auto"><%= t('members.index.sort.label') %></span>
+            <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="name"><%= t('members.index.sort.name') %></button>
+            <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="position"><%= t('members.index.sort.position') %></button>
+            <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="height"><%= t('members.index.sort.height') %></button>
+            <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="winrate"><%= t('matches.new.winrate') %></button>
+            <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="games"><%= t('matches.new.games_count') %></button>
+            <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="jersey"><%= t('members.index.sort.jersey') %></button>
           </div>
 
           <% if @members.any? %>
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 p-4 bg-base-200 rounded-box min-h-[500px] content-start" id="member-list">
               <% @members.each do |member| %>
                 <% stats = @member_stats[member.id] || { games: 0, win_rate: 0.0 } %>
-                <label class="cursor-pointer member-item group" 
+                <label class="cursor-pointer member-item group"
                        data-member-id="<%= member.id %>"
                        data-name="<%= member.name %>"
                        data-position="<%= member.position %>"
@@ -230,7 +230,7 @@
                           <span class="text-xs opacity-50 group-hover:opacity-100 font-mono">#<%= member.jersey_number %></span>
                         <% end %>
                       </div>
-                      
+
                       <div class="flex items-center gap-1 mt-1 flex-wrap">
                         <span class="badge badge-xs text-white border-none" style="<%= position_badge_style(member.position) %>">
                           <%= member.position %>
@@ -239,15 +239,15 @@
                           <span class="text-[10px] opacity-70 bg-base-200 px-1 rounded text-base-content"><%= member.height_cm %>cm</span>
                         <% end %>
                       </div>
-                      
+
                       <!-- 승률 및 경기수 표시 -->
                       <div class="mt-2 pt-2 border-t border-base-content/10 flex justify-between items-end text-xs">
                         <div class="flex flex-col">
-                          <span class="text-[10px] opacity-60">승률</span>
+                          <span class="text-[10px] opacity-60"><%= t('matches.new.winrate') %></span>
                           <span class="font-bold font-mono <%= 'text-primary' if stats[:win_rate] >= 0.5 %>"><%= (stats[:win_rate] * 100).round(0) %>%</span>
                         </div>
                         <div class="flex flex-col text-right">
-                          <span class="text-[10px] opacity-60">경기수</span>
+                          <span class="text-[10px] opacity-60"><%= t('matches.new.games_count') %></span>
                           <span class="font-bold"><%= stats[:games] %></span>
                         </div>
                       </div>
@@ -258,14 +258,14 @@
             </div>
           <% else %>
             <div class="alert alert-warning">
-              <span>멤버가 없습니다.</span>
+              <span><%= t('matches.new.no_members') %></span>
             </div>
           <% end %>
         </div>
 
         <!-- 제출 버튼 -->
         <div class="form-control mt-8">
-          <%= form.submit "팀 생성하기", class: "btn btn-primary btn-lg w-full gap-2" %>
+          <%= form.submit t('matches.new.submit'), class: "btn btn-primary btn-lg w-full gap-2" %>
         </div>
       <% end %>
     </div>
@@ -273,16 +273,23 @@
 </div>
 
 <script>
+const i18n = {
+  game1: "<%= j t('matches.new.game_1', quarters: 'QUARTERS') %>",
+  gameN: "<%= j t('matches.new.game_n', count: 'COUNT', quarters: 'QUARTERS') %>",
+  threeTeamNote: "<%= j t('matches.new.three_team_note', quarters: 'QUARTERS', total: 'TOTAL') %>",
+  selectTop: "<%= j t('matches.new.select_top', count: 'COUNT') %>"
+};
+
 function handleColorChangeOnly(input, teamIndex) {
   const color = input.value;
   // 미리보기 업데이트
   const preview = document.getElementById(`color-preview-${teamIndex}`);
   if (preview) preview.style.backgroundColor = color;
-  
+
   // 모달 닫기
   const modal = document.getElementById(`color_modal_${teamIndex}`);
   if (modal) modal.close();
-  
+
   // 다른 팀에서 이 색상 비활성화 처리
   updateColorAvailability();
 }
@@ -309,7 +316,7 @@ function updateColorAvailability() {
     const parentLabel = input.closest('label');
     const myTeamIndex = parentLabel.dataset.teamIndex;
     const myColor = parentLabel.dataset.color;
-    
+
     let disabled = false;
     // 다른 팀이 선택한 색상이면 비활성화 (내 팀이 선택한 건 제외)
     for (const [teamIdx, color] of Object.entries(selectedColors)) {
@@ -318,9 +325,9 @@ function updateColorAvailability() {
         break;
       }
     }
-    
+
     input.disabled = disabled;
-    
+
     // 시각적 피드백
     const colorCircle = parentLabel.querySelector('div');
     if (disabled) {
@@ -362,12 +369,14 @@ function updateGamesPerMatchOptionLabels() {
     const gameCount = sanitizeGamesPerMatch(label.dataset.gamesPerMatchLabel);
     const totalQuarters = regularQuarters * gameCount;
     label.textContent = gameCount === 1
-      ? `1게임 (기본, 총 ${totalQuarters}쿼터)`
-      : `${gameCount}게임 (총 ${totalQuarters}쿼터)`;
+      ? i18n.game1.replace('QUARTERS', totalQuarters)
+      : i18n.gameN.replace('COUNT', gameCount).replace('QUARTERS', totalQuarters);
   });
 
   if (threeTeamNote) {
-    threeTeamNote.textContent = `3팀 모드는 3개 매치업 × ${regularQuarters}쿼터 (총 ${regularQuarters * 3}쿼터)로 진행됩니다.`;
+    threeTeamNote.textContent = i18n.threeTeamNote
+      .replace('QUARTERS', regularQuarters)
+      .replace('TOTAL', regularQuarters * 3);
   }
 }
 
@@ -429,7 +438,7 @@ function recommendedTopMembersCount() {
 function updateRecommendedTopMembersButtonLabel() {
   const trigger = document.querySelector("[data-top-members-trigger]");
   if (!trigger) return;
-  trigger.textContent = `상위 ${recommendedTopMembersCount()}명 선택`;
+  trigger.textContent = i18n.selectTop.replace('COUNT', recommendedTopMembersCount());
 }
 
 function selectRecommendedTopMembers() {
@@ -478,7 +487,7 @@ function selectTopMembers(count) {
   const checkboxes = document.querySelectorAll('input[name="member_ids[]"]');
   // 현재 화면에 보이는 순서대로 체크
   const items = Array.from(document.querySelectorAll('.member-item'));
-  
+
   items.forEach((item, index) => {
     const checkbox = item.querySelector('input[type="checkbox"]');
     checkbox.checked = index < count;

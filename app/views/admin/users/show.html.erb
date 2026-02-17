@@ -1,38 +1,38 @@
-<% content_for :title, "관리자 · 사용자 상세" %>
+<% content_for :title, t('admin.users.show.page_title') %>
 
 <div class="page-header">
   <div>
-    <h1>사용자 상세</h1>
+    <h1><%= t('admin.users.show.title') %></h1>
     <p class="muted"><%= @user.email %></p>
   </div>
   <div class="actions">
-    <%= link_to "목록으로", admin_users_path, class: "button ghost" %>
+    <%= link_to t('admin.common.back_to_list'), admin_users_path, class: "button ghost" %>
   </div>
 </div>
 
 <div class="card">
   <table class="table">
     <tbody>
-      <tr><th>ID</th><td><%= @user.id %></td></tr>
-      <tr><th>이름</th><td><%= @user.name.presence || "-" %></td></tr>
-      <tr><th>이메일</th><td><%= @user.email %></td></tr>
-      <tr><th>관리자</th><td><%= @user.admin? ? "Y" : "N" %></td></tr>
-      <tr><th>생성일</th><td><%= @user.created_at.strftime("%Y-%m-%d %H:%M") %></td></tr>
+      <tr><th><%= t('admin.users.fields.id') %></th><td><%= @user.id %></td></tr>
+      <tr><th><%= t('admin.users.fields.name') %></th><td><%= @user.name.presence || "-" %></td></tr>
+      <tr><th><%= t('admin.users.fields.email') %></th><td><%= @user.email %></td></tr>
+      <tr><th><%= t('admin.users.fields.admin') %></th><td><%= @user.admin? ? "Y" : "N" %></td></tr>
+      <tr><th><%= t('admin.users.fields.created_at') %></th><td><%= @user.created_at.strftime("%Y-%m-%d %H:%M") %></td></tr>
     </tbody>
   </table>
 </div>
 
 <div class="card">
-  <h2>클럽</h2>
+  <h2><%= t('admin.users.sections.clubs') %></h2>
   <ul class="member-list">
     <% @user.clubs.each do |club| %>
       <li class="member-item">
         <span class="member-name"><%= club.name %></span>
-        <%= link_to "보기", admin_club_path(club), class: "button ghost" %>
+        <%= link_to t('admin.common.view'), admin_club_path(club), class: "button ghost" %>
       </li>
     <% end %>
   </ul>
   <% if @user.clubs.empty? %>
-    <div class="empty-state"><p>클럽이 없습니다.</p></div>
+    <div class="empty-state"><p><%= t('admin.users.empty.no_clubs') %></p></div>
   <% end %>
 </div>

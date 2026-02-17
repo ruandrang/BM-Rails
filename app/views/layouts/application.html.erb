@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html data-theme="basketball">
+<html data-theme="basketball" lang="<%= current_locale %>">
   <head>
-    <title><%= content_for(:title) || "농구 클럽 매니저" %></title>
+    <title><%= content_for(:title) || t("app.name") %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="농구 클럽 매니저">
+    <meta name="application-name" content="<%= t("app.name") %>">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -45,7 +45,7 @@
             </label>
           </div>
           <div class="flex-1 px-2 mx-2">
-            <span class="text-lg font-bold">🏀 농구 클럽 매니저</span>
+            <span class="text-lg font-bold">🏀 <%= t("app.name") %></span>
           </div>
           <div class="flex-none">
             <% if logged_in? %>
@@ -57,7 +57,7 @@
                 </label>
                 <ul tabindex="0" class="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 text-base-content rounded-box w-52">
                   <li><a><%= current_user.email %></a></li>
-                  <li><%= button_to "로그아웃", session_path, method: :delete, class: "w-full text-left" %></li>
+                  <li><%= button_to t("common.logout"), session_path, method: :delete, class: "w-full text-left" %></li>
                 </ul>
               </div>
             <% end %>
@@ -92,8 +92,8 @@
             <%= link_to logged_in? ? clubs_path : new_session_path, class: "flex items-center gap-3" do %>
               <div class="text-4xl">🏀</div>
               <div>
-                <h1 class="text-xl font-bold">농구 클럽 매니저</h1>
-                <p class="text-sm opacity-80">Basketball Club Manager</p>
+                <h1 class="text-xl font-bold"><%= t("app.name") %></h1>
+                <p class="text-sm opacity-80"><%= t("app.name") %></p>
               </div>
             <% end %>
           </div>
@@ -103,14 +103,14 @@
             <div class="flex-1 overflow-y-auto">
               <ul class="menu p-4 gap-2">
                 <li class="menu-title">
-                  <span>메인 메뉴</span>
+                  <span><%= t("menu.main") %></span>
                 </li>
                 <li>
                   <%= link_to clubs_path, class: "gap-3" do %>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                     </svg>
-                    내 클럽
+                    <%= t("menu.my_clubs") %>
                   <% end %>
                 </li>
                 <li>
@@ -118,7 +118,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
-                    새 클럽 만들기
+                    <%= t("menu.new_club") %>
                   <% end %>
                 </li>
                 <li>
@@ -126,7 +126,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-5a2 2 0 012-2h2a2 2 0 012 2v5m-6 0h6m4 0a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2h14z" />
                     </svg>
-                    연동 점수판
+                    <%= t("menu.connected_scoreboard") %>
                   <% end %>
                 </li>
                 <li>
@@ -134,7 +134,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
-                    단독 점수판
+                    <%= t("menu.standalone_scoreboard") %>
                   <% end %>
                 </li>
                 <li>
@@ -142,8 +142,8 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                     </svg>
-                    대회 모드
-                    <span class="badge badge-xs badge-info badge-outline ml-auto">준비중</span>
+                    <%= t("menu.tournament_mode") %>
+                    <span class="badge badge-xs badge-info badge-outline ml-auto"><%= t("common.coming_soon") %></span>
                   </a>
                 </li>
                 
@@ -152,7 +152,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
-                    데이터 백업
+                    <%= t("menu.backup_data") %>
                   <% end %>
                 </li>
                 <li>
@@ -161,14 +161,14 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.983 5.968a2 2 0 014.034 0 2 2 0 002.56 1.642 2 2 0 012.853 2.853 2 2 0 001.642 2.56 2 2 0 010 4.034 2 2 0 00-1.642 2.56 2 2 0 01-2.853 2.853 2 2 0 00-2.56 1.642 2 2 0 01-4.034 0 2 2 0 00-2.56-1.642 2 2 0 01-2.853-2.853 2 2 0 00-1.642-2.56 2 2 0 010-4.034 2 2 0 001.642-2.56 2 2 0 012.853-2.853 2 2 0 002.56-1.642z" />
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    세팅
+                    <%= t("menu.settings") %>
                   <% end %>
                 </li>
 
 
                 <% if current_user.admin? %>
                   <li class="menu-title mt-4">
-                    <span>관리</span>
+                    <span><%= t("menu.admin_group") %></span>
                   </li>
                   <li>
                     <%= link_to admin_root_path, class: "gap-3" do %>
@@ -176,7 +176,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
-                      관리자 페이지
+                      <%= t("menu.admin_page") %>
                     <% end %>
                   </li>
                 <% end %>
@@ -194,11 +194,11 @@
                 <div class="flex-1 min-w-0">
                   <p class="font-semibold truncate"><%= current_user.email %></p>
                   <p class="text-sm text-base-content/60">
-                    <%= current_user.admin? ? '관리자' : '사용자' %>
+                    <%= current_user.admin? ? t("common.admin") : t("common.user") %>
                   </p>
                 </div>
               </div>
-              <%= button_to "로그아웃", session_path, method: :delete, class: "btn btn-outline btn-error btn-block btn-sm" %>
+              <%= button_to t("common.logout"), session_path, method: :delete, class: "btn btn-outline btn-error btn-block btn-sm" %>
             </div>
           <% else %>
             <!-- 로그인 전 메뉴 -->
@@ -209,7 +209,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                     </svg>
-                    로그인
+                    <%= t("common.login") %>
                   <% end %>
                 </li>
                 <li>
@@ -217,7 +217,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                     </svg>
-                    회원가입
+                    <%= t("common.signup") %>
                   <% end %>
                 </li>
               </ul>

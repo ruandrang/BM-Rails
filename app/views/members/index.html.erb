@@ -1,4 +1,4 @@
-<% content_for :title, "멤버 관리 - #{@club.name}" %>
+<% content_for :title, t('members.index.page_title', club_name: @club.name) %>
 
 <div class="max-w-7xl mx-auto">
   <!-- 뒤로가기 -->
@@ -7,14 +7,14 @@
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg>
-      뒤로가기
+      <%= t('common.back') %>
     <% end %>
   </div>
 
   <!-- 페이지 헤더 -->
   <div class="mb-8">
-    <h1 class="text-4xl font-bold text-base-content mb-2">멤버 관리</h1>
-    <p class="text-base-content/60"><%= @club.name %> 멤버 목록입니다</p>
+    <h1 class="text-4xl font-bold text-base-content mb-2"><%= t('members.index.title') %></h1>
+    <p class="text-base-content/60"><%= t('members.index.subtitle', club_name: @club.name) %></p>
   </div>
 
   <!-- 포지션별 통계 카드 -->
@@ -23,7 +23,7 @@
   <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
     <div class="stats shadow bg-primary text-primary-content">
       <div class="stat p-4">
-        <div class="stat-title text-primary-content/70 text-xs">총 멤버</div>
+        <div class="stat-title text-primary-content/70 text-xs"><%= t('members.index.stats.total') %></div>
         <div class="stat-value text-2xl"><%= @members.count %></div>
       </div>
     </div>
@@ -45,7 +45,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
-        멤버 추가
+        <%= t('members.index.add_member') %>
       <% end %>
     </div>
 
@@ -54,12 +54,12 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
         </svg>
-        CSV 내보내기
+        <%= t('members.index.export_csv') %>
       <% end %>
 
       <%= form_with url: import_csv_club_members_path(@club), local: true, multipart: true, class: "flex flex-nowrap items-center gap-2" do %>
         <input type="file" name="file" accept=".csv,text/csv" class="file-input file-input-bordered file-input-sm w-[260px] md:w-[320px]" />
-        <button type="submit" class="btn btn-ghost btn-sm whitespace-nowrap shrink-0">가져오기</button>
+        <button type="submit" class="btn btn-ghost btn-sm whitespace-nowrap shrink-0"><%= t('members.index.import_csv') %></button>
       <% end %>
     </div>
   </div>
@@ -68,13 +68,13 @@
   <% if @members.any? %>
     <!-- 정렬 컨트롤 (새 경기 페이지와 통일) -->
     <div class="flex flex-wrap items-center gap-2 mb-4 p-2 bg-base-200 rounded-lg justify-end">
-      <span class="text-xs font-bold opacity-50 px-2 mr-auto">정렬:</span>
-      <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="name">이름</button>
-      <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="position">포지션</button>
-      <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="height">키</button>
-      <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="winrate">승률</button>
-      <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="games">경기수</button>
-      <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="jersey">등번호</button>
+      <span class="text-xs font-bold opacity-50 px-2 mr-auto"><%= t('members.index.sort.label') %></span>
+      <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="name"><%= t('members.index.sort.name') %></button>
+      <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="position"><%= t('members.index.sort.position') %></button>
+      <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="height"><%= t('members.index.sort.height') %></button>
+      <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="winrate"><%= t('members.index.sort.winrate') %></button>
+      <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="games"><%= t('members.index.sort.games') %></button>
+      <button type="button" class="btn btn-ghost btn-xs gap-1 w-24" data-sort="jersey"><%= t('members.index.sort.jersey') %></button>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="member-list">
@@ -93,7 +93,7 @@
             <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation();">
               <%= button_to club_member_path(@club, member),
                   method: :delete,
-                  form: { onsubmit: "return confirm('정말 삭제할까요?');" },
+                  form: { onsubmit: "return confirm('#{t('members.index.delete_confirm')}');" },
                   class: "btn btn-ghost btn-xs btn-circle text-error" do %>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -119,13 +119,13 @@
               <% if member.age %>
                 <div class="flex flex-col">
                   <span class="text-[10px] uppercase font-bold opacity-50">Age</span>
-                  <span class="font-medium"><%= member.age %>세</span>
+                  <span class="font-medium"><%= t('members.index.age_suffix', age: member.age) %></span>
                 </div>
               <% end %>
               <% if member.height_cm %>
                 <div class="flex flex-col">
                   <span class="text-[10px] uppercase font-bold opacity-50">Height</span>
-                  <span class="font-medium"><%= member.height_cm %>cm</span>
+                  <span class="font-medium"><%= t('members.index.height_suffix', height: member.height_cm) %></span>
                 </div>
               <% end %>
               <div class="flex flex-col">
@@ -134,7 +134,7 @@
               </div>
               <div class="flex flex-col">
                 <span class="text-[10px] uppercase font-bold opacity-50">Games</span>
-                <span class="font-medium"><%= stats[:games] %>경기</span>
+                <span class="font-medium"><%= t('members.index.games_suffix', count: stats[:games]) %></span>
               </div>
             </div>
           </div>
@@ -147,15 +147,15 @@
       <div class="hero-content text-center">
         <div class="max-w-md">
           <div class="text-6xl mb-4">👥</div>
-          <h1 class="text-3xl font-bold mb-4">멤버가 없습니다</h1>
+          <h1 class="text-3xl font-bold mb-4"><%= t('members.index.empty.title') %></h1>
           <p class="mb-6 text-base-content/70">
-            클럽에 멤버를 추가하여 팀을 구성하고 경기를 시작하세요!
+            <%= t('members.index.empty.description') %>
           </p>
           <%= link_to new_club_member_path(@club), class: "btn btn-primary btn-lg gap-2" do %>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
-            첫 멤버 추가하기
+            <%= t('members.index.empty.add_first') %>
           <% end %>
         </div>
       </div>

@@ -1,12 +1,12 @@
-<% content_for :title, "관리자 · 사용자" %>
+<% content_for :title, t('admin.users.page_title') %>
 
 <div class="page-header">
   <div>
-    <h1>사용자 목록</h1>
-    <p class="muted">전체 사용자 계정 정보</p>
+    <h1><%= t('admin.users.title') %></h1>
+    <p class="muted"><%= t('admin.users.subtitle') %></p>
   </div>
   <div class="actions">
-    <%= link_to "대시보드", admin_root_path, class: "button ghost" %>
+    <%= link_to t('admin.common.dashboard'), admin_root_path, class: "button ghost" %>
   </div>
 </div>
 
@@ -14,12 +14,12 @@
   <table class="table">
     <thead>
       <tr>
-        <th>ID</th>
-        <th>이메일</th>
-        <th>이름</th>
-        <th>관리자</th>
-        <th>클럽 수</th>
-        <th>보기</th>
+        <th><%= t('admin.users.fields.id') %></th>
+        <th><%= t('admin.users.fields.email') %></th>
+        <th><%= t('admin.users.fields.name') %></th>
+        <th><%= t('admin.users.fields.admin') %></th>
+        <th><%= t('admin.users.fields.clubs_count') %></th>
+        <th><%= t('admin.common.view') %></th>
       </tr>
     </thead>
     <tbody>
@@ -30,7 +30,7 @@
           <td><%= user.name.presence || "-" %></td>
           <td><%= user.admin? ? "Y" : "N" %></td>
           <td><%= user.clubs.count %></td>
-          <td><%= link_to "보기", admin_user_path(user), class: "button ghost" %></td>
+          <td><%= link_to t('admin.common.view'), admin_user_path(user), class: "button ghost" %></td>
         </tr>
       <% end %>
     </tbody>

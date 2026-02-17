@@ -38,5 +38,9 @@ module BmRail
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+
+    config.i18n.available_locales = %i[ko ja en zh fr es it pt tl de]
+    config.i18n.default_locale = :ko
+    config.i18n.fallbacks = [ :ko ]
   end
 end

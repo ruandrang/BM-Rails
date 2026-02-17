@@ -1,12 +1,12 @@
-<% content_for :title, "관리자 · 클럽" %>
+<% content_for :title, t('admin.clubs.page_title') %>
 
 <div class="page-header">
   <div>
-    <h1>클럽 목록</h1>
-    <p class="muted">전체 클럽 정보</p>
+    <h1><%= t('admin.clubs.title') %></h1>
+    <p class="muted"><%= t('admin.clubs.subtitle') %></p>
   </div>
   <div class="actions">
-    <%= link_to "대시보드", admin_root_path, class: "button ghost" %>
+    <%= link_to t('admin.common.dashboard'), admin_root_path, class: "button ghost" %>
   </div>
 </div>
 
@@ -14,13 +14,13 @@
   <table class="table">
     <thead>
       <tr>
-        <th>ID</th>
-        <th>클럽명</th>
-        <th>소유자</th>
-        <th>아이콘</th>
-        <th>멤버 수</th>
-        <th>경기 수</th>
-        <th>보기</th>
+        <th><%= t('admin.clubs.fields.id') %></th>
+        <th><%= t('admin.clubs.fields.name') %></th>
+        <th><%= t('admin.clubs.fields.owner') %></th>
+        <th><%= t('admin.clubs.fields.icon') %></th>
+        <th><%= t('admin.clubs.fields.members_count') %></th>
+        <th><%= t('admin.clubs.fields.matches_count') %></th>
+        <th><%= t('admin.common.view') %></th>
       </tr>
     </thead>
     <tbody>
@@ -32,7 +32,7 @@
           <td><%= club_icon(club.icon) %></td>
           <td><%= club.members.count %></td>
           <td><%= club.matches.count %></td>
-          <td><%= link_to "보기", admin_club_path(club), class: "button ghost" %></td>
+          <td><%= link_to t('admin.common.view'), admin_club_path(club), class: "button ghost" %></td>
         </tr>
       <% end %>
     </tbody>

@@ -1,9 +1,9 @@
-<% content_for :title, "세팅" %>
+<% content_for :title, t("settings.page_title") %>
 
 <div class="max-w-5xl mx-auto">
   <div class="mb-6">
-    <h1 class="text-4xl font-bold text-base-content mb-2">세팅</h1>
-    <p class="text-base-content/60">점수판 기본 설정을 관리합니다.</p>
+    <h1 class="text-4xl font-bold text-base-content mb-2"><%= t("settings.page_title") %></h1>
+    <p class="text-base-content/60"><%= t("settings.page_subtitle") %></p>
   </div>
 
   <div class="card bg-base-100 shadow-xl border border-base-300">
@@ -14,51 +14,51 @@
         <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
           <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h2 class="text-2xl font-bold text-base-content">경기 시간 설정</h2>
-              <p class="text-base-content/60 mt-1">설정한 시간이 새 점수판의 기본 경기 시간으로 적용됩니다.</p>
+              <h2 class="text-2xl font-bold text-base-content"><%= t("settings.game_time.title") %></h2>
+              <p class="text-base-content/60 mt-1"><%= t("settings.game_time.description") %></p>
             </div>
             <div class="badge badge-neutral badge-lg gap-1 shrink-0">
-              현재 기본 <span data-minute-preview class="font-bold"><%= @user.default_game_minutes %></span>분
+              <%= t("settings.game_time.current_default", minutes: @user.default_game_minutes) %>
             </div>
           </div>
 
           <div class="mt-5 grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-4">
             <div class="rounded-xl border border-base-300 bg-base-200/40 p-4">
-              <p class="font-semibold text-base-content mb-3">기본 경기 시간</p>
+              <p class="font-semibold text-base-content mb-3"><%= t("settings.game_time.base_minutes") %></p>
 
               <div class="join w-full">
                 <button type="button" class="btn btn-outline join-item px-4" data-minute-adjust="-1">-1</button>
                 <button type="button" class="btn btn-outline join-item px-4" data-minute-adjust="1">+1</button>
                 <div class="join-item btn btn-outline flex-1 cursor-default pointer-events-none bg-base-100 justify-center gap-1 normal-case">
                   <span data-minute-display class="text-3xl md:text-4xl font-black tabular-nums leading-none"><%= @user.default_game_minutes %></span>
-                  <span class="text-sm text-base-content/60 font-semibold">분</span>
+                  <span class="text-sm text-base-content/60 font-semibold"><%= t("settings.game_time.minutes_unit") %></span>
                 </div>
               </div>
 
-              <p class="text-sm text-base-content/60 mt-3">허용 범위: <%= User::MIN_GAME_MINUTES %>~<%= User::MAX_GAME_MINUTES %>분</p>
+              <p class="text-sm text-base-content/60 mt-3"><%= t("settings.game_time.allowed_range", min: User::MIN_GAME_MINUTES, max: User::MAX_GAME_MINUTES) %></p>
               <% if @user.errors[:default_game_minutes].any? %>
                 <p class="text-error text-sm mt-2"><%= @user.errors[:default_game_minutes].join(", ") %></p>
               <% end %>
             </div>
 
             <div class="rounded-xl border border-base-300 bg-base-200/40 p-4">
-              <p class="font-semibold text-base-content mb-3">빠른 시간 선택</p>
+              <p class="font-semibold text-base-content mb-3"><%= t("settings.game_time.quick_select") %></p>
               <div class="flex flex-wrap gap-2">
                 <% [6, 7, 8, 9, 10, 11, 12].each do |minute| %>
                   <button type="button" class="btn btn-outline" data-minute-preset="<%= minute %>">
-                    <%= minute %>분
+                    <%= t("settings.game_time.minute_option", minutes: minute) %>
                   </button>
                 <% end %>
               </div>
-              <p class="text-sm text-base-content/60 mt-3">자주 쓰는 시간을 빠르게 적용할 수 있습니다.</p>
+              <p class="text-sm text-base-content/60 mt-3"><%= t("settings.game_time.quick_select_hint") %></p>
             </div>
           </div>
         </section>
 
         <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
           <div class="mb-4">
-            <h3 class="text-xl font-bold">사운드/음성 설정</h3>
-            <p class="text-base-content/60 mt-1">현장 운영 환경에 맞게 안내 기능을 켜거나 끌 수 있습니다.</p>
+            <h3 class="text-xl font-bold"><%= t("settings.voice.title") %></h3>
+            <p class="text-base-content/60 mt-1"><%= t("settings.voice.description") %></p>
           </div>
 
           <% selected_voice_rate = @user.voice_announcement_rate.to_f.round(1) %>
@@ -72,11 +72,11 @@
 
             <label class="cursor-pointer rounded-xl border border-base-300 bg-base-200/30 p-4 flex items-center justify-between gap-4 hover:border-primary/40 transition-colors">
               <div>
-                <p class="font-semibold">안내 기능 (사운드 + 음성)</p>
-                <p class="text-sm text-base-content/60">제어 패널과 동일하게 버저/음성 안내를 한 번에 ON/OFF 합니다.</p>
+                <p class="font-semibold"><%= t("settings.voice.announcements_title") %></p>
+                <p class="text-sm text-base-content/60"><%= t("settings.voice.announcements_description") %></p>
               </div>
               <div class="flex items-center gap-2">
-                <span id="announcements-status" class="badge badge-sm">ON</span>
+                <span id="announcements-status" class="badge badge-sm"><%= t("common.on") %></span>
                 <input
                   type="checkbox"
                   class="toggle toggle-primary"
@@ -86,11 +86,16 @@
             </label>
 
             <div class="rounded-xl border border-base-300 bg-base-200/30 p-4">
-              <p class="font-semibold">음성 안내 속도</p>
-              <p class="text-sm text-base-content/60 mt-1">카운트다운과 점수 안내 음성 속도를 설정합니다.</p>
+              <p class="font-semibold"><%= t("settings.voice.rate_title") %></p>
+              <p class="text-sm text-base-content/60 mt-1"><%= t("settings.voice.rate_description") %></p>
 
               <div class="mt-3 flex flex-wrap items-center gap-2">
-                <% User::VOICE_ANNOUNCEMENT_RATE_OPTIONS.each do |label, rate| %>
+                <% User::VOICE_ANNOUNCEMENT_RATES.each do |rate| %>
+                  <% label = case rate
+                            when 1.0 then t("settings.voice.rate_normal")
+                            when 1.1 then t("settings.voice.rate_fast")
+                            else t("settings.voice.rate_slow")
+                            end %>
                   <label class="cursor-pointer">
                     <%= form.radio_button :voice_announcement_rate, rate, checked: (selected_voice_rate == rate), class: "peer sr-only" %>
                     <span class="inline-flex items-center rounded-lg border border-base-300 bg-base-100 px-3 py-2 text-sm font-semibold transition-all peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-content">
@@ -99,42 +104,62 @@
                   </label>
                 <% end %>
                 <button type="button" class="btn btn-sm btn-outline ml-1" data-voice-rate-test>
-                  테스트
+                  <%= t("settings.voice.test_button") %>
                 </button>
               </div>
-              <p class="text-xs text-base-content/50 mt-2">테스트 버튼을 누르면 선택한 속도로 음성 안내를 미리 들어볼 수 있습니다.</p>
+              <p class="text-xs text-base-content/50 mt-2"><%= t("settings.voice.test_description") %></p>
             </div>
           </div>
         </section>
 
         <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
           <div class="mb-4">
-            <h3 class="text-xl font-bold">공격방향 전환 설정</h3>
-            <p class="text-base-content/60 mt-1">쿼터 진행 시 공격방향 자동 전환 규칙을 선택합니다.</p>
+            <h3 class="text-xl font-bold"><%= t("settings.language.title") %></h3>
+            <p class="text-base-content/60 mt-1"><%= t("settings.language.description") %></p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            <% selected_locale = @user.preferred_locale.presence || User::DEFAULT_LOCALE %>
+            <% available_locale_options.each do |label, code| %>
+              <label class="cursor-pointer rounded-xl border border-base-300 bg-base-200/30 p-4 flex items-center gap-3 hover:border-primary/40 transition-colors">
+                <%= form.radio_button :preferred_locale, code, checked: (selected_locale == code), class: "radio radio-primary" %>
+                <div class="min-w-0">
+                  <p class="font-semibold truncate"><%= label %></p>
+                  <p class="text-xs text-base-content/50 uppercase"><%= code %></p>
+                </div>
+              </label>
+            <% end %>
+          </div>
+        </section>
+
+        <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
+          <div class="mb-4">
+            <h3 class="text-xl font-bold"><%= t("settings.possession.title") %></h3>
+            <p class="text-base-content/60 mt-1"><%= t("settings.possession.description") %></p>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <label class="cursor-pointer rounded-xl border border-base-300 bg-base-200/30 p-4 flex items-start gap-3 hover:border-primary/40 transition-colors">
               <%= form.radio_button :possession_switch_pattern, "q12_q34", class: "radio radio-primary mt-1" %>
               <div>
-                <p class="font-semibold">1,2쿼터 / 3,4쿼터 전환</p>
-                <p class="text-sm text-base-content/60 mt-1">전반(1·2Q) 동일, 후반(3·4Q)에서 방향을 바꿉니다.</p>
+                <p class="font-semibold"><%= t("settings.possession.option_q12_q34.title") %></p>
+                <p class="text-sm text-base-content/60 mt-1"><%= t("settings.possession.option_q12_q34.description") %></p>
               </div>
             </label>
 
             <label class="cursor-pointer rounded-xl border border-base-300 bg-base-200/30 p-4 flex items-start gap-3 hover:border-primary/40 transition-colors">
               <%= form.radio_button :possession_switch_pattern, "q13_q24", class: "radio radio-primary mt-1" %>
               <div>
-                <p class="font-semibold">1,3쿼터 / 2,4쿼터 전환</p>
-                <p class="text-sm text-base-content/60 mt-1">쿼터마다 번갈아 공격방향을 자동 전환합니다.</p>
+                <p class="font-semibold"><%= t("settings.possession.option_q13_q24.title") %></p>
+                <p class="text-sm text-base-content/60 mt-1"><%= t("settings.possession.option_q13_q24.description") %></p>
               </div>
             </label>
           </div>
         </section>
 
         <div class="flex items-center gap-3">
-          <%= form.submit "저장하기", class: "btn btn-primary px-7" %>
-          <%= link_to "취소", clubs_path, class: "btn btn-ghost" %>
+          <%= form.submit t("common.save"), class: "btn btn-primary px-7" %>
+          <%= link_to t("common.cancel"), clubs_path, class: "btn btn-ghost" %>
         </div>
       <% end %>
     </div>
@@ -147,6 +172,22 @@
       const form = document.querySelector("[data-settings-form]");
       if (!form || form.dataset.settingsUiBound === "true") return;
       form.dataset.settingsUiBound = "true";
+      const announcementsOnLabel = "<%= j t("common.on") %>";
+      const announcementsOffLabel = "<%= j t("common.off") %>";
+      const unsupportedSpeechAlert = "<%= j t("settings.voice.unsupported_browser_alert") %>";
+      const speechLocaleByPreferredLocale = <%= raw(User::SPEECH_LOCALE_BY_PREFERRED_LOCALE.to_json) %>;
+      const voiceTestTextByLocale = <%= raw({
+        "ko" => I18n.t("settings.voice.preview_text", locale: :ko),
+        "ja" => I18n.t("settings.voice.preview_text", locale: :ja),
+        "en" => I18n.t("settings.voice.preview_text", locale: :en),
+        "zh" => I18n.t("settings.voice.preview_text", locale: :zh),
+        "fr" => I18n.t("settings.voice.preview_text", locale: :fr),
+        "es" => I18n.t("settings.voice.preview_text", locale: :es),
+        "it" => I18n.t("settings.voice.preview_text", locale: :it),
+        "pt" => I18n.t("settings.voice.preview_text", locale: :pt),
+        "tl" => I18n.t("settings.voice.preview_text", locale: :tl),
+        "de" => I18n.t("settings.voice.preview_text", locale: :de)
+      }.to_json) %>;
 
       const minuteInput = form.querySelector("[data-minute-input]");
       const minutePreview = form.querySelector("[data-minute-preview]");
@@ -201,7 +242,7 @@
         const enabled = announcementsToggle.checked;
 
         if (announcementsStatus) {
-          announcementsStatus.textContent = enabled ? "ON" : "OFF";
+          announcementsStatus.textContent = enabled ? announcementsOnLabel : announcementsOffLabel;
           announcementsStatus.classList.toggle("badge-success", enabled);
           announcementsStatus.classList.toggle("badge-ghost", !enabled);
         }
@@ -218,6 +259,12 @@
 
       const voiceRateTestButton = form.querySelector("[data-voice-rate-test]");
       if (voiceRateTestButton) {
+        const selectedPreferredLocale = () => {
+          const checked = form.querySelector('input[name="user[preferred_locale]"]:checked');
+          const value = String(checked?.value || "<%= j(User::DEFAULT_LOCALE) %>").toLowerCase();
+          return Object.prototype.hasOwnProperty.call(speechLocaleByPreferredLocale, value) ? value : "<%= j(User::DEFAULT_LOCALE) %>";
+        };
+
         const selectedVoiceRate = () => {
           const checked = form.querySelector('input[name="user[voice_announcement_rate]"]:checked');
           const parsed = Number.parseFloat(checked?.value || "<%= User::DEFAULT_VOICE_ANNOUNCEMENT_RATE %>");
@@ -226,21 +273,26 @@
 
         voiceRateTestButton.addEventListener("click", () => {
           if (!("speechSynthesis" in window)) {
-            alert("이 브라우저는 음성 안내를 지원하지 않습니다.");
+            alert(unsupportedSpeechAlert);
             return;
           }
 
           window.speechSynthesis.cancel();
 
-          const utterance = new SpeechSynthesisUtterance("이 속도로 안내 하겠습니다. 삼십이대 사십오");
-          utterance.lang = "ko-KR";
+          const locale = selectedPreferredLocale();
+          const voiceLang = speechLocaleByPreferredLocale[locale] || speechLocaleByPreferredLocale["ko"];
+          const previewText = voiceTestTextByLocale[locale] || voiceTestTextByLocale["ko"];
+
+          const utterance = new SpeechSynthesisUtterance(previewText);
+          utterance.lang = voiceLang;
           utterance.rate = selectedVoiceRate();
           utterance.volume = 1.0;
           utterance.pitch = 1.0;
 
           const voices = window.speechSynthesis.getVoices();
-          const koreanVoice = voices.find((voice) => String(voice.lang || "").toLowerCase().startsWith("ko"));
-          if (koreanVoice) utterance.voice = koreanVoice;
+          const langPrefix = String(voiceLang || "").toLowerCase().split("-")[0];
+          const matchingVoice = voices.find((voice) => String(voice.lang || "").toLowerCase().startsWith(langPrefix));
+          if (matchingVoice) utterance.voice = matchingVoice;
 
           window.speechSynthesis.speak(utterance);
         });

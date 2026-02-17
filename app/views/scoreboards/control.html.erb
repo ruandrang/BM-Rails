@@ -7,6 +7,8 @@
      data-teams-count="<%= @match.teams.count %>"
      data-regular-quarters="<%= @match.respond_to?(:regular_quarters) ? @match.regular_quarters : 4 %>"
      data-default-period-seconds="<%= current_user.default_period_seconds %>"
+     data-locale="<%= current_locale %>"
+     data-voice-lang="<%= current_user.speech_locale %>"
      data-sound-enabled="<%= current_user.scoreboard_sound_enabled %>"
      data-voice-enabled="<%= current_user.voice_announcement_enabled %>"
      data-voice-rate="<%= current_user.voice_announcement_rate %>"
@@ -17,30 +19,35 @@
     <header class="flex justify-between items-center mb-8 border-b border-gray-200 pb-6 relative">
       <div class="flex items-center gap-4">
         <h1 class="text-3xl font-black tracking-tighter italic text-gray-900">
-          제어 <span class="text-[#FF6B35]">패널</span>
+          <span data-ui-key="control_panel_prefix">제어</span> <span class="text-[#FF6B35]" data-ui-key="control_panel_highlight">패널</span>
         </h1>
-        <p class="text-gray-500 text-sm mt-1 font-mono">연결됨</p>
+        <p class="text-gray-500 text-sm mt-1 font-mono" data-ui-key="control_connected">연결됨</p>
       </div>
 
       <!-- Center Info -->
       <div class="absolute left-1/2 -translate-x-1/2 text-center">
-        <h2 class="text-xl font-bold text-gray-900"><%= @club&.name || "Standalone Mode" %></h2>
+        <h2 class="text-xl font-bold text-gray-900" data-club-title data-club-name="<%= @club&.name.to_s %>"><%= @club&.name || "Standalone Mode" %></h2>
         <p class="text-gray-500 text-sm font-mono"><%= Time.current.strftime("%Y.%m.%d") %></p>
       </div>
 
       <div class="flex items-center gap-3">
         <% if @match.id.to_s.start_with?("standalone_") %>
-          <%= link_to "디스플레이 열기", standalone_display_path, target: "_blank", class: "btn btn-sm btn-outline border-gray-300 text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-400" %>
+          <%= link_to standalone_display_path, target: "_blank", class: "btn btn-sm btn-outline border-gray-300 text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-400", data: { ui_key: "open_display" } do %>
+            디스플레이 열기
+          <% end %>
         <% else %>
-          <%= link_to "디스플레이 열기", scoreboard_display_club_match_path(@club, @match), target: "_blank", class: "btn btn-sm btn-outline border-gray-300 text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-400" %>
+          <%= link_to scoreboard_display_club_match_path(@club, @match), target: "_blank", class: "btn btn-sm btn-outline border-gray-300 text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-400", data: { ui_key: "open_display" } do %>
+            디스플레이 열기
+          <% end %>
         <% end %>
         <button
           class="btn btn-sm px-3 bg-white border border-gray-300 text-gray-600 hover:bg-gray-50 shadow-sm font-bold"
-          data-action="toggle-quarter-score-reset">
+          data-action="toggle-quarter-score-reset"
+          data-ui-key="quarter_reset_off">
           쿼터별 점수 리셋 OFF
         </button>
         <div class="px-3 py-1 rounded border border-[#22C55E]/30 bg-[#22C55E]/10 text-[#22C55E] text-xs font-bold tracking-wider">
-          라이브
+          <span data-ui-key="live">라이브</span>
         </div>
       </div>
     </header>
@@ -52,7 +59,7 @@
       <section class="lg:col-span-5 flex flex-col gap-6">
         <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
           <div class="flex justify-between items-center mb-4">
-             <h2 class="text-gray-500 text-[10px] tracking-[2px] font-bold uppercase">경기 타이머</h2>
+             <h2 class="text-gray-500 text-[10px] tracking-[2px] font-bold uppercase" data-ui-key="game_timer">경기 타이머</h2>
              <span class="text-[#E53935] font-black text-3xl" data-scoreboard-quarter>1Q</span>
           </div>
           
@@ -77,12 +84,12 @@
                     data-action="toggle-main"
                     data-start-text="경기 시작"
                     data-stop-text="경기 멈춤">
-              <span>경기 시작</span>
+              <span data-ui-key="main_start">경기 시작</span>
             </button>
             <div class="flex flex-col gap-2">
                <button class="btn btn-outline h-20 px-6 rounded-xl border-2 border-gray-300 text-gray-600 font-bold text-lg hover:bg-gray-100 hover:text-gray-900 hover:border-gray-400"
                   data-action="reset-main">
-                리셋
+                <span data-ui-key="reset">리셋</span>
               </button>
             </div>
           </div>
@@ -90,7 +97,7 @@
 
         <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
            <div class="flex items-center justify-between mb-4">
-             <h2 class="text-gray-500 text-[10px] tracking-[2px] font-bold uppercase">샷클락</h2>
+             <h2 class="text-gray-500 text-[10px] tracking-[2px] font-bold uppercase" data-ui-key="shot_clock_title">샷클락</h2>
            </div>
            
            <div class="flex gap-4">
@@ -102,7 +109,7 @@
               <div class="flex flex-col gap-2 w-32">
                 <button class="btn flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 border-none font-bold" data-action="reset-shot-24">24s</button>
                 <button class="btn flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 border-none font-bold" data-action="reset-shot-14">14s</button>
-                <button class="btn flex-1 btn-outline border-gray-300 text-gray-500 hover:bg-gray-100 hover:text-gray-800" data-action="toggle-shot">멈춤</button>
+                <button class="btn flex-1 btn-outline border-gray-300 text-gray-500 hover:bg-gray-100 hover:text-gray-800" data-action="toggle-shot"><span data-ui-key="main_stop">멈춤</span></button>
               </div>
            </div>
         </div>
@@ -146,11 +153,11 @@
           </div>
           <div class="grid grid-cols-2 gap-2 mt-2">
             <button class="btn h-10 bg-gray-50 hover:bg-gray-100 text-gray-600 border border-gray-200 text-sm font-bold rounded-lg" data-action="sub-home">-1</button>
-            <button class="btn h-10 bg-gray-50 hover:bg-red-50 text-red-500 border border-red-100 text-sm font-bold rounded-lg" data-action="reset-home-score">리셋</button>
+            <button class="btn h-10 bg-gray-50 hover:bg-red-50 text-red-500 border border-red-100 text-sm font-bold rounded-lg" data-action="reset-home-score"><span data-ui-key="reset">리셋</span></button>
           </div>
           <div class="flex justify-between items-center mt-2 px-2">
             <div class="flex items-center gap-2">
-               <span class="text-sm font-bold text-gray-400 uppercase">파울</span>
+               <span class="text-sm font-bold text-gray-400 uppercase" data-ui-key="foul">파울</span>
                <div class="join border border-gray-200 rounded-lg overflow-hidden">
                  <button class="join-item btn btn-sm btn-ghost border-r border-gray-200 bg-white" data-action="decrement-home-fouls">-</button>
                  <button class="join-item btn btn-sm btn-active bg-gray-50 cursor-default w-12 text-gray-900 text-lg font-bold border-none" data-home-fouls>0</button>
@@ -187,11 +194,11 @@
           </div>
           <div class="grid grid-cols-2 gap-2 mt-2">
             <button class="btn h-10 bg-gray-50 hover:bg-gray-100 text-gray-600 border border-gray-200 text-sm font-bold rounded-lg" data-action="sub-away">-1</button>
-            <button class="btn h-10 bg-gray-50 hover:bg-red-50 text-red-500 border border-red-100 text-sm font-bold rounded-lg" data-action="reset-away-score">리셋</button>
+            <button class="btn h-10 bg-gray-50 hover:bg-red-50 text-red-500 border border-red-100 text-sm font-bold rounded-lg" data-action="reset-away-score"><span data-ui-key="reset">리셋</span></button>
           </div>
           <div class="flex justify-between items-center mt-2 px-2">
             <div class="flex items-center gap-2">
-               <span class="text-sm font-bold text-gray-400 uppercase">파울</span>
+               <span class="text-sm font-bold text-gray-400 uppercase" data-ui-key="foul">파울</span>
                <div class="join border border-gray-200 rounded-lg overflow-hidden">
                  <button class="join-item btn btn-sm btn-ghost border-r border-gray-200 bg-white" data-action="decrement-away-fouls">-</button>
                  <button class="join-item btn btn-sm btn-active bg-gray-50 cursor-default w-12 text-gray-900 text-lg font-bold border-none" data-away-fouls>0</button>
@@ -213,13 +220,14 @@
         <!-- Main Controls -->
         <div class="flex items-center gap-2 shrink-0">
           <button class="btn btn-sm px-5 border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900 shadow-sm font-black text-lg h-11 flex items-center gap-2 shrink-0"
-                  data-action="buzzer">🔔 BUZZER</button>
+                  data-action="buzzer" data-ui-key="buzzer_label">🔔 BUZZER</button>
           <button class="btn btn-sm px-3 bg-white hover:bg-gray-50 shadow-sm font-bold h-11 shrink-0"
-                  data-action="toggle-announcements">🔊 안내 ON</button>
+                  data-action="toggle-announcements"
+                  data-ui-key="announcements_on">🔊 안내 ON</button>
           <button class="btn btn-sm px-4 border-red-100 bg-red-50 text-red-600 hover:bg-red-100 shadow-sm font-bold h-11 shrink-0"
-                  data-action="reset-all">🔄 전체 리셋</button>
+                  data-action="reset-all" data-ui-key="reset_all">🔄 전체 리셋</button>
           <button class="btn btn-sm px-4 border-blue-100 bg-blue-50 text-blue-600 hover:bg-blue-100 shadow-sm font-bold h-11 shrink-0"
-                  data-action="swap-sides">🔄 점수 바꾸기</button>
+                  data-action="swap-sides" data-ui-key="swap_scores">🔄 점수 바꾸기</button>
         </div>
 
         <% unless @match.id.to_s.start_with?("standalone_") %>
@@ -232,9 +240,10 @@
                       data-action="add-game">+ 경기 추가</button>
             <% end %>
             <button class="btn btn-sm px-4 border-red-100 bg-red-50 text-red-600 hover:bg-red-100 shadow-sm font-bold h-11 shrink-0"
-                    data-action="new-game">경기 리셋</button>
+                    data-action="new-game" data-ui-key="match_reset">경기 리셋</button>
             <button class="btn btn-sm px-4 border-green-200 bg-green-50 text-green-700 hover:bg-green-100 shadow-sm font-bold h-11 shrink-0"
-                    data-action="finish-game">🏁 경기 종료</button>
+                    data-action="finish-game"
+                    data-ui-key="finish_match">🏁 경기 종료</button>
           </div>
         <% end %>
 
@@ -251,7 +260,8 @@
 
         <% unless @match.id.to_s.start_with?("standalone_") %>
           <button class="btn px-8 h-14 min-h-0 ml-auto bg-blue-600 border-blue-600 text-white hover:bg-blue-700 shadow-md font-extrabold text-base tracking-wide shrink-0"
-                  data-action="next-quarter">다음 쿼터</button>
+                  data-action="next-quarter"
+                  data-ui-key="next_quarter">다음 쿼터</button>
         <% end %>
 
       </div>
@@ -261,9 +271,9 @@
     <div class="mt-12 w-full pb-16 flex flex-col items-center">
         <!-- Toggle Button -->
         <div class="mb-4">
-             <button data-action="toggle-shortcuts" class="btn btn-xs bg-white border border-gray-300 shadow-sm text-gray-500 rounded-full px-4 hover:bg-gray-50 transition-all">
-                ⌨️ 상세 숨기기
-             </button>
+                <button data-action="toggle-shortcuts" data-ui-key="shortcuts_hide" class="btn btn-xs bg-white border border-gray-300 shadow-sm text-gray-500 rounded-full px-4 hover:bg-gray-50 transition-all">
+                  ⌨️ 상세 숨기기
+                </button>
         </div>
 
         <!-- Collapsible Panel: Draggable Cards -->
@@ -273,23 +283,25 @@
               <!-- Quarterly Score Table -->
               <div data-detail-sort-item data-detail-sort-key="matchup" class="w-full bg-white border border-gray-200 rounded-2xl shadow-sm">
                 <div class="flex items-center justify-between px-6 pt-5 pb-2 border-b border-gray-100">
-                  <p class="text-xs font-bold tracking-widest uppercase text-gray-400">경기 Matchup</p>
+                  <p class="text-xs font-bold tracking-widest uppercase text-gray-400" data-ui-key="quarter_table_matchup">경기 Matchup</p>
                   <div class="flex items-center gap-2">
                     <div class="join border border-gray-200 rounded-lg overflow-hidden">
                       <button
                         type="button"
                         class="join-item btn btn-xs bg-gray-900 text-white border-0 h-7 min-h-0 px-3"
-                        data-action="set-quarter-view-cumulative">
+                        data-action="set-quarter-view-cumulative"
+                        data-ui-key="view_cumulative">
                         누적
                       </button>
                       <button
                         type="button"
                         class="join-item btn btn-xs bg-white text-gray-500 border-0 h-7 min-h-0 px-3"
-                        data-action="set-quarter-view-per-quarter">
+                        data-action="set-quarter-view-per-quarter"
+                        data-ui-key="view_per_quarter">
                         쿼터별
                       </button>
                     </div>
-                    <button type="button" data-detail-drag-handle class="btn btn-xs btn-ghost text-gray-400 hover:text-gray-700 min-h-0 h-7 px-2 cursor-move" aria-label="경기 순서 변경">
+                    <button type="button" data-detail-drag-handle class="btn btn-xs btn-ghost text-gray-400 hover:text-gray-700 min-h-0 h-7 px-2 cursor-move" aria-label="경기 순서 변경" data-ui-aria-key="drag_matchup_aria" data-ui-key="drag">
                       ↕ 드래그
                     </button>
                   </div>
@@ -303,8 +315,8 @@
             <!-- Shortcuts -->
             <div data-detail-sort-item data-detail-sort-key="shortcuts" class="w-full bg-white border border-gray-200 rounded-2xl shadow-sm">
               <div class="flex items-center justify-between px-6 pt-5 pb-2 border-b border-gray-100">
-                <p class="text-xs font-bold tracking-widest uppercase text-gray-400">키보드 단축키</p>
-                <button type="button" data-detail-drag-handle class="btn btn-xs btn-ghost text-gray-400 hover:text-gray-700 min-h-0 h-7 px-2 cursor-move" aria-label="단축키 순서 변경">
+                <p class="text-xs font-bold tracking-widest uppercase text-gray-400" data-ui-key="shortcuts_title">키보드 단축키</p>
+                <button type="button" data-detail-drag-handle class="btn btn-xs btn-ghost text-gray-400 hover:text-gray-700 min-h-0 h-7 px-2 cursor-move" aria-label="단축키 순서 변경" data-ui-aria-key="drag_shortcuts_aria" data-ui-key="drag">
                   ↕ 드래그
                 </button>
               </div>
@@ -314,29 +326,29 @@
                 <div class="flex flex-col gap-4">
                   <div class="flex items-center gap-4">
                     <kbd class="bg-gray-100 text-gray-900 px-3 py-1 rounded-lg font-black min-w-[60px] text-center shadow-sm border border-gray-300 border-b-4 text-lg">Space</kbd>
-                    <span class="text-base">경기 시간 시작 / 멈춤</span>
+                    <span class="text-base" data-ui-key="shortcut_game_clock_toggle">경기 시간 시작 / 멈춤</span>
                   </div>
                   <div class="flex items-center gap-4">
                     <div class="flex gap-2">
                       <kbd class="bg-gray-100 text-gray-900 px-3 py-1 rounded-lg font-black min-w-[36px] text-center shadow-sm border border-gray-300 border-b-4 text-lg">Z</kbd>
                       <kbd class="bg-gray-100 text-gray-900 px-3 py-1 rounded-lg font-black min-w-[36px] text-center shadow-sm border border-gray-300 border-b-4 text-lg">X</kbd>
                     </div>
-                    <span class="text-base">샷클락 리셋 (14초 / 24초)</span>
+                    <span class="text-base" data-ui-key="shortcut_shot_reset">샷클락 리셋 (14초 / 24초)</span>
                   </div>
                   <div class="flex items-center gap-4">
                     <kbd class="bg-gray-100 text-gray-900 px-3 py-1 rounded-lg font-black min-w-[36px] text-center shadow-sm border border-gray-300 border-b-4 text-lg">C</kbd>
-                    <span class="text-base">샷클락 멈춤 / 시작</span>
+                    <span class="text-base" data-ui-key="shortcut_shot_toggle">샷클락 멈춤 / 시작</span>
                   </div>
                   <div class="flex items-center gap-4">
                     <div class="flex gap-2">
                       <kbd class="bg-gray-100 text-gray-900 px-3 py-1 rounded-lg font-black min-w-[36px] text-center shadow-sm border border-gray-300 border-b-4 text-lg">B</kbd>
                       <kbd class="bg-gray-100 text-gray-900 px-3 py-1 rounded-lg font-black min-w-[36px] text-center shadow-sm border border-gray-300 border-b-4 text-lg">V</kbd>
                     </div>
-                    <span class="text-base">B: 안내 ON / V: 안내 OFF</span>
+                    <span class="text-base" data-ui-key="shortcut_announcements_toggle">B: 안내 ON / V: 안내 OFF</span>
                   </div>
                   <div class="flex items-center gap-4">
                     <kbd class="bg-gray-100 text-gray-900 px-3 py-1 rounded-lg font-black min-w-[36px] text-center shadow-sm border border-gray-300 border-b-4 text-lg">D</kbd>
-                    <span class="text-base">부저 울리기</span>
+                    <span class="text-base" data-ui-key="shortcut_buzzer">부저 울리기</span>
                   </div>
                 </div>
 
@@ -350,7 +362,7 @@
                       <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-lg">2</kbd>
                       <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-lg">3</kbd>
                     </div>
-                    <span class="text-base">왼쪽 팀 득점 (+1, +2, +3)</span>
+                    <span class="text-base" data-ui-key="shortcut_left_score_add">왼쪽 팀 득점 (+1, +2, +3)</span>
                   </div>
                   <div class="flex items-center gap-4">
                     <div class="flex gap-2">
@@ -358,14 +370,14 @@
                       <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-lg">9</kbd>
                       <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-lg">0</kbd>
                     </div>
-                    <span class="text-base">오른쪽 팀 득점 (+1, +2, +3)</span>
+                    <span class="text-base" data-ui-key="shortcut_right_score_add">오른쪽 팀 득점 (+1, +2, +3)</span>
                   </div>
                   <div class="flex items-center gap-4">
                     <div class="flex gap-2">
                       <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-lg">5</kbd>
                       <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-lg">6</kbd>
                     </div>
-                    <span class="text-base">5: 오른쪽 팀 -1 / 6: 왼쪽 팀 -1</span>
+                    <span class="text-base" data-ui-key="shortcut_score_subtract">5: 오른쪽 팀 -1 / 6: 왼쪽 팀 -1</span>
                   </div>
                   <div class="flex items-center gap-4">
                     <div class="flex gap-2">
@@ -374,11 +386,11 @@
                       <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-lg">K</kbd>
                       <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-lg">L</kbd>
                     </div>
-                    <span class="text-base">A/S: 오른쪽 파울 -, + · K/L: 왼쪽 파울 -, +</span>
+                    <span class="text-base" data-ui-key="shortcut_fouls">A/S: 오른쪽 파울 -, + · K/L: 왼쪽 파울 -, +</span>
                   </div>
                   <div class="flex items-center gap-4">
                     <kbd class="bg-gray-100 text-gray-900 w-9 py-1 rounded-lg font-black text-center shadow-sm border border-gray-300 border-b-4 text-lg">N</kbd>
-                    <span class="text-base">다음 쿼터로 이동</span>
+                    <span class="text-base" data-ui-key="shortcut_next_quarter">다음 쿼터로 이동</span>
                   </div>
                 </div>
 

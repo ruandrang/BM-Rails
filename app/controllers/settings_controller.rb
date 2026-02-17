@@ -15,10 +15,17 @@ class SettingsController < ApplicationController
       setting_params[:possession_switch_pattern],
       default: @user.possession_switch_pattern
     )
+    preferred_locale = normalized_preferred_locale(
+      setting_params[:preferred_locale],
+      default: @user.preferred_locale
+    )
 
     unless minutes
       @user.assign_attributes(setting_params.except(:announcements_enabled))
-      @user.errors.add(:default_game_minutes, "는 #{User::MIN_GAME_MINUTES}~#{User::MAX_GAME_MINUTES}분 사이여야 합니다.")
+      @user.errors.add(
+        :default_game_minutes,
+        I18n.t("settings.errors.default_game_minutes_range", min: User::MIN_GAME_MINUTES, max: User::MAX_GAME_MINUTES, default: "는 #{User::MIN_GAME_MINUTES}~#{User::MAX_GAME_MINUTES}분 사이여야 합니다.")
+      )
       render :show, status: :unprocessable_entity
       return
     end
@@ -29,10 +36,13 @@ class SettingsController < ApplicationController
       voice_announcement_enabled: announcements_enabled,
       voice_announcement_rate: voice_rate,
       possession_switch_pattern: possession_switch_pattern,
+      preferred_locale: preferred_locale,
       updated_at: Time.current
     )
+    I18n.locale = preferred_locale
+    session[:preferred_locale] = preferred_locale
     clear_scoreboard_state_cache!
-    redirect_to setting_path, notice: "세팅이 저장되었습니다."
+    redirect_to setting_path, notice: I18n.t("settings.notice.saved", default: "세팅이 저장되었습니다.")
   end
 
   private
@@ -44,7 +54,8 @@ class SettingsController < ApplicationController
       :scoreboard_sound_enabled,
       :voice_announcement_enabled,
       :voice_announcement_rate,
-      :possession_switch_pattern
+      :possession_switch_pattern,
+      :preferred_locale
     )
   end
 
@@ -94,7 +105,7 @@ class SettingsController < ApplicationController
 
   def normalized_possession_switch_pattern(value, default:)
     candidate = value.presence || default
-    return candidate if User::POSSESSION_SWITCH_PATTERNS.key?(candidate)
+    return candidate if User::POSSESSION_SWITCH_PATTERNS.include?(candidate)
 
     User::DEFAULT_POSSESSION_SWITCH_PATTERN
   end
@@ -105,5 +116,12 @@ class SettingsController < ApplicationController
     return rate if User::VOICE_ANNOUNCEMENT_RATES.include?(rate)
 
     User::DEFAULT_VOICE_ANNOUNCEMENT_RATE
+  end
+
+  def normalized_preferred_locale(value, default:)
+    candidate = value.presence || default
+    return candidate if User::SUPPORTED_LOCALES.include?(candidate)
+
+    User::DEFAULT_LOCALE
   end
 end

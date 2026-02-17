@@ -1,56 +1,56 @@
-<% content_for :title, "관리자 · 클럽 상세" %>
+<% content_for :title, t('admin.clubs.show.page_title') %>
 
 <div class="page-header">
   <div>
-    <h1>클럽 상세</h1>
+    <h1><%= t('admin.clubs.show.title') %></h1>
     <p class="muted"><%= @club.name %> · <%= @club.user.email %></p>
   </div>
   <div class="actions">
-    <%= link_to "목록으로", admin_clubs_path, class: "button ghost" %>
+    <%= link_to t('admin.common.back_to_list'), admin_clubs_path, class: "button ghost" %>
   </div>
 </div>
 
 <div class="card">
   <table class="table">
     <tbody>
-      <tr><th>ID</th><td><%= @club.id %></td></tr>
-      <tr><th>클럽명</th><td><%= @club.name %></td></tr>
-      <tr><th>아이콘</th><td><%= club_icon(@club.icon) %></td></tr>
-      <tr><th>소유자</th><td><%= @club.user.email %></td></tr>
-      <tr><th>멤버 수</th><td><%= @club.members.count %></td></tr>
-      <tr><th>경기 수</th><td><%= @club.matches.count %></td></tr>
+      <tr><th><%= t('admin.clubs.fields.id') %></th><td><%= @club.id %></td></tr>
+      <tr><th><%= t('admin.clubs.fields.name') %></th><td><%= @club.name %></td></tr>
+      <tr><th><%= t('admin.clubs.fields.icon') %></th><td><%= club_icon(@club.icon) %></td></tr>
+      <tr><th><%= t('admin.clubs.fields.owner') %></th><td><%= @club.user.email %></td></tr>
+      <tr><th><%= t('admin.clubs.fields.members_count') %></th><td><%= @club.members.count %></td></tr>
+      <tr><th><%= t('admin.clubs.fields.matches_count') %></th><td><%= @club.matches.count %></td></tr>
     </tbody>
   </table>
 </div>
 
 <div class="card">
-  <h2>멤버</h2>
+  <h2><%= t('admin.clubs.sections.members') %></h2>
   <ul class="member-list">
     <% @club.members.each do |member| %>
       <li class="member-item">
         <span class="member-name"><%= member.name %></span>
         <span class="member-meta"><%= member.position %></span>
-        <%= link_to "보기", admin_member_path(member), class: "button ghost" %>
+        <%= link_to t('admin.common.view'), admin_member_path(member), class: "button ghost" %>
       </li>
     <% end %>
   </ul>
   <% if @club.members.empty? %>
-    <div class="empty-state"><p>멤버가 없습니다.</p></div>
+    <div class="empty-state"><p><%= t('admin.clubs.empty.no_members') %></p></div>
   <% end %>
 </div>
 
 <div class="card">
-  <h2>경기</h2>
+  <h2><%= t('admin.clubs.sections.matches') %></h2>
   <ul class="member-list">
     <% @club.matches.each do |match| %>
       <li class="member-item">
         <span class="member-name"><%= match.played_on.strftime("%Y-%m-%d") %></span>
-        <span class="member-meta"><%= match.teams_count %>팀</span>
-        <%= link_to "보기", admin_match_path(match), class: "button ghost" %>
+        <span class="member-meta"><%= match.teams_count %><%= t('admin.common.teams_suffix') %></span>
+        <%= link_to t('admin.common.view'), admin_match_path(match), class: "button ghost" %>
       </li>
     <% end %>
   </ul>
   <% if @club.matches.empty? %>
-    <div class="empty-state"><p>경기가 없습니다.</p></div>
+    <div class="empty-state"><p><%= t('admin.clubs.empty.no_matches') %></p></div>
   <% end %>
 </div>

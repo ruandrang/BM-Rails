@@ -1,6 +1,6 @@
 namespace :admin do
   desc "Grant admin role to user by email"
-  task :grant, [:email] => :environment do |_, args|
+  task :grant, [ :email ] => :environment do |_, args|
     email = args[:email].to_s.strip.downcase
     if email.empty?
       puts "Usage: bin/rails admin:grant[email@example.com]"

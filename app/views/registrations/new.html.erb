@@ -1,4 +1,4 @@
-<% content_for :title, "회원가입 - 농구 클럽 매니저" %>
+<% content_for :title, t("auth.signup.page_title") %>
 
 <div class="min-h-screen flex items-center justify-center p-4">
   <div class="card bg-base-100 shadow-xl w-full max-w-md">
@@ -6,8 +6,8 @@
       <!-- 로고 & 타이틀 -->
       <div class="text-center mb-6">
         <div class="text-6xl mb-4">🏀</div>
-        <h1 class="text-3xl font-bold">회원가입</h1>
-        <p class="text-base-content/60 mt-2">간단하게 계정을 만들고 시작하세요</p>
+        <h1 class="text-3xl font-bold"><%= t("auth.signup.title") %></h1>
+        <p class="text-base-content/60 mt-2"><%= t("auth.signup.subtitle") %></p>
       </div>
 
       <!-- 에러 메시지 -->
@@ -18,7 +18,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div>
-              <h3 class="font-bold">입력 오류</h3>
+              <h3 class="font-bold"><%= t("auth.signup.input_error_title") %></h3>
               <ul class="text-sm list-disc list-inside">
                 <% @user.errors.full_messages.each do |message| %>
                   <li><%= message %></li>
@@ -32,15 +32,15 @@
       <!-- 회원가입 폼 -->
       <%= form_with model: @user, url: registration_path, method: :post, local: true, class: "space-y-4" do |form| %>
         <div class="form-control w-full">
-          <%= form.label :name, "이름", class: "label" %>
+          <%= form.label :name, t("auth.fields.name"), class: "label" %>
           <%= form.text_field :name,
               autocomplete: "name",
-              placeholder: "홍길동",
+              placeholder: t("auth.fields.name_placeholder"),
               class: "input input-bordered w-full" %>
         </div>
 
         <div class="form-control w-full">
-          <%= form.label :email, "이메일", class: "label" %>
+          <%= form.label :email, t("auth.fields.email"), class: "label" %>
           <%= form.email_field :email,
               required: true,
               autocomplete: "email",
@@ -49,19 +49,19 @@
         </div>
 
         <div class="form-control w-full">
-          <%= form.label :password, "비밀번호", class: "label" %>
+          <%= form.label :password, t("auth.fields.password"), class: "label" %>
           <%= form.password_field :password,
               required: true,
               autocomplete: "new-password",
               placeholder: "••••••••",
               class: "input input-bordered w-full" %>
           <label class="label">
-            <span class="label-text-alt text-base-content/60">최소 6자 이상</span>
+            <span class="label-text-alt text-base-content/60"><%= t("auth.signup.password_hint") %></span>
           </label>
         </div>
 
         <div class="form-control w-full">
-          <%= form.label :password_confirmation, "비밀번호 확인", class: "label" %>
+          <%= form.label :password_confirmation, t("auth.fields.password_confirmation"), class: "label" %>
           <%= form.password_field :password_confirmation,
               required: true,
               autocomplete: "new-password",
@@ -70,16 +70,16 @@
         </div>
 
         <div class="form-control mt-6">
-          <%= form.submit "회원가입", class: "btn btn-primary btn-lg w-full" %>
+          <%= form.submit t("common.signup"), class: "btn btn-primary btn-lg w-full" %>
         </div>
       <% end %>
 
       <!-- 로그인 링크 -->
-      <div class="divider">OR</div>
+      <div class="divider"><%= t("common.or", default: "OR") %></div>
 
       <div class="text-center">
-        <span class="text-base-content/60">이미 계정이 있으신가요?</span>
-        <%= link_to "로그인", new_session_path, class: "link link-primary ml-1" %>
+        <span class="text-base-content/60"><%= t("auth.signup.have_account") %></span>
+        <%= link_to t("common.login"), new_session_path, class: "link link-primary ml-1" %>
       </div>
     </div>
   </div>

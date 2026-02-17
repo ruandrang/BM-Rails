@@ -1,4 +1,4 @@
-<% content_for :title, "관리자 대시보드 - 농구 클럽 매니저" %>
+<% content_for :title, t('admin.dashboard.page_title', app_name: t('app.name')) %>
 
 <div class="max-w-7xl mx-auto">
   <!-- 뒤로가기 -->
@@ -7,47 +7,47 @@
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg>
-      내 클럽으로
+      <%= t('admin.common.back_to_clubs') %>
     <% end %>
   </div>
 
   <!-- 페이지 헤더 -->
   <div class="mb-8">
-    <h1 class="text-4xl font-bold text-base-content mb-2">관리자 대시보드</h1>
-    <p class="text-base-content/60">전체 데이터 현황을 빠르게 확인합니다.</p>
+    <h1 class="text-4xl font-bold text-base-content mb-2"><%= t('admin.dashboard.title') %></h1>
+    <p class="text-base-content/60"><%= t('admin.dashboard.subtitle') %></p>
   </div>
 
   <!-- 통계 그리드 -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <div class="stats shadow bg-base-100">
       <div class="stat">
-        <div class="stat-title">사용자</div>
+        <div class="stat-title"><%= t('admin.dashboard.stats.users') %></div>
         <div class="stat-value text-primary"><%= @stats[:users] %></div>
-        <div class="stat-desc">명</div>
+        <div class="stat-desc"><%= t('admin.common.count_unit') %></div>
       </div>
     </div>
-    
+
     <div class="stats shadow bg-base-100">
       <div class="stat">
-        <div class="stat-title">클럽</div>
+        <div class="stat-title"><%= t('admin.dashboard.stats.clubs') %></div>
         <div class="stat-value text-secondary"><%= @stats[:clubs] %></div>
-        <div class="stat-desc">개</div>
+        <div class="stat-desc"><%= t('admin.common.clubs_unit') %></div>
       </div>
     </div>
 
     <div class="stats shadow bg-base-100">
       <div class="stat">
-        <div class="stat-title">멤버</div>
+        <div class="stat-title"><%= t('admin.dashboard.stats.members') %></div>
         <div class="stat-value text-accent"><%= @stats[:members] %></div>
-        <div class="stat-desc">명</div>
+        <div class="stat-desc"><%= t('admin.common.count_unit') %></div>
       </div>
     </div>
 
     <div class="stats shadow bg-base-100">
       <div class="stat">
-        <div class="stat-title">경기</div>
+        <div class="stat-title"><%= t('admin.dashboard.stats.matches') %></div>
         <div class="stat-value"><%= @stats[:matches] %></div>
-        <div class="stat-desc">회</div>
+        <div class="stat-desc"><%= t('admin.common.matches_unit') %></div>
       </div>
     </div>
   </div>
@@ -57,21 +57,21 @@
     <div class="card-body">
       <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
         <div>
-          <h2 class="card-title">DB 내용 대시보드</h2>
+          <h2 class="card-title"><%= t('admin.dashboard.db_dashboard.title') %></h2>
           <p class="text-sm text-base-content/60">
-            어댑터: <span class="font-semibold"><%= @database_adapter %></span>
+            <%= t('admin.dashboard.db_dashboard.adapter') %>: <span class="font-semibold"><%= @database_adapter %></span>
             <% if @database_name.present? %>
-              · DB: <span class="font-mono"><%= @database_name %></span>
+              · <%= t('admin.dashboard.db_dashboard.db_name') %>: <span class="font-mono"><%= @database_name %></span>
             <% end %>
           </p>
         </div>
         <div class="stats stats-horizontal shadow bg-base-200/60">
           <div class="stat py-2 px-4">
-            <div class="stat-title text-xs">테이블 수</div>
+            <div class="stat-title text-xs"><%= t('admin.dashboard.db_dashboard.table_count') %></div>
             <div class="stat-value text-2xl"><%= @db_tables.size %></div>
           </div>
           <div class="stat py-2 px-4">
-            <div class="stat-title text-xs">미리보기 행</div>
+            <div class="stat-title text-xs"><%= t('admin.dashboard.db_dashboard.preview_rows') %></div>
             <div class="stat-value text-2xl"><%= @selected_rows.size %></div>
           </div>
         </div>
@@ -79,7 +79,7 @@
 
       <% if @db_tables.any? %>
         <div class="mb-4">
-          <div class="text-xs font-bold uppercase tracking-widest opacity-50 mb-2">테이블별 행 수</div>
+          <div class="text-xs font-bold uppercase tracking-widest opacity-50 mb-2"><%= t('admin.dashboard.db_dashboard.row_count_by_table') %></div>
           <div class="flex flex-wrap gap-2">
             <% @table_counts.each do |table_name, row_count| %>
               <% active = table_name == @selected_table %>
@@ -95,7 +95,7 @@
         <%= form_with url: admin_root_path, method: :get, local: true, class: "flex flex-wrap items-end gap-3 mb-4" do %>
           <div class="form-control min-w-[220px]">
             <label class="label pb-1">
-              <span class="label-text text-xs font-bold uppercase tracking-widest opacity-60">테이블 선택</span>
+              <span class="label-text text-xs font-bold uppercase tracking-widest opacity-60"><%= t('admin.dashboard.db_dashboard.select_table') %></span>
             </label>
             <%= select_tag :table,
                 options_for_select(@db_tables, @selected_table),
@@ -104,12 +104,12 @@
 
           <div class="form-control w-28">
             <label class="label pb-1">
-              <span class="label-text text-xs font-bold uppercase tracking-widest opacity-60">행 수</span>
+              <span class="label-text text-xs font-bold uppercase tracking-widest opacity-60"><%= t('admin.dashboard.db_dashboard.row_limit') %></span>
             </label>
             <%= number_field_tag :limit, @selected_limit, min: 10, max: 200, class: "input input-bordered input-sm" %>
           </div>
 
-          <%= submit_tag "조회", class: "btn btn-primary btn-sm" %>
+          <%= submit_tag t('admin.dashboard.db_dashboard.query'), class: "btn btn-primary btn-sm" %>
         <% end %>
 
         <% admin_links = {
@@ -124,10 +124,10 @@
 
         <div class="flex items-center justify-between mb-2">
           <h3 class="font-bold">
-            <%= @selected_table %> 최근 <%= @selected_limit %>건
+            <%= t('admin.common.recent_items', table: @selected_table, limit: @selected_limit) %>
           </h3>
           <% if admin_links[@selected_table].present? %>
-            <%= link_to "전체 목록 보기", admin_links[@selected_table], class: "btn btn-ghost btn-xs" %>
+            <%= link_to t('admin.common.view_all_list'), admin_links[@selected_table], class: "btn btn-ghost btn-xs" %>
           <% end %>
         </div>
 
@@ -160,7 +160,7 @@
               <% else %>
                 <tr>
                   <td colspan="<%= @selected_columns.size %>" class="text-center py-8 text-base-content/50">
-                    표시할 데이터가 없습니다.
+                    <%= t('admin.common.no_data') %>
                   </td>
                 </tr>
               <% end %>
@@ -169,7 +169,7 @@
         </div>
       <% else %>
         <div class="alert">
-          <span>조회 가능한 테이블이 없습니다.</span>
+          <span><%= t('admin.common.no_tables') %></span>
         </div>
       <% end %>
     </div>
@@ -178,20 +178,20 @@
   <!-- 상세 데이터 관리 카드 -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     <% [
-      { name: "사용자", count: @stats[:users], path: admin_users_path, icon: "👤" },
-      { name: "클럽", count: @stats[:clubs], path: admin_clubs_path, icon: "🏀" },
-      { name: "멤버", count: @stats[:members], path: admin_members_path, icon: "👥" },
-      { name: "경기", count: @stats[:matches], path: admin_matches_path, icon: "🏆" },
-      { name: "팀", count: @stats[:teams], path: admin_teams_path, icon: "👕" },
-      { name: "게임", count: @stats[:games], path: admin_games_path, icon: "🎮" }
+      { name: t('admin.dashboard.stats.users'), count: @stats[:users], path: admin_users_path, icon: "👤" },
+      { name: t('admin.dashboard.stats.clubs'), count: @stats[:clubs], path: admin_clubs_path, icon: "🏀" },
+      { name: t('admin.dashboard.stats.members'), count: @stats[:members], path: admin_members_path, icon: "👥" },
+      { name: t('admin.dashboard.stats.matches'), count: @stats[:matches], path: admin_matches_path, icon: "🏆" },
+      { name: t('admin.dashboard.stats.teams'), count: @stats[:teams], path: admin_teams_path, icon: "👕" },
+      { name: t('admin.dashboard.stats.games'), count: @stats[:games], path: admin_games_path, icon: "🎮" }
     ].each do |item| %>
       <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300">
         <div class="card-body items-center text-center">
           <div class="text-4xl mb-2"><%= item[:icon] %></div>
-          <h2 class="card-title"><%= item[:name] %> 관리</h2>
-          <p class="text-base-content/60">총 <%= item[:count] %>건의 데이터</p>
+          <h2 class="card-title"><%= item[:name] %> <%= t('admin.common.manage') %></h2>
+          <p class="text-base-content/60"><%= t('admin.common.total_count', count: item[:count]) %></p>
           <div class="card-actions mt-4">
-            <%= link_to "상세 목록", item[:path], class: "btn btn-primary btn-sm" %>
+            <%= link_to t('admin.common.details'), item[:path], class: "btn btn-primary btn-sm" %>
           </div>
         </div>
       </div>

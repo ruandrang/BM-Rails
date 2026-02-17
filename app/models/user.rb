@@ -1,19 +1,26 @@
 class User < ApplicationRecord
+  SUPPORTED_LOCALES = %w[ko ja en zh fr es it pt tl de].freeze
+  DEFAULT_LOCALE = "ko"
+  SPEECH_LOCALE_BY_PREFERRED_LOCALE = {
+    "ko" => "ko-KR",
+    "ja" => "ja-JP",
+    "en" => "en-US",
+    "zh" => "zh-CN",
+    "fr" => "fr-FR",
+    "es" => "es-ES",
+    "it" => "it-IT",
+    "pt" => "pt-BR",
+    "tl" => "fil-PH",
+    "de" => "de-DE"
+  }.freeze
+
   DEFAULT_GAME_MINUTES = 8
   MIN_GAME_MINUTES = 1
   MAX_GAME_MINUTES = 60
-  POSSESSION_SWITCH_PATTERNS = {
-    "q12_q34" => "1,2쿼터 / 3,4쿼터 공격권 전환",
-    "q13_q24" => "1,3쿼터 / 2,4쿼터 공격권 전환"
-  }.freeze
+  POSSESSION_SWITCH_PATTERNS = %w[q12_q34 q13_q24].freeze
   DEFAULT_POSSESSION_SWITCH_PATTERN = "q12_q34"
   VOICE_ANNOUNCEMENT_RATES = [ 1.0, 1.1, 0.9 ].freeze
   DEFAULT_VOICE_ANNOUNCEMENT_RATE = 1.0
-  VOICE_ANNOUNCEMENT_RATE_OPTIONS = {
-    "보통" => 1.0,
-    "빠르게" => 1.1,
-    "느리게" => 0.9
-  }.freeze
 
   has_secure_password
 
@@ -32,10 +39,12 @@ class User < ApplicationRecord
   }
   validates :scoreboard_sound_enabled, inclusion: { in: [ true, false ] }
   validates :voice_announcement_enabled, inclusion: { in: [ true, false ] }
-  validates :possession_switch_pattern, inclusion: { in: POSSESSION_SWITCH_PATTERNS.keys }
+  validates :possession_switch_pattern, inclusion: { in: POSSESSION_SWITCH_PATTERNS }
   validates :voice_announcement_rate, inclusion: { in: VOICE_ANNOUNCEMENT_RATES }
+  validates :preferred_locale, inclusion: { in: SUPPORTED_LOCALES }
 
   before_validation { self.email = email.to_s.downcase.strip }
+  before_validation :normalize_preferred_locale
 
   def admin?
     admin
@@ -43,5 +52,16 @@ class User < ApplicationRecord
 
   def default_period_seconds
     default_game_minutes.to_i * 60
+  end
+
+  def speech_locale
+    SPEECH_LOCALE_BY_PREFERRED_LOCALE.fetch(preferred_locale.to_s, SPEECH_LOCALE_BY_PREFERRED_LOCALE.fetch(DEFAULT_LOCALE))
+  end
+
+  private
+
+  def normalize_preferred_locale
+    value = preferred_locale.to_s
+    self.preferred_locale = SUPPORTED_LOCALES.include?(value) ? value : DEFAULT_LOCALE
   end
 end

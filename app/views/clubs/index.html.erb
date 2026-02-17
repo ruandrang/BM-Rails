@@ -1,10 +1,10 @@
-<% content_for :title, "내 클럽 - 농구 클럽 매니저" %>
+<% content_for :title, t('clubs.index.page_title', app_name: t('app.name')) %>
 
 <div class="max-w-7xl mx-auto">
   <!-- 페이지 헤더 -->
   <div class="mb-8">
-    <h1 class="text-4xl font-bold text-base-content mb-2">내 클럽</h1>
-    <p class="text-base-content/60">관리 중인 농구 클럽을 확인하고 선택하세요</p>
+    <h1 class="text-4xl font-bold text-base-content mb-2"><%= t('clubs.index.title') %></h1>
+    <p class="text-base-content/60"><%= t('clubs.index.subtitle') %></p>
   </div>
 
   <!-- 통계 요약 카드 -->
@@ -16,9 +16,9 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
         </div>
-        <div class="stat-title text-primary-content/70">총 클럽</div>
+        <div class="stat-title text-primary-content/70"><%= t('clubs.index.stats.total_clubs') %></div>
         <div class="stat-value"><%= @clubs.count %></div>
-        <div class="stat-desc text-primary-content/60">운영 중인 클럽</div>
+        <div class="stat-desc text-primary-content/60"><%= t('clubs.index.stats.clubs_operating') %></div>
       </div>
     </div>
 
@@ -29,9 +29,9 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
           </svg>
         </div>
-        <div class="stat-title text-secondary-content/70">총 멤버</div>
+        <div class="stat-title text-secondary-content/70"><%= t('clubs.index.stats.total_members') %></div>
         <div class="stat-value"><%= @total_members %></div>
-        <div class="stat-desc text-secondary-content/60">모든 클럽 멤버 합계</div>
+        <div class="stat-desc text-secondary-content/60"><%= t('clubs.index.stats.all_members_sum') %></div>
       </div>
     </div>
 
@@ -42,9 +42,9 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
           </svg>
         </div>
-        <div class="stat-title text-accent-content/70">이번 달 경기</div>
+        <div class="stat-title text-accent-content/70"><%= t('clubs.index.stats.monthly_matches') %></div>
         <div class="stat-value"><%= @monthly_matches %></div>
-        <div class="stat-desc text-accent-content/60"><%= Time.current.strftime('%Y년 %m월') %></div>
+        <div class="stat-desc text-accent-content/60"><%= l(Time.current, format: '%Y-%m') %></div>
       </div>
     </div>
   </div>
@@ -55,7 +55,7 @@
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
       </svg>
-      새 클럽 만들기
+      <%= t('clubs.index.new_club') %>
     <% end %>
   </div>
 
@@ -83,14 +83,14 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
-                <span><%= club.members.count %>명의 멤버</span>
+                <span><%= t('clubs.index.members_count', count: club.members.count) %></span>
               </div>
 
               <div class="flex items-center gap-2 text-base-content/70">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                 </svg>
-                <span><%= club.matches.count %>회 경기</span>
+                <span><%= t('clubs.index.matches_count', count: club.matches.count) %></span>
               </div>
 
               <% if club.matches.any? %>
@@ -98,14 +98,14 @@
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  <span>최근 경기: <%= club.matches.last.played_on.strftime('%Y-%m-%d') %></span>
+                  <span><%= t('clubs.index.recent_match', date: club.matches.last.played_on.strftime('%Y-%m-%d')) %></span>
                 </div>
               <% end %>
             </div>
 
             <!-- 액션 버튼 영역 -->
             <div class="card-actions justify-end mt-auto">
-              <div class="badge badge-primary">클릭하여 관리</div>
+              <div class="badge badge-primary"><%= t('clubs.index.click_to_manage') %></div>
             </div>
           </div>
         <% end %>
@@ -117,15 +117,15 @@
       <div class="hero-content text-center">
         <div class="max-w-md">
           <div class="text-6xl mb-4">🏀</div>
-          <h1 class="text-3xl font-bold mb-4">클럽이 없습니다</h1>
+          <h1 class="text-3xl font-bold mb-4"><%= t('clubs.index.empty.title') %></h1>
           <p class="mb-6 text-base-content/70">
-            첫 번째 농구 클럽을 만들어 멤버를 관리하고 경기를 기록해보세요!
+            <%= t('clubs.index.empty.description') %>
           </p>
           <%= link_to new_club_path, class: "btn btn-primary btn-lg gap-2" do %>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
-            첫 클럽 만들기
+            <%= t('clubs.index.empty.create_first') %>
           <% end %>
         </div>
       </div>

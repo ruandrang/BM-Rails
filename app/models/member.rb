@@ -1,5 +1,5 @@
 class Member < ApplicationRecord
-  POSITIONS = ["PG", "SG", "SF", "PF", "C"].freeze
+  POSITIONS = [ "PG", "SG", "SF", "PF", "C" ].freeze
   POSITION_NAMES = {
     "PG" => "포인트 가드",
     "SG" => "슈팅 가드",

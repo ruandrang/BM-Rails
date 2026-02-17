@@ -1,4 +1,4 @@
-<% content_for :title, "통계 - #{@club.name}" %>
+<% content_for :title, t('stats.index.page_title', club_name: @club.name) %>
 
 <div class="max-w-7xl mx-auto">
   <!-- 뒤로가기 -->
@@ -7,24 +7,24 @@
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg>
-      뒤로가기
+      <%= t('common.back') %>
     <% end %>
   </div>
 
   <!-- 페이지 헤더 -->
   <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
     <div>
-      <h1 class="text-4xl font-bold text-base-content mb-2">선수 통계</h1>
-      <p class="text-base-content/60"><%= @club.name %> 멤버별 경기 기록</p>
+      <h1 class="text-4xl font-bold text-base-content mb-2"><%= t('stats.index.title') %></h1>
+      <p class="text-base-content/60"><%= t('stats.index.subtitle', club_name: @club.name) %></p>
     </div>
 
     <!-- 정렬 버튼 (JS) -->
     <div class="flex flex-wrap items-center gap-2 p-2 bg-base-200 rounded-lg">
-      <span class="text-xs font-bold opacity-50 px-2">정렬:</span>
-      <button type="button" class="btn btn-ghost btn-xs gap-1 w-20" data-sort="name">이름</button>
-      <button type="button" class="btn btn-ghost btn-xs gap-1 w-20" data-sort="position">포지션</button>
-      <button type="button" class="btn btn-ghost btn-xs gap-1 w-20" data-sort="games">경기수</button>
-      <button type="button" class="btn btn-ghost btn-xs gap-1 w-20" data-sort="winrate">승률</button>
+      <span class="text-xs font-bold opacity-50 px-2"><%= t('stats.index.sort.label') %></span>
+      <button type="button" class="btn btn-ghost btn-xs gap-1 w-20" data-sort="name"><%= t('stats.index.sort.name') %></button>
+      <button type="button" class="btn btn-ghost btn-xs gap-1 w-20" data-sort="position"><%= t('stats.index.sort.position') %></button>
+      <button type="button" class="btn btn-ghost btn-xs gap-1 w-20" data-sort="games"><%= t('stats.index.sort.games') %></button>
+      <button type="button" class="btn btn-ghost btn-xs gap-1 w-20" data-sort="winrate"><%= t('stats.index.sort.winrate') %></button>
     </div>
   </div>
 
@@ -42,8 +42,8 @@
             </svg>
           </div>
           <div>
-            <div class="text-sm font-bold opacity-50 uppercase tracking-widest">Active Players</div>
-            <div class="text-3xl font-black"><%= @stats.count %><span class="text-sm font-normal ml-1">명</span></div>
+            <div class="text-sm font-bold opacity-50 uppercase tracking-widest"><%= t('stats.index.active_players') %></div>
+            <div class="text-3xl font-black"><%= t('stats.index.players_count', count: @stats.count) %></div>
           </div>
         </div>
       </div>
@@ -57,7 +57,7 @@
             </svg>
           </div>
           <div>
-            <div class="text-sm font-bold opacity-50 uppercase tracking-widest">Avg Win Rate</div>
+            <div class="text-sm font-bold opacity-50 uppercase tracking-widest"><%= t('stats.index.avg_win_rate') %></div>
             <div class="text-3xl font-black text-secondary"><%= avg_win_rate %><span class="text-sm font-normal ml-1">%</span></div>
           </div>
         </div>
@@ -73,7 +73,7 @@
               </svg>
             </div>
             <div>
-              <div class="text-sm font-bold text-accent uppercase tracking-widest"><%= @mvp_month %>월 MVP</div>
+              <div class="text-sm font-bold text-accent uppercase tracking-widest"><%= t('stats.index.monthly_mvp', month: @mvp_month) %></div>
               <div class="text-2xl font-black truncate max-w-[150px]"><%= @monthly_mvp[:member].name %></div>
             </div>
           </div>
@@ -87,8 +87,8 @@
                </svg>
              </div>
              <div>
-               <div class="text-sm font-bold uppercase tracking-widest"><%= @mvp_month %>월 MVP</div>
-               <div class="text-sm">데이터 없음</div>
+               <div class="text-sm font-bold uppercase tracking-widest"><%= t('stats.index.monthly_mvp', month: @mvp_month) %></div>
+               <div class="text-sm"><%= t('stats.index.no_data') %></div>
              </div>
            </div>
          </div>
@@ -158,15 +158,15 @@
       <div class="hero-content text-center">
         <div class="max-w-md">
           <div class="text-6xl mb-4">📊</div>
-          <h1 class="text-3xl font-bold mb-4">통계 데이터가 없습니다</h1>
+          <h1 class="text-3xl font-bold mb-4"><%= t('stats.index.empty.title') %></h1>
           <p class="mb-6 text-base-content/70">
-            경기를 진행하고 결과를 기록하면 선수별 통계가 자동으로 생성됩니다.
+            <%= t('stats.index.empty.description') %>
           </p>
           <%= link_to new_club_match_path(@club), class: "btn btn-primary btn-lg gap-2" do %>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
-            첫 경기 만들기
+            <%= t('stats.index.empty.create_first') %>
           <% end %>
         </div>
       </div>

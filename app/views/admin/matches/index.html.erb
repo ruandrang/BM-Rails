@@ -1,12 +1,12 @@
-<% content_for :title, "관리자 · 경기" %>
+<% content_for :title, t('admin.matches.page_title') %>
 
 <div class="page-header">
   <div>
-    <h1>경기 목록</h1>
-    <p class="muted">전체 경기 기록</p>
+    <h1><%= t('admin.matches.title') %></h1>
+    <p class="muted"><%= t('admin.matches.subtitle') %></p>
   </div>
   <div class="actions">
-    <%= link_to "대시보드", admin_root_path, class: "button ghost" %>
+    <%= link_to t('admin.common.dashboard'), admin_root_path, class: "button ghost" %>
   </div>
 </div>
 
@@ -14,11 +14,11 @@
   <table class="table">
     <thead>
       <tr>
-        <th>ID</th>
-        <th>클럽</th>
-        <th>날짜</th>
-        <th>팀 수</th>
-        <th>보기</th>
+        <th><%= t('admin.matches.fields.id') %></th>
+        <th><%= t('admin.matches.fields.club') %></th>
+        <th><%= t('admin.matches.fields.date') %></th>
+        <th><%= t('admin.matches.fields.teams_count') %></th>
+        <th><%= t('admin.common.view') %></th>
       </tr>
     </thead>
     <tbody>
@@ -28,7 +28,7 @@
           <td><%= match.club.name %></td>
           <td><%= match.played_on.strftime("%Y-%m-%d") %></td>
           <td><%= match.teams_count %></td>
-          <td><%= link_to "보기", admin_match_path(match), class: "button ghost" %></td>
+          <td><%= link_to t('admin.common.view'), admin_match_path(match), class: "button ghost" %></td>
         </tr>
       <% end %>
     </tbody>

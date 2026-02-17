@@ -1,12 +1,12 @@
-<% content_for :title, "관리자 · 팀 멤버" %>
+<% content_for :title, t('admin.team_members.page_title') %>
 
 <div class="page-header">
   <div>
-    <h1>팀 멤버 목록</h1>
-    <p class="muted">전체 팀-멤버 매핑</p>
+    <h1><%= t('admin.team_members.title') %></h1>
+    <p class="muted"><%= t('admin.team_members.subtitle') %></p>
   </div>
   <div class="actions">
-    <%= link_to "대시보드", admin_root_path, class: "button ghost" %>
+    <%= link_to t('admin.common.dashboard'), admin_root_path, class: "button ghost" %>
   </div>
 </div>
 
@@ -14,21 +14,21 @@
   <table class="table">
     <thead>
       <tr>
-        <th>ID</th>
-        <th>팀</th>
-        <th>클럽</th>
-        <th>멤버</th>
-        <th>보기</th>
+        <th><%= t('admin.team_members.fields.id') %></th>
+        <th><%= t('admin.team_members.fields.team') %></th>
+        <th><%= t('admin.team_members.fields.club') %></th>
+        <th><%= t('admin.team_members.fields.member') %></th>
+        <th><%= t('admin.common.view') %></th>
       </tr>
     </thead>
     <tbody>
       <% @team_members.each do |team_member| %>
         <tr>
           <td><%= team_member.id %></td>
-          <td>팀 <%= team_member.team.label %></td>
+          <td><%= t('admin.common.team_label', label: team_member.team.label) %></td>
           <td><%= team_member.team.match.club.name %></td>
           <td><%= team_member.member.name %></td>
-          <td><%= link_to "보기", admin_team_member_path(team_member), class: "button ghost" %></td>
+          <td><%= link_to t('admin.common.view'), admin_team_member_path(team_member), class: "button ghost" %></td>
         </tr>
       <% end %>
     </tbody>

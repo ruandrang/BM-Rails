@@ -1,4 +1,4 @@
-<% content_for :title, "경기 목록 - #{@club.name}" %>
+<% content_for :title, t('matches.index.page_title', club_name: @club.name) %>
 
 <div class="max-w-7xl mx-auto">
   <!-- 뒤로가기 -->
@@ -7,22 +7,22 @@
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg>
-      뒤로가기
+      <%= t('common.back') %>
     <% end %>
   </div>
 
   <!-- 페이지 헤더 -->
   <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
     <div>
-      <h1 class="text-4xl font-bold text-base-content mb-2">경기 목록</h1>
-      <p class="text-base-content/60"><%= @club.name %>의 경기 기록입니다</p>
+      <h1 class="text-4xl font-bold text-base-content mb-2"><%= t('matches.index.title') %></h1>
+      <p class="text-base-content/60"><%= t('matches.index.subtitle', club_name: @club.name) %></p>
     </div>
 
     <%= link_to new_club_match_path(@club), class: "btn btn-primary gap-2" do %>
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
       </svg>
-      새 경기 만들기
+      <%= t('matches.index.new_match') %>
     <% end %>
   </div>
 
@@ -35,8 +35,8 @@
             <!-- 날짜 & 팀 수 -->
             <div class="flex items-center justify-between mb-4">
               <div class="flex items-center gap-2">
-                <div class="badge badge-primary badge-lg"><%= match.teams_count %>팀</div>
-                <div class="badge badge-outline"><%= match.regular_quarters_count %>쿼터</div>
+                <div class="badge badge-primary badge-lg"><%= t('matches.index.teams_count', count: match.teams_count) %></div>
+                <div class="badge badge-outline"><%= t('matches.index.quarters_count', count: match.regular_quarters_count) %></div>
                 <% completed_games = match.games.where.not(result: "pending").count rescue 0 %>
                 <% total_games = match.games.count rescue 0 %>
                 <% if total_games > 0 && completed_games == total_games %>
@@ -44,10 +44,10 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
-                    완료
+                    <%= t('matches.index.completed') %>
                   </div>
                 <% elsif total_games > 0 %>
-                  <div class="badge badge-warning gap-1">진행중</div>
+                  <div class="badge badge-warning gap-1"><%= t('matches.index.in_progress') %></div>
                 <% end %>
               </div>
             </div>
@@ -57,7 +57,7 @@
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <span class="truncate"><%= match.played_on.strftime("%Y년 %m월 %d일") %></span>
+              <span class="truncate"><%= l(match.played_on, format: :long) %></span>
             </h2>
 
             <!-- 메모 -->
@@ -72,7 +72,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
               <% end %>
-              <%= button_to club_match_path(@club, match), method: :delete, data: { turbo_confirm: "이 경기를 삭제하시겠습니까?" }, class: "btn btn-ghost btn-sm text-error" do %>
+              <%= button_to club_match_path(@club, match), method: :delete, data: { turbo_confirm: t('matches.index.delete_confirm') }, class: "btn btn-ghost btn-sm text-error" do %>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
@@ -88,15 +88,15 @@
       <div class="hero-content text-center">
         <div class="max-w-md">
           <div class="text-6xl mb-4">🏆</div>
-          <h1 class="text-3xl font-bold mb-4">경기가 없습니다</h1>
+          <h1 class="text-3xl font-bold mb-4"><%= t('matches.index.empty.title') %></h1>
           <p class="mb-6 text-base-content/70">
-            새 경기를 만들어 팀을 구성하고 결과를 기록하세요!
+            <%= t('matches.index.empty.description') %>
           </p>
           <%= link_to new_club_match_path(@club), class: "btn btn-primary btn-lg gap-2" do %>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
-            첫 경기 만들기
+            <%= t('matches.index.empty.create_first') %>
           <% end %>
         </div>
       </div>

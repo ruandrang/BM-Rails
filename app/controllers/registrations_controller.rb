@@ -11,7 +11,7 @@ class RegistrationsController < ApplicationController
 
     if @user.save
       session[:user_id] = @user.id
-      redirect_to clubs_path, notice: "계정이 생성되었습니다."
+      redirect_to clubs_path, notice: I18n.t("auth.notices.account_created", default: "계정이 생성되었습니다.")
     else
       render :new, status: :unprocessable_entity
     end

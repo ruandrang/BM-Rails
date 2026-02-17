@@ -1,4 +1,4 @@
-<% content_for :title, "#{@club.name} - 농구 클럽 매니저" %>
+<% content_for :title, t('clubs.show.page_title', name: @club.name, app_name: t('app.name')) %>
 
 <div class="max-w-7xl mx-auto">
   <!-- 뒤로가기 -->
@@ -7,7 +7,7 @@
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg>
-      뒤로가기
+      <%= t('common.back') %>
     <% end %>
   </div>
 
@@ -25,24 +25,21 @@
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
-              멤버 <%= @members_count %>명
+              <%= t('clubs.show.members_count', count: @members_count) %>
             </span>
             <span class="flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
               </svg>
-              경기 <%= @matches_count %>회
+              <%= t('clubs.show.matches_count', count: @matches_count) %>
             </span>
             <% if @club.meeting_days.present? %>
               <span class="flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <% if @club.meeting_days.respond_to?(:join) %>
-                  매주 <%= @club.meeting_days.join(", ") %>
-                <% else %>
-                  매주 <%= @club.meeting_days %>
-                <% end %>
+                <% days = @club.meeting_days.respond_to?(:join) ? @club.meeting_days.join(", ") : @club.meeting_days %>
+                <%= t('clubs.show.weekly', days: days) %>
               </span>
             <% end %>
           </div>
@@ -56,7 +53,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
           <% end %>
-          <%= button_to club_path(@club), method: :delete, form: { onsubmit: "return confirm('정말 이 클럽을 삭제하시겠습니까?');" }, class: "btn btn-ghost btn-sm text-error" do %>
+          <%= button_to club_path(@club), method: :delete, form: { onsubmit: "return confirm('#{t('clubs.show.delete_confirm')}');" }, class: "btn btn-ghost btn-sm text-error" do %>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
@@ -72,9 +69,9 @@
     <%= link_to club_members_path(@club), class: "card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1" do %>
       <div class="card-body items-center text-center">
         <div class="text-4xl mb-2">👥</div>
-        <h2 class="card-title">멤버 관리</h2>
-        <p class="text-base-content/60 text-sm">멤버 추가/수정, CSV 관리</p>
-        <div class="badge badge-primary mt-2"><%= @members_count %>명</div>
+        <h2 class="card-title"><%= t('clubs.show.cards.members.title') %></h2>
+        <p class="text-base-content/60 text-sm"><%= t('clubs.show.cards.members.description') %></p>
+        <div class="badge badge-primary mt-2"><%= @members_count %></div>
       </div>
     <% end %>
 
@@ -82,9 +79,9 @@
     <%= link_to club_matches_path(@club), class: "card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1" do %>
       <div class="card-body items-center text-center">
         <div class="text-4xl mb-2">🏆</div>
-        <h2 class="card-title">팀 생성 & 경기</h2>
-        <p class="text-base-content/60 text-sm">팀 밸런싱 및 결과 기록</p>
-        <div class="badge badge-secondary mt-2"><%= @matches_count %>회</div>
+        <h2 class="card-title"><%= t('clubs.show.cards.matches.title') %></h2>
+        <p class="text-base-content/60 text-sm"><%= t('clubs.show.cards.matches.description') %></p>
+        <div class="badge badge-secondary mt-2"><%= @matches_count %></div>
       </div>
     <% end %>
 
@@ -92,9 +89,9 @@
     <%= link_to club_stats_path(@club), class: "card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1" do %>
       <div class="card-body items-center text-center">
         <div class="text-4xl mb-2">📊</div>
-        <h2 class="card-title">통계 대시보드</h2>
-        <p class="text-base-content/60 text-sm">선수별 승/무/패, 승률</p>
-        <div class="badge badge-accent mt-2">분석</div>
+        <h2 class="card-title"><%= t('clubs.show.cards.stats.title') %></h2>
+        <p class="text-base-content/60 text-sm"><%= t('clubs.show.cards.stats.description') %></p>
+        <div class="badge badge-accent mt-2"><%= t('common.analysis') %></div>
       </div>
     <% end %>
 
@@ -102,9 +99,9 @@
     <a href="#" class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 group">
       <div class="card-body items-center text-center">
         <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">❤️</div>
-        <h2 class="card-title">궁합 보기</h2>
-        <p class="text-base-content/60 text-sm">멤버간 케미 분석</p>
-        <div class="badge badge-error badge-outline mt-2">준비중</div>
+        <h2 class="card-title"><%= t('clubs.show.cards.chemistry.title') %></h2>
+        <p class="text-base-content/60 text-sm"><%= t('clubs.show.cards.chemistry.description') %></p>
+        <div class="badge badge-error badge-outline mt-2"><%= t('common.coming_soon') %></div>
       </div>
     </a>
 
@@ -116,9 +113,9 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
         </div>
-        <h2 class="card-title">새 경기 만들기</h2>
-        <p class="text-primary-content/70 text-sm">지금 바로 시작</p>
-        <div class="badge badge-outline mt-2">빠른 시작</div>
+        <h2 class="card-title"><%= t('clubs.show.cards.new_match.title') %></h2>
+        <p class="text-primary-content/70 text-sm"><%= t('clubs.show.cards.new_match.description') %></p>
+        <div class="badge badge-outline mt-2"><%= t('common.quick_start') %></div>
       </div>
     <% end %>
   </div>
@@ -133,9 +130,9 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            최근 경기
+            <%= t('clubs.show.recent_matches.title') %>
           </h2>
-          <%= link_to "전체보기", club_matches_path(@club), class: "btn btn-ghost btn-xs" %>
+          <%= link_to t('common.view_all'), club_matches_path(@club), class: "btn btn-ghost btn-xs" %>
         </div>
 
         <% if @recent_matches.any? %>
@@ -143,9 +140,9 @@
             <table class="table table-sm table-zebra w-full">
               <thead>
                 <tr>
-                  <th>날짜</th>
-                  <th>메모</th>
-                  <th class="text-right">액션</th>
+                  <th><%= t('common.date') %></th>
+                  <th><%= t('common.memo') %></th>
+                  <th class="text-right"><%= t('common.action') %></th>
                 </tr>
               </thead>
               <tbody>
@@ -167,7 +164,7 @@
           </div>
         <% else %>
           <div class="text-center py-8 text-base-content/40">
-            <p>아직 기록된 경기가 없습니다</p>
+            <p><%= t('clubs.show.recent_matches.empty') %></p>
           </div>
         <% end %>
       </div>
@@ -181,9 +178,9 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
-            멤버 미리보기
+            <%= t('clubs.show.members_preview.title') %>
           </h2>
-          <%= link_to "전체보기", club_members_path(@club), class: "btn btn-ghost btn-xs" %>
+          <%= link_to t('common.view_all'), club_members_path(@club), class: "btn btn-ghost btn-xs" %>
         </div>
 
         <% if @preview_members.any? %>
@@ -204,7 +201,7 @@
           </div>
         <% else %>
           <div class="text-center py-8 text-base-content/40">
-            <p>등록된 멤버가 없습니다</p>
+            <p><%= t('clubs.show.members_preview.empty') %></p>
           </div>
         <% end %>
       </div>

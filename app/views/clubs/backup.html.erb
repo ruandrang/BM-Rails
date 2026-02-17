@@ -1,4 +1,4 @@
-<% content_for :title, "전체 데이터 백업 - 농구 클럽 매니저" %>
+<% content_for :title, t('clubs.backup.page_title', app_name: t('app.name')) %>
 
 <div class="max-w-4xl mx-auto">
   <!-- 뒤로가기 -->
@@ -7,13 +7,13 @@
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg>
-      뒤로가기
+      <%= t('common.back') %>
     <% end %>
   </div>
 
   <div class="mb-8">
-    <h1 class="text-3xl font-bold mb-2">전체 데이터 백업</h1>
-    <p class="text-base-content/60">계정 내 모든 클럽 데이터를 JSON 파일로 안전하게 보관하거나 복원하세요.</p>
+    <h1 class="text-3xl font-bold mb-2"><%= t('clubs.backup.title') %></h1>
+    <p class="text-base-content/60"><%= t('clubs.backup.subtitle') %></p>
   </div>
 
   <!-- 데이터 백업 섹션 -->
@@ -23,19 +23,19 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
         </svg>
-        백업 및 복원
+        <%= t('clubs.backup.section_title') %>
       </h2>
-      <p class="text-base-content/60">모든 클럽, 멤버, 경기 기록이 포함됩니다.</p>
+      <p class="text-base-content/60"><%= t('clubs.backup.section_description') %></p>
 
       <div class="flex flex-wrap items-center gap-4 mt-6">
         <%= link_to export_all_clubs_path, class: "btn btn-outline btn-primary gap-2" do %>
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
           </svg>
-          전체 데이터 내보내기 (백업)
+          <%= t('clubs.backup.export_button') %>
         <% end %>
 
-        <div class="divider lg:divider-horizontal">OR</div>
+        <div class="divider lg:divider-horizontal"><%= t('common.or') %></div>
 
         <%= form_with url: import_all_clubs_path, local: true, multipart: true, class: "flex items-center gap-2", html: { onsubmit: "showLoading()" } do %>
           <input type="file" name="file" accept="application/json" class="file-input file-input-bordered file-input-sm w-full max-w-xs" />
@@ -43,7 +43,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
             </svg>
-            전체 데이터 가져오기 (복원)
+            <%= t('clubs.backup.import_button') %>
           </button>
         <% end %>
       </div>
@@ -53,10 +53,10 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <div>
-          <h3 class="font-bold">안내사항</h3>
+          <h3 class="font-bold"><%= t('clubs.backup.info.title') %></h3>
           <div class="text-xs">
-            <strong>백업</strong>: 모든 클럽, 멤버, 경기(진행중 포함)가 JSON 파일로 저장됩니다.<br/>
-            <strong>복원</strong>: 기존 데이터를 삭제하지 않고, 백업 파일의 데이터를 <strong>비교하여 새로운 항목만 추가</strong>합니다. 이미 존재하는 클럽·멤버·경기는 건너뜁니다.
+            <%= raw t('clubs.backup.info.backup_desc') %><br/>
+            <%= raw t('clubs.backup.info.restore_desc') %>
           </div>
         </div>
       </div>
@@ -66,8 +66,8 @@
   <div id="loading-overlay" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden backdrop-blur-sm">
     <div class="card bg-base-100 shadow-xl p-8 text-center min-w-[300px]">
       <div class="loading loading-spinner loading-lg text-primary mx-auto mb-4"></div>
-      <h3 class="text-xl font-bold mb-2">데이터 복원 중...</h3>
-      <p class="text-base-content/60">잠시만 기다려주세요.<br>데이터 양에 따라 시간이 걸릴 수 있습니다.</p>
+      <h3 class="text-xl font-bold mb-2"><%= t('clubs.backup.loading.title') %></h3>
+      <p class="text-base-content/60"><%= t('clubs.backup.loading.description').html_safe.gsub("\n", "<br>").html_safe %></p>
     </div>
   </div>
 </div>

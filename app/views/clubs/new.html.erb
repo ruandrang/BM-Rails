@@ -1,4 +1,4 @@
-<% content_for :title, "새 클럽 만들기 - 농구 클럽 매니저" %>
+<% content_for :title, t('clubs.new.page_title', app_name: t('app.name')) %>
 
 <div class="max-w-7xl mx-auto">
   <!-- 뒤로가기 -->
@@ -7,15 +7,15 @@
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg>
-      뒤로가기
+      <%= t('common.back') %>
     <% end %>
   </div>
 
   <!-- 페이지 헤더 -->
   <div class="mb-8 text-center">
     <div class="text-6xl mb-4">🏀</div>
-    <h1 class="text-4xl font-bold text-base-content mb-2">새 클럽 만들기</h1>
-    <p class="text-base-content/60">아이콘을 고르고 이름을 입력해주세요</p>
+    <h1 class="text-4xl font-bold text-base-content mb-2"><%= t('clubs.new.title') %></h1>
+    <p class="text-base-content/60"><%= t('clubs.new.subtitle') %></p>
   </div>
 
   <!-- 폼 카드 -->

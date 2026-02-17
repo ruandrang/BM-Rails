@@ -9,6 +9,8 @@
      data-teams-count="<%= @match.teams.count %>"
      data-regular-quarters="<%= @match.respond_to?(:regular_quarters) ? @match.regular_quarters : 4 %>"
      data-default-period-seconds="<%= current_user.default_period_seconds %>"
+     data-locale="<%= current_locale %>"
+     data-voice-lang="<%= current_user.speech_locale %>"
      data-sound-enabled="<%= current_user.scoreboard_sound_enabled %>"
      data-voice-enabled="<%= current_user.voice_announcement_enabled %>"
      data-voice-rate="<%= current_user.voice_announcement_rate %>"
@@ -28,7 +30,7 @@
       <span class="text-[#00ff00] font-['DSEG7'] font-bold tracking-wider tabular-nums" 
             style="font-size: 14rem;"
             data-scoreboard-timer>10:00</span>
-      <span class="text-gray-500 text-sm tracking-widest uppercase">Game Clock</span>
+      <span class="text-gray-500 text-sm tracking-widest uppercase" data-ui-key="game_clock_label">Game Clock</span>
     </div>
 
     <%# Right Team Name %>
@@ -47,7 +49,7 @@
             style="font-size: 26.4rem;"
             data-score-left>0</span>
       <div class="px-6 py-2 bg-[#1a1a1a] border border-[#333] rounded flex items-center gap-3">
-        <span class="text-gray-400 text-xs tracking-wider uppercase">FOUL</span>
+        <span class="text-gray-400 text-xs tracking-wider uppercase" data-ui-key="foul">FOUL</span>
         <div class="flex gap-2" data-foul-indicators-left>
           <div class="w-8 h-8 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="0"></div>
           <div class="w-8 h-8 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="1"></div>
@@ -81,7 +83,7 @@
         <span class="text-[#00ff00] font-['DSEG7'] font-bold tabular-nums" 
               style="font-size: 10rem;"
               data-scoreboard-shot>24</span>
-        <span class="text-gray-500 text-xs tracking-widest uppercase">Shot Clock</span>
+        <span class="text-gray-500 text-xs tracking-widest uppercase" data-ui-key="shot_clock_label">Shot Clock</span>
       </div>
     </div>
 
@@ -91,7 +93,7 @@
             style="font-size: 26.4rem;"
             data-score-right>0</span>
       <div class="px-6 py-2 bg-[#1a1a1a] border border-[#333] rounded flex items-center gap-3">
-        <span class="text-gray-400 text-xs tracking-wider uppercase">FOUL</span>
+        <span class="text-gray-400 text-xs tracking-wider uppercase" data-ui-key="foul">FOUL</span>
         <div class="flex gap-2" data-foul-indicators-right>
           <div class="w-8 h-8 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="0"></div>
           <div class="w-8 h-8 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="1"></div>
@@ -109,7 +111,7 @@
     <%# League Info %>
     <div class="flex flex-col">
       <span class="text-[#666] text-xs tracking-[3px] uppercase">BM League</span>
-      <span class="text-gray-400 text-sm font-['JetBrains_Mono']"><%= @match.respond_to?(:date) ? @match.date.strftime("%Y.%m.%d") : Time.current.strftime("%Y.%m.%d") %> — Standalone Mode</span>
+      <span class="text-gray-400 text-sm font-['JetBrains_Mono']"><%= @match.respond_to?(:date) ? @match.date.strftime("%Y.%m.%d") : Time.current.strftime("%Y.%m.%d") %> — <span data-ui-key="standalone_mode">Standalone Mode</span></span>
     </div>
 
     <%# Bottom Center Logos %>
@@ -124,7 +126,7 @@
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-400">
         <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
       </svg>
-      <span class="text-gray-400 text-sm font-bold tracking-wider uppercase">Fullscreen</span>
+      <span class="text-gray-400 text-sm font-bold tracking-wider uppercase" data-ui-key="fullscreen">Fullscreen</span>
     </button>
   </div>
 

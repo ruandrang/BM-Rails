@@ -1,40 +1,40 @@
-<% content_for :title, "관리자 · 팀 상세" %>
+<% content_for :title, t('admin.teams.show.page_title') %>
 
 <div class="page-header">
   <div>
-    <h1>팀 상세</h1>
-    <p class="muted">팀 <%= @team.label %> · <%= @team.match.club.name %></p>
+    <h1><%= t('admin.teams.show.title') %></h1>
+    <p class="muted"><%= t('admin.common.team_label', label: @team.label) %> · <%= @team.match.club.name %></p>
   </div>
   <div class="actions">
-    <%= link_to "목록으로", admin_teams_path, class: "button ghost" %>
+    <%= link_to t('admin.common.back_to_list'), admin_teams_path, class: "button ghost" %>
   </div>
 </div>
 
 <div class="card">
   <table class="table">
     <tbody>
-      <tr><th>ID</th><td><%= @team.id %></td></tr>
-      <tr><th>라벨</th><td><%= @team.label %></td></tr>
-      <tr><th>색상</th><td><%= @team.color %></td></tr>
-      <tr><th>클럽</th><td><%= @team.match.club.name %></td></tr>
-      <tr><th>경기 날짜</th><td><%= @team.match.played_on.strftime("%Y-%m-%d") %></td></tr>
-      <tr><th>멤버 수</th><td><%= @team.members.count %></td></tr>
+      <tr><th><%= t('admin.teams.fields.id') %></th><td><%= @team.id %></td></tr>
+      <tr><th><%= t('admin.teams.fields.label') %></th><td><%= @team.label %></td></tr>
+      <tr><th><%= t('admin.teams.fields.color') %></th><td><%= @team.color %></td></tr>
+      <tr><th><%= t('admin.teams.fields.club') %></th><td><%= @team.match.club.name %></td></tr>
+      <tr><th><%= t('admin.teams.fields.match_date') %></th><td><%= @team.match.played_on.strftime("%Y-%m-%d") %></td></tr>
+      <tr><th><%= t('admin.teams.fields.members_count') %></th><td><%= @team.members.count %></td></tr>
     </tbody>
   </table>
 </div>
 
 <div class="card">
-  <h2>멤버</h2>
+  <h2><%= t('admin.teams.sections.members') %></h2>
   <ul class="member-list">
     <% @team.members.each do |member| %>
       <li class="member-item">
         <span class="member-name"><%= member.name %></span>
         <span class="member-meta"><%= member.position %></span>
-        <%= link_to "보기", admin_member_path(member), class: "button ghost" %>
+        <%= link_to t('admin.common.view'), admin_member_path(member), class: "button ghost" %>
       </li>
     <% end %>
   </ul>
   <% if @team.members.empty? %>
-    <div class="empty-state"><p>멤버가 없습니다.</p></div>
+    <div class="empty-state"><p><%= t('admin.teams.empty.no_members') %></p></div>
   <% end %>
 </div>

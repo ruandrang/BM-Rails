@@ -1,23 +1,23 @@
-<% content_for :title, "관리자 · 팀 멤버 상세" %>
+<% content_for :title, t('admin.team_members.show.page_title') %>
 
 <div class="page-header">
   <div>
-    <h1>팀 멤버 상세</h1>
-    <p class="muted"><%= @team_member.member.name %> · 팀 <%= @team_member.team.label %></p>
+    <h1><%= t('admin.team_members.show.title') %></h1>
+    <p class="muted"><%= @team_member.member.name %> · <%= t('admin.common.team_label', label: @team_member.team.label) %></p>
   </div>
   <div class="actions">
-    <%= link_to "목록으로", admin_team_members_path, class: "button ghost" %>
+    <%= link_to t('admin.common.back_to_list'), admin_team_members_path, class: "button ghost" %>
   </div>
 </div>
 
 <div class="card">
   <table class="table">
     <tbody>
-      <tr><th>ID</th><td><%= @team_member.id %></td></tr>
-      <tr><th>클럽</th><td><%= @team_member.team.match.club.name %></td></tr>
-      <tr><th>팀</th><td>팀 <%= @team_member.team.label %> (<%= @team_member.team.color %>)</td></tr>
-      <tr><th>멤버</th><td><%= @team_member.member.name %></td></tr>
-      <tr><th>경기 날짜</th><td><%= @team_member.team.match.played_on.strftime("%Y-%m-%d") %></td></tr>
+      <tr><th><%= t('admin.team_members.fields.id') %></th><td><%= @team_member.id %></td></tr>
+      <tr><th><%= t('admin.team_members.fields.club') %></th><td><%= @team_member.team.match.club.name %></td></tr>
+      <tr><th><%= t('admin.team_members.fields.team') %></th><td><%= t('admin.common.team_label', label: @team_member.team.label) %> (<%= @team_member.team.color %>)</td></tr>
+      <tr><th><%= t('admin.team_members.fields.member') %></th><td><%= @team_member.member.name %></td></tr>
+      <tr><th><%= t('admin.team_members.fields.match_date') %></th><td><%= @team_member.team.match.played_on.strftime("%Y-%m-%d") %></td></tr>
     </tbody>
   </table>
 </div>

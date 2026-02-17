@@ -65,6 +65,16 @@ Team (1)
 | `ClubExporter` | 클럽 데이터 JSON 내보내기 |
 | `ClubImporter` | 클럽 데이터 JSON 가져오기 |
 
+### User 설정 상수 (`app/models/user.rb`)
+
+| 상수 | 설명 |
+|------|------|
+| `SUPPORTED_LOCALES` | 지원 언어 목록 (10개) |
+| `DEFAULT_GAME_MINUTES` | 기본 경기 시간 (8분) |
+| `MIN/MAX_GAME_MINUTES` | 경기 시간 범위 (1~60분) |
+| `POSSESSION_SWITCH_PATTERNS` | 공격방향 전환 패턴 (`q12_q34`, `q13_q24`) |
+| `VOICE_ANNOUNCEMENT_RATES` | 음성 속도 (0.9, 1.0, 1.1) |
+
 ### 도메인 로직
 
 - **Match 생성 흐름** (`MatchesController#create`): 선수 선택 → `TeamBalancer`로 자동 배정 → 팀 생성 → `teams.combination(2)`로 모든 대전 Game 자동 생성 (트랜잭션)
@@ -116,13 +126,27 @@ Stimulus + 바닐라 JS 혼합 사용 (importmap 미사용, `<script>` 태그로
 - `ApplicationController`에서 `before_action :require_login` 전역 적용
 - `sessions#new`, `registrations#new`는 로그인 불필요 (`skip_before_action` 처리)
 - Admin 컨트롤러는 `Admin::BaseController`에서 `require_admin` 적용
+- **Rate limiting**: 로그인 시도 분당 10회 제한 (`SessionsController#create`)
+- **공유 화면**: `matches#share`는 비로그인 허용 + 토큰 검증
 
 ## 코드 컨벤션
 
 - **Ruby 스타일**: rubocop-rails-omakase (Rails 공식 권장, `.rubocop.yml`에서 상속)
 - **뷰**: ERB 템플릿 + Tailwind/DaisyUI 클래스
 - **Active Storage / Action Mailbox / Action Text**: 비활성화 상태 (`config/application.rb`)
-- **모든 UI 텍스트**: 한국어
+
+## 다국어 지원 (i18n)
+
+- **지원 언어**: ko(한국어, 기본), ja, en, zh, fr, es, it, pt, tl, de — 총 10개 언어
+- **로케일 파일**: `config/locales/*.yml`
+- **사용자 언어 설정**: `User#preferred_locale` 컬럼, 세팅 페이지에서 변경 가능
+- **음성 로케일 매핑**: `User::SPEECH_LOCALE_BY_PREFERRED_LOCALE` (예: `ko → ko-KR`, `en → en-US`)
+- **번역 키 구조**: `auth.*`, `common.*`, `menu.*`, `settings.*` 등 네임스페이스 기반
+- **Fallback**: 번역 키 없으면 한국어(`:ko`)로 폴백 (`config/application.rb`)
+
+### 번역 추가 시 주의사항
+- 모든 10개 로케일 파일에 동일한 키 구조 유지 필요
+- `ApplicationController#set_locale`에서 `current_user.preferred_locale` 기반으로 `I18n.locale` 설정
 
 ## 개발 시 참고사항
 

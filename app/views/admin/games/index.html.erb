@@ -1,12 +1,12 @@
-<% content_for :title, "관리자 · 게임" %>
+<% content_for :title, t('admin.games.page_title') %>
 
 <div class="page-header">
   <div>
-    <h1>게임 목록</h1>
-    <p class="muted">전체 게임 기록</p>
+    <h1><%= t('admin.games.title') %></h1>
+    <p class="muted"><%= t('admin.games.subtitle') %></p>
   </div>
   <div class="actions">
-    <%= link_to "대시보드", admin_root_path, class: "button ghost" %>
+    <%= link_to t('admin.common.dashboard'), admin_root_path, class: "button ghost" %>
   </div>
 </div>
 
@@ -14,12 +14,12 @@
   <table class="table">
     <thead>
       <tr>
-        <th>ID</th>
-        <th>클럽</th>
-        <th>경기 날짜</th>
-        <th>대결</th>
-        <th>결과</th>
-        <th>보기</th>
+        <th><%= t('admin.games.fields.id') %></th>
+        <th><%= t('admin.games.fields.club') %></th>
+        <th><%= t('admin.games.fields.match_date') %></th>
+        <th><%= t('admin.games.fields.matchup') %></th>
+        <th><%= t('admin.games.fields.result') %></th>
+        <th><%= t('admin.common.view') %></th>
       </tr>
     </thead>
     <tbody>
@@ -28,9 +28,9 @@
           <td><%= game.id %></td>
           <td><%= game.match.club.name %></td>
           <td><%= game.match.played_on.strftime("%Y-%m-%d") %></td>
-          <td>팀 <%= game.home_team.label %> vs 팀 <%= game.away_team.label %></td>
+          <td><%= t('admin.common.team_vs', home: game.home_team.label, away: game.away_team.label) %></td>
           <td><%= game.result %></td>
-          <td><%= link_to "보기", admin_game_path(game), class: "button ghost" %></td>
+          <td><%= link_to t('admin.common.view'), admin_game_path(game), class: "button ghost" %></td>
         </tr>
       <% end %>
     </tbody>

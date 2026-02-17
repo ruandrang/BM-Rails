@@ -1,12 +1,12 @@
-<% content_for :title, "관리자 · 멤버" %>
+<% content_for :title, t('admin.members.page_title') %>
 
 <div class="page-header">
   <div>
-    <h1>멤버 목록</h1>
-    <p class="muted">전체 멤버 정보</p>
+    <h1><%= t('admin.members.title') %></h1>
+    <p class="muted"><%= t('admin.members.subtitle') %></p>
   </div>
   <div class="actions">
-    <%= link_to "대시보드", admin_root_path, class: "button ghost" %>
+    <%= link_to t('admin.common.dashboard'), admin_root_path, class: "button ghost" %>
   </div>
 </div>
 
@@ -14,12 +14,12 @@
   <table class="table">
     <thead>
       <tr>
-        <th>ID</th>
-        <th>이름</th>
-        <th>클럽</th>
-        <th>포지션</th>
-        <th>등번호</th>
-        <th>보기</th>
+        <th><%= t('admin.members.fields.id') %></th>
+        <th><%= t('admin.members.fields.name') %></th>
+        <th><%= t('admin.members.fields.club') %></th>
+        <th><%= t('admin.members.fields.position') %></th>
+        <th><%= t('admin.members.fields.jersey_number') %></th>
+        <th><%= t('admin.common.view') %></th>
       </tr>
     </thead>
     <tbody>
@@ -30,7 +30,7 @@
           <td><%= member.club.name %></td>
           <td><%= member.position %></td>
           <td><%= member.jersey_number || "-" %></td>
-          <td><%= link_to "보기", admin_member_path(member), class: "button ghost" %></td>
+          <td><%= link_to t('admin.common.view'), admin_member_path(member), class: "button ghost" %></td>
         </tr>
       <% end %>
     </tbody>

@@ -1,4 +1,4 @@
-<% content_for :title, "로그인 - 농구 클럽 매니저" %>
+<% content_for :title, t("auth.login.page_title") %>
 
 <div class="min-h-screen flex items-center justify-center p-4">
   <div class="card bg-base-100 shadow-xl w-full max-w-md">
@@ -6,15 +6,15 @@
       <!-- 로고 & 타이틀 -->
       <div class="text-center mb-6">
         <div class="text-6xl mb-4">🏀</div>
-        <h1 class="text-3xl font-bold">로그인</h1>
-        <p class="text-base-content/60 mt-2">클럽 관리로 바로 들어가세요</p>
+        <h1 class="text-3xl font-bold"><%= t("auth.login.title") %></h1>
+        <p class="text-base-content/60 mt-2"><%= t("auth.login.subtitle") %></p>
       </div>
 
       <!-- 로그인 폼 -->
       <%= form_with url: session_path, method: :post, local: true, class: "space-y-4" do %>
         <div class="form-control w-full">
           <label class="label" for="email">
-            <span class="label-text">이메일</span>
+            <span class="label-text"><%= t("auth.fields.email") %></span>
           </label>
           <%= email_field_tag :email, params[:email],
               required: true,
@@ -25,7 +25,7 @@
 
         <div class="form-control w-full">
           <label class="label" for="password">
-            <span class="label-text">비밀번호</span>
+            <span class="label-text"><%= t("auth.fields.password") %></span>
           </label>
           <%= password_field_tag :password, nil,
               required: true,
@@ -35,16 +35,16 @@
         </div>
 
         <div class="form-control mt-6">
-          <%= submit_tag "로그인", class: "btn btn-primary btn-lg w-full" %>
+          <%= submit_tag t("common.login"), class: "btn btn-primary btn-lg w-full" %>
         </div>
       <% end %>
 
       <!-- 회원가입 링크 -->
-      <div class="divider">OR</div>
+      <div class="divider"><%= t("common.or", default: "OR") %></div>
 
       <div class="text-center">
-        <span class="text-base-content/60">계정이 없으신가요?</span>
-        <%= link_to "회원가입", new_registration_path, class: "link link-primary ml-1" %>
+        <span class="text-base-content/60"><%= t("auth.login.no_account") %></span>
+        <%= link_to t("common.signup"), new_registration_path, class: "link link-primary ml-1" %>
       </div>
     </div>
   </div>

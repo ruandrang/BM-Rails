@@ -6,7 +6,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <div>
-          <h3 class="font-bold">입력 오류</h3>
+          <h3 class="font-bold"><%= t('common.input_error') %></h3>
           <ul class="text-sm list-disc list-inside">
             <% @club.errors.full_messages.each do |message| %>
               <li><%= message %></li>
@@ -18,19 +18,19 @@
   <% end %>
 
   <div class="form-control w-full">
-    <%= form.label :name, "클럽 이름", class: "label" %>
+    <%= form.label :name, t('clubs.form.name_label'), class: "label" %>
     <%= form.text_field :name,
         required: true,
-        placeholder: "예: 루키 바스켓볼",
+        placeholder: t('clubs.form.name_placeholder'),
         class: "input input-bordered w-full" %>
     <label class="label">
-      <span class="label-text-alt text-base-content/60">기억하기 쉬운 이름을 입력하세요</span>
+      <span class="label-text-alt text-base-content/60"><%= t('clubs.form.name_hint') %></span>
     </label>
   </div>
 
   <!-- 정기 운동 요일 -->
   <div class="form-control w-full">
-    <%= form.label :meeting_days, "정기 운동 요일", class: "label" %>
+    <%= form.label :meeting_days, t('clubs.form.meeting_days_label'), class: "label" %>
     <div class="flex flex-wrap gap-2">
       <% Club::MEETING_DAYS.each do |day| %>
         <label class="cursor-pointer">
@@ -42,23 +42,23 @@
       <% end %>
     </div>
     <label class="label">
-      <span class="label-text-alt text-base-content/60">버튼을 눌러 운동하는 요일을 모두 선택하세요</span>
+      <span class="label-text-alt text-base-content/60"><%= t('clubs.form.meeting_days_hint') %></span>
     </label>
   </div>
 
   <!-- 클럽 소개 -->
   <div class="form-control w-full">
-    <%= form.label :description, "클럽 소개", class: "label" %>
-    <%= form.text_area :description, 
-        rows: 3, 
-        placeholder: "클럽에 대한 간단한 소개를 입력하세요",
+    <%= form.label :description, t('clubs.form.description_label'), class: "label" %>
+    <%= form.text_area :description,
+        rows: 3,
+        placeholder: t('clubs.form.description_placeholder'),
         class: "textarea textarea-bordered w-full" %>
   </div>
 
   <!-- 클럽 아이콘 선택 -->
   <div class="form-control w-full">
     <label class="label">
-      <span class="label-text font-medium">클럽 아이콘</span>
+      <span class="label-text font-medium"><%= t('clubs.form.icon_label') %></span>
     </label>
     <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
       <% Club::ICONS.each do |icon| %>
@@ -78,7 +78,7 @@
 
   <!-- 제출 버튼 -->
   <div class="form-control mt-8">
-    <%= form.submit @club.new_record? ? "클럽 만들기" : "저장하기",
+    <%= form.submit @club.new_record? ? t('clubs.form.submit_create') : t('common.save'),
         class: "btn btn-primary btn-lg w-full gap-2" %>
   </div>
 <% end %>

@@ -3,7 +3,7 @@ class ScoreboardChannel < ApplicationCable::Channel
     quarter period_seconds shot_seconds running shot_running matchup_index
     teams rotation_step home_fouls away_fouls matchup_scores matchup_order matchup_slots quarter_history possession
     manual_swap sound_enabled voice_enabled voice_rate base_possession possession_switch_pattern progression_mode
-    quarter_score_reset_enabled regular_quarters
+    quarter_score_reset_enabled regular_quarters state_version updated_at_ms source_client_id
   ].freeze
   MAX_PAYLOAD_SIZE = 50_000
 
@@ -108,7 +108,7 @@ class ScoreboardStore
       sanitized_voice_rate = voice_rate.to_f.round(1)
       sanitized_voice_rate = User::DEFAULT_VOICE_ANNOUNCEMENT_RATE unless User::VOICE_ANNOUNCEMENT_RATES.include?(sanitized_voice_rate)
       sanitized_possession_switch_pattern =
-        User::POSSESSION_SWITCH_PATTERNS.key?(possession_switch_pattern) ? possession_switch_pattern : User::DEFAULT_POSSESSION_SWITCH_PATTERN
+        User::POSSESSION_SWITCH_PATTERNS.include?(possession_switch_pattern) ? possession_switch_pattern : User::DEFAULT_POSSESSION_SWITCH_PATTERN
       sanitized_regular_quarters = regular_quarters.to_i
       sanitized_regular_quarters = 4 unless [ 3, 4 ].include?(sanitized_regular_quarters)
 
@@ -140,7 +140,10 @@ class ScoreboardStore
         "quarter_score_reset_enabled" => sanitized_regular_quarters == 3,
         "sound_enabled" => true,
         "voice_enabled" => true,
-        "voice_rate" => sanitized_voice_rate
+        "voice_rate" => sanitized_voice_rate,
+        "state_version" => 0,
+        "updated_at_ms" => 0,
+        "source_client_id" => nil
       }
     end
 

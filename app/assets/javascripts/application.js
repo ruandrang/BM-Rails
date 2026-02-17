@@ -157,6 +157,828 @@ document.addEventListener("DOMContentLoaded", () => {
       return VOICE_ANNOUNCEMENT_RATES.includes(rounded) ? rounded : fallback;
     };
     const defaultVoiceRate = normalizeVoiceRate(scoreboardRoot.dataset.voiceRate, 1.0);
+    const SUPPORTED_UI_LOCALES = ["ko", "ja", "en", "zh", "fr", "es", "it", "pt", "tl", "de"];
+    const DEFAULT_VOICE_LANG_BY_LOCALE = {
+      ko: "ko-KR",
+      ja: "ja-JP",
+      en: "en-US",
+      zh: "zh-CN",
+      fr: "fr-FR",
+      es: "es-ES",
+      it: "it-IT",
+      pt: "pt-BR",
+      tl: "fil-PH",
+      de: "de-DE"
+    };
+    const normalizeUiLocale = (value) => {
+      const raw = String(value || "").trim().toLowerCase();
+      if (!raw) return "ko";
+      const code = raw.split("-")[0];
+      return SUPPORTED_UI_LOCALES.includes(code) ? code : "ko";
+    };
+    const uiLocale = normalizeUiLocale(scoreboardRoot.dataset.locale || document.documentElement.lang || "ko");
+    const scoreboardVoiceLang = String(scoreboardRoot.dataset.voiceLang || DEFAULT_VOICE_LANG_BY_LOCALE[uiLocale] || "ko-KR");
+    const UI_MESSAGES = {
+      ko: {
+        team_word: "팀",
+        roster_empty: "명단 없음",
+        roster_label: "명단",
+        quarter_table_need_teams: "점수표를 표시하려면 최소 2팀이 필요합니다.",
+        quarter_table_matchup: "경기 (Matchup)",
+        quarter_table_final: "최종",
+        main_start: "시작",
+        main_stop: "멈춤",
+        announcements_on: "🔊 안내 ON",
+        announcements_off: "🔇 안내 OFF",
+        quarter_reset_on: "쿼터별 점수 리셋 ON",
+        quarter_reset_off: "쿼터별 점수 리셋 OFF",
+        finish_current_game: "🏁 현재 경기 종료",
+        finish_match: "🏁 경기 종료",
+        add_game_enabled: "+ 경기 추가 (%{current}/%{max})",
+        add_game_completed: "경기 추가 완료 (%{max}/%{max})",
+        next_quarter: "다음 쿼터",
+        score_finalize: "점수 확정",
+        saved_complete: "저장 완료",
+        shortcuts_hide: "⌨️ 상세 숨기기",
+        shortcuts_show: "⌨️ 상세 보기",
+        possession_left: "왼쪽",
+        possession_right: "오른쪽",
+        possession_toggle: "공격 전환 (%{direction})",
+        confirm_reset_all: "정말로 모든 점수와 시간을 초기화하시겠습니까?",
+        alert_club_not_found: "클럽 정보를 찾을 수 없습니다.",
+        alert_add_game_failed: "경기 추가에 실패했습니다.",
+        alert_add_game_error: "경기 추가 중 오류가 발생했습니다.",
+        alert_score_save_failed: "점수 저장 실패: %{error}",
+        alert_unknown_error: "알 수 없는 오류",
+        alert_finish_current_game: "현재 경기 종료!\n최종 점수: %{team1} %{score1} : %{score2} %{team2}\n다음 경기로 이동합니다.",
+        alert_finish_match: "경기 종료!\n최종 점수: %{team1} %{score1} : %{score2} %{team2}\n결과: %{result}",
+        alert_score_save_error: "점수 저장 중 오류가 발생했습니다.",
+        confirm_finish_current_game: "현재 경기를 종료하고 점수를 저장한 뒤 다음 경기로 이동하시겠습니까?",
+        confirm_finish_match: "경기를 종료하고 현재 점수를 저장하시겠습니까?",
+        confirm_new_game_reset: "모든 경기 점수 데이터가 초기화 됩니다. 진행 하시겠습니까?",
+        voice_score_pattern: "%{home} 대 %{away}",
+        voice_countdown_pattern: "%{count}",
+        control_panel_prefix: "제어",
+        control_panel_highlight: "패널",
+        control_connected: "연결됨",
+        open_display: "디스플레이 열기",
+        live: "라이브",
+        game_timer: "경기 타이머",
+        reset: "리셋",
+        shot_clock_title: "샷클락",
+        foul: "파울",
+        buzzer_label: "🔔 버저",
+        reset_all: "🔄 전체 리셋",
+        swap_scores: "🔄 점수 바꾸기",
+        match_reset: "경기 리셋",
+        view_cumulative: "누적",
+        view_per_quarter: "쿼터별",
+        drag: "↕ 드래그",
+        drag_matchup_aria: "경기 순서 변경",
+        shortcuts_title: "키보드 단축키",
+        drag_shortcuts_aria: "단축키 순서 변경",
+        shortcut_game_clock_toggle: "경기 시간 시작 / 멈춤",
+        shortcut_shot_reset: "샷클락 리셋 (14초 / 24초)",
+        shortcut_shot_toggle: "샷클락 멈춤 / 시작",
+        shortcut_announcements_toggle: "B: 안내 ON / V: 안내 OFF",
+        shortcut_buzzer: "부저 울리기",
+        shortcut_left_score_add: "왼쪽 팀 득점 (+1, +2, +3)",
+        shortcut_right_score_add: "오른쪽 팀 득점 (+1, +2, +3)",
+        shortcut_score_subtract: "5: 오른쪽 팀 -1 / 6: 왼쪽 팀 -1",
+        shortcut_fouls: "A/S: 오른쪽 파울 -, + · K/L: 왼쪽 파울 -, +",
+        shortcut_next_quarter: "다음 쿼터로 이동",
+        game_clock_label: "경기 시계",
+        shot_clock_label: "샷클락",
+        fullscreen: "전체 화면",
+        standalone_mode: "단독 모드",
+        team_label_pattern: "팀 %{label}",
+        matchup_pattern: "%{home} vs %{away}",
+        member_name_unknown: "이름없음"
+      },
+      ja: {
+        team_word: "チーム",
+        roster_empty: "メンバーなし",
+        roster_label: "ロスター",
+        quarter_table_need_teams: "スコア表を表示するには最低2チームが必要です。",
+        quarter_table_matchup: "対戦 (Matchup)",
+        quarter_table_final: "最終",
+        main_start: "開始",
+        main_stop: "停止",
+        announcements_on: "🔊 音声案内 ON",
+        announcements_off: "🔇 音声案内 OFF",
+        quarter_reset_on: "クォーターごとリセット ON",
+        quarter_reset_off: "クォーターごとリセット OFF",
+        finish_current_game: "🏁 現在の試合終了",
+        finish_match: "🏁 試合終了",
+        add_game_enabled: "+ 試合追加 (%{current}/%{max})",
+        add_game_completed: "試合追加完了 (%{max}/%{max})",
+        next_quarter: "次のクォーター",
+        score_finalize: "スコア確定",
+        saved_complete: "保存完了",
+        shortcuts_hide: "⌨️ 詳細を隠す",
+        shortcuts_show: "⌨️ 詳細を表示",
+        possession_left: "左",
+        possession_right: "右",
+        possession_toggle: "攻撃切替 (%{direction})",
+        confirm_reset_all: "本当にすべてのスコアと時間を初期化しますか？",
+        alert_club_not_found: "クラブ情報が見つかりません。",
+        alert_add_game_failed: "試合の追加に失敗しました。",
+        alert_add_game_error: "試合追加中にエラーが発生しました。",
+        alert_score_save_failed: "スコア保存失敗: %{error}",
+        alert_unknown_error: "不明なエラー",
+        alert_finish_current_game: "現在の試合終了！\n最終スコア: %{team1} %{score1} : %{score2} %{team2}\n次の試合へ移動します。",
+        alert_finish_match: "試合終了！\n最終スコア: %{team1} %{score1} : %{score2} %{team2}\n結果: %{result}",
+        alert_score_save_error: "スコア保存中にエラーが発生しました。",
+        confirm_finish_current_game: "現在の試合を終了してスコアを保存し、次の試合へ移動しますか？",
+        confirm_finish_match: "試合を終了して現在のスコアを保存しますか？",
+        confirm_new_game_reset: "すべての試合スコアデータを初期化します。続行しますか？",
+        voice_score_pattern: "%{home} 対 %{away}",
+        voice_countdown_pattern: "%{count}",
+        control_panel_prefix: "操作",
+        control_panel_highlight: "パネル",
+        control_connected: "接続中",
+        open_display: "ディスプレイを開く",
+        live: "ライブ",
+        game_timer: "試合タイマー",
+        reset: "リセット",
+        shot_clock_title: "ショットクロック",
+        foul: "ファウル",
+        buzzer_label: "🔔 ブザー",
+        reset_all: "🔄 全体リセット",
+        swap_scores: "🔄 スコア入替",
+        match_reset: "試合リセット",
+        view_cumulative: "累計",
+        view_per_quarter: "クォーター別",
+        drag: "↕ ドラッグ",
+        drag_matchup_aria: "対戦順を変更",
+        shortcuts_title: "キーボードショートカット",
+        drag_shortcuts_aria: "ショートカット順を変更",
+        shortcut_game_clock_toggle: "試合時間 開始 / 停止",
+        shortcut_shot_reset: "ショットクロック リセット (14秒 / 24秒)",
+        shortcut_shot_toggle: "ショットクロック 停止 / 開始",
+        shortcut_announcements_toggle: "B: 案内 ON / V: 案内 OFF",
+        shortcut_buzzer: "ブザーを鳴らす",
+        shortcut_left_score_add: "左チーム得点 (+1, +2, +3)",
+        shortcut_right_score_add: "右チーム得点 (+1, +2, +3)",
+        shortcut_score_subtract: "5: 右チーム -1 / 6: 左チーム -1",
+        shortcut_fouls: "A/S: 右ファウル -, + · K/L: 左ファウル -, +",
+        shortcut_next_quarter: "次のクォーターへ",
+        game_clock_label: "ゲームクロック",
+        shot_clock_label: "ショットクロック",
+        fullscreen: "全画面",
+        standalone_mode: "単独モード",
+        team_label_pattern: "チーム %{label}",
+        matchup_pattern: "%{home} vs %{away}",
+        member_name_unknown: "名前なし"
+      },
+      en: {
+        team_word: "Team",
+        roster_empty: "No roster",
+        roster_label: "Roster",
+        quarter_table_need_teams: "At least two teams are required to show the score table.",
+        quarter_table_matchup: "Matchup",
+        quarter_table_final: "Final",
+        main_start: "Start",
+        main_stop: "Stop",
+        announcements_on: "🔊 Announcements ON",
+        announcements_off: "🔇 Announcements OFF",
+        quarter_reset_on: "Quarter Reset ON",
+        quarter_reset_off: "Quarter Reset OFF",
+        finish_current_game: "🏁 End Current Game",
+        finish_match: "🏁 End Match",
+        add_game_enabled: "+ Add Game (%{current}/%{max})",
+        add_game_completed: "Game Slots Full (%{max}/%{max})",
+        next_quarter: "Next Quarter",
+        score_finalize: "Finalize Score",
+        saved_complete: "Saved",
+        shortcuts_hide: "⌨️ Hide Details",
+        shortcuts_show: "⌨️ Show Details",
+        possession_left: "Left",
+        possession_right: "Right",
+        possession_toggle: "Toggle Possession (%{direction})",
+        confirm_reset_all: "Reset all scores and timers?",
+        alert_club_not_found: "Club information was not found.",
+        alert_add_game_failed: "Failed to add game.",
+        alert_add_game_error: "An error occurred while adding the game.",
+        alert_score_save_failed: "Failed to save score: %{error}",
+        alert_unknown_error: "Unknown error",
+        alert_finish_current_game: "Current game ended!\nFinal score: %{team1} %{score1} : %{score2} %{team2}\nMoving to the next game.",
+        alert_finish_match: "Match ended!\nFinal score: %{team1} %{score1} : %{score2} %{team2}\nResult: %{result}",
+        alert_score_save_error: "An error occurred while saving score.",
+        confirm_finish_current_game: "End the current game, save the score, and move to the next game?",
+        confirm_finish_match: "End the match and save the current score?",
+        confirm_new_game_reset: "All game score data will be reset. Continue?",
+        voice_score_pattern: "%{home} to %{away}",
+        voice_countdown_pattern: "%{count}",
+        control_panel_prefix: "Control",
+        control_panel_highlight: "Panel",
+        control_connected: "Connected",
+        open_display: "Open Display",
+        live: "Live",
+        game_timer: "Game Timer",
+        reset: "Reset",
+        shot_clock_title: "Shot Clock",
+        foul: "Foul",
+        buzzer_label: "🔔 Buzzer",
+        reset_all: "🔄 Reset All",
+        swap_scores: "🔄 Swap Scores",
+        match_reset: "Reset Match",
+        view_cumulative: "Cumulative",
+        view_per_quarter: "Per Quarter",
+        drag: "↕ Drag",
+        drag_matchup_aria: "Reorder matchups",
+        shortcuts_title: "Keyboard Shortcuts",
+        drag_shortcuts_aria: "Reorder shortcuts",
+        shortcut_game_clock_toggle: "Game clock start / stop",
+        shortcut_shot_reset: "Shot clock reset (14s / 24s)",
+        shortcut_shot_toggle: "Shot clock stop / start",
+        shortcut_announcements_toggle: "B: announcements ON / V: announcements OFF",
+        shortcut_buzzer: "Trigger buzzer",
+        shortcut_left_score_add: "Left team score (+1, +2, +3)",
+        shortcut_right_score_add: "Right team score (+1, +2, +3)",
+        shortcut_score_subtract: "5: right team -1 / 6: left team -1",
+        shortcut_fouls: "A/S: right fouls -, + · K/L: left fouls -, +",
+        shortcut_next_quarter: "Go to next quarter",
+        game_clock_label: "Game Clock",
+        shot_clock_label: "Shot Clock",
+        fullscreen: "Fullscreen",
+        standalone_mode: "Standalone Mode",
+        team_label_pattern: "Team %{label}",
+        matchup_pattern: "%{home} vs %{away}",
+        member_name_unknown: "Unknown"
+      },
+      zh: {
+        team_word: "队",
+        roster_empty: "无名单",
+        roster_label: "名单",
+        quarter_table_need_teams: "至少需要两支队伍才能显示记分表。",
+        quarter_table_matchup: "对阵",
+        quarter_table_final: "最终",
+        main_start: "开始",
+        main_stop: "停止",
+        announcements_on: "🔊 语音提示 开",
+        announcements_off: "🔇 语音提示 关",
+        quarter_reset_on: "每节重置 开",
+        quarter_reset_off: "每节重置 关",
+        finish_current_game: "🏁 结束当前比赛",
+        finish_match: "🏁 结束比赛",
+        add_game_enabled: "+ 添加比赛 (%{current}/%{max})",
+        add_game_completed: "比赛已满 (%{max}/%{max})",
+        next_quarter: "下一节",
+        score_finalize: "确认比分",
+        saved_complete: "已保存",
+        shortcuts_hide: "⌨️ 隐藏详情",
+        shortcuts_show: "⌨️ 显示详情",
+        possession_left: "左",
+        possession_right: "右",
+        possession_toggle: "切换球权 (%{direction})",
+        confirm_reset_all: "确定重置所有比分和时间吗？",
+        alert_club_not_found: "未找到俱乐部信息。",
+        alert_add_game_failed: "添加比赛失败。",
+        alert_add_game_error: "添加比赛时发生错误。",
+        alert_score_save_failed: "保存比分失败: %{error}",
+        alert_unknown_error: "未知错误",
+        alert_finish_current_game: "当前比赛结束！\n最终比分: %{team1} %{score1} : %{score2} %{team2}\n即将进入下一场比赛。",
+        alert_finish_match: "比赛结束！\n最终比分: %{team1} %{score1} : %{score2} %{team2}\n结果: %{result}",
+        alert_score_save_error: "保存比分时发生错误。",
+        confirm_finish_current_game: "结束当前比赛并保存比分后进入下一场吗？",
+        confirm_finish_match: "结束比赛并保存当前比分吗？",
+        confirm_new_game_reset: "所有比赛比分数据将被重置。是否继续？",
+        voice_score_pattern: "%{home} 比 %{away}",
+        voice_countdown_pattern: "%{count}",
+        control_panel_prefix: "控制",
+        control_panel_highlight: "面板",
+        control_connected: "已连接",
+        open_display: "打开显示屏",
+        live: "实时",
+        game_timer: "比赛计时器",
+        reset: "重置",
+        shot_clock_title: "进攻计时",
+        foul: "犯规",
+        buzzer_label: "🔔 蜂鸣器",
+        reset_all: "🔄 全部重置",
+        swap_scores: "🔄 对调比分",
+        match_reset: "比赛重置",
+        view_cumulative: "累计",
+        view_per_quarter: "按节",
+        drag: "↕ 拖动",
+        drag_matchup_aria: "调整对阵顺序",
+        shortcuts_title: "键盘快捷键",
+        drag_shortcuts_aria: "调整快捷键顺序",
+        shortcut_game_clock_toggle: "比赛时间 开始 / 停止",
+        shortcut_shot_reset: "进攻计时重置 (14秒 / 24秒)",
+        shortcut_shot_toggle: "进攻计时 停止 / 开始",
+        shortcut_announcements_toggle: "B: 提示开 / V: 提示关",
+        shortcut_buzzer: "鸣响蜂鸣器",
+        shortcut_left_score_add: "左侧队伍得分 (+1, +2, +3)",
+        shortcut_right_score_add: "右侧队伍得分 (+1, +2, +3)",
+        shortcut_score_subtract: "5: 右侧队伍 -1 / 6: 左侧队伍 -1",
+        shortcut_fouls: "A/S: 右侧犯规 -, + · K/L: 左侧犯规 -, +",
+        shortcut_next_quarter: "进入下一节",
+        game_clock_label: "比赛时钟",
+        shot_clock_label: "进攻计时",
+        fullscreen: "全屏",
+        standalone_mode: "独立模式",
+        team_label_pattern: "队 %{label}",
+        matchup_pattern: "%{home} vs %{away}",
+        member_name_unknown: "未知姓名"
+      },
+      fr: {
+        team_word: "Équipe",
+        roster_empty: "Aucun effectif",
+        roster_label: "Effectif",
+        quarter_table_need_teams: "Au moins deux équipes sont nécessaires pour afficher le tableau des scores.",
+        quarter_table_matchup: "Affiche",
+        quarter_table_final: "Final",
+        main_start: "Démarrer",
+        main_stop: "Arrêter",
+        announcements_on: "🔊 Annonces ON",
+        announcements_off: "🔇 Annonces OFF",
+        quarter_reset_on: "Réinit. par quart ON",
+        quarter_reset_off: "Réinit. par quart OFF",
+        finish_current_game: "🏁 Terminer le match en cours",
+        finish_match: "🏁 Terminer le match",
+        add_game_enabled: "+ Ajouter un match (%{current}/%{max})",
+        add_game_completed: "Ajout terminé (%{max}/%{max})",
+        next_quarter: "Quart suivant",
+        score_finalize: "Valider le score",
+        saved_complete: "Enregistré",
+        shortcuts_hide: "⌨️ Masquer les détails",
+        shortcuts_show: "⌨️ Afficher les détails",
+        possession_left: "Gauche",
+        possession_right: "Droite",
+        possession_toggle: "Changer possession (%{direction})",
+        confirm_reset_all: "Réinitialiser tous les scores et chronos ?",
+        alert_club_not_found: "Informations du club introuvables.",
+        alert_add_game_failed: "Échec de l'ajout du match.",
+        alert_add_game_error: "Une erreur est survenue pendant l'ajout du match.",
+        alert_score_save_failed: "Échec de l'enregistrement du score : %{error}",
+        alert_unknown_error: "Erreur inconnue",
+        alert_finish_current_game: "Match en cours terminé !\nScore final : %{team1} %{score1} : %{score2} %{team2}\nPassage au match suivant.",
+        alert_finish_match: "Match terminé !\nScore final : %{team1} %{score1} : %{score2} %{team2}\nRésultat : %{result}",
+        alert_score_save_error: "Une erreur est survenue lors de l'enregistrement du score.",
+        confirm_finish_current_game: "Terminer le match en cours, enregistrer le score et passer au suivant ?",
+        confirm_finish_match: "Terminer le match et enregistrer le score actuel ?",
+        confirm_new_game_reset: "Toutes les données de score seront réinitialisées. Continuer ?",
+        voice_score_pattern: "%{home} à %{away}",
+        voice_countdown_pattern: "%{count}",
+        control_panel_prefix: "Panneau",
+        control_panel_highlight: "de contrôle",
+        control_connected: "Connecté",
+        open_display: "Ouvrir l'affichage",
+        live: "En direct",
+        game_timer: "Chronomètre du match",
+        reset: "Réinitialiser",
+        shot_clock_title: "Chrono tir",
+        foul: "Faute",
+        buzzer_label: "🔔 Buzzer",
+        reset_all: "🔄 Réinit. totale",
+        swap_scores: "🔄 Inverser score",
+        match_reset: "Réinit. match",
+        view_cumulative: "Cumulé",
+        view_per_quarter: "Par quart",
+        drag: "↕ Glisser",
+        drag_matchup_aria: "Réordonner les affiches",
+        shortcuts_title: "Raccourcis clavier",
+        drag_shortcuts_aria: "Réordonner les raccourcis",
+        shortcut_game_clock_toggle: "Chrono match démarrer / arrêter",
+        shortcut_shot_reset: "Chrono tir réinit. (14s / 24s)",
+        shortcut_shot_toggle: "Chrono tir arrêter / démarrer",
+        shortcut_announcements_toggle: "B : annonces ON / V : annonces OFF",
+        shortcut_buzzer: "Déclencher le buzzer",
+        shortcut_left_score_add: "Score équipe gauche (+1, +2, +3)",
+        shortcut_right_score_add: "Score équipe droite (+1, +2, +3)",
+        shortcut_score_subtract: "5 : équipe droite -1 / 6 : équipe gauche -1",
+        shortcut_fouls: "A/S : fautes droite -, + · K/L : fautes gauche -, +",
+        shortcut_next_quarter: "Passer au quart suivant",
+        game_clock_label: "Horloge de match",
+        shot_clock_label: "Chrono tir",
+        fullscreen: "Plein écran",
+        standalone_mode: "Mode autonome",
+        team_label_pattern: "Équipe %{label}",
+        matchup_pattern: "%{home} vs %{away}",
+        member_name_unknown: "Sans nom"
+      },
+      es: {
+        team_word: "Equipo",
+        roster_empty: "Sin plantilla",
+        roster_label: "Plantilla",
+        quarter_table_need_teams: "Se requieren al menos dos equipos para mostrar la tabla de puntuación.",
+        quarter_table_matchup: "Enfrentamiento",
+        quarter_table_final: "Final",
+        main_start: "Iniciar",
+        main_stop: "Detener",
+        announcements_on: "🔊 Avisos ON",
+        announcements_off: "🔇 Avisos OFF",
+        quarter_reset_on: "Reinicio por cuarto ON",
+        quarter_reset_off: "Reinicio por cuarto OFF",
+        finish_current_game: "🏁 Finalizar juego actual",
+        finish_match: "🏁 Finalizar partido",
+        add_game_enabled: "+ Agregar juego (%{current}/%{max})",
+        add_game_completed: "Juegos completos (%{max}/%{max})",
+        next_quarter: "Siguiente cuarto",
+        score_finalize: "Confirmar marcador",
+        saved_complete: "Guardado",
+        shortcuts_hide: "⌨️ Ocultar detalles",
+        shortcuts_show: "⌨️ Mostrar detalles",
+        possession_left: "Izquierda",
+        possession_right: "Derecha",
+        possession_toggle: "Cambiar posesión (%{direction})",
+        confirm_reset_all: "¿Restablecer todos los marcadores y tiempos?",
+        alert_club_not_found: "No se encontró la información del club.",
+        alert_add_game_failed: "No se pudo agregar el juego.",
+        alert_add_game_error: "Se produjo un error al agregar el juego.",
+        alert_score_save_failed: "Error al guardar marcador: %{error}",
+        alert_unknown_error: "Error desconocido",
+        alert_finish_current_game: "¡Juego actual finalizado!\nMarcador final: %{team1} %{score1} : %{score2} %{team2}\nMoviendo al siguiente juego.",
+        alert_finish_match: "¡Partido finalizado!\nMarcador final: %{team1} %{score1} : %{score2} %{team2}\nResultado: %{result}",
+        alert_score_save_error: "Se produjo un error al guardar el marcador.",
+        confirm_finish_current_game: "¿Finalizar el juego actual, guardar marcador y pasar al siguiente?",
+        confirm_finish_match: "¿Finalizar el partido y guardar el marcador actual?",
+        confirm_new_game_reset: "Se restablecerán todos los datos de puntuación. ¿Continuar?",
+        voice_score_pattern: "%{home} a %{away}",
+        voice_countdown_pattern: "%{count}",
+        control_panel_prefix: "Panel",
+        control_panel_highlight: "de control",
+        control_connected: "Conectado",
+        open_display: "Abrir pantalla",
+        live: "En vivo",
+        game_timer: "Reloj del partido",
+        reset: "Reiniciar",
+        shot_clock_title: "Reloj de tiro",
+        foul: "Falta",
+        buzzer_label: "🔔 Zumbador",
+        reset_all: "🔄 Reiniciar todo",
+        swap_scores: "🔄 Intercambiar marcador",
+        match_reset: "Reiniciar partido",
+        view_cumulative: "Acumulado",
+        view_per_quarter: "Por cuarto",
+        drag: "↕ Arrastrar",
+        drag_matchup_aria: "Reordenar enfrentamientos",
+        shortcuts_title: "Atajos de teclado",
+        drag_shortcuts_aria: "Reordenar atajos",
+        shortcut_game_clock_toggle: "Reloj del partido iniciar / detener",
+        shortcut_shot_reset: "Reloj de tiro reiniciar (14s / 24s)",
+        shortcut_shot_toggle: "Reloj de tiro detener / iniciar",
+        shortcut_announcements_toggle: "B: avisos ON / V: avisos OFF",
+        shortcut_buzzer: "Activar zumbador",
+        shortcut_left_score_add: "Puntos equipo izquierdo (+1, +2, +3)",
+        shortcut_right_score_add: "Puntos equipo derecho (+1, +2, +3)",
+        shortcut_score_subtract: "5: equipo derecho -1 / 6: equipo izquierdo -1",
+        shortcut_fouls: "A/S: faltas derecha -, + · K/L: faltas izquierda -, +",
+        shortcut_next_quarter: "Ir al siguiente cuarto",
+        game_clock_label: "Reloj de juego",
+        shot_clock_label: "Reloj de tiro",
+        fullscreen: "Pantalla completa",
+        standalone_mode: "Modo independiente",
+        team_label_pattern: "Equipo %{label}",
+        matchup_pattern: "%{home} vs %{away}",
+        member_name_unknown: "Sin nombre"
+      },
+      it: {
+        team_word: "Squadra",
+        roster_empty: "Nessun roster",
+        roster_label: "Roster",
+        quarter_table_need_teams: "Sono necessarie almeno due squadre per mostrare il tabellone.",
+        quarter_table_matchup: "Sfida",
+        quarter_table_final: "Finale",
+        main_start: "Avvia",
+        main_stop: "Ferma",
+        announcements_on: "🔊 Avvisi ON",
+        announcements_off: "🔇 Avvisi OFF",
+        quarter_reset_on: "Reset per quarto ON",
+        quarter_reset_off: "Reset per quarto OFF",
+        finish_current_game: "🏁 Termina partita corrente",
+        finish_match: "🏁 Termina partita",
+        add_game_enabled: "+ Aggiungi partita (%{current}/%{max})",
+        add_game_completed: "Partite complete (%{max}/%{max})",
+        next_quarter: "Quarto successivo",
+        score_finalize: "Conferma punteggio",
+        saved_complete: "Salvato",
+        shortcuts_hide: "⌨️ Nascondi dettagli",
+        shortcuts_show: "⌨️ Mostra dettagli",
+        possession_left: "Sinistra",
+        possession_right: "Destra",
+        possession_toggle: "Cambia possesso (%{direction})",
+        confirm_reset_all: "Reimpostare tutti i punteggi e i timer?",
+        alert_club_not_found: "Informazioni club non trovate.",
+        alert_add_game_failed: "Aggiunta partita non riuscita.",
+        alert_add_game_error: "Si è verificato un errore durante l'aggiunta della partita.",
+        alert_score_save_failed: "Salvataggio punteggio non riuscito: %{error}",
+        alert_unknown_error: "Errore sconosciuto",
+        alert_finish_current_game: "Partita corrente terminata!\nPunteggio finale: %{team1} %{score1} : %{score2} %{team2}\nPassaggio alla partita successiva.",
+        alert_finish_match: "Partita terminata!\nPunteggio finale: %{team1} %{score1} : %{score2} %{team2}\nRisultato: %{result}",
+        alert_score_save_error: "Si è verificato un errore durante il salvataggio del punteggio.",
+        confirm_finish_current_game: "Terminare la partita corrente, salvare il punteggio e passare alla successiva?",
+        confirm_finish_match: "Terminare la partita e salvare il punteggio attuale?",
+        confirm_new_game_reset: "Tutti i dati punteggio verranno reimpostati. Continuare?",
+        voice_score_pattern: "%{home} a %{away}",
+        voice_countdown_pattern: "%{count}",
+        control_panel_prefix: "Pannello",
+        control_panel_highlight: "di controllo",
+        control_connected: "Connesso",
+        open_display: "Apri display",
+        live: "Live",
+        game_timer: "Timer partita",
+        reset: "Reset",
+        shot_clock_title: "Crono tiro",
+        foul: "Fallo",
+        buzzer_label: "🔔 Buzzer",
+        reset_all: "🔄 Reset totale",
+        swap_scores: "🔄 Scambia punteggi",
+        match_reset: "Reset partita",
+        view_cumulative: "Cumulato",
+        view_per_quarter: "Per quarto",
+        drag: "↕ Trascina",
+        drag_matchup_aria: "Riordina sfide",
+        shortcuts_title: "Scorciatoie tastiera",
+        drag_shortcuts_aria: "Riordina scorciatoie",
+        shortcut_game_clock_toggle: "Timer partita avvia / ferma",
+        shortcut_shot_reset: "Crono tiro reset (14s / 24s)",
+        shortcut_shot_toggle: "Crono tiro ferma / avvia",
+        shortcut_announcements_toggle: "B: avvisi ON / V: avvisi OFF",
+        shortcut_buzzer: "Attiva buzzer",
+        shortcut_left_score_add: "Punti squadra sinistra (+1, +2, +3)",
+        shortcut_right_score_add: "Punti squadra destra (+1, +2, +3)",
+        shortcut_score_subtract: "5: squadra destra -1 / 6: squadra sinistra -1",
+        shortcut_fouls: "A/S: falli destra -, + · K/L: falli sinistra -, +",
+        shortcut_next_quarter: "Vai al quarto successivo",
+        game_clock_label: "Cronometro gara",
+        shot_clock_label: "Crono tiro",
+        fullscreen: "Schermo intero",
+        standalone_mode: "Modalità standalone",
+        team_label_pattern: "Squadra %{label}",
+        matchup_pattern: "%{home} vs %{away}",
+        member_name_unknown: "Senza nome"
+      }
+    };
+    const baseEnglishMessages = UI_MESSAGES.en;
+    UI_MESSAGES.pt = {
+      ...baseEnglishMessages,
+      team_word: "Equipe",
+      roster_empty: "Sem elenco",
+      roster_label: "Elenco",
+      quarter_table_need_teams: "São necessárias pelo menos duas equipes para exibir a tabela de pontuação.",
+      quarter_table_matchup: "Confronto",
+      quarter_table_final: "Final",
+      main_start: "Iniciar",
+      main_stop: "Parar",
+      announcements_on: "🔊 Avisos ON",
+      announcements_off: "🔇 Avisos OFF",
+      quarter_reset_on: "Reset por quarto ON",
+      quarter_reset_off: "Reset por quarto OFF",
+      finish_current_game: "🏁 Encerrar jogo atual",
+      finish_match: "🏁 Encerrar partida",
+      add_game_enabled: "+ Adicionar jogo (%{current}/%{max})",
+      add_game_completed: "Jogos completos (%{max}/%{max})",
+      next_quarter: "Próximo quarto",
+      score_finalize: "Confirmar placar",
+      saved_complete: "Salvo",
+      shortcuts_hide: "⌨️ Ocultar detalhes",
+      shortcuts_show: "⌨️ Mostrar detalhes",
+      possession_left: "Esquerda",
+      possession_right: "Direita",
+      possession_toggle: "Alternar posse (%{direction})",
+      confirm_reset_all: "Redefinir todos os placares e cronômetros?",
+      alert_club_not_found: "Informações do clube não encontradas.",
+      alert_add_game_failed: "Falha ao adicionar jogo.",
+      alert_add_game_error: "Ocorreu um erro ao adicionar o jogo.",
+      alert_score_save_failed: "Falha ao salvar placar: %{error}",
+      alert_unknown_error: "Erro desconhecido",
+      alert_finish_current_game: "Jogo atual encerrado!\nPlacar final: %{team1} %{score1} : %{score2} %{team2}\nIndo para o próximo jogo.",
+      alert_finish_match: "Partida encerrada!\nPlacar final: %{team1} %{score1} : %{score2} %{team2}\nResultado: %{result}",
+      alert_score_save_error: "Ocorreu um erro ao salvar o placar.",
+      confirm_finish_current_game: "Encerrar o jogo atual, salvar o placar e ir para o próximo jogo?",
+      confirm_finish_match: "Encerrar a partida e salvar o placar atual?",
+      confirm_new_game_reset: "Todos os dados de placar serão redefinidos. Continuar?",
+      voice_score_pattern: "%{home} a %{away}",
+      control_panel_prefix: "Painel",
+      control_panel_highlight: "de Controle",
+      control_connected: "Conectado",
+      open_display: "Abrir Display",
+      live: "Ao Vivo",
+      game_timer: "Cronômetro do Jogo",
+      reset: "Reset",
+      shot_clock_title: "Cronômetro de Arremesso",
+      foul: "Falta",
+      buzzer_label: "🔔 Buzina",
+      reset_all: "🔄 Resetar Tudo",
+      swap_scores: "🔄 Trocar Placar",
+      match_reset: "Resetar Partida",
+      view_cumulative: "Acumulado",
+      view_per_quarter: "Por Quarto",
+      drag: "↕ Arrastar",
+      drag_matchup_aria: "Reordenar confrontos",
+      shortcuts_title: "Atalhos de Teclado",
+      drag_shortcuts_aria: "Reordenar atalhos",
+      shortcut_game_clock_toggle: "Cronômetro do jogo iniciar / parar",
+      shortcut_shot_reset: "Cronômetro de arremesso reset (14s / 24s)",
+      shortcut_shot_toggle: "Cronômetro de arremesso parar / iniciar",
+      shortcut_announcements_toggle: "B: avisos ON / V: avisos OFF",
+      shortcut_buzzer: "Tocar buzina",
+      shortcut_left_score_add: "Pontuação equipe esquerda (+1, +2, +3)",
+      shortcut_right_score_add: "Pontuação equipe direita (+1, +2, +3)",
+      shortcut_score_subtract: "5: equipe direita -1 / 6: equipe esquerda -1",
+      shortcut_fouls: "A/S: faltas direita -, + · K/L: faltas esquerda -, +",
+      shortcut_next_quarter: "Ir para o próximo quarto",
+      game_clock_label: "Relógio de Jogo",
+      shot_clock_label: "Cronômetro de Arremesso",
+      fullscreen: "Tela Cheia",
+      standalone_mode: "Modo Independente",
+      team_label_pattern: "Equipe %{label}",
+      matchup_pattern: "%{home} vs %{away}",
+      member_name_unknown: "Sem nome"
+    };
+    UI_MESSAGES.tl = {
+      ...baseEnglishMessages,
+      team_word: "Koponan",
+      roster_empty: "Walang roster",
+      roster_label: "Roster",
+      quarter_table_need_teams: "Kailangan ng hindi bababa sa dalawang koponan para maipakita ang score table.",
+      quarter_table_matchup: "Matchup",
+      quarter_table_final: "Final",
+      main_start: "Simulan",
+      main_stop: "Ihinto",
+      announcements_on: "🔊 Anunsyo ON",
+      announcements_off: "🔇 Anunsyo OFF",
+      quarter_reset_on: "Quarter Reset ON",
+      quarter_reset_off: "Quarter Reset OFF",
+      finish_current_game: "🏁 Tapusin ang kasalukuyang laro",
+      finish_match: "🏁 Tapusin ang laban",
+      add_game_enabled: "+ Magdagdag ng laro (%{current}/%{max})",
+      add_game_completed: "Puno na ang laro (%{max}/%{max})",
+      next_quarter: "Susunod na quarter",
+      score_finalize: "I-finalize ang score",
+      saved_complete: "Na-save",
+      shortcuts_hide: "⌨️ Itago ang detalye",
+      shortcuts_show: "⌨️ Ipakita ang detalye",
+      possession_left: "Kaliwa",
+      possession_right: "Kanan",
+      possession_toggle: "Palitan ang possession (%{direction})",
+      confirm_reset_all: "I-reset ang lahat ng score at timer?",
+      alert_club_not_found: "Hindi makita ang impormasyon ng club.",
+      alert_add_game_failed: "Nabigo ang pagdagdag ng laro.",
+      alert_add_game_error: "Nagkaroon ng error habang nagdadagdag ng laro.",
+      alert_score_save_failed: "Nabigo ang pag-save ng score: %{error}",
+      alert_unknown_error: "Hindi kilalang error",
+      alert_finish_current_game: "Natapos ang kasalukuyang laro!\nFinal score: %{team1} %{score1} : %{score2} %{team2}\nLilipat sa susunod na laro.",
+      alert_finish_match: "Natapos ang laban!\nFinal score: %{team1} %{score1} : %{score2} %{team2}\nResulta: %{result}",
+      alert_score_save_error: "Nagkaroon ng error habang sine-save ang score.",
+      confirm_finish_current_game: "Tapusin ang kasalukuyang laro, i-save ang score, at lumipat sa susunod na laro?",
+      confirm_finish_match: "Tapusin ang laban at i-save ang kasalukuyang score?",
+      confirm_new_game_reset: "Mare-reset ang lahat ng game score data. Magpatuloy?",
+      voice_score_pattern: "%{home} laban sa %{away}",
+      control_panel_prefix: "Control",
+      control_panel_highlight: "Panel",
+      control_connected: "Nakakonekta",
+      open_display: "Buksan ang Display",
+      live: "Live",
+      game_timer: "Game Timer",
+      reset: "I-reset",
+      shot_clock_title: "Shot Clock",
+      foul: "Foul",
+      buzzer_label: "🔔 Buzzer",
+      reset_all: "🔄 I-reset Lahat",
+      swap_scores: "🔄 Pagpalitin ang Score",
+      match_reset: "I-reset ang Laban",
+      view_cumulative: "Cumulative",
+      view_per_quarter: "Per Quarter",
+      drag: "↕ I-drag",
+      drag_matchup_aria: "Ayusin ang matchup order",
+      shortcuts_title: "Keyboard Shortcuts",
+      drag_shortcuts_aria: "Ayusin ang shortcut order",
+      shortcut_game_clock_toggle: "Game clock start / stop",
+      shortcut_shot_reset: "Shot clock reset (14s / 24s)",
+      shortcut_shot_toggle: "Shot clock stop / start",
+      shortcut_announcements_toggle: "B: anunsyo ON / V: anunsyo OFF",
+      shortcut_buzzer: "Patunugin ang buzzer",
+      shortcut_left_score_add: "Score ng kaliwang koponan (+1, +2, +3)",
+      shortcut_right_score_add: "Score ng kanang koponan (+1, +2, +3)",
+      shortcut_score_subtract: "5: kanang koponan -1 / 6: kaliwang koponan -1",
+      shortcut_fouls: "A/S: fouls kanan -, + · K/L: fouls kaliwa -, +",
+      shortcut_next_quarter: "Pumunta sa susunod na quarter",
+      game_clock_label: "Game Clock",
+      shot_clock_label: "Shot Clock",
+      fullscreen: "Fullscreen",
+      standalone_mode: "Standalone Mode",
+      team_label_pattern: "Koponan %{label}",
+      matchup_pattern: "%{home} vs %{away}",
+      member_name_unknown: "Walang pangalan"
+    };
+    UI_MESSAGES.de = {
+      ...baseEnglishMessages,
+      team_word: "Team",
+      roster_empty: "Kein Kader",
+      roster_label: "Kader",
+      quarter_table_need_teams: "Mindestens zwei Teams sind erforderlich, um die Punktetabelle anzuzeigen.",
+      quarter_table_matchup: "Matchup",
+      quarter_table_final: "Endstand",
+      main_start: "Start",
+      main_stop: "Stopp",
+      announcements_on: "🔊 Ansagen AN",
+      announcements_off: "🔇 Ansagen AUS",
+      quarter_reset_on: "Viertel-Reset AN",
+      quarter_reset_off: "Viertel-Reset AUS",
+      finish_current_game: "🏁 Aktuelles Spiel beenden",
+      finish_match: "🏁 Spiel beenden",
+      add_game_enabled: "+ Spiel hinzufügen (%{current}/%{max})",
+      add_game_completed: "Spiele voll (%{max}/%{max})",
+      next_quarter: "Nächstes Viertel",
+      score_finalize: "Punktestand festlegen",
+      saved_complete: "Gespeichert",
+      shortcuts_hide: "⌨️ Details ausblenden",
+      shortcuts_show: "⌨️ Details anzeigen",
+      possession_left: "Links",
+      possession_right: "Rechts",
+      possession_toggle: "Ballbesitz wechseln (%{direction})",
+      confirm_reset_all: "Alle Punktestände und Timer zurücksetzen?",
+      alert_club_not_found: "Club-Informationen wurden nicht gefunden.",
+      alert_add_game_failed: "Spiel konnte nicht hinzugefügt werden.",
+      alert_add_game_error: "Beim Hinzufügen des Spiels ist ein Fehler aufgetreten.",
+      alert_score_save_failed: "Speichern des Punktestands fehlgeschlagen: %{error}",
+      alert_unknown_error: "Unbekannter Fehler",
+      alert_finish_current_game: "Aktuelles Spiel beendet!\nEndstand: %{team1} %{score1} : %{score2} %{team2}\nWechsel zum nächsten Spiel.",
+      alert_finish_match: "Spiel beendet!\nEndstand: %{team1} %{score1} : %{score2} %{team2}\nErgebnis: %{result}",
+      alert_score_save_error: "Beim Speichern des Punktestands ist ein Fehler aufgetreten.",
+      confirm_finish_current_game: "Aktuelles Spiel beenden, Punktestand speichern und zum nächsten Spiel wechseln?",
+      confirm_finish_match: "Spiel beenden und aktuellen Punktestand speichern?",
+      confirm_new_game_reset: "Alle Spielstandsdaten werden zurückgesetzt. Fortfahren?",
+      voice_score_pattern: "%{home} zu %{away}",
+      control_panel_prefix: "Kontroll",
+      control_panel_highlight: "panel",
+      control_connected: "Verbunden",
+      open_display: "Anzeige öffnen",
+      live: "Live",
+      game_timer: "Spiel-Timer",
+      reset: "Zurücksetzen",
+      shot_clock_title: "Wurfuhr",
+      foul: "Foul",
+      buzzer_label: "🔔 Buzzer",
+      reset_all: "🔄 Alles zurücksetzen",
+      swap_scores: "🔄 Punktestand tauschen",
+      match_reset: "Spiel zurücksetzen",
+      view_cumulative: "Kumuliert",
+      view_per_quarter: "Pro Viertel",
+      drag: "↕ Ziehen",
+      drag_matchup_aria: "Matchups neu anordnen",
+      shortcuts_title: "Tastaturkürzel",
+      drag_shortcuts_aria: "Kürzel neu anordnen",
+      shortcut_game_clock_toggle: "Spieluhr Start / Stopp",
+      shortcut_shot_reset: "Wurfuhr zurücksetzen (14s / 24s)",
+      shortcut_shot_toggle: "Wurfuhr Stopp / Start",
+      shortcut_announcements_toggle: "B: Ansagen AN / V: Ansagen AUS",
+      shortcut_buzzer: "Buzzer auslösen",
+      shortcut_left_score_add: "Punkte linkes Team (+1, +2, +3)",
+      shortcut_right_score_add: "Punkte rechtes Team (+1, +2, +3)",
+      shortcut_score_subtract: "5: rechtes Team -1 / 6: linkes Team -1",
+      shortcut_fouls: "A/S: Fouls rechts -, + · K/L: Fouls links -, +",
+      shortcut_next_quarter: "Zum nächsten Viertel wechseln",
+      game_clock_label: "Spieluhr",
+      shot_clock_label: "Wurfuhr",
+      fullscreen: "Vollbild",
+      standalone_mode: "Standalone-Modus",
+      team_label_pattern: "Team %{label}",
+      matchup_pattern: "%{home} vs %{away}",
+      member_name_unknown: "Unbekannt"
+    };
+    const i18nForScoreboard = (key, params = {}) => {
+      const template = UI_MESSAGES[uiLocale]?.[key] ?? UI_MESSAGES.ko[key] ?? key;
+      return String(template).replace(/%\{(\w+)\}/g, (_, token) => {
+        const replacement = params[token];
+        return replacement === undefined || replacement === null ? "" : String(replacement);
+      });
+    };
+    const applyStaticUiText = () => {
+      scoreboardRoot.querySelectorAll("[data-ui-key]").forEach((element) => {
+        const key = String(element.dataset.uiKey || "").trim();
+        if (!key) return;
+        element.textContent = i18nForScoreboard(key);
+      });
+
+      scoreboardRoot.querySelectorAll("[data-ui-aria-key]").forEach((element) => {
+        const key = String(element.dataset.uiAriaKey || "").trim();
+        if (!key) return;
+        element.setAttribute("aria-label", i18nForScoreboard(key));
+      });
+
+      const clubTitle = scoreboardRoot.querySelector("[data-club-title]");
+      if (clubTitle && String(clubTitle.dataset.clubName || "").trim() === "") {
+        clubTitle.textContent = i18nForScoreboard("standalone_mode");
+      }
+    };
+    const formatTeamName = (team) => {
+      const teamName = String(team?.name || "").trim();
+      if (teamName) return teamName;
+
+      const rawLabel = String(team?.label || "").trim();
+      const label = rawLabel || "?";
+      return i18nForScoreboard("team_label_pattern", { label });
+    };
+    const formatMatchupText = (homeTeam, awayTeam) => i18nForScoreboard("matchup_pattern", {
+      home: formatTeamName(homeTeam),
+      away: formatTeamName(awayTeam)
+    });
+    applyStaticUiText();
     const POSSESSION_SWITCH_PATTERNS = ["q12_q34", "q13_q24"];
     const defaultPossessionSwitchPattern = POSSESSION_SWITCH_PATTERNS.includes(scoreboardRoot.dataset.possessionSwitchPattern)
       ? scoreboardRoot.dataset.possessionSwitchPattern
@@ -178,8 +1000,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const socket = new WebSocket(cableUrl);
     const identifier = JSON.stringify({ channel: "ScoreboardChannel", match_id: matchId });
     let state = null;
+    const buildClientId = () => {
+      if (window.crypto && typeof window.crypto.randomUUID === "function") {
+        return window.crypto.randomUUID();
+      }
+      return `client_${Date.now()}_${Math.random().toString(16).slice(2, 10)}`;
+    };
+    const localClientId = buildClientId();
+    let localStateVersion = 0;
     let mainTimer = null;
     let shotTimer = null;
+    let mainLastTickAtMs = null;
+    let shotLastTickAtMs = null;
     let matchupSortInstance = null;
     let isMatchupDragging = false;
 
@@ -220,6 +1052,25 @@ document.addEventListener("DOMContentLoaded", () => {
       const min = Math.floor(seconds / 60);
       const sec = Math.max(seconds % 60, 0);
       return `${min}:${sec.toString().padStart(2, "0")}`;
+    };
+
+    const parseStateVersion = (value, fallback = 0) => {
+      const parsed = Number.parseInt(value, 10);
+      if (!Number.isFinite(parsed)) return fallback;
+      return Math.max(0, parsed);
+    };
+
+    const parseUpdatedAtMs = (value, fallback = 0) => {
+      const parsed = Number.parseInt(value, 10);
+      if (!Number.isFinite(parsed)) return fallback;
+      return Math.max(0, parsed);
+    };
+
+    const normalizeSourceClientId = (value) => {
+      if (typeof value !== "string") return null;
+      const trimmed = value.trim();
+      if (trimmed.length === 0) return null;
+      return trimmed.slice(0, 128);
     };
 
     const parseColorToRgb = (color) => {
@@ -542,7 +1393,10 @@ document.addEventListener("DOMContentLoaded", () => {
         possession_switch_pattern: defaultPossessionSwitchPattern,
         possession: "away", // 'home' or 'away'
         manual_swap: false,
-        quarter_score_reset_enabled: totalRegularQuarters() === 3
+        quarter_score_reset_enabled: totalRegularQuarters() === 3,
+        state_version: 0,
+        source_client_id: null,
+        updated_at_ms: 0
       };
     };
 
@@ -618,6 +1472,9 @@ document.addEventListener("DOMContentLoaded", () => {
       normalized.sound_enabled = announcementsEnabled;
       normalized.voice_enabled = announcementsEnabled;
       normalized.quarter_score_reset_enabled = parseBooleanDataset(normalized.quarter_score_reset_enabled, false);
+      normalized.state_version = parseStateVersion(incomingState.state_version, base.state_version);
+      normalized.updated_at_ms = parseUpdatedAtMs(incomingState.updated_at_ms, base.updated_at_ms);
+      normalized.source_client_id = normalizeSourceClientId(incomingState.source_client_id);
 
       const parsedStep = Number.parseInt(incomingState.rotation_step, 10);
       const roundsForState = Math.max(1, slotsForState.length);
@@ -871,7 +1728,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const renderPreview = () => {
       const [home, away] = currentMatchup();
-      setText("[data-preview-matchup]", `팀 ${escapeHtml(home.label)} vs 팀 ${escapeHtml(away.label)}`);
+      setText("[data-preview-matchup]", formatMatchupText(home, away));
       setText("[data-preview-quarter]", `${state.quarter}Q`);
       setText("[data-preview-timer]", formatTime(state.period_seconds));
       setText("[data-preview-home]", home.score);
@@ -896,8 +1753,8 @@ document.addEventListener("DOMContentLoaded", () => {
       setText("[data-scoreboard-shot]", state.shot_seconds);
 
       // Team names (for new sports display)
-      setText("[data-team-name-left]", leftTeam.name || `TEAM ${leftTeam.label}`);
-      setText("[data-team-name-right]", rightTeam.name || `TEAM ${rightTeam.label}`);
+      setText("[data-team-name-left]", formatTeamName(leftTeam));
+      setText("[data-team-name-right]", formatTeamName(rightTeam));
 
       const applyDisplayBadgeStyle = (selector, team) => {
         const badge = scoreboardRoot.querySelector(selector);
@@ -977,9 +1834,9 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Legacy display elements
-      setText("[data-scoreboard-matchup]", `${home.name || '팀 ' + home.label} vs ${away.name || '팀 ' + away.label}`);
-      setText("[data-home-name]", home.name || `TEAM ${home.label}`);
-      setText("[data-away-name]", away.name || `TEAM ${away.label}`);
+      setText("[data-scoreboard-matchup]", formatMatchupText(home, away));
+      setText("[data-home-name]", formatTeamName(home));
+      setText("[data-away-name]", formatTeamName(away));
       const homeIconEl = scoreboardRoot.querySelector("[data-home-icon]");
       if (homeIconEl) {
         applyTeamIconColor(homeIconEl, home.color);
@@ -997,13 +1854,13 @@ document.addEventListener("DOMContentLoaded", () => {
       if (nextQuarterBtn) {
         const finalRotationStep = maxRotationStep();
         if (state.rotation_step === finalRotationStep) {
-          nextQuarterBtn.textContent = "점수 확정";
+          nextQuarterBtn.textContent = i18nForScoreboard("score_finalize");
           nextQuarterBtn.classList.add("bg-red-600", "hover:bg-red-700"); // 스타일 강조 (선택사항)
           nextQuarterBtn.style.display = '';
         } else if (state.rotation_step > finalRotationStep) {
           nextQuarterBtn.style.display = 'none';
         } else {
-          nextQuarterBtn.textContent = "다음 쿼터";
+          nextQuarterBtn.textContent = i18nForScoreboard("next_quarter");
           nextQuarterBtn.classList.remove("bg-red-600", "hover:bg-red-700");
           nextQuarterBtn.style.display = '';
         }
@@ -1012,7 +1869,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const quarterScoreResetBtn = scoreboardRoot.querySelector('[data-action="toggle-quarter-score-reset"]');
       if (quarterScoreResetBtn) {
         const enabled = isQuarterScoreResetEnabled();
-        quarterScoreResetBtn.textContent = enabled ? "쿼터별 점수 리셋 ON" : "쿼터별 점수 리셋 OFF";
+        quarterScoreResetBtn.textContent = enabled ? i18nForScoreboard("quarter_reset_on") : i18nForScoreboard("quarter_reset_off");
         quarterScoreResetBtn.classList.toggle("bg-green-50", enabled);
         quarterScoreResetBtn.classList.toggle("text-green-700", enabled);
         quarterScoreResetBtn.classList.toggle("border-green-200", enabled);
@@ -1044,8 +1901,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const canAddGame = teamsCount === 2 && currentGames < maxGames;
         addGameBtn.disabled = !canAddGame;
         addGameBtn.textContent = canAddGame
-          ? `+ 경기 추가 (${currentGames}/${maxGames})`
-          : `경기 추가 완료 (${maxGames}/${maxGames})`;
+          ? i18nForScoreboard("add_game_enabled", { current: currentGames, max: maxGames })
+          : i18nForScoreboard("add_game_completed", { max: maxGames });
         addGameBtn.classList.toggle("opacity-50", !canAddGame);
         addGameBtn.classList.toggle("cursor-not-allowed", !canAddGame);
       }
@@ -1053,26 +1910,28 @@ document.addEventListener("DOMContentLoaded", () => {
       const finishGameBtn = scoreboardRoot.querySelector('[data-action="finish-game"]');
       if (finishGameBtn) {
         const hasRemainingGames = isTwoTeamMode() && currentMatchupIndex() < (roundsPerQuarter() - 1);
-        finishGameBtn.textContent = hasRemainingGames ? "🏁 현재 경기 종료" : "🏁 경기 종료";
+        finishGameBtn.textContent = hasRemainingGames ? i18nForScoreboard("finish_current_game") : i18nForScoreboard("finish_match");
       }
 
       const toggleMainBtn = scoreboardRoot.querySelector('[data-action="toggle-main"]');
       if (toggleMainBtn) {
         const span = toggleMainBtn.querySelector('span');
-        if (span) span.textContent = state.running ? "경기 멈춤" : "경기 시작";
+        if (span) span.textContent = state.running ? i18nForScoreboard("main_stop") : i18nForScoreboard("main_start");
         toggleMainBtn.style.backgroundColor = state.running ? '#dc2626' : '#22C55E';
       }
 
       const toggleShotBtn = scoreboardRoot.querySelector('[data-action="toggle-shot"]');
       if (toggleShotBtn) {
-        toggleShotBtn.textContent = state.shot_running ? "멈춤" : "시작";
+        toggleShotBtn.textContent = state.shot_running ? i18nForScoreboard("main_stop") : i18nForScoreboard("main_start");
       }
 
       const possToggleBtn = scoreboardRoot.querySelector('[data-possession-toggle-btn]');
       if (possToggleBtn) {
         const currentPossession = normalizePossession(state.possession, "away");
-        const directionLabel = currentPossession === "home" ? "오른쪽" : "왼쪽";
-        possToggleBtn.textContent = `공격 전환 (${directionLabel})`;
+        const directionLabel = currentPossession === "home"
+          ? i18nForScoreboard("possession_right")
+          : i18nForScoreboard("possession_left");
+        possToggleBtn.textContent = i18nForScoreboard("possession_toggle", { direction: directionLabel });
         possToggleBtn.style.color = "#FFFFFF";
         possToggleBtn.style.textShadow = "0 1px 1px rgba(0,0,0,0.25)";
         if (currentPossession === "home") {
@@ -1101,9 +1960,9 @@ document.addEventListener("DOMContentLoaded", () => {
             return `<div class="flex-1 flex flex-col gap-4">
                       <div class="flex items-center gap-3 border-b border-gray-100 pb-2 mb-2">
                         <span class="text-2xl">${escapeHtml(team?.icon) || '🛡️'}</span>
-                        <span class="font-black text-lg uppercase text-gray-900">${escapeHtml(team?.label) || '팀'} 명단</span>
+                        <span class="font-black text-lg uppercase text-gray-900">${escapeHtml(team?.label) || i18nForScoreboard("team_word")} ${i18nForScoreboard("roster_label")}</span>
                       </div>
-                      <div class="text-gray-400 text-sm italic">명단 없음</div>
+                      <div class="text-gray-400 text-sm italic">${i18nForScoreboard("roster_empty")}</div>
                     </div>`;
           }
 
@@ -1145,7 +2004,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!tableContainer) return;
 
         if (state.teams.length < 2) {
-          tableContainer.innerHTML = "<p class='text-center text-gray-500'>점수표를 표시하려면 최소 2팀이 필요합니다.</p>";
+          tableContainer.innerHTML = `<p class='text-center text-gray-500'>${i18nForScoreboard("quarter_table_need_teams")}</p>`;
           return;
         }
 
@@ -1161,9 +2020,9 @@ document.addEventListener("DOMContentLoaded", () => {
            <table class="w-full text-center text-base border-collapse">
              <thead>
                <tr class="bg-gray-100 border-b border-gray-200 text-gray-600 font-bold uppercase tracking-wider text-sm">
-                 <th class="p-4 text-left">경기 (Matchup)</th>
+                 <th class="p-4 text-left">${i18nForScoreboard("quarter_table_matchup")}</th>
                  ${quarterHeaderHtml}
-                 <th class="p-4 w-24">최종</th>
+                 <th class="p-4 w-24">${i18nForScoreboard("quarter_table_final")}</th>
                </tr>
              </thead>
              <tbody class="divide-y divide-gray-200" data-matchup-tbody>
@@ -1224,8 +2083,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
           const formatTeamLabel = (label) => {
             const raw = String(label || "").trim();
-            if (!raw) return "Team";
-            return /^team\s+/i.test(raw) ? raw : `Team ${raw}`;
+            if (!raw) return i18nForScoreboard("team_word");
+            const teamWord = i18nForScoreboard("team_word");
+            const matcher = new RegExp(`^${teamWord}\\s+`, "i");
+            return matcher.test(raw) ? raw : `${teamWord} ${raw}`;
           };
 
           const getTeamNameStyle = (team, fallbackColor = "#111827") => {
@@ -1250,11 +2111,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
           const getMemberChips = (team) => {
             if (!team || !Array.isArray(team.members) || team.members.length === 0) {
-              return `<span class="text-xs text-gray-400 italic">명단 없음</span>`;
+              return `<span class="text-xs text-gray-400 italic">${i18nForScoreboard("roster_empty")}</span>`;
             }
 
             const sortedMembers = [ ...team.members ].sort((a, b) => (a.back_number || 999) - (b.back_number || 999));
-            const names = sortedMembers.map((member) => escapeHtml(member?.name || "이름없음"));
+            const names = sortedMembers.map((member) => escapeHtml(member?.name || i18nForScoreboard("member_name_unknown")));
             return `
               <div class="flex items-center gap-2 overflow-x-auto whitespace-nowrap py-1">
                 ${names.map((name) => `<span class="text-sm font-semibold text-gray-700 shrink-0">${name}</span>`).join('<span class="text-gray-300 shrink-0">·</span>')}
@@ -1392,11 +2253,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (mainToggleBtn) {
         const span = mainToggleBtn.querySelector('span');
         if (state.running) {
-          if (span) span.textContent = "STOP";
+          if (span) span.textContent = i18nForScoreboard("main_stop");
           mainToggleBtn.classList.remove("bg-[#22C55E]", "hover:bg-[#15803d]");
           mainToggleBtn.classList.add("bg-[#ef4444]", "hover:bg-[#b91c1c]"); // Red for Stop
         } else {
-          if (span) span.textContent = "START";
+          if (span) span.textContent = i18nForScoreboard("main_start");
           mainToggleBtn.classList.remove("bg-[#ef4444]", "hover:bg-[#b91c1c]");
           mainToggleBtn.classList.add("bg-[#22C55E]", "hover:bg-[#15803d]"); // Green for Start
         }
@@ -1407,17 +2268,17 @@ document.addEventListener("DOMContentLoaded", () => {
       if (shotToggleBtn) {
         if (state.shot_running) {
           shotToggleBtn.classList.add("btn-active");
-          shotToggleBtn.textContent = "멈춤";
+          shotToggleBtn.textContent = i18nForScoreboard("main_stop");
         } else {
           shotToggleBtn.classList.remove("btn-active");
-          shotToggleBtn.textContent = "시작";
+          shotToggleBtn.textContent = i18nForScoreboard("main_start");
         }
       }
 
       const announcementsToggleBtn = scoreboardRoot.querySelector('[data-action="toggle-announcements"]');
       if (announcementsToggleBtn) {
         const enabled = isAnnouncementsEnabled();
-        announcementsToggleBtn.textContent = enabled ? "🔊 안내 ON" : "🔇 안내 OFF";
+        announcementsToggleBtn.textContent = enabled ? i18nForScoreboard("announcements_on") : i18nForScoreboard("announcements_off");
         announcementsToggleBtn.classList.toggle("bg-green-50", enabled);
         announcementsToggleBtn.classList.toggle("text-green-700", enabled);
         announcementsToggleBtn.classList.toggle("border-green-200", enabled);
@@ -1437,11 +2298,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const stopMainTimer = () => {
       if (mainTimer) clearInterval(mainTimer);
       mainTimer = null;
+      mainLastTickAtMs = null;
     };
 
     const stopShotTimer = () => {
       if (shotTimer) clearInterval(shotTimer);
       shotTimer = null;
+      shotLastTickAtMs = null;
     };
 
     // Global AudioContext for buzzer (initialized on first user interaction)
@@ -1500,47 +2363,82 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     };
 
+    const consumeElapsedSeconds = (lastTickAtMs) => {
+      const now = Date.now();
+      if (!Number.isFinite(lastTickAtMs) || lastTickAtMs <= 0) {
+        return { elapsedSeconds: 0, nextTickAtMs: now };
+      }
+
+      const elapsedSeconds = Math.floor((now - lastTickAtMs) / 1000);
+      if (elapsedSeconds <= 0) {
+        return { elapsedSeconds: 0, nextTickAtMs: lastTickAtMs };
+      }
+
+      return {
+        elapsedSeconds,
+        nextTickAtMs: lastTickAtMs + (elapsedSeconds * 1000)
+      };
+    };
+
+    const speakCountdownIfNeeded = (previousSeconds, nextSeconds) => {
+      if (nextSeconds >= previousSeconds) return;
+      if (nextSeconds <= 0) return;
+      if (previousSeconds <= 0) return;
+
+      const speakTarget = previousSeconds > 5 && nextSeconds < 5 ? 5 : nextSeconds;
+      if (speakTarget <= 5 && speakTarget > 0) {
+        speak(speakTarget);
+      }
+    };
+
     const startMainTimer = () => {
       if (mainTimer) return;
+      mainLastTickAtMs = Date.now();
       mainTimer = setInterval(() => {
-        if (state.period_seconds > 0) {
-          state.period_seconds -= 1;
-          if (state.period_seconds <= 5 && state.period_seconds > 0) {
-            speak(state.period_seconds);
-          }
-        } else {
+        const { elapsedSeconds, nextTickAtMs } = consumeElapsedSeconds(mainLastTickAtMs);
+        mainLastTickAtMs = nextTickAtMs;
+        if (elapsedSeconds <= 0) return;
+
+        const previousSeconds = Math.max(0, Number.parseInt(state.period_seconds, 10) || 0);
+        const nextSeconds = Math.max(0, previousSeconds - elapsedSeconds);
+        state.period_seconds = nextSeconds;
+        speakCountdownIfNeeded(previousSeconds, nextSeconds);
+
+        if (nextSeconds === 0) {
           state.running = false;
           state.shot_running = false;
           stopMainTimer();
+          stopShotTimer();
           playBuzzer();
         }
+
         render();
         broadcast();
-      }, 1000);
+      }, 250);
     };
 
     const startShotTimer = () => {
       if (shotTimer) return;
+      shotLastTickAtMs = Date.now();
       shotTimer = setInterval(() => {
-        if (state.shot_seconds > 0) {
-          state.shot_seconds -= 1; // Decrement FIRST
+        const { elapsedSeconds, nextTickAtMs } = consumeElapsedSeconds(shotLastTickAtMs);
+        shotLastTickAtMs = nextTickAtMs;
+        if (elapsedSeconds <= 0) return;
 
+        const previousSeconds = Math.max(0, Number.parseInt(state.shot_seconds, 10) || 0);
+        const nextSeconds = Math.max(0, previousSeconds - elapsedSeconds);
+        state.shot_seconds = nextSeconds;
+        speakCountdownIfNeeded(previousSeconds, nextSeconds);
 
-          // Then speak if <= 5
-          if (state.shot_seconds <= 5 && state.shot_seconds > 0) {
-            speak(state.shot_seconds);
-          }
-
-          // Buzzer when reaching 0
-          if (state.shot_seconds === 0) {
-            state.shot_running = false;
-            stopShotTimer();
-            playBuzzer();
-          }
+        if (nextSeconds === 0) {
+          state.shot_running = false;
+          stopShotTimer();
+          playBuzzer();
         }
+
         render();
         broadcast();
-      }, 1000);
+      }, 250);
     };
 
     const speak = (text) => {
@@ -1549,9 +2447,13 @@ document.addEventListener("DOMContentLoaded", () => {
       // Cancel any previous speech to prevent duplicates
       window.speechSynthesis.cancel();
 
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = "ko-KR";
+      const utterance = new SpeechSynthesisUtterance(i18nForScoreboard("voice_countdown_pattern", { count: text }));
+      utterance.lang = scoreboardVoiceLang;
       utterance.rate = currentVoiceRate();
+      const langPrefix = String(scoreboardVoiceLang || "").toLowerCase().split("-")[0];
+      const voices = window.speechSynthesis.getVoices();
+      const matchingVoice = voices.find((voice) => String(voice.lang || "").toLowerCase().startsWith(langPrefix));
+      if (matchingVoice) utterance.voice = matchingVoice;
       window.speechSynthesis.speak(utterance);
     };
 
@@ -1571,8 +2473,38 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     };
 
+    const refreshLocalStateVersion = (sourceState = state) => {
+      localStateVersion = Math.max(localStateVersion, parseStateVersion(sourceState?.state_version, 0));
+    };
+
+    const stampStateForBroadcast = () => {
+      if (!state || typeof state !== "object") return;
+      localStateVersion = Math.max(localStateVersion, parseStateVersion(state.state_version, 0)) + 1;
+      state.state_version = localStateVersion;
+      state.updated_at_ms = Date.now();
+      state.source_client_id = localClientId;
+    };
+
+    const shouldApplyIncomingState = (incomingState) => {
+      if (!state) return true;
+
+      const currentVersion = parseStateVersion(state.state_version, 0);
+      const incomingVersion = parseStateVersion(incomingState?.state_version, 0);
+      if (incomingVersion > currentVersion) return true;
+      if (incomingVersion < currentVersion) return false;
+
+      const currentUpdatedAt = parseUpdatedAtMs(state.updated_at_ms, 0);
+      const incomingUpdatedAt = parseUpdatedAtMs(incomingState?.updated_at_ms, 0);
+      if (incomingUpdatedAt > currentUpdatedAt) return true;
+      if (incomingUpdatedAt < currentUpdatedAt) return false;
+
+      return true;
+    };
+
     const broadcast = () => {
+      if (role !== "control") return;
       if (socket.readyState !== WebSocket.OPEN) return;
+      stampStateForBroadcast();
       const payload = JSON.stringify({ action: "update", payload: state });
       socket.send(JSON.stringify({ command: "message", identifier, data: payload }));
     };
@@ -1619,6 +2551,11 @@ document.addEventListener("DOMContentLoaded", () => {
       return result;
     };
 
+    const spokenNumber = (value) => {
+      if (uiLocale === "ko") return toSinoKoreanNumber(value);
+      return String(Math.max(0, Number.parseInt(value, 10) || 0));
+    };
+
     const speakScore = () => {
       if (!isVoiceEnabled()) return;
 
@@ -1646,24 +2583,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
       // Use sino-korean numerals to avoid native-korean reading like "열"
-      const homeScoreText = toSinoKoreanNumber(homeScore);
-      const awayScoreText = toSinoKoreanNumber(awayScore);
-      const text = `${homeScoreText} 대 ${awayScoreText}`;
+      const homeScoreText = spokenNumber(homeScore);
+      const awayScoreText = spokenNumber(awayScore);
+      const text = i18nForScoreboard("voice_score_pattern", { home: homeScoreText, away: awayScoreText });
 
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'ko-KR';
+      utterance.lang = scoreboardVoiceLang;
       utterance.rate = currentVoiceRate();
       utterance.volume = 1.0;
       utterance.pitch = 1.0;
 
-      // Get available voices and select Korean voice if available
+      // Match a voice by selected locale when available.
       const voices = window.speechSynthesis.getVoices();
-
-      const koreanVoice = voices.find(voice => voice.lang.startsWith('ko'));
-      if (koreanVoice) {
-        utterance.voice = koreanVoice;
-      } else {
-      }
+      const langPrefix = String(scoreboardVoiceLang || "").toLowerCase().split("-")[0];
+      const matchingVoice = voices.find((voice) => String(voice.lang || "").toLowerCase().startsWith(langPrefix));
+      if (matchingVoice) utterance.voice = matchingVoice;
 
       utterance.onstart = () => {
       };
@@ -1821,7 +2755,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 state.shot_running = false;
                 break;
               case "reset-all":
-                if (confirm("정말로 모든 점수와 시간을 초기화하시겠습니까?")) {
+                if (confirm(i18nForScoreboard("confirm_reset_all"))) {
                   state.period_seconds = defaultPeriodSeconds;
                   state.shot_seconds = 24;
                   state.running = false;
@@ -1859,7 +2793,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const clubMatch = window.location.pathname.match(/\/clubs\/(\d+)/);
                 const clubId = clubMatch ? clubMatch[1] : null;
                 if (!clubId) {
-                  alert("클럽 정보를 찾을 수 없습니다.");
+                  alert(i18nForScoreboard("alert_club_not_found"));
                   return;
                 }
 
@@ -1879,7 +2813,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const data = await response.json();
 
                     if (!response.ok || !data.success) {
-                      alert(data.error || "경기 추가에 실패했습니다.");
+                      alert(data.error || i18nForScoreboard("alert_add_game_failed"));
                       return;
                     }
 
@@ -1901,7 +2835,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                   } catch (error) {
                     console.error("경기 추가 중 오류:", error);
-                    alert("경기 추가 중 오류가 발생했습니다.");
+                    alert(i18nForScoreboard("alert_add_game_error"));
                   } finally {
                     render();
                   }
@@ -1969,7 +2903,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (state.rotation_step === maxRotationStep()) {
                   const nextQuarterBtn = scoreboardRoot.querySelector('[data-action="next-quarter"]');
                   if (nextQuarterBtn) {
-                    nextQuarterBtn.textContent = "저장 완료";
+                    nextQuarterBtn.textContent = i18nForScoreboard("saved_complete");
                     nextQuarterBtn.disabled = true;
                     nextQuarterBtn.classList.add("opacity-50", "cursor-not-allowed");
                   }
@@ -2128,7 +3062,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   const clubMatch = window.location.pathname.match(/\/clubs\/(\d+)/);
                   const clubId = clubMatch ? clubMatch[1] : null;
                   if (!clubId) {
-                    alert("클럽 정보를 찾을 수 없습니다.");
+                    alert(i18nForScoreboard("alert_club_not_found"));
                     return;
                   }
 
@@ -2194,7 +3128,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     const data = await response.json();
                     if (!data.success) {
-                      alert('점수 저장 실패: ' + (data.error || '알 수 없는 오류'));
+                      alert(i18nForScoreboard("alert_score_save_failed", { error: data.error || i18nForScoreboard("alert_unknown_error") }));
                       return;
                     }
 
@@ -2239,22 +3173,33 @@ document.addEventListener("DOMContentLoaded", () => {
                       render();
                       syncTimers();
                       broadcast();
-                      alert(`현재 경기 종료!\n최종 점수: ${team1.label} ${finishedTotals.team1} : ${finishedTotals.team2} ${team2.label}\n다음 경기로 이동합니다.`);
+                      alert(i18nForScoreboard("alert_finish_current_game", {
+                        team1: team1.label,
+                        score1: finishedTotals.team1,
+                        score2: finishedTotals.team2,
+                        team2: team2.label
+                      }));
                       return;
                     }
 
-                    alert(`경기 종료!\n최종 점수: ${team1.label} ${finishedTotals.team1} : ${finishedTotals.team2} ${team2.label}\n결과: ${data.result}`);
+                    alert(i18nForScoreboard("alert_finish_match", {
+                      team1: team1.label,
+                      score1: finishedTotals.team1,
+                      score2: finishedTotals.team2,
+                      team2: team2.label,
+                      result: data.result
+                    }));
                     window.location.href = `/clubs/${clubId}/matches/${matchId}`;
                   } catch (error) {
                     console.error('점수 저장 중 오류:', error);
-                    alert('점수 저장 중 오류가 발생했습니다.');
+                    alert(i18nForScoreboard("alert_score_save_error"));
                   }
                 };
 
                 const hasRemainingGames = isTwoTeamMode() && currentMatchupIndex() < (roundsPerQuarter() - 1);
                 const message = hasRemainingGames
-                  ? "현재 경기를 종료하고 점수를 저장한 뒤 다음 경기로 이동하시겠습니까?"
-                  : "경기를 종료하고 현재 점수를 저장하시겠습니까?";
+                  ? i18nForScoreboard("confirm_finish_current_game")
+                  : i18nForScoreboard("confirm_finish_match");
 
                 if (confirm(message)) {
                   finishCurrentGame();
@@ -2267,10 +3212,10 @@ document.addEventListener("DOMContentLoaded", () => {
                   const btn = scoreboardRoot.querySelector('[data-action="toggle-shortcuts"]');
                   if (panel.classList.contains("hidden")) {
                     panel.classList.remove("hidden");
-                    if (btn) btn.textContent = "⌨️ 상세 숨기기";
+                    if (btn) btn.textContent = i18nForScoreboard("shortcuts_hide");
                   } else {
                     panel.classList.add("hidden");
-                    if (btn) btn.textContent = "⌨️ 상세 보기";
+                    if (btn) btn.textContent = i18nForScoreboard("shortcuts_show");
                   }
                 }
                 break;
@@ -2278,7 +3223,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 state.manual_swap = !state.manual_swap;
                 break;
               case "new-game":
-                if (confirm("모든 경기 점수 데이터가 초기화 됩니다. 진행 하시겠습니까?")) {
+                if (confirm(i18nForScoreboard("confirm_new_game_reset"))) {
                   // SAVE CURRENT QUARTER BEFORE RESET
                   const currentPairIdx = currentMatchupId();
                   const [p1, p2] = matchupPairById(currentPairIdx);
@@ -2485,6 +3430,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         state = normalizeState(state);
       }
+      refreshLocalStateVersion(state);
       render();
       syncTimers();
     };
@@ -2502,13 +3448,17 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.type === "confirm_subscription") {
         if (role === "control") {
           state = normalizeState(state || defaultState());
+          refreshLocalStateVersion(state);
           render();
           broadcast();
         }
         return;
       }
       if (data.message?.type === "state") {
-        state = normalizeState(data.message.payload);
+        const incomingState = normalizeState(data.message.payload);
+        if (!shouldApplyIncomingState(incomingState)) return;
+        state = incomingState;
+        refreshLocalStateVersion(state);
         render();
         syncTimers();
       }
@@ -2566,6 +3516,51 @@ const initDragAndDrop = () => {
   const moveUrl = matchContainer?.dataset.moveMemberUrl || (clubId && matchId ? `/clubs/${clubId}/matches/${matchId}/move_member` : null);
   const removeUrl = matchContainer?.dataset.removeMemberUrl || (clubId && matchId ? `/clubs/${clubId}/matches/${matchId}/remove_member` : null);
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+  const pageLocale = String(document.documentElement.lang || "ko").toLowerCase().split("-")[0];
+  const dragMessages = {
+    ko: {
+      delete_failed: "멤버 삭제 실패: %{error}\n페이지를 새로고침합니다.",
+      invalid_target: "오류: 이동 대상을 확인할 수 없습니다.",
+      move_failed: "멤버 이동 실패: %{error}\n페이지를 새로고침합니다."
+    },
+    ja: {
+      delete_failed: "メンバー削除失敗: %{error}\nページを再読み込みします。",
+      invalid_target: "エラー: 移動先を確認できません。",
+      move_failed: "メンバー移動失敗: %{error}\nページを再読み込みします。"
+    },
+    en: {
+      delete_failed: "Failed to remove member: %{error}\nReloading the page.",
+      invalid_target: "Error: Could not determine the move target.",
+      move_failed: "Failed to move member: %{error}\nReloading the page."
+    },
+    zh: {
+      delete_failed: "删除成员失败: %{error}\n正在刷新页面。",
+      invalid_target: "错误：无法确认移动目标。",
+      move_failed: "移动成员失败: %{error}\n正在刷新页面。"
+    },
+    fr: {
+      delete_failed: "Échec de suppression du membre : %{error}\nRechargement de la page.",
+      invalid_target: "Erreur : impossible de déterminer la cible du déplacement.",
+      move_failed: "Échec du déplacement du membre : %{error}\nRechargement de la page."
+    },
+    es: {
+      delete_failed: "Error al eliminar miembro: %{error}\nRecargando la página.",
+      invalid_target: "Error: no se pudo identificar el destino del movimiento.",
+      move_failed: "Error al mover miembro: %{error}\nRecargando la página."
+    },
+    it: {
+      delete_failed: "Eliminazione membro non riuscita: %{error}\nRicarico la pagina.",
+      invalid_target: "Errore: impossibile identificare la destinazione dello spostamento.",
+      move_failed: "Spostamento membro non riuscito: %{error}\nRicarico la pagina."
+    }
+  };
+  const dragT = (key, params = {}) => {
+    const template = dragMessages[pageLocale]?.[key] || dragMessages.ko[key] || key;
+    return String(template).replace(/%\{(\w+)\}/g, (_, token) => {
+      const value = params[token];
+      return value === undefined || value === null ? "" : String(value);
+    });
+  };
 
   const showTrashZone = () => {
     if (!trashZone) return;
@@ -2616,7 +3611,7 @@ const initDragAndDrop = () => {
           window.location.reload();
         } catch (error) {
           console.error("Delete failed:", error);
-          alert(`멤버 삭제 실패: ${error.message}\n페이지를 새로고침합니다.`);
+          alert(dragT("delete_failed", { error: error.message }));
           window.location.reload();
         }
       }
@@ -2655,7 +3650,7 @@ const initDragAndDrop = () => {
         const targetTeamId = to.dataset.teamId;
         if (!memberId || !targetTeamId || !moveUrl) {
           console.error("Invalid drag target");
-          alert("오류: 이동 대상을 확인할 수 없습니다.");
+          alert(dragT("invalid_target"));
           return;
         }
 
@@ -2686,7 +3681,7 @@ const initDragAndDrop = () => {
           }
         } catch (error) {
           console.error("Move failed:", error);
-          alert(`멤버 이동 실패: ${error.message}\n페이지를 새로고침합니다.`);
+          alert(dragT("move_failed", { error: error.message }));
           window.location.reload();
         }
       }

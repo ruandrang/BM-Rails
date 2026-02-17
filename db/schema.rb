@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_11_105326) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_12_044739) do
   create_table "clubs", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
@@ -93,6 +93,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_11_105326) do
     t.string "name"
     t.string "password_digest", null: false
     t.string "possession_switch_pattern", default: "q12_q34", null: false
+    t.string "preferred_locale", default: "ko", null: false
     t.boolean "scoreboard_sound_enabled", default: true, null: false
     t.datetime "updated_at", null: false
     t.boolean "voice_announcement_enabled", default: true, null: false
