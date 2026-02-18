@@ -1,24 +1,67 @@
 <% content_for :title, t('admin.games.show.page_title') %>
 
-<div class="page-header">
-  <div>
-    <h1><%= t('admin.games.show.title') %></h1>
-    <p class="muted"><%= @game.match.club.name %> · <%= @game.match.played_on.strftime("%Y-%m-%d") %></p>
+<div class="max-w-7xl mx-auto">
+  <!-- 뒤로가기 -->
+  <div class="mb-4">
+    <%= link_to admin_games_path, class: "btn btn-ghost btn-sm gap-2" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      <%= t('admin.common.back_to_list') %>
+    <% end %>
   </div>
-  <div class="actions">
-    <%= link_to t('admin.common.back_to_list'), admin_games_path, class: "button ghost" %>
-  </div>
-</div>
 
-<div class="card">
-  <table class="table">
-    <tbody>
-      <tr><th><%= t('admin.games.fields.id') %></th><td><%= @game.id %></td></tr>
-      <tr><th><%= t('admin.games.fields.club') %></th><td><%= @game.match.club.name %></td></tr>
-      <tr><th><%= t('admin.games.fields.match_date') %></th><td><%= @game.match.played_on.strftime("%Y-%m-%d") %></td></tr>
-      <tr><th><%= t('admin.games.fields.home_team') %></th><td><%= t('admin.common.team_label', label: @game.home_team.label) %> (<%= @game.home_team.color %>)</td></tr>
-      <tr><th><%= t('admin.games.fields.away_team') %></th><td><%= t('admin.common.team_label', label: @game.away_team.label) %> (<%= @game.away_team.color %>)</td></tr>
-      <tr><th><%= t('admin.games.fields.result') %></th><td><%= @game.result %></td></tr>
-    </tbody>
-  </table>
+  <!-- 페이지 헤더 -->
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-base-content mb-2"><%= t('admin.games.show.title') %></h1>
+    <p class="text-base-content/60"><%= @game.match.club.name %> · <%= @game.match.played_on.strftime("%Y-%m-%d") %></p>
+  </div>
+
+  <!-- 액션 버튼 -->
+  <div class="flex gap-3 mb-6">
+    <%= link_to edit_admin_game_path(@game), class: "btn btn-primary" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+      </svg>
+      <%= t('admin.common.edit') %>
+    <% end %>
+  </div>
+
+  <!-- 게임 정보 카드 -->
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <h2 class="card-title mb-4"><%= t('admin.games.sections.info') %></h2>
+      <div class="overflow-x-auto">
+        <table class="table">
+          <tbody>
+            <tr><th class="w-1/4"><%= t('admin.games.fields.id') %></th><td><%= @game.id %></td></tr>
+            <tr><th><%= t('admin.games.fields.club') %></th><td><%= @game.match.club.name %></td></tr>
+            <tr><th><%= t('admin.games.fields.match_date') %></th><td><%= @game.match.played_on.strftime("%Y-%m-%d") %></td></tr>
+            <tr>
+              <th><%= t('admin.games.fields.home_team') %></th>
+              <td>
+                <span class="font-medium"><%= t('admin.common.team_label', label: @game.home_team.label) %></span>
+                <span class="badge badge-outline badge-sm ml-2"><%= @game.home_team.color %></span>
+              </td>
+            </tr>
+            <tr>
+              <th><%= t('admin.games.fields.away_team') %></th>
+              <td>
+                <span class="font-medium"><%= t('admin.common.team_label', label: @game.away_team.label) %></span>
+                <span class="badge badge-outline badge-sm ml-2"><%= @game.away_team.color %></span>
+              </td>
+            </tr>
+            <tr>
+              <th><%= t('admin.games.fields.result') %></th>
+              <td>
+                <span class="badge badge-lg <%= @game.result == 'pending' ? 'badge-ghost' : 'badge-success' %>">
+                  <%= @game.result %>
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>

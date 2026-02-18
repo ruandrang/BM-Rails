@@ -1,49 +1,110 @@
 <% content_for :title, t('admin.matches.show.page_title') %>
 
-<div class="page-header">
-  <div>
-    <h1><%= t('admin.matches.show.title') %></h1>
-    <p class="muted"><%= @match.club.name %> · <%= @match.played_on.strftime("%Y-%m-%d") %></p>
-  </div>
-  <div class="actions">
-    <%= link_to t('admin.common.back_to_list'), admin_matches_path, class: "button ghost" %>
-  </div>
-</div>
-
-<div class="card">
-  <table class="table">
-    <tbody>
-      <tr><th><%= t('admin.matches.fields.id') %></th><td><%= @match.id %></td></tr>
-      <tr><th><%= t('admin.matches.fields.club') %></th><td><%= @match.club.name %></td></tr>
-      <tr><th><%= t('admin.matches.fields.date') %></th><td><%= @match.played_on.strftime("%Y-%m-%d") %></td></tr>
-      <tr><th><%= t('admin.matches.fields.teams_count') %></th><td><%= @match.teams_count %></td></tr>
-      <tr><th><%= t('admin.matches.fields.memo') %></th><td><%= @match.note.presence || "-" %></td></tr>
-    </tbody>
-  </table>
-</div>
-
-<div class="card">
-  <h2><%= t('admin.matches.sections.teams') %></h2>
-  <ul class="member-list">
-    <% @match.teams.each do |team| %>
-      <li class="member-item">
-        <span class="member-name"><%= t('admin.common.team_label', label: team.label) %> (<%= team.color %>)</span>
-        <span class="member-meta"><%= team.members.count %><%= t('admin.common.members_suffix') %></span>
-        <%= link_to t('admin.common.view'), admin_team_path(team), class: "button ghost" %>
-      </li>
+<div class="max-w-7xl mx-auto">
+  <!-- 뒤로가기 -->
+  <div class="mb-4">
+    <%= link_to admin_matches_path, class: "btn btn-ghost btn-sm gap-2" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      <%= t('admin.common.back_to_list') %>
     <% end %>
-  </ul>
-</div>
+  </div>
 
-<div class="card">
-  <h2><%= t('admin.matches.sections.games') %></h2>
-  <ul class="member-list">
-    <% @match.games.each do |game| %>
-      <li class="member-item">
-        <span class="member-name"><%= t('admin.common.team_vs', home: game.home_team.label, away: game.away_team.label) %></span>
-        <span class="member-meta"><%= game.result %></span>
-        <%= link_to t('admin.common.view'), admin_game_path(game), class: "button ghost" %>
-      </li>
+  <!-- 페이지 헤더 -->
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-base-content mb-2"><%= t('admin.matches.show.title') %></h1>
+    <p class="text-base-content/60"><%= @match.club.name %> · <%= @match.played_on.strftime("%Y-%m-%d") %></p>
+  </div>
+
+  <!-- 액션 버튼 -->
+  <div class="flex gap-3 mb-6">
+    <%= link_to edit_admin_match_path(@match), class: "btn btn-primary" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+      </svg>
+      <%= t('admin.common.edit') %>
     <% end %>
-  </ul>
+
+    <%= button_to admin_match_path(@match), method: :delete,
+        data: { confirm: t('admin.matches.confirms.delete') },
+        class: "btn btn-error btn-outline" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+      </svg>
+      <%= t('admin.common.delete') %>
+    <% end %>
+  </div>
+
+  <!-- 경기 정보 카드 -->
+  <div class="card bg-base-100 shadow-xl mb-6">
+    <div class="card-body">
+      <h2 class="card-title mb-4"><%= t('admin.matches.sections.info') %></h2>
+      <div class="overflow-x-auto">
+        <table class="table">
+          <tbody>
+            <tr><th class="w-1/4"><%= t('admin.matches.fields.id') %></th><td><%= @match.id %></td></tr>
+            <tr><th><%= t('admin.matches.fields.club') %></th><td><%= @match.club.name %></td></tr>
+            <tr><th><%= t('admin.matches.fields.date') %></th><td class="font-medium"><%= @match.played_on.strftime("%Y-%m-%d") %></td></tr>
+            <tr>
+              <th><%= t('admin.matches.fields.teams_count') %></th>
+              <td><span class="badge badge-primary"><%= @match.teams_count %><%= t('admin.common.teams_suffix') %></span></td>
+            </tr>
+            <tr><th><%= t('admin.matches.fields.memo') %></th><td><%= @match.note.presence || "-" %></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- 팀 목록 카드 -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title mb-4"><%= t('admin.matches.sections.teams') %></h2>
+        <% if @match.teams.any? %>
+          <div class="space-y-2">
+            <% @match.teams.each do |team| %>
+              <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
+                <div>
+                  <span class="font-medium"><%= t('admin.common.team_label', label: team.label) %></span>
+                  <span class="badge badge-outline badge-sm ml-2"><%= team.color %></span>
+                  <span class="text-sm text-base-content/60 ml-2"><%= team.members.count %><%= t('admin.common.members_suffix') %></span>
+                </div>
+                <%= link_to t('admin.common.view'), admin_team_path(team), class: "btn btn-ghost btn-xs" %>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="text-center py-8 text-base-content/50">
+            <%= t('admin.common.no_data') %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- 게임 목록 카드 -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title mb-4"><%= t('admin.matches.sections.games') %></h2>
+        <% if @match.games.any? %>
+          <div class="space-y-2">
+            <% @match.games.each do |game| %>
+              <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
+                <div>
+                  <span class="font-medium"><%= t('admin.common.team_vs', home: game.home_team.label, away: game.away_team.label) %></span>
+                  <span class="badge <%= game.result == 'pending' ? 'badge-ghost' : 'badge-success' %> badge-sm ml-2"><%= game.result %></span>
+                </div>
+                <%= link_to t('admin.common.view'), admin_game_path(game), class: "btn btn-ghost btn-xs" %>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="text-center py-8 text-base-content/50">
+            <%= t('admin.common.no_data') %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
 </div>

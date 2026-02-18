@@ -1,38 +1,96 @@
 <% content_for :title, t('admin.users.show.page_title') %>
 
-<div class="page-header">
-  <div>
-    <h1><%= t('admin.users.show.title') %></h1>
-    <p class="muted"><%= @user.email %></p>
-  </div>
-  <div class="actions">
-    <%= link_to t('admin.common.back_to_list'), admin_users_path, class: "button ghost" %>
-  </div>
-</div>
-
-<div class="card">
-  <table class="table">
-    <tbody>
-      <tr><th><%= t('admin.users.fields.id') %></th><td><%= @user.id %></td></tr>
-      <tr><th><%= t('admin.users.fields.name') %></th><td><%= @user.name.presence || "-" %></td></tr>
-      <tr><th><%= t('admin.users.fields.email') %></th><td><%= @user.email %></td></tr>
-      <tr><th><%= t('admin.users.fields.admin') %></th><td><%= @user.admin? ? "Y" : "N" %></td></tr>
-      <tr><th><%= t('admin.users.fields.created_at') %></th><td><%= @user.created_at.strftime("%Y-%m-%d %H:%M") %></td></tr>
-    </tbody>
-  </table>
-</div>
-
-<div class="card">
-  <h2><%= t('admin.users.sections.clubs') %></h2>
-  <ul class="member-list">
-    <% @user.clubs.each do |club| %>
-      <li class="member-item">
-        <span class="member-name"><%= club.name %></span>
-        <%= link_to t('admin.common.view'), admin_club_path(club), class: "button ghost" %>
-      </li>
+<div class="max-w-7xl mx-auto">
+  <!-- 뒤로가기 -->
+  <div class="mb-4">
+    <%= link_to admin_users_path, class: "btn btn-ghost btn-sm gap-2" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      <%= t('admin.common.back_to_list') %>
     <% end %>
-  </ul>
-  <% if @user.clubs.empty? %>
-    <div class="empty-state"><p><%= t('admin.users.empty.no_clubs') %></p></div>
-  <% end %>
+  </div>
+
+  <!-- 페이지 헤더 -->
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-base-content mb-2"><%= t('admin.users.show.title') %></h1>
+    <p class="text-base-content/60"><%= @user.email %></p>
+  </div>
+
+  <!-- 액션 버튼 -->
+  <div class="flex gap-3 mb-6">
+    <%= link_to edit_admin_user_path(@user), class: "btn btn-primary" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+      </svg>
+      <%= t('admin.common.edit') %>
+    <% end %>
+
+    <% if @user != current_user %>
+      <%= button_to toggle_admin_admin_user_path(@user), method: :patch, class: "btn #{@user.admin? ? 'btn-warning' : 'btn-success'}" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+        <%= @user.admin? ? t('admin.users.actions.revoke_admin') : t('admin.users.actions.grant_admin') %>
+      <% end %>
+
+      <%= button_to admin_user_path(@user), method: :delete,
+          data: { confirm: t('admin.users.confirms.delete') },
+          class: "btn btn-error btn-outline" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+        <%= t('admin.common.delete') %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <!-- 사용자 정보 카드 -->
+  <div class="card bg-base-100 shadow-xl mb-6">
+    <div class="card-body">
+      <h2 class="card-title mb-4"><%= t('admin.users.sections.info') %></h2>
+      <div class="overflow-x-auto">
+        <table class="table">
+          <tbody>
+            <tr><th class="w-1/4"><%= t('admin.users.fields.id') %></th><td><%= @user.id %></td></tr>
+            <tr><th><%= t('admin.users.fields.name') %></th><td><%= @user.name.presence || "-" %></td></tr>
+            <tr><th><%= t('admin.users.fields.email') %></th><td><%= @user.email %></td></tr>
+            <tr>
+              <th><%= t('admin.users.fields.admin') %></th>
+              <td>
+                <span class="badge <%= @user.admin? ? 'badge-primary' : 'badge-ghost' %>">
+                  <%= @user.admin? ? "Admin" : "User" %>
+                </span>
+              </td>
+            </tr>
+            <tr><th><%= t('admin.users.fields.created_at') %></th><td><%= @user.created_at.strftime("%Y-%m-%d %H:%M") %></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 클럽 목록 카드 -->
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <h2 class="card-title mb-4"><%= t('admin.users.sections.clubs') %></h2>
+      <% if @user.clubs.any? %>
+        <div class="space-y-2">
+          <% @user.clubs.each do |club| %>
+            <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
+              <div class="flex items-center gap-3">
+                <span class="text-2xl"><%= club_icon(club.icon) %></span>
+                <span class="font-medium"><%= club.name %></span>
+              </div>
+              <%= link_to t('admin.common.view'), admin_club_path(club), class: "btn btn-ghost btn-xs" %>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="text-center py-8 text-base-content/50">
+          <%= t('admin.users.empty.no_clubs') %>
+        </div>
+      <% end %>
+    </div>
+  </div>
 </div>

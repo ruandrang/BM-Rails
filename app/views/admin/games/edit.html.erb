@@ -1,0 +1,69 @@
+<% content_for :title, t('admin.games.edit.page_title') %>
+
+<div class="max-w-2xl mx-auto">
+  <div class="mb-4">
+    <%= link_to admin_game_path(@game), class: "btn btn-ghost btn-sm gap-2" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      <%= t('admin.common.back_to_detail') %>
+    <% end %>
+  </div>
+
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-base-content mb-2"><%= t('admin.games.edit.title') %></h1>
+    <p class="text-base-content/60"><%= @game.match.club.name %> - <%= @game.match.played_on.strftime("%Y-%m-%d") %></p>
+  </div>
+
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <%= form_with model: [:admin, @game], class: "space-y-6" do |f| %>
+        <% if @game.errors.any? %>
+          <div class="alert alert-error">
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <ul class="list-disc list-inside">
+              <% @game.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+        <div class="bg-base-200 p-4 rounded-lg mb-4">
+          <div class="text-lg font-medium mb-2"><%= t('admin.games.fields.matchup') %></div>
+          <div class="flex items-center justify-center gap-4">
+            <div class="text-center">
+              <span class="badge badge-lg"><%= @game.home_team.icon %> <%= @game.home_team.label %></span>
+            </div>
+            <span class="text-xl font-bold">vs</span>
+            <div class="text-center">
+              <span class="badge badge-lg"><%= @game.away_team.icon %> <%= @game.away_team.label %></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-control">
+            <%= f.label :home_score, "#{@game.home_team.label} #{t('admin.games.fields.score')}", class: "label" %>
+            <%= f.number_field :home_score, class: "input input-bordered w-full", min: 0 %>
+          </div>
+
+          <div class="form-control">
+            <%= f.label :away_score, "#{@game.away_team.label} #{t('admin.games.fields.score')}", class: "label" %>
+            <%= f.number_field :away_score, class: "input input-bordered w-full", min: 0 %>
+          </div>
+        </div>
+
+        <div class="form-control">
+          <%= f.label :result, t('admin.games.fields.result'), class: "label" %>
+          <%= f.select :result, Game::RESULTS.map { |r| [t("admin.games.results.#{r}"), r] }, {}, class: "select select-bordered w-full" %>
+        </div>
+
+        <div class="flex gap-3 pt-4">
+          <%= f.submit t('admin.common.save'), class: "btn btn-primary" %>
+          <%= link_to t('admin.common.cancel'), admin_game_path(@game), class: "btn btn-ghost" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

@@ -1,40 +1,59 @@
 <% content_for :title, t('admin.clubs.page_title') %>
 
-<div class="page-header">
-  <div>
-    <h1><%= t('admin.clubs.title') %></h1>
-    <p class="muted"><%= t('admin.clubs.subtitle') %></p>
+<div class="max-w-7xl mx-auto">
+  <!-- 뒤로가기 -->
+  <div class="mb-4">
+    <%= link_to admin_root_path, class: "btn btn-ghost btn-sm gap-2" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      <%= t('admin.common.dashboard') %>
+    <% end %>
   </div>
-  <div class="actions">
-    <%= link_to t('admin.common.dashboard'), admin_root_path, class: "button ghost" %>
-  </div>
-</div>
 
-<div class="card">
-  <table class="table">
-    <thead>
-      <tr>
-        <th><%= t('admin.clubs.fields.id') %></th>
-        <th><%= t('admin.clubs.fields.name') %></th>
-        <th><%= t('admin.clubs.fields.owner') %></th>
-        <th><%= t('admin.clubs.fields.icon') %></th>
-        <th><%= t('admin.clubs.fields.members_count') %></th>
-        <th><%= t('admin.clubs.fields.matches_count') %></th>
-        <th><%= t('admin.common.view') %></th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @clubs.each do |club| %>
-        <tr>
-          <td><%= club.id %></td>
-          <td><%= club.name %></td>
-          <td><%= club.user.email %></td>
-          <td><%= club_icon(club.icon) %></td>
-          <td><%= club.members.count %></td>
-          <td><%= club.matches.count %></td>
-          <td><%= link_to t('admin.common.view'), admin_club_path(club), class: "button ghost" %></td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
+  <!-- 페이지 헤더 -->
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-base-content mb-2"><%= t('admin.clubs.title') %></h1>
+    <p class="text-base-content/60"><%= t('admin.clubs.subtitle') %></p>
+  </div>
+
+  <!-- 검색 -->
+  <%= render 'admin/shared/search_form', url: admin_clubs_path, placeholder: t('admin.clubs.search_placeholder') %>
+
+  <!-- 테이블 카드 -->
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr>
+              <th><%= t('admin.clubs.fields.id') %></th>
+              <th><%= t('admin.clubs.fields.icon') %></th>
+              <th><%= t('admin.clubs.fields.name') %></th>
+              <th><%= t('admin.clubs.fields.owner') %></th>
+              <th><%= t('admin.clubs.fields.members_count') %></th>
+              <th><%= t('admin.clubs.fields.matches_count') %></th>
+              <th><%= t('admin.common.view') %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @clubs.each do |club| %>
+              <tr class="hover">
+                <td><%= club.id %></td>
+                <td class="text-2xl"><%= club_icon(club.icon) %></td>
+                <td class="font-medium"><%= club.name %></td>
+                <td><%= club.user.email %></td>
+                <td><span class="badge badge-ghost"><%= club.members.count %></span></td>
+                <td><span class="badge badge-ghost"><%= club.matches.count %></span></td>
+                <td>
+                  <%= link_to t('admin.common.view'), admin_club_path(club), class: "btn btn-ghost btn-xs" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <%= render 'admin/shared/pagination' %>
+    </div>
+  </div>
 </div>

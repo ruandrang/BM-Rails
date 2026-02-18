@@ -1,36 +1,55 @@
 <% content_for :title, t('admin.team_members.page_title') %>
 
-<div class="page-header">
-  <div>
-    <h1><%= t('admin.team_members.title') %></h1>
-    <p class="muted"><%= t('admin.team_members.subtitle') %></p>
+<div class="max-w-7xl mx-auto">
+  <!-- 뒤로가기 -->
+  <div class="mb-4">
+    <%= link_to admin_root_path, class: "btn btn-ghost btn-sm gap-2" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      <%= t('admin.common.dashboard') %>
+    <% end %>
   </div>
-  <div class="actions">
-    <%= link_to t('admin.common.dashboard'), admin_root_path, class: "button ghost" %>
-  </div>
-</div>
 
-<div class="card">
-  <table class="table">
-    <thead>
-      <tr>
-        <th><%= t('admin.team_members.fields.id') %></th>
-        <th><%= t('admin.team_members.fields.team') %></th>
-        <th><%= t('admin.team_members.fields.club') %></th>
-        <th><%= t('admin.team_members.fields.member') %></th>
-        <th><%= t('admin.common.view') %></th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @team_members.each do |team_member| %>
-        <tr>
-          <td><%= team_member.id %></td>
-          <td><%= t('admin.common.team_label', label: team_member.team.label) %></td>
-          <td><%= team_member.team.match.club.name %></td>
-          <td><%= team_member.member.name %></td>
-          <td><%= link_to t('admin.common.view'), admin_team_member_path(team_member), class: "button ghost" %></td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
+  <!-- 페이지 헤더 -->
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-base-content mb-2"><%= t('admin.team_members.title') %></h1>
+    <p class="text-base-content/60"><%= t('admin.team_members.subtitle') %></p>
+  </div>
+
+  <!-- 테이블 카드 -->
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr>
+              <th><%= t('admin.team_members.fields.id') %></th>
+              <th><%= t('admin.team_members.fields.team') %></th>
+              <th><%= t('admin.team_members.fields.club') %></th>
+              <th><%= t('admin.team_members.fields.member') %></th>
+              <th><%= t('admin.common.view') %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @team_members.each do |team_member| %>
+              <tr class="hover">
+                <td><%= team_member.id %></td>
+                <td>
+                  <span class="font-medium"><%= t('admin.common.team_label', label: team_member.team.label) %></span>
+                  <span class="badge badge-ghost badge-sm ml-1"><%= team_member.team.color %></span>
+                </td>
+                <td><%= team_member.team.match.club.name %></td>
+                <td><%= team_member.member.name %></td>
+                <td>
+                  <%= link_to t('admin.common.view'), admin_team_member_path(team_member), class: "btn btn-ghost btn-xs" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <%= render 'admin/shared/pagination' %>
+    </div>
+  </div>
 </div>

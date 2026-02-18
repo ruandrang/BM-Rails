@@ -365,8 +365,12 @@ zh:
       back_to_clubs: "我的俱乐部"
       dashboard: "控制面板"
       back_to_list: "返回列表"
+      back_to_detail: "返回详情"
       view: "查看"
       view_all_list: "查看全部"
+      edit: "修改"
+      save: "保存"
+      cancel: "取消"
       no_data: "暂无数据。"
       no_tables: "没有可查询的表。"
       recent_items: "%{table} 最近 %{limit} 条"
@@ -380,6 +384,11 @@ zh:
       team_vs: "队伍 %{home} vs 队伍 %{away}"
       teams_suffix: "队"
       members_suffix: "人"
+      search_placeholder: "搜索..."
+      all_positions: "所有位置"
+      clear_search: "清除"
+      delete: "删除"
+      pagination_info: "%{current} / %{total} 页 (共%{count}条)"
     dashboard:
       page_title: "管理员控制面板 - %{app_name}"
       title: "管理员控制面板"
@@ -405,9 +414,20 @@ zh:
       page_title: "管理员 · 用户"
       title: "用户列表"
       subtitle: "全部用户账户信息"
+      search_placeholder: "按邮箱或姓名搜索..."
       show:
         page_title: "管理员 · 用户详情"
         title: "用户详情"
+      edit:
+        page_title: "管理员 · 修改用户"
+        title: "修改用户"
+      notices:
+        updated: "用户信息已更新。"
+        deleted: "用户已删除。"
+        admin_toggled: "权限已变更。"
+      errors:
+        cannot_change_self: "无法更改自己的权限。"
+        cannot_delete_self: "无法删除自己的账户。"
       fields:
         id: "ID"
         email: "邮箱"
@@ -416,16 +436,31 @@ zh:
         clubs_count: "俱乐部数"
         created_at: "创建时间"
       sections:
+        info: "用户信息"
         clubs: "俱乐部"
+      actions:
+        grant_admin: "设为管理员"
+        revoke_admin: "撤销管理员"
+      confirms:
+        delete: "确定要删除此用户吗？所有俱乐部和数据将被删除。"
       empty:
         no_clubs: "暂无俱乐部。"
     clubs:
       page_title: "管理员 · 俱乐部"
       title: "俱乐部列表"
       subtitle: "全部俱乐部信息"
+      search_placeholder: "按俱乐部名搜索..."
       show:
         page_title: "管理员 · 俱乐部详情"
         title: "俱乐部详情"
+      edit:
+        page_title: "管理员 · 修改俱乐部"
+        title: "修改俱乐部"
+      notices:
+        updated: "俱乐部信息已更新。"
+        deleted: "俱乐部已删除。"
+      errors:
+        update_failed: "更新失败。"
       fields:
         id: "ID"
         name: "俱乐部名"
@@ -434,8 +469,11 @@ zh:
         members_count: "成员数"
         matches_count: "比赛数"
       sections:
+        info: "俱乐部信息"
         members: "成员"
         matches: "比赛"
+      confirms:
+        delete: "确定要删除此俱乐部吗？所有成员和比赛数据将被删除。"
       empty:
         no_members: "暂无成员。"
         no_matches: "暂无比赛。"
@@ -443,9 +481,18 @@ zh:
       page_title: "管理员 · 成员"
       title: "成员列表"
       subtitle: "全部成员信息"
+      search_placeholder: "按成员姓名搜索..."
       show:
         page_title: "管理员 · 成员详情"
         title: "成员详情"
+      edit:
+        page_title: "管理员 · 修改成员"
+        title: "修改成员"
+      notices:
+        updated: "成员信息已更新。"
+        deleted: "成员已删除。"
+      errors:
+        update_failed: "更新失败。"
       fields:
         id: "ID"
         name: "姓名"
@@ -456,7 +503,10 @@ zh:
         height: "身高"
         sort_order: "排序"
       sections:
+        info: "成员信息"
         teams: "参与队伍"
+      confirms:
+        delete: "确定要删除此成员吗？"
       empty:
         no_teams: "暂无参与队伍。"
     matches:
@@ -466,6 +516,14 @@ zh:
       show:
         page_title: "管理员 · 比赛详情"
         title: "比赛详情"
+      edit:
+        page_title: "管理员 · 修改比赛"
+        title: "修改比赛"
+      notices:
+        updated: "比赛信息已更新。"
+        deleted: "比赛已删除。"
+      errors:
+        update_failed: "更新失败。"
       fields:
         id: "ID"
         club: "俱乐部"
@@ -473,8 +531,11 @@ zh:
         teams_count: "队伍数"
         memo: "备注"
       sections:
+        info: "比赛信息"
         teams: "队伍"
         games: "比赛场次"
+      confirms:
+        delete: "确定要删除此比赛吗？所有队伍和比赛场次数据将被删除。"
     teams:
       page_title: "管理员 · 队伍"
       title: "队伍列表"
@@ -482,6 +543,13 @@ zh:
       show:
         page_title: "管理员 · 队伍详情"
         title: "队伍详情"
+      edit:
+        page_title: "管理员 · 修改队伍"
+        title: "修改队伍"
+      notices:
+        updated: "队伍信息已更新。"
+      errors:
+        update_failed: "更新失败。"
       fields:
         id: "ID"
         label: "标签"
@@ -490,6 +558,7 @@ zh:
         match_date: "比赛日期"
         members_count: "成员数"
       sections:
+        info: "队伍信息"
         members: "成员"
       empty:
         no_members: "暂无成员。"
@@ -506,6 +575,8 @@ zh:
         club: "俱乐部"
         member: "成员"
         match_date: "比赛日期"
+      sections:
+        info: "队伍成员信息"
     games:
       page_title: "管理员 · 比赛场次"
       title: "比赛场次列表"
@@ -513,6 +584,18 @@ zh:
       show:
         page_title: "管理员 · 比赛场次详情"
         title: "比赛场次详情"
+      edit:
+        page_title: "管理员 · 修改比赛场次"
+        title: "修改比赛场次"
+      notices:
+        updated: "比赛场次信息已更新。"
+      errors:
+        update_failed: "更新失败。"
+      results:
+        pending: "待定"
+        home_win: "主队胜"
+        away_win: "客队胜"
+        draw: "平局"
       fields:
         id: "ID"
         club: "俱乐部"
@@ -521,3 +604,5 @@ zh:
         home_team: "主队"
         away_team: "客队"
         result: "结果"
+      sections:
+        info: "比赛场次信息"

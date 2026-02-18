@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 여러 파일을 동시에 수정할 때, 한 파일씩 수정하고 문법 오류 확인 후 다음 파일로 넘어갈 것
 - `link_to`, `form_with` 같은 Rails 헬퍼 수정 시 문법에 특히 주의하고 렌더링 확인할 것
 - 코드 수정 후 커밋 전에 반드시 `bin/rubocop`과 `bin/brakeman` 실행할 것
+- 파일 이름이나 경로를 언급하면 반드시 Read로 직접 확인한 뒤 작업할 것. 추측하지 않는다
 
 ## Git 규칙
 
@@ -16,6 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 언어 규칙
 
 - 코드 주석, README, 문서, 대화 모두 한국어 사용
+- 한국어로 질문하면 한국어로 답한다. 영어를 섞지 않는다
 - i18n은 Rails `I18n.t()` 사용. 하드코딩된 텍스트 발견 시 I18n 전환 제안할 것
 
 ## 기술 스택
@@ -23,10 +25,36 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Rails 8, Ruby 컨벤션 준수
 - Tailwind CSS + DaisyUI 사용
 
-## UI 구현 규칙
+## 작업 방식
 
-- 디자인 파일(.pen 등)에서 UI 구현 시, 코딩 전에 텍스트로 레이아웃 구조/색상/크기를 설명하고 확인받을 것
-- 파일이나 경로를 언급하면 반드시 Read로 직접 확인 후 작업할 것
+- 새로운 기능이나 큰 변경 작업은 항상 bkit PDCA 방식으로 진행한다
+- plan → design → do → analyze → iterate 순서를 따른다
+- 각 단계의 문서는 docs/ 폴더에 저장한다
+- 작업 중간에 세션이 끊겨도 docs/를 보면 어디까지 했는지 알 수 있도록 한다
+
+## 디자인 구현 규칙
+
+### 코딩 전 필수 과정
+
+- 디자인 파일(.pen, .fig 등)을 받으면 바로 코딩하지 않는다
+- 먼저 텍스트로 다음을 정리해서 확인을 받는다:
+  - 전체 레이아웃 구조 (어떤 영역이 어디에 배치되는지)
+  - 색상 코드 (예: 배경 #1a1a2e, 텍스트 #ffffff)
+  - 폰트 크기와 굵기
+  - 요소 간 간격과 여백
+  - 반응형 동작 방식
+
+### 구현 중 규칙
+
+- Tailwind CSS + DaisyUI 클래스를 우선 사용한다
+- 텍스트는 항상 가독성을 최우선으로 한다. 작은 것보다 큰 쪽으로 잡아라
+- 첫 번째 구현 후 반드시 "이 결과가 맞는지" 물어봐라
+- 내가 "틀렸다" 또는 "다르다"고 하면, 어떤 부분이 다른지 구체적으로 질문해라. 추측해서 다시 만들지 마라
+
+### 수정 시 규칙
+
+- UI 수정할 때 다른 부분을 건드리지 마라. 요청한 부분만 수정해라
+- 색상, 크기, 간격을 변경할 때는 변경 전/후 값을 알려줘라
 
 ## 프로젝트 개요
 
@@ -163,7 +191,7 @@ Stimulus + 바닐라 JS 혼합 사용 (importmap 미사용, `<script>` 태그로
 
 ## 다국어 지원 (i18n)
 
-- **지원 언어**: ko(한국어, 기본), ja, en, zh, fr, es, it, pt, tl, de — 총 10개 언어
+- **지원 언어**: ko(한국어, 기본), ja, en, zh — 총 4개 언어
 - **로케일 파일**: `config/locales/*.yml`
 - **사용자 언어 설정**: `User#preferred_locale` 컬럼, 세팅 페이지에서 변경 가능
 - **음성 로케일 매핑**: `User::SPEECH_LOCALE_BY_PREFERRED_LOCALE` (예: `ko → ko-KR`, `en → en-US`)
@@ -171,7 +199,7 @@ Stimulus + 바닐라 JS 혼합 사용 (importmap 미사용, `<script>` 태그로
 - **Fallback**: 번역 키 없으면 한국어(`:ko`)로 폴백 (`config/application.rb`)
 
 ### 번역 추가 시 주의사항
-- 모든 10개 로케일 파일에 동일한 키 구조 유지 필요
+- 모든 4개 로케일 파일에 동일한 키 구조 유지 필요
 - `ApplicationController#set_locale`에서 `current_user.preferred_locale` 기반으로 `I18n.locale` 설정
 
 ## 폴더 구조

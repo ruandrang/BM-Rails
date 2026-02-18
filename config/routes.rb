@@ -51,13 +51,17 @@ Rails.application.routes.draw do
 
   namespace :admin do
     root "dashboard#index"
-    resources :users, only: [ :index, :show ]
-    resources :clubs, only: [ :index, :show ]
-    resources :members, only: [ :index, :show ]
-    resources :matches, only: [ :index, :show ]
-    resources :teams, only: [ :index, :show ]
+    resources :users, only: [ :index, :show, :edit, :update, :destroy ] do
+      member do
+        patch :toggle_admin
+      end
+    end
+    resources :clubs, only: [ :index, :show, :edit, :update, :destroy ]
+    resources :members, only: [ :index, :show, :edit, :update, :destroy ]
+    resources :matches, only: [ :index, :show, :edit, :update, :destroy ]
+    resources :teams, only: [ :index, :show, :edit, :update ]
     resources :team_members, only: [ :index, :show ]
-    resources :games, only: [ :index, :show ]
+    resources :games, only: [ :index, :show, :edit, :update ]
   end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

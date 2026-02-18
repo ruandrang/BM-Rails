@@ -380,6 +380,15 @@ en:
       team_vs: "Team %{home} vs Team %{away}"
       teams_suffix: "teams"
       members_suffix: "members"
+      search_placeholder: "Search..."
+      all_positions: "All Positions"
+      clear_search: "Clear"
+      delete: "Delete"
+      edit: "Edit"
+      save: "Save"
+      cancel: "Cancel"
+      back_to_detail: "Back to Details"
+      pagination_info: "%{current} / %{total} pages (%{count} total)"
     dashboard:
       page_title: "Admin Dashboard - %{app_name}"
       title: "Admin Dashboard"
@@ -405,9 +414,20 @@ en:
       page_title: "Admin · Users"
       title: "User List"
       subtitle: "All user accounts"
+      search_placeholder: "Search by email or name..."
       show:
         page_title: "Admin · User Details"
         title: "User Details"
+      edit:
+        page_title: "Admin · Edit User"
+        title: "Edit User"
+      notices:
+        updated: "User has been updated."
+        deleted: "User has been deleted."
+        admin_toggled: "Admin status has been changed."
+      errors:
+        cannot_change_self: "You cannot change your own admin status."
+        cannot_delete_self: "You cannot delete your own account."
       fields:
         id: "ID"
         email: "Email"
@@ -416,26 +436,43 @@ en:
         clubs_count: "Clubs"
         created_at: "Created At"
       sections:
+        info: "User Information"
         clubs: "Clubs"
+      actions:
+        grant_admin: "Grant Admin"
+        revoke_admin: "Revoke Admin"
+      confirms:
+        delete: "Are you sure you want to delete this user? All clubs and data will be deleted."
       empty:
         no_clubs: "No clubs."
     clubs:
       page_title: "Admin · Clubs"
       title: "Club List"
       subtitle: "All club information"
+      search_placeholder: "Search by club name..."
       show:
         page_title: "Admin · Club Details"
         title: "Club Details"
+      edit:
+        page_title: "Admin · Edit Club"
+        title: "Edit Club"
+      notices:
+        updated: "Club has been updated."
+        deleted: "Club has been deleted."
       fields:
         id: "ID"
         name: "Club Name"
         owner: "Owner"
         icon: "Icon"
+        description: "Description"
         members_count: "Members"
         matches_count: "Matches"
       sections:
+        info: "Club Information"
         members: "Members"
         matches: "Matches"
+      confirms:
+        delete: "Are you sure you want to delete this club? All members and match data will be deleted."
       empty:
         no_members: "No members."
         no_matches: "No matches."
@@ -443,9 +480,16 @@ en:
       page_title: "Admin · Members"
       title: "Member List"
       subtitle: "All member information"
+      search_placeholder: "Search by member name..."
       show:
         page_title: "Admin · Member Details"
         title: "Member Details"
+      edit:
+        page_title: "Admin · Edit Member"
+        title: "Edit Member"
+      notices:
+        updated: "Member has been updated."
+        deleted: "Member has been deleted."
       fields:
         id: "ID"
         name: "Name"
@@ -456,7 +500,10 @@ en:
         height: "Height"
         sort_order: "Sort Order"
       sections:
+        info: "Member Information"
         teams: "Teams"
+      confirms:
+        delete: "Are you sure you want to delete this member?"
       empty:
         no_teams: "No teams."
     matches:
@@ -466,6 +513,12 @@ en:
       show:
         page_title: "Admin · Match Details"
         title: "Match Details"
+      edit:
+        page_title: "Admin · Edit Match"
+        title: "Edit Match"
+      notices:
+        updated: "Match has been updated."
+        deleted: "Match has been deleted."
       fields:
         id: "ID"
         club: "Club"
@@ -473,8 +526,11 @@ en:
         teams_count: "Teams"
         memo: "Memo"
       sections:
+        info: "Match Information"
         teams: "Teams"
         games: "Games"
+      confirms:
+        delete: "Are you sure you want to delete this match? All teams and game data will be deleted."
     teams:
       page_title: "Admin · Teams"
       title: "Team List"
@@ -482,6 +538,11 @@ en:
       show:
         page_title: "Admin · Team Details"
         title: "Team Details"
+      edit:
+        page_title: "Admin · Edit Team"
+        title: "Edit Team"
+      notices:
+        updated: "Team has been updated."
       fields:
         id: "ID"
         label: "Label"
@@ -490,6 +551,7 @@ en:
         match_date: "Match Date"
         members_count: "Members"
       sections:
+        info: "Team Information"
         members: "Members"
       empty:
         no_members: "No members."
@@ -506,6 +568,8 @@ en:
         club: "Club"
         member: "Member"
         match_date: "Match Date"
+      sections:
+        info: "Team Member Information"
     games:
       page_title: "Admin · Games"
       title: "Game List"
@@ -513,6 +577,11 @@ en:
       show:
         page_title: "Admin · Game Details"
         title: "Game Details"
+      edit:
+        page_title: "Admin · Edit Game"
+        title: "Edit Game"
+      notices:
+        updated: "Game has been updated."
       fields:
         id: "ID"
         club: "Club"
@@ -521,3 +590,11 @@ en:
         home_team: "Home Team"
         away_team: "Away Team"
         result: "Result"
+        score: "Score"
+      results:
+        pending: "Pending"
+        home_win: "Home Win"
+        away_win: "Away Win"
+        draw: "Draw"
+      sections:
+        info: "Game Information"

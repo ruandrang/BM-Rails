@@ -1,40 +1,56 @@
 <% content_for :title, t('admin.teams.page_title') %>
 
-<div class="page-header">
-  <div>
-    <h1><%= t('admin.teams.title') %></h1>
-    <p class="muted"><%= t('admin.teams.subtitle') %></p>
+<div class="max-w-7xl mx-auto">
+  <!-- 뒤로가기 -->
+  <div class="mb-4">
+    <%= link_to admin_root_path, class: "btn btn-ghost btn-sm gap-2" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      <%= t('admin.common.dashboard') %>
+    <% end %>
   </div>
-  <div class="actions">
-    <%= link_to t('admin.common.dashboard'), admin_root_path, class: "button ghost" %>
-  </div>
-</div>
 
-<div class="card">
-  <table class="table">
-    <thead>
-      <tr>
-        <th><%= t('admin.teams.fields.id') %></th>
-        <th><%= t('admin.teams.fields.label') %></th>
-        <th><%= t('admin.teams.fields.color') %></th>
-        <th><%= t('admin.teams.fields.club') %></th>
-        <th><%= t('admin.teams.fields.match_date') %></th>
-        <th><%= t('admin.teams.fields.members_count') %></th>
-        <th><%= t('admin.common.view') %></th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @teams.each do |team| %>
-        <tr>
-          <td><%= team.id %></td>
-          <td><%= team.label %></td>
-          <td><%= team.color %></td>
-          <td><%= team.match.club.name %></td>
-          <td><%= team.match.played_on.strftime("%Y-%m-%d") %></td>
-          <td><%= team.members.count %></td>
-          <td><%= link_to t('admin.common.view'), admin_team_path(team), class: "button ghost" %></td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
+  <!-- 페이지 헤더 -->
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-base-content mb-2"><%= t('admin.teams.title') %></h1>
+    <p class="text-base-content/60"><%= t('admin.teams.subtitle') %></p>
+  </div>
+
+  <!-- 테이블 카드 -->
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr>
+              <th><%= t('admin.teams.fields.id') %></th>
+              <th><%= t('admin.teams.fields.label') %></th>
+              <th><%= t('admin.teams.fields.color') %></th>
+              <th><%= t('admin.teams.fields.club') %></th>
+              <th><%= t('admin.teams.fields.match_date') %></th>
+              <th><%= t('admin.teams.fields.members_count') %></th>
+              <th><%= t('admin.common.view') %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @teams.each do |team| %>
+              <tr class="hover">
+                <td><%= team.id %></td>
+                <td class="font-medium"><%= team.label %></td>
+                <td><span class="badge badge-outline"><%= team.color %></span></td>
+                <td><%= team.match.club.name %></td>
+                <td><%= team.match.played_on.strftime("%Y-%m-%d") %></td>
+                <td><span class="badge badge-ghost"><%= team.members.count %></span></td>
+                <td>
+                  <%= link_to t('admin.common.view'), admin_team_path(team), class: "btn btn-ghost btn-xs" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <%= render 'admin/shared/pagination' %>
+    </div>
+  </div>
 </div>

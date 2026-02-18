@@ -1,36 +1,52 @@
 <% content_for :title, t('admin.matches.page_title') %>
 
-<div class="page-header">
-  <div>
-    <h1><%= t('admin.matches.title') %></h1>
-    <p class="muted"><%= t('admin.matches.subtitle') %></p>
+<div class="max-w-7xl mx-auto">
+  <!-- 뒤로가기 -->
+  <div class="mb-4">
+    <%= link_to admin_root_path, class: "btn btn-ghost btn-sm gap-2" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      <%= t('admin.common.dashboard') %>
+    <% end %>
   </div>
-  <div class="actions">
-    <%= link_to t('admin.common.dashboard'), admin_root_path, class: "button ghost" %>
-  </div>
-</div>
 
-<div class="card">
-  <table class="table">
-    <thead>
-      <tr>
-        <th><%= t('admin.matches.fields.id') %></th>
-        <th><%= t('admin.matches.fields.club') %></th>
-        <th><%= t('admin.matches.fields.date') %></th>
-        <th><%= t('admin.matches.fields.teams_count') %></th>
-        <th><%= t('admin.common.view') %></th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @matches.each do |match| %>
-        <tr>
-          <td><%= match.id %></td>
-          <td><%= match.club.name %></td>
-          <td><%= match.played_on.strftime("%Y-%m-%d") %></td>
-          <td><%= match.teams_count %></td>
-          <td><%= link_to t('admin.common.view'), admin_match_path(match), class: "button ghost" %></td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
+  <!-- 페이지 헤더 -->
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-base-content mb-2"><%= t('admin.matches.title') %></h1>
+    <p class="text-base-content/60"><%= t('admin.matches.subtitle') %></p>
+  </div>
+
+  <!-- 테이블 카드 -->
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr>
+              <th><%= t('admin.matches.fields.id') %></th>
+              <th><%= t('admin.matches.fields.club') %></th>
+              <th><%= t('admin.matches.fields.date') %></th>
+              <th><%= t('admin.matches.fields.teams_count') %></th>
+              <th><%= t('admin.common.view') %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @matches.each do |match| %>
+              <tr class="hover">
+                <td><%= match.id %></td>
+                <td><%= match.club.name %></td>
+                <td class="font-medium"><%= match.played_on.strftime("%Y-%m-%d") %></td>
+                <td><span class="badge badge-outline"><%= match.teams_count %><%= t('admin.common.teams_suffix') %></span></td>
+                <td>
+                  <%= link_to t('admin.common.view'), admin_match_path(match), class: "btn btn-ghost btn-xs" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <%= render 'admin/shared/pagination' %>
+    </div>
+  </div>
 </div>

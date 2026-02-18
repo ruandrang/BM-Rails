@@ -1,23 +1,43 @@
 <% content_for :title, t('admin.team_members.show.page_title') %>
 
-<div class="page-header">
-  <div>
-    <h1><%= t('admin.team_members.show.title') %></h1>
-    <p class="muted"><%= @team_member.member.name %> · <%= t('admin.common.team_label', label: @team_member.team.label) %></p>
+<div class="max-w-7xl mx-auto">
+  <!-- 뒤로가기 -->
+  <div class="mb-4">
+    <%= link_to admin_team_members_path, class: "btn btn-ghost btn-sm gap-2" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      <%= t('admin.common.back_to_list') %>
+    <% end %>
   </div>
-  <div class="actions">
-    <%= link_to t('admin.common.back_to_list'), admin_team_members_path, class: "button ghost" %>
-  </div>
-</div>
 
-<div class="card">
-  <table class="table">
-    <tbody>
-      <tr><th><%= t('admin.team_members.fields.id') %></th><td><%= @team_member.id %></td></tr>
-      <tr><th><%= t('admin.team_members.fields.club') %></th><td><%= @team_member.team.match.club.name %></td></tr>
-      <tr><th><%= t('admin.team_members.fields.team') %></th><td><%= t('admin.common.team_label', label: @team_member.team.label) %> (<%= @team_member.team.color %>)</td></tr>
-      <tr><th><%= t('admin.team_members.fields.member') %></th><td><%= @team_member.member.name %></td></tr>
-      <tr><th><%= t('admin.team_members.fields.match_date') %></th><td><%= @team_member.team.match.played_on.strftime("%Y-%m-%d") %></td></tr>
-    </tbody>
-  </table>
+  <!-- 페이지 헤더 -->
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-base-content mb-2"><%= t('admin.team_members.show.title') %></h1>
+    <p class="text-base-content/60"><%= @team_member.member.name %> · <%= t('admin.common.team_label', label: @team_member.team.label) %></p>
+  </div>
+
+  <!-- 팀 멤버 정보 카드 -->
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <h2 class="card-title mb-4"><%= t('admin.team_members.sections.info') %></h2>
+      <div class="overflow-x-auto">
+        <table class="table">
+          <tbody>
+            <tr><th class="w-1/4"><%= t('admin.team_members.fields.id') %></th><td><%= @team_member.id %></td></tr>
+            <tr><th><%= t('admin.team_members.fields.club') %></th><td><%= @team_member.team.match.club.name %></td></tr>
+            <tr>
+              <th><%= t('admin.team_members.fields.team') %></th>
+              <td>
+                <span class="font-medium"><%= t('admin.common.team_label', label: @team_member.team.label) %></span>
+                <span class="badge badge-outline badge-sm ml-2"><%= @team_member.team.color %></span>
+              </td>
+            </tr>
+            <tr><th><%= t('admin.team_members.fields.member') %></th><td class="font-medium"><%= @team_member.member.name %></td></tr>
+            <tr><th><%= t('admin.team_members.fields.match_date') %></th><td><%= @team_member.team.match.played_on.strftime("%Y-%m-%d") %></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>

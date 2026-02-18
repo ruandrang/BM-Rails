@@ -1,0 +1,66 @@
+<% if @pagination && @pagination[:total_pages] > 1 %>
+  <div class="flex justify-center mt-6">
+    <div class="join">
+      <%# 이전 페이지 %>
+      <% if @pagination[:current_page] > 1 %>
+        <%= link_to url_for(page: @pagination[:current_page] - 1), class: "join-item btn btn-sm" do %>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        <% end %>
+      <% else %>
+        <button class="join-item btn btn-sm btn-disabled">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+      <% end %>
+
+      <%# 페이지 번호 %>
+      <% start_page = [1, @pagination[:current_page] - 2].max %>
+      <% end_page = [start_page + 4, @pagination[:total_pages]].min %>
+      <% start_page = [1, end_page - 4].max %>
+
+      <% if start_page > 1 %>
+        <%= link_to 1, url_for(page: 1), class: "join-item btn btn-sm" %>
+        <% if start_page > 2 %>
+          <button class="join-item btn btn-sm btn-disabled">...</button>
+        <% end %>
+      <% end %>
+
+      <% (start_page..end_page).each do |page| %>
+        <%= link_to page, url_for(page: page),
+            class: "join-item btn btn-sm #{page == @pagination[:current_page] ? 'btn-active' : ''}" %>
+      <% end %>
+
+      <% if end_page < @pagination[:total_pages] %>
+        <% if end_page < @pagination[:total_pages] - 1 %>
+          <button class="join-item btn btn-sm btn-disabled">...</button>
+        <% end %>
+        <%= link_to @pagination[:total_pages], url_for(page: @pagination[:total_pages]), class: "join-item btn btn-sm" %>
+      <% end %>
+
+      <%# 다음 페이지 %>
+      <% if @pagination[:current_page] < @pagination[:total_pages] %>
+        <%= link_to url_for(page: @pagination[:current_page] + 1), class: "join-item btn btn-sm" do %>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        <% end %>
+      <% else %>
+        <button class="join-item btn btn-sm btn-disabled">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="text-center mt-2 text-sm text-base-content/60">
+    <%= t('admin.common.pagination_info',
+        current: @pagination[:current_page],
+        total: @pagination[:total_pages],
+        count: @pagination[:total_count]) %>
+  </div>
+<% end %>

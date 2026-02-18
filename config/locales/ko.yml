@@ -382,6 +382,15 @@ ko:
       team_vs: "팀 %{home} vs 팀 %{away}"
       teams_suffix: "팀"
       members_suffix: "명"
+      search_placeholder: "검색..."
+      all_positions: "모든 포지션"
+      clear_search: "초기화"
+      delete: "삭제"
+      edit: "수정"
+      save: "저장"
+      cancel: "취소"
+      back_to_detail: "상세로 돌아가기"
+      pagination_info: "%{current} / %{total} 페이지 (총 %{count}개)"
     dashboard:
       page_title: "관리자 대시보드 - %{app_name}"
       title: "관리자 대시보드"
@@ -407,9 +416,20 @@ ko:
       page_title: "관리자 · 사용자"
       title: "사용자 목록"
       subtitle: "전체 사용자 계정 정보"
+      search_placeholder: "이메일 또는 이름 검색..."
       show:
         page_title: "관리자 · 사용자 상세"
         title: "사용자 상세"
+      edit:
+        page_title: "관리자 · 사용자 수정"
+        title: "사용자 수정"
+      notices:
+        updated: "사용자 정보가 수정되었습니다."
+        deleted: "사용자가 삭제되었습니다."
+        admin_toggled: "권한이 변경되었습니다."
+      errors:
+        cannot_change_self: "자신의 권한은 변경할 수 없습니다."
+        cannot_delete_self: "자신의 계정은 삭제할 수 없습니다."
       fields:
         id: "ID"
         email: "이메일"
@@ -418,26 +438,43 @@ ko:
         clubs_count: "클럽 수"
         created_at: "생성일"
       sections:
+        info: "사용자 정보"
         clubs: "클럽"
+      actions:
+        grant_admin: "관리자 지정"
+        revoke_admin: "관리자 해제"
+      confirms:
+        delete: "정말 이 사용자를 삭제하시겠습니까? 모든 클럽과 데이터가 함께 삭제됩니다."
       empty:
         no_clubs: "클럽이 없습니다."
     clubs:
       page_title: "관리자 · 클럽"
       title: "클럽 목록"
       subtitle: "전체 클럽 정보"
+      search_placeholder: "클럽명 검색..."
       show:
         page_title: "관리자 · 클럽 상세"
         title: "클럽 상세"
+      edit:
+        page_title: "관리자 · 클럽 수정"
+        title: "클럽 수정"
+      notices:
+        updated: "클럽 정보가 수정되었습니다."
+        deleted: "클럽이 삭제되었습니다."
       fields:
         id: "ID"
         name: "클럽명"
         owner: "소유자"
         icon: "아이콘"
+        description: "설명"
         members_count: "멤버 수"
         matches_count: "경기 수"
       sections:
+        info: "클럽 정보"
         members: "멤버"
         matches: "경기"
+      confirms:
+        delete: "정말 이 클럽을 삭제하시겠습니까? 모든 멤버와 경기 데이터가 함께 삭제됩니다."
       empty:
         no_members: "멤버가 없습니다."
         no_matches: "경기가 없습니다."
@@ -445,9 +482,16 @@ ko:
       page_title: "관리자 · 멤버"
       title: "멤버 목록"
       subtitle: "전체 멤버 정보"
+      search_placeholder: "멤버 이름 검색..."
       show:
         page_title: "관리자 · 멤버 상세"
         title: "멤버 상세"
+      edit:
+        page_title: "관리자 · 멤버 수정"
+        title: "멤버 수정"
+      notices:
+        updated: "멤버 정보가 수정되었습니다."
+        deleted: "멤버가 삭제되었습니다."
       fields:
         id: "ID"
         name: "이름"
@@ -458,7 +502,10 @@ ko:
         height: "키"
         sort_order: "정렬"
       sections:
+        info: "멤버 정보"
         teams: "참여 팀"
+      confirms:
+        delete: "정말 이 멤버를 삭제하시겠습니까?"
       empty:
         no_teams: "참여 팀이 없습니다."
     matches:
@@ -468,6 +515,12 @@ ko:
       show:
         page_title: "관리자 · 경기 상세"
         title: "경기 상세"
+      edit:
+        page_title: "관리자 · 경기 수정"
+        title: "경기 수정"
+      notices:
+        updated: "경기 정보가 수정되었습니다."
+        deleted: "경기가 삭제되었습니다."
       fields:
         id: "ID"
         club: "클럽"
@@ -475,8 +528,11 @@ ko:
         teams_count: "팀 수"
         memo: "메모"
       sections:
+        info: "경기 정보"
         teams: "팀"
         games: "게임"
+      confirms:
+        delete: "정말 이 경기를 삭제하시겠습니까? 모든 팀과 게임 데이터가 함께 삭제됩니다."
     teams:
       page_title: "관리자 · 팀"
       title: "팀 목록"
@@ -484,6 +540,11 @@ ko:
       show:
         page_title: "관리자 · 팀 상세"
         title: "팀 상세"
+      edit:
+        page_title: "관리자 · 팀 수정"
+        title: "팀 수정"
+      notices:
+        updated: "팀 정보가 수정되었습니다."
       fields:
         id: "ID"
         label: "라벨"
@@ -492,6 +553,7 @@ ko:
         match_date: "경기 날짜"
         members_count: "멤버 수"
       sections:
+        info: "팀 정보"
         members: "멤버"
       empty:
         no_members: "멤버가 없습니다."
@@ -508,6 +570,8 @@ ko:
         club: "클럽"
         member: "멤버"
         match_date: "경기 날짜"
+      sections:
+        info: "팀 멤버 정보"
     games:
       page_title: "관리자 · 게임"
       title: "게임 목록"
@@ -515,6 +579,11 @@ ko:
       show:
         page_title: "관리자 · 게임 상세"
         title: "게임 상세"
+      edit:
+        page_title: "관리자 · 게임 수정"
+        title: "게임 수정"
+      notices:
+        updated: "게임 정보가 수정되었습니다."
       fields:
         id: "ID"
         club: "클럽"
@@ -523,3 +592,11 @@ ko:
         home_team: "홈팀"
         away_team: "원정팀"
         result: "결과"
+        score: "점수"
+      results:
+        pending: "대기"
+        home_win: "홈팀 승"
+        away_win: "원정팀 승"
+        draw: "무승부"
+      sections:
+        info: "게임 정보"

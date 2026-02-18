@@ -1,56 +1,107 @@
 <% content_for :title, t('admin.clubs.show.page_title') %>
 
-<div class="page-header">
-  <div>
-    <h1><%= t('admin.clubs.show.title') %></h1>
-    <p class="muted"><%= @club.name %> · <%= @club.user.email %></p>
-  </div>
-  <div class="actions">
-    <%= link_to t('admin.common.back_to_list'), admin_clubs_path, class: "button ghost" %>
-  </div>
-</div>
-
-<div class="card">
-  <table class="table">
-    <tbody>
-      <tr><th><%= t('admin.clubs.fields.id') %></th><td><%= @club.id %></td></tr>
-      <tr><th><%= t('admin.clubs.fields.name') %></th><td><%= @club.name %></td></tr>
-      <tr><th><%= t('admin.clubs.fields.icon') %></th><td><%= club_icon(@club.icon) %></td></tr>
-      <tr><th><%= t('admin.clubs.fields.owner') %></th><td><%= @club.user.email %></td></tr>
-      <tr><th><%= t('admin.clubs.fields.members_count') %></th><td><%= @club.members.count %></td></tr>
-      <tr><th><%= t('admin.clubs.fields.matches_count') %></th><td><%= @club.matches.count %></td></tr>
-    </tbody>
-  </table>
-</div>
-
-<div class="card">
-  <h2><%= t('admin.clubs.sections.members') %></h2>
-  <ul class="member-list">
-    <% @club.members.each do |member| %>
-      <li class="member-item">
-        <span class="member-name"><%= member.name %></span>
-        <span class="member-meta"><%= member.position %></span>
-        <%= link_to t('admin.common.view'), admin_member_path(member), class: "button ghost" %>
-      </li>
+<div class="max-w-7xl mx-auto">
+  <!-- 뒤로가기 -->
+  <div class="mb-4">
+    <%= link_to admin_clubs_path, class: "btn btn-ghost btn-sm gap-2" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      <%= t('admin.common.back_to_list') %>
     <% end %>
-  </ul>
-  <% if @club.members.empty? %>
-    <div class="empty-state"><p><%= t('admin.clubs.empty.no_members') %></p></div>
-  <% end %>
-</div>
+  </div>
 
-<div class="card">
-  <h2><%= t('admin.clubs.sections.matches') %></h2>
-  <ul class="member-list">
-    <% @club.matches.each do |match| %>
-      <li class="member-item">
-        <span class="member-name"><%= match.played_on.strftime("%Y-%m-%d") %></span>
-        <span class="member-meta"><%= match.teams_count %><%= t('admin.common.teams_suffix') %></span>
-        <%= link_to t('admin.common.view'), admin_match_path(match), class: "button ghost" %>
-      </li>
+  <!-- 페이지 헤더 -->
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-base-content mb-2"><%= t('admin.clubs.show.title') %></h1>
+    <p class="text-base-content/60"><%= @club.name %> · <%= @club.user.email %></p>
+  </div>
+
+  <!-- 액션 버튼 -->
+  <div class="flex gap-3 mb-6">
+    <%= link_to edit_admin_club_path(@club), class: "btn btn-primary" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+      </svg>
+      <%= t('admin.common.edit') %>
     <% end %>
-  </ul>
-  <% if @club.matches.empty? %>
-    <div class="empty-state"><p><%= t('admin.clubs.empty.no_matches') %></p></div>
-  <% end %>
+
+    <%= button_to admin_club_path(@club), method: :delete,
+        data: { confirm: t('admin.clubs.confirms.delete') },
+        class: "btn btn-error btn-outline" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+      </svg>
+      <%= t('admin.common.delete') %>
+    <% end %>
+  </div>
+
+  <!-- 클럽 정보 카드 -->
+  <div class="card bg-base-100 shadow-xl mb-6">
+    <div class="card-body">
+      <h2 class="card-title mb-4"><%= t('admin.clubs.sections.info') %></h2>
+      <div class="overflow-x-auto">
+        <table class="table">
+          <tbody>
+            <tr><th class="w-1/4"><%= t('admin.clubs.fields.id') %></th><td><%= @club.id %></td></tr>
+            <tr><th><%= t('admin.clubs.fields.name') %></th><td><%= @club.name %></td></tr>
+            <tr><th><%= t('admin.clubs.fields.icon') %></th><td class="text-2xl"><%= club_icon(@club.icon) %></td></tr>
+            <tr><th><%= t('admin.clubs.fields.owner') %></th><td><%= @club.user.email %></td></tr>
+            <tr><th><%= t('admin.clubs.fields.members_count') %></th><td><span class="badge badge-primary"><%= @club.members.count %></span></td></tr>
+            <tr><th><%= t('admin.clubs.fields.matches_count') %></th><td><span class="badge badge-secondary"><%= @club.matches.count %></span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- 멤버 목록 카드 -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title mb-4"><%= t('admin.clubs.sections.members') %></h2>
+        <% if @club.members.any? %>
+          <div class="space-y-2">
+            <% @club.members.each do |member| %>
+              <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
+                <div>
+                  <span class="font-medium"><%= member.name %></span>
+                  <span class="badge badge-ghost badge-sm ml-2"><%= member.position %></span>
+                </div>
+                <%= link_to t('admin.common.view'), admin_member_path(member), class: "btn btn-ghost btn-xs" %>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="text-center py-8 text-base-content/50">
+            <%= t('admin.clubs.empty.no_members') %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- 경기 목록 카드 -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title mb-4"><%= t('admin.clubs.sections.matches') %></h2>
+        <% if @club.matches.any? %>
+          <div class="space-y-2">
+            <% @club.matches.each do |match| %>
+              <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
+                <div>
+                  <span class="font-medium"><%= match.played_on.strftime("%Y-%m-%d") %></span>
+                  <span class="badge badge-ghost badge-sm ml-2"><%= match.teams_count %><%= t('admin.common.teams_suffix') %></span>
+                </div>
+                <%= link_to t('admin.common.view'), admin_match_path(match), class: "btn btn-ghost btn-xs" %>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="text-center py-8 text-base-content/50">
+            <%= t('admin.clubs.empty.no_matches') %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
 </div>

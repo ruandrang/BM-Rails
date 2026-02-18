@@ -380,6 +380,15 @@ ja:
       team_vs: "チーム %{home} vs チーム %{away}"
       teams_suffix: "チーム"
       members_suffix: "人"
+      search_placeholder: "検索..."
+      all_positions: "すべてのポジション"
+      clear_search: "クリア"
+      delete: "削除"
+      edit: "編集"
+      save: "保存"
+      cancel: "キャンセル"
+      back_to_detail: "詳細に戻る"
+      pagination_info: "%{current} / %{total} ページ (全%{count}件)"
     dashboard:
       page_title: "管理者ダッシュボード - %{app_name}"
       title: "管理者ダッシュボード"
@@ -405,9 +414,20 @@ ja:
       page_title: "管理者 · ユーザー"
       title: "ユーザー一覧"
       subtitle: "全ユーザーアカウント情報"
+      search_placeholder: "メールまたは名前で検索..."
       show:
         page_title: "管理者 · ユーザー詳細"
         title: "ユーザー詳細"
+      edit:
+        page_title: "管理者 · ユーザー編集"
+        title: "ユーザー編集"
+      notices:
+        updated: "ユーザー情報が更新されました。"
+        deleted: "ユーザーが削除されました。"
+        admin_toggled: "権限が変更されました。"
+      errors:
+        cannot_change_self: "自分の権限は変更できません。"
+        cannot_delete_self: "自分のアカウントは削除できません。"
       fields:
         id: "ID"
         email: "メール"
@@ -416,26 +436,43 @@ ja:
         clubs_count: "クラブ数"
         created_at: "作成日"
       sections:
+        info: "ユーザー情報"
         clubs: "クラブ"
+      actions:
+        grant_admin: "管理者に指定"
+        revoke_admin: "管理者を解除"
+      confirms:
+        delete: "このユーザーを削除してもよろしいですか？すべてのクラブとデータが削除されます。"
       empty:
         no_clubs: "クラブがありません。"
     clubs:
       page_title: "管理者 · クラブ"
       title: "クラブ一覧"
       subtitle: "全クラブ情報"
+      search_placeholder: "クラブ名で検索..."
       show:
         page_title: "管理者 · クラブ詳細"
         title: "クラブ詳細"
+      edit:
+        page_title: "管理者 · クラブ編集"
+        title: "クラブ編集"
+      notices:
+        updated: "クラブ情報が更新されました。"
+        deleted: "クラブが削除されました。"
       fields:
         id: "ID"
         name: "クラブ名"
         owner: "オーナー"
         icon: "アイコン"
+        description: "説明"
         members_count: "メンバー数"
         matches_count: "試合数"
       sections:
+        info: "クラブ情報"
         members: "メンバー"
         matches: "試合"
+      confirms:
+        delete: "このクラブを削除してもよろしいですか？すべてのメンバーと試合データが削除されます。"
       empty:
         no_members: "メンバーがいません。"
         no_matches: "試合がありません。"
@@ -443,9 +480,16 @@ ja:
       page_title: "管理者 · メンバー"
       title: "メンバー一覧"
       subtitle: "全メンバー情報"
+      search_placeholder: "メンバー名で検索..."
       show:
         page_title: "管理者 · メンバー詳細"
         title: "メンバー詳細"
+      edit:
+        page_title: "管理者 · メンバー編集"
+        title: "メンバー編集"
+      notices:
+        updated: "メンバー情報が更新されました。"
+        deleted: "メンバーが削除されました。"
       fields:
         id: "ID"
         name: "名前"
@@ -456,7 +500,10 @@ ja:
         height: "身長"
         sort_order: "並び順"
       sections:
+        info: "メンバー情報"
         teams: "参加チーム"
+      confirms:
+        delete: "このメンバーを削除してもよろしいですか？"
       empty:
         no_teams: "参加チームがありません。"
     matches:
@@ -466,6 +513,12 @@ ja:
       show:
         page_title: "管理者 · 試合詳細"
         title: "試合詳細"
+      edit:
+        page_title: "管理者 · 試合編集"
+        title: "試合編集"
+      notices:
+        updated: "試合情報が更新されました。"
+        deleted: "試合が削除されました。"
       fields:
         id: "ID"
         club: "クラブ"
@@ -473,8 +526,11 @@ ja:
         teams_count: "チーム数"
         memo: "メモ"
       sections:
+        info: "試合情報"
         teams: "チーム"
         games: "ゲーム"
+      confirms:
+        delete: "この試合を削除してもよろしいですか？すべてのチームとゲームデータが削除されます。"
     teams:
       page_title: "管理者 · チーム"
       title: "チーム一覧"
@@ -482,6 +538,11 @@ ja:
       show:
         page_title: "管理者 · チーム詳細"
         title: "チーム詳細"
+      edit:
+        page_title: "管理者 · チーム編集"
+        title: "チーム編集"
+      notices:
+        updated: "チーム情報が更新されました。"
       fields:
         id: "ID"
         label: "ラベル"
@@ -490,6 +551,7 @@ ja:
         match_date: "試合日"
         members_count: "メンバー数"
       sections:
+        info: "チーム情報"
         members: "メンバー"
       empty:
         no_members: "メンバーがいません。"
@@ -506,6 +568,8 @@ ja:
         club: "クラブ"
         member: "メンバー"
         match_date: "試合日"
+      sections:
+        info: "チームメンバー情報"
     games:
       page_title: "管理者 · ゲーム"
       title: "ゲーム一覧"
@@ -513,6 +577,11 @@ ja:
       show:
         page_title: "管理者 · ゲーム詳細"
         title: "ゲーム詳細"
+      edit:
+        page_title: "管理者 · ゲーム編集"
+        title: "ゲーム編集"
+      notices:
+        updated: "ゲーム情報が更新されました。"
       fields:
         id: "ID"
         club: "クラブ"
@@ -521,3 +590,11 @@ ja:
         home_team: "ホームチーム"
         away_team: "アウェイチーム"
         result: "結果"
+        score: "スコア"
+      results:
+        pending: "未定"
+        home_win: "ホーム勝利"
+        away_win: "アウェイ勝利"
+        draw: "引き分け"
+      sections:
+        info: "ゲーム情報"

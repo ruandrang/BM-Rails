@@ -1,0 +1,37 @@
+<%# locals: (url:, placeholder: nil, position_filter: false) %>
+<%= form_with url: url, method: :get, local: true, class: "flex flex-wrap gap-3 mb-6" do %>
+  <div class="form-control flex-1 min-w-[200px]">
+    <div class="input-group">
+      <input type="text"
+             name="q"
+             value="<%= params[:q] %>"
+             placeholder="<%= placeholder || t('admin.common.search_placeholder') %>"
+             class="input input-bordered w-full" />
+      <button type="submit" class="btn btn-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <% if position_filter %>
+    <div class="form-control">
+      <select name="position" class="select select-bordered">
+        <option value=""><%= t('admin.common.all_positions') %></option>
+        <% Member::POSITIONS.each do |pos| %>
+          <option value="<%= pos %>" <%= 'selected' if params[:position] == pos %>><%= pos %></option>
+        <% end %>
+      </select>
+    </div>
+  <% end %>
+
+  <% if params[:q].present? || params[:position].present? %>
+    <%= link_to url, class: "btn btn-ghost" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+      <%= t('admin.common.clear_search') %>
+    <% end %>
+  <% end %>
+<% end %>

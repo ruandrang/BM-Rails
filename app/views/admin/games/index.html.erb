@@ -1,38 +1,58 @@
 <% content_for :title, t('admin.games.page_title') %>
 
-<div class="page-header">
-  <div>
-    <h1><%= t('admin.games.title') %></h1>
-    <p class="muted"><%= t('admin.games.subtitle') %></p>
+<div class="max-w-7xl mx-auto">
+  <!-- 뒤로가기 -->
+  <div class="mb-4">
+    <%= link_to admin_root_path, class: "btn btn-ghost btn-sm gap-2" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      <%= t('admin.common.dashboard') %>
+    <% end %>
   </div>
-  <div class="actions">
-    <%= link_to t('admin.common.dashboard'), admin_root_path, class: "button ghost" %>
-  </div>
-</div>
 
-<div class="card">
-  <table class="table">
-    <thead>
-      <tr>
-        <th><%= t('admin.games.fields.id') %></th>
-        <th><%= t('admin.games.fields.club') %></th>
-        <th><%= t('admin.games.fields.match_date') %></th>
-        <th><%= t('admin.games.fields.matchup') %></th>
-        <th><%= t('admin.games.fields.result') %></th>
-        <th><%= t('admin.common.view') %></th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @games.each do |game| %>
-        <tr>
-          <td><%= game.id %></td>
-          <td><%= game.match.club.name %></td>
-          <td><%= game.match.played_on.strftime("%Y-%m-%d") %></td>
-          <td><%= t('admin.common.team_vs', home: game.home_team.label, away: game.away_team.label) %></td>
-          <td><%= game.result %></td>
-          <td><%= link_to t('admin.common.view'), admin_game_path(game), class: "button ghost" %></td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
+  <!-- 페이지 헤더 -->
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-base-content mb-2"><%= t('admin.games.title') %></h1>
+    <p class="text-base-content/60"><%= t('admin.games.subtitle') %></p>
+  </div>
+
+  <!-- 테이블 카드 -->
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr>
+              <th><%= t('admin.games.fields.id') %></th>
+              <th><%= t('admin.games.fields.club') %></th>
+              <th><%= t('admin.games.fields.match_date') %></th>
+              <th><%= t('admin.games.fields.matchup') %></th>
+              <th><%= t('admin.games.fields.result') %></th>
+              <th><%= t('admin.common.view') %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @games.each do |game| %>
+              <tr class="hover">
+                <td><%= game.id %></td>
+                <td><%= game.match.club.name %></td>
+                <td><%= game.match.played_on.strftime("%Y-%m-%d") %></td>
+                <td class="font-medium"><%= t('admin.common.team_vs', home: game.home_team.label, away: game.away_team.label) %></td>
+                <td>
+                  <span class="badge <%= game.result == 'pending' ? 'badge-ghost' : 'badge-success' %>">
+                    <%= game.result %>
+                  </span>
+                </td>
+                <td>
+                  <%= link_to t('admin.common.view'), admin_game_path(game), class: "btn btn-ghost btn-xs" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <%= render 'admin/shared/pagination' %>
+    </div>
+  </div>
 </div>

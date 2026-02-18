@@ -70,7 +70,7 @@
             <%= button_to reset_all_scores_club_match_path(@club, @match),
                 method: :patch,
                 class: "btn btn-error btn-sm gap-2",
-                data: { turbo_confirm: t('matches.show.reset_all_scores_confirm', default: '정말로 모든 점수를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.') } do %>
+                data: { confirm: t('matches.show.reset_all_scores_confirm', default: '정말로 모든 점수를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.') } do %>
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
@@ -143,7 +143,7 @@
       <%= button_to shuffle_teams_club_match_path(@club, @match),
           method: :patch,
           class: "btn btn-warning gap-2 btn-sm",
-          data: { turbo_confirm: t('matches.show.shuffle_confirm') } do %>
+          data: { confirm: t('matches.show.shuffle_confirm') } do %>
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
         </svg>
@@ -305,7 +305,7 @@
                           method: :patch,
                           params: { game_id: game.id },
                           class: "btn btn-xs btn-outline btn-error",
-                          data: { turbo_confirm: t('matches.show.delete_game_confirm') } %>
+                          data: { confirm: t('matches.show.delete_game_confirm') } %>
                     <% end %>
                   </div>
                 </div>
@@ -431,7 +431,7 @@
             <%= button_to finish_match_club_match_path(@club, @match),
                 method: :patch,
                 class: "btn btn-success btn-lg px-12 text-xl italic font-black rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all",
-                data: { turbo_confirm: t('matches.show.finish_match_confirm', default: '경기를 종료하고 결과를 확정하시겠습니까? 이 작업 후에는 점수 수정이 제한됩니다.') } do %>
+                data: { confirm: t('matches.show.finish_match_confirm', default: '경기를 종료하고 결과를 확정하시겠습니까? 이 작업 후에는 점수 수정이 제한됩니다.') } do %>
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
