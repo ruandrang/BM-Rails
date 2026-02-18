@@ -1,17 +1,11 @@
 class User < ApplicationRecord
-  SUPPORTED_LOCALES = %w[ko ja en zh fr es it pt tl de].freeze
+  SUPPORTED_LOCALES = %w[ko ja en zh].freeze
   DEFAULT_LOCALE = "ko"
   SPEECH_LOCALE_BY_PREFERRED_LOCALE = {
     "ko" => "ko-KR",
     "ja" => "ja-JP",
     "en" => "en-US",
-    "zh" => "zh-CN",
-    "fr" => "fr-FR",
-    "es" => "es-ES",
-    "it" => "it-IT",
-    "pt" => "pt-BR",
-    "tl" => "fil-PH",
-    "de" => "de-DE"
+    "zh" => "zh-CN"
   }.freeze
 
   DEFAULT_GAME_MINUTES = 8

@@ -1,7 +1,9 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-02-08T22:03:54.849Z",
+  "lastUpdated": "2026-02-19T10:00:00.000Z",
   "activeFeatures": [
+    "admin-ui-improvement",
+    "multilingual-support",
     "BM-rail",
     "helpers",
     "admin",
@@ -10,8 +12,50 @@
     "javascripts",
     "concerns"
   ],
-  "primaryFeature": "BM-rail",
+  "primaryFeature": "admin-ui-improvement",
   "features": {
+    "admin-ui-improvement": {
+      "phase": "plan",
+      "phaseNumber": 1,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [
+        "Phase 1: 14개 뷰 파일 DaisyUI 스타일 통일",
+        "Phase 2: 페이지네이션 UI 추가",
+        "Phase 3: 검색/필터 기능 (선택)",
+        "Phase 4: CRUD 완성 (선택)"
+      ],
+      "documents": {
+        "plan": "docs/01-plan/features/admin-ui-improvement.plan.md"
+      },
+      "timestamps": {
+        "started": "2026-02-19T10:00:00.000Z",
+        "lastUpdated": "2026-02-19T10:00:00.000Z"
+      }
+    },
+    "multilingual-support": {
+      "phase": "completed",
+      "phaseNumber": 6,
+      "matchRate": 100,
+      "iterationCount": 1,
+      "requirements": [
+        "✓ Infrastructure (model, controller, config)",
+        "✓ Locale Files (4개 언어: ko, ja, en, zh)",
+        "✓ Auth/Settings 뷰 i18n",
+        "✓ Layout i18n",
+        "✓ Scoreboard JS i18n",
+        "✓ Clubs/Members/Matches 뷰 i18n",
+        "✓ Locale 키 커버리지 완료"
+      ],
+      "documents": {
+        "analysis": "docs/03-analysis/multilingual-support.analysis.md"
+      },
+      "timestamps": {
+        "started": "2026-02-12T00:00:00.000Z",
+        "lastUpdated": "2026-02-19T00:00:00.000Z",
+        "completed": "2026-02-19T00:00:00.000Z"
+      }
+    },
     "code-quality": {
       "phase": "completed",
       "phaseNumber": 6,

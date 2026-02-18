@@ -141,12 +141,6 @@ ko:
       ja: "日本語"
       en: "English"
       zh: "中文"
-      fr: "Français"
-      es: "Español"
-      it: "Italiano"
-      pt: "Português"
-      tl: "Filipino"
-      de: "Deutsch"
   menu:
     main: "메인 메뉴"
     my_clubs: "내 클럽"
