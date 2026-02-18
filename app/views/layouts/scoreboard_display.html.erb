@@ -1,10 +1,16 @@
 <!DOCTYPE html>
-<html lang="<%= current_locale %>">
+<html lang="<%= current_locale %>" class="dark">
   <head>
     <title><%= t("menu.connected_scoreboard", default: "Scoreboard Display") %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta charset="utf-8">
     <%= csrf_meta_tags %>
+
+    <%# Google Fonts - Inter with proper loading %>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
@@ -12,12 +18,35 @@
     <%= javascript_include_tag "application", defer: true %>
 
     <style>
-      body {
-        font-family: 'Inter', sans-serif;
-        background-color: #0A0A0A;
-        overflow: hidden;
+      /* Font stack with fallbacks for Safari/Chrome compatibility */
+      body, html {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
-      /* Hide scrollbars but allow scrolling if needed */
+
+      /* Custom colors */
+      :root {
+        --color-primary: #FF6B00;
+        --color-background-dark: #0B1120;
+        --color-panel-dark: #131B2E;
+        --color-accent-red: #EF4444;
+        --color-accent-green: #10B981;
+      }
+
+      /* Score text responsive sizing */
+      .text-score {
+        font-size: clamp(10rem, 28vw, 22rem);
+        line-height: 1;
+      }
+
+      /* Clock text responsive sizing */
+      .text-clock {
+        font-size: clamp(6rem, 14vw, 12rem);
+        line-height: 1;
+      }
+
+      /* Hide scrollbars */
       ::-webkit-scrollbar {
         display: none;
       }
@@ -25,25 +54,41 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
       }
+
+      /* Possession arrow animation */
+      .possession-active {
+        animation: pulse-glow 1.5s ease-in-out infinite;
+      }
+
+      @keyframes pulse-glow {
+        0%, 100% { opacity: 1; box-shadow: 0 0 20px currentColor; }
+        50% { opacity: 0.7; box-shadow: 0 0 10px currentColor; }
+      }
+
+      /* Team foul badge animation */
+      .team-foul-active {
+        animation: foul-pulse 1s ease-in-out infinite;
+      }
+
+      @keyframes foul-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+      }
     </style>
   </head>
-  <body class="bg-[#0A0A0A] text-white min-h-screen">
+  <body class="bg-[#0B1120] text-white min-h-screen overflow-hidden">
     <%= yield %>
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         const setupFullscreen = () => {
-          const btn = document.getElementById("fullscreen-toggle");
+          const btn = document.getElementById("fullscreen-btn");
           if (!btn) return;
-          
-          // Remove old listeners by cloning
-          const newBtn = btn.cloneNode(true);
-          btn.parentNode.replaceChild(newBtn, btn);
-          
-          newBtn.addEventListener("click", () => {
+
+          btn.addEventListener("click", () => {
             if (!document.fullscreenElement) {
               document.documentElement.requestFullscreen().catch(err => {
-                console.error(`Error enabling fullscreen mode: ${err.message}`);
+                console.error(`Error enabling fullscreen: ${err.message}`);
               });
             } else {
               if (document.exitFullscreen) {
@@ -53,14 +98,8 @@
           });
         };
 
-        // Run immediately
         setupFullscreen();
-
-        // Also run on Turbo load events if applicable
         document.addEventListener("turbo:load", setupFullscreen);
-        
-        // Backup: check periodically in case of dynamic rendering
-        setTimeout(setupFullscreen, 1000);
       });
     </script>
   </body>

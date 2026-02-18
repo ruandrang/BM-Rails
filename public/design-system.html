@@ -4,9 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Basketball Theme — Design System Mockup</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
 <style>
   /* ─── CSS Variables from Linear Theme ─── */
+  /* Dark Mode (Default) */
   :root {
     --bg-primary: #000000;
     --bg-secondary: #0A0A0B;
@@ -56,8 +58,10 @@
     --code-number: #F2994A;
     --code-comment: #5C5C66;
 
-    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-sans: 'Pretendard', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-sans-kr: 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+    --font-score: 'DSEG7', 'JetBrains Mono', monospace;
 
     --radius-sm: 4px;
     --radius-md: 6px;
@@ -70,6 +74,68 @@
     --shadow-lg: 0 4px 16px rgba(0,0,0,0.5);
     --shadow-xl: 0 8px 32px rgba(0,0,0,0.6);
     --shadow-glow: 0 0 20px rgba(255,107,0,0.15);
+
+    --nav-bg: rgba(0, 0, 0, 0.75);
+    --hero-gradient-start: #F2F2F2;
+    --hero-gradient-end: #787882;
+    --glass-bg: rgba(20, 20, 21, 0.75);
+    --glass-orb-1: rgba(255,107,0,0.4);
+    --glass-orb-2: rgba(255,133,51,0.3);
+  }
+
+  /* Light Mode */
+  [data-theme="light"] {
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #FAFAFA;
+    --bg-tertiary: #F5F5F5;
+    --bg-elevated: #FFFFFF;
+    --bg-surface: #F0F0F2;
+    --bg-surface-hover: #E8E8EC;
+    --overlay: rgba(255, 255, 255, 0.8);
+
+    --fg-primary: #1A1A1A;
+    --fg-secondary: #5C5C66;
+    --fg-tertiary: #8C8C96;
+    --fg-quaternary: #ABABAF;
+    --fg-disabled: #C8C8CC;
+
+    --border-default: rgba(0, 0, 0, 0.08);
+    --border-subtle: rgba(0, 0, 0, 0.05);
+    --border-strong: rgba(0, 0, 0, 0.15);
+
+    --accent: #E65C00;
+    --accent-hover: #CC5200;
+    --accent-secondary: #D95700;
+    --accent-dark: #B34700;
+
+    --code-bg: #F8F8FA;
+    --code-keyword: #9333EA;
+    --code-string: #059669;
+    --code-function: #2563EB;
+    --code-number: #D97706;
+    --code-comment: #9CA3AF;
+
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.08);
+    --shadow-md: 0 2px 8px rgba(0,0,0,0.1);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.12);
+    --shadow-xl: 0 8px 32px rgba(0,0,0,0.15);
+    --shadow-glow: 0 0 20px rgba(230,92,0,0.12);
+
+    --nav-bg: rgba(255, 255, 255, 0.85);
+    --hero-gradient-start: #1A1A1A;
+    --hero-gradient-end: #5C5C66;
+    --glass-bg: rgba(255, 255, 255, 0.75);
+    --glass-orb-1: rgba(255,107,0,0.25);
+    --glass-orb-2: rgba(255,133,51,0.2);
+  }
+
+  /* ─── 7-Segment Font ─── */
+  @font-face {
+    font-family: 'DSEG7';
+    src: url('/fonts/7-segment-trackmania-united.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
   }
 
   /* ─── Reset & Base ─── */
@@ -99,6 +165,10 @@
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     background-repeat: repeat;
     background-size: 128px 128px;
+    transition: opacity 0.3s ease;
+  }
+  [data-theme="light"] body::before {
+    opacity: 0.015;
   }
 
   /* ─── Hero glow ─── */
@@ -112,6 +182,10 @@
     background: radial-gradient(ellipse 80% 50% at 50% 50%, rgba(255, 107, 0, 0.12), transparent);
     pointer-events: none;
     z-index: 0;
+    transition: background 0.3s ease;
+  }
+  [data-theme="light"] .hero-glow {
+    background: radial-gradient(ellipse 80% 50% at 50% 50%, rgba(255, 107, 0, 0.08), transparent);
   }
 
   /* ─── Layout ─── */
@@ -154,10 +228,11 @@
     position: sticky; top: 0; z-index: 100;
     display: flex; align-items: center; justify-content: space-between;
     padding: 12px 32px;
-    background: rgba(0, 0, 0, 0.75);
+    background: var(--nav-bg);
     backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border-subtle);
     animation: fadeIn 0.5s ease both;
+    transition: background 0.3s ease;
   }
   .nav-logo {
     display: flex; align-items: center; gap: 10px;
@@ -175,6 +250,7 @@
     transition: all 0.15s ease;
   }
   .nav-links a:hover { color: var(--fg-primary); background: rgba(255,255,255,0.04); }
+  [data-theme="light"] .nav-links a:hover { background: rgba(0,0,0,0.04); }
   .nav-right { display: flex; align-items: center; gap: 8px; }
 
   /* ─── Section Title ─── */
@@ -239,10 +315,11 @@
     letter-spacing: -0.04em;
     line-height: 1.1;
     margin-bottom: 20px;
-    background: linear-gradient(180deg, #F2F2F2 30%, #787882 100%);
+    background: linear-gradient(180deg, var(--hero-gradient-start) 30%, var(--hero-gradient-end) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    transition: background 0.3s ease;
   }
   .hero p {
     font-size: 17px;
@@ -284,8 +361,173 @@
     font-size: 13px;
   }
   .btn-ghost:hover { background: rgba(255,255,255,0.06); color: var(--fg-primary); }
+  [data-theme="light"] .btn-ghost:hover { background: rgba(0,0,0,0.06); }
+  [data-theme="light"] .btn-secondary { background: rgba(0,0,0,0.04); }
+  [data-theme="light"] .btn-secondary:hover { background: rgba(0,0,0,0.08); }
+
+  /* Status Buttons */
+  .btn-success {
+    background: var(--status-success);
+    color: #000;
+  }
+  .btn-success:hover { background: #22C55E; transform: translateY(-1px); box-shadow: 0 0 20px rgba(74,222,128,0.3); }
+  .btn-warning {
+    background: var(--status-warning);
+    color: #000;
+  }
+  .btn-warning:hover { background: #D97706; transform: translateY(-1px); box-shadow: 0 0 20px rgba(245,158,11,0.3); }
+  .btn-error {
+    background: var(--status-error);
+    color: #fff;
+  }
+  .btn-error:hover { background: #DC2626; transform: translateY(-1px); box-shadow: 0 0 20px rgba(239,68,68,0.3); }
+  .btn-info {
+    background: #3B82F6;
+    color: #fff;
+  }
+  .btn-info:hover { background: #2563EB; transform: translateY(-1px); box-shadow: 0 0 20px rgba(59,130,246,0.3); }
+
+  /* Outline Buttons */
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--fg-primary);
+  }
+  .btn-outline:hover { background: rgba(255,255,255,0.06); border-color: var(--fg-tertiary); }
+  [data-theme="light"] .btn-outline:hover { background: rgba(0,0,0,0.04); }
+  .btn-outline-primary {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+  }
+  .btn-outline-primary:hover { background: var(--accent); color: #fff; }
+  .btn-outline-success {
+    background: transparent;
+    border: 1px solid var(--status-success);
+    color: var(--status-success);
+  }
+  .btn-outline-success:hover { background: var(--status-success); color: #000; }
+  .btn-outline-error {
+    background: transparent;
+    border: 1px solid var(--status-error);
+    color: var(--status-error);
+  }
+  .btn-outline-error:hover { background: var(--status-error); color: #fff; }
+
+  /* Score/Counter Buttons */
+  .btn-score {
+    width: 56px; height: 56px;
+    padding: 0;
+    font-size: 24px;
+    font-weight: 700;
+    border-radius: var(--radius-lg);
+    background: var(--bg-surface);
+    border: 2px solid var(--border-default);
+    color: var(--fg-primary);
+  }
+  .btn-score:hover { background: var(--bg-surface-hover); border-color: var(--accent); }
+  .btn-score:active { transform: scale(0.95); }
+  .btn-score-plus {
+    background: rgba(74,222,128,0.15);
+    border-color: var(--status-success);
+    color: var(--status-success);
+  }
+  .btn-score-plus:hover { background: var(--status-success); color: #000; }
+  .btn-score-minus {
+    background: rgba(239,68,68,0.15);
+    border-color: var(--status-error);
+    color: var(--status-error);
+  }
+  .btn-score-minus:hover { background: var(--status-error); color: #fff; }
+
+  /* Icon Buttons */
+  .btn-icon {
+    width: 36px; height: 36px;
+    padding: 0;
+    border-radius: var(--radius-md);
+  }
+  .btn-icon.btn-sm { width: 28px; height: 28px; }
+  .btn-icon.btn-xs { width: 24px; height: 24px; }
+  .btn-icon.btn-lg { width: 44px; height: 44px; }
+
+  /* Circle Buttons */
+  .btn-circle {
+    border-radius: 9999px;
+    padding: 0;
+    width: 36px; height: 36px;
+  }
+  .btn-circle.btn-sm { width: 28px; height: 28px; }
+  .btn-circle.btn-lg { width: 48px; height: 48px; }
+  .btn-circle.btn-xl { width: 64px; height: 64px; font-size: 24px; }
+
+  /* Soft/Subtle Buttons */
+  .btn-soft-primary {
+    background: rgba(255,107,0,0.15);
+    color: var(--accent);
+    border: none;
+  }
+  .btn-soft-primary:hover { background: rgba(255,107,0,0.25); }
+  .btn-soft-success {
+    background: rgba(74,222,128,0.15);
+    color: var(--status-success);
+    border: none;
+  }
+  .btn-soft-success:hover { background: rgba(74,222,128,0.25); }
+  .btn-soft-error {
+    background: rgba(239,68,68,0.15);
+    color: var(--status-error);
+    border: none;
+  }
+  .btn-soft-error:hover { background: rgba(239,68,68,0.25); }
+  .btn-soft-info {
+    background: rgba(59,130,246,0.15);
+    color: #3B82F6;
+    border: none;
+  }
+  .btn-soft-info:hover { background: rgba(59,130,246,0.25); }
+
+  /* Loading State */
+  .btn-loading {
+    pointer-events: none;
+    opacity: 0.7;
+  }
+  .btn-loading::after {
+    content: '';
+    width: 14px; height: 14px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    margin-left: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Disabled State */
+  .btn:disabled, .btn.btn-disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: not-allowed;
+  }
+
+  /* Button Group */
+  .btn-group {
+    display: inline-flex;
+  }
+  .btn-group .btn {
+    border-radius: 0;
+  }
+  .btn-group .btn:first-child { border-radius: var(--radius-md) 0 0 var(--radius-md); }
+  .btn-group .btn:last-child { border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+  .btn-group .btn:not(:last-child) { border-right: 1px solid rgba(0,0,0,0.1); }
+
+  /* Size Variants */
+  .btn-lg { height: 44px; padding: 0 24px; font-size: 16px; }
   .btn-sm { height: 28px; padding: 0 10px; font-size: 12px; }
   .btn-xs { height: 24px; padding: 0 8px; font-size: 11px; border-radius: var(--radius-sm); }
+
+  /* Wide Button */
+  .btn-wide { min-width: 200px; }
+  .btn-block { width: 100%; }
 
   /* ─── Color Palette Grid ─── */
   .palette-grid {
@@ -402,6 +644,8 @@
   }
   .input::placeholder { color: var(--fg-quaternary); }
   .input:focus { border-color: var(--accent); background: rgba(255,255,255,0.06); box-shadow: 0 0 0 3px rgba(255,107,0,0.15); }
+  [data-theme="light"] .input { background: rgba(0,0,0,0.03); }
+  [data-theme="light"] .input:focus { background: rgba(0,0,0,0.02); box-shadow: 0 0 0 3px rgba(230,92,0,0.1); }
 
   /* ─── Badges ─── */
   .badge {
@@ -412,6 +656,7 @@
     background: rgba(255,255,255,0.06);
     color: var(--fg-secondary);
   }
+  [data-theme="light"] .badge { background: rgba(0,0,0,0.06); }
   .badge-dot {
     width: 6px; height: 6px;
     border-radius: 50%;
@@ -441,7 +686,9 @@
     color: var(--fg-primary);
     border-bottom: 1px solid rgba(255,255,255,0.04);
   }
+  [data-theme="light"] td { border-bottom-color: rgba(0,0,0,0.04); }
   tr:hover td { background: rgba(255,255,255,0.02); }
+  [data-theme="light"] tr:hover td { background: rgba(0,0,0,0.02); }
 
   /* ─── Issue Row (Linear style) ─── */
   .issue-list { display: flex; flex-direction: column; }
@@ -453,6 +700,7 @@
     cursor: pointer;
   }
   .issue-row:hover { background: rgba(255,255,255,0.03); }
+  [data-theme="light"] .issue-row:hover { background: rgba(0,0,0,0.03); }
   .issue-id {
     font-family: var(--font-mono);
     font-size: 12px;
@@ -529,6 +777,7 @@
     overflow: hidden;
     box-shadow: var(--shadow-xl);
   }
+  [data-theme="light"] .cmd-menu { border-color: rgba(0,0,0,0.1); }
   .cmd-input-wrap {
     display: flex; align-items: center; gap: 10px;
     padding: 14px 16px;
@@ -556,6 +805,7 @@
     color: var(--fg-primary);
   }
   .cmd-item:hover, .cmd-item.active { background: rgba(255,255,255,0.06); }
+  [data-theme="light"] .cmd-item:hover, [data-theme="light"] .cmd-item.active { background: rgba(0,0,0,0.06); }
   .cmd-item svg { color: var(--fg-tertiary); flex-shrink: 0; }
   .cmd-item-shortcut {
     margin-left: auto;
@@ -573,6 +823,7 @@
     color: var(--fg-tertiary);
     font-weight: 500;
   }
+  [data-theme="light"] .kbd { background: rgba(0,0,0,0.06); }
 
   /* ─── Code Block ─── */
   .code-block {
@@ -646,6 +897,8 @@
   }
   .sidebar-item:hover { background: rgba(255,255,255,0.04); color: var(--fg-primary); }
   .sidebar-item.active { background: rgba(255,255,255,0.08); color: var(--fg-primary); }
+  [data-theme="light"] .sidebar-item:hover { background: rgba(0,0,0,0.04); }
+  [data-theme="light"] .sidebar-item.active { background: rgba(0,0,0,0.08); }
   .sidebar-item svg { flex-shrink: 0; }
   .sidebar-count {
     margin-left: auto;
@@ -689,6 +942,7 @@
     padding: 20px;
     transition: all 0.2s ease;
   }
+  [data-theme="light"] .card { border-color: rgba(0,0,0,0.06); }
   .card:hover {
     background: var(--bg-surface);
     border-color: var(--border-default);
@@ -831,18 +1085,23 @@
     border-radius: var(--radius-xl);
     overflow: hidden;
     background: linear-gradient(135deg, rgba(255,107,0,0.2) 0%, rgba(255,133,51,0.1) 50%, rgba(255,107,0,0.15) 100%);
+    transition: background 0.3s ease;
+  }
+  [data-theme="light"] .glass-demo {
+    background: linear-gradient(135deg, rgba(255,107,0,0.12) 0%, rgba(255,133,51,0.06) 50%, rgba(255,107,0,0.1) 100%);
   }
   .glass-card {
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(20, 20, 21, 0.75);
+    background: var(--glass-bg);
     backdrop-filter: blur(16px);
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid var(--border-default);
     border-radius: var(--radius-xl);
     padding: 24px 32px;
     text-align: center;
     box-shadow: var(--shadow-xl);
+    transition: background 0.3s ease;
   }
   .glass-card h3 {
     font-size: 16px; font-weight: 600;
@@ -859,13 +1118,34 @@
   }
   .glass-orb-1 {
     width: 200px; height: 200px;
-    background: rgba(255,107,0,0.4);
+    background: var(--glass-orb-1);
     top: -40px; left: -20px;
+    transition: background 0.3s ease;
   }
   .glass-orb-2 {
     width: 150px; height: 150px;
-    background: rgba(255,133,51,0.3);
+    background: var(--glass-orb-2);
     bottom: -30px; right: -10px;
+    transition: background 0.3s ease;
+  }
+
+  /* ─── Theme Toggle ─── */
+  #theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+  }
+  .theme-icon-dark { display: block; }
+  .theme-icon-light { display: none; }
+  [data-theme="light"] .theme-icon-dark { display: none; }
+  [data-theme="light"] .theme-icon-light { display: block; }
+
+  /* ─── Smooth Theme Transitions ─── */
+  body, .nav, .comp-card, .card, .sidebar-demo, .dashboard, .modal-demo,
+  .cmd-menu, .code-block, .swatch-info, .input, .badge, .issue-row,
+  .sidebar-item, .cmd-item, .btn-secondary, .btn-ghost {
+    transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
   }
 
   /* ─── Footer ─── */
@@ -910,6 +1190,14 @@
     <a href="#dashboard-section">Dashboard</a>
   </div>
   <div class="nav-right">
+    <button id="theme-toggle" class="btn btn-ghost btn-sm" title="Toggle theme">
+      <svg class="theme-icon-dark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+      <svg class="theme-icon-light" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
     <button class="btn btn-ghost btn-sm">Log in</button>
     <button class="btn btn-primary btn-sm">Sign up</button>
   </div>
@@ -1012,45 +1300,141 @@
     <div class="animate-in">
       <div class="section-label">02 · Typography</div>
       <div class="section-title">Type Scale</div>
-      <div class="section-desc">Inter 폰트 패밀리를 기반으로, 11px부터 56px까지의 타이프 스케일과 웨이트 시스템입니다.</div>
+      <div class="section-desc">Pretendard 한글 폰트와 DSEG7 스코어보드 폰트를 기반으로 한 타이포그래피 시스템입니다.</div>
     </div>
 
-    <div class="animate-in delay-1">
+    <!-- 7-Segment / Scoreboard Font -->
+    <div class="palette-group animate-in delay-1">
+      <div class="palette-group-title">7-Segment · Scoreboard Display</div>
+      <div style="background:var(--bg-surface);border-radius:var(--radius-xl);padding:24px;border:1px solid var(--border-default);margin-bottom:24px">
+        <div style="display:flex;align-items:center;justify-content:center;gap:32px;flex-wrap:wrap">
+          <div style="text-align:center">
+            <div style="font-family:var(--font-score);font-size:96px;color:#00ff00;line-height:1;text-shadow:0 0 20px rgba(0,255,0,0.5)">10:00</div>
+            <div style="font-size:11px;color:var(--fg-tertiary);margin-top:8px">Game Clock</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-family:var(--font-score);font-size:120px;color:#ffa500;line-height:1;text-shadow:0 0 30px rgba(255,165,0,0.4)">88</div>
+            <div style="font-size:11px;color:var(--fg-tertiary);margin-top:8px">Score Display</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-family:var(--font-score);font-size:72px;color:#00ff00;line-height:1;text-shadow:0 0 15px rgba(0,255,0,0.4)">24</div>
+            <div style="font-size:11px;color:var(--fg-tertiary);margin-top:8px">Shot Clock</div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:center;gap:16px;margin-top:24px;flex-wrap:wrap">
+          <div style="font-family:var(--font-score);font-size:48px;color:var(--fg-primary)">1234567890</div>
+        </div>
+        <div style="text-align:center;margin-top:16px">
+          <code style="font-family:var(--font-mono);font-size:12px;color:var(--fg-tertiary);background:var(--bg-tertiary);padding:4px 8px;border-radius:4px">font-family: var(--font-score)</code>
+        </div>
+      </div>
+    </div>
+
+    <!-- Korean Font Scale -->
+    <div class="palette-group animate-in delay-2">
+      <div class="palette-group-title">Korean · Pretendard</div>
       <div class="typo-row">
-        <div class="typo-meta">Hero / 56px<br>Weight 700</div>
-        <div class="typo-sample" style="font-size:56px;font-weight:700;letter-spacing:-0.04em;line-height:1.1">The product system</div>
+        <div class="typo-meta">Hero / 56px<br>Weight 900</div>
+        <div class="typo-sample" style="font-family:var(--font-sans-kr);font-size:56px;font-weight:900;letter-spacing:-0.04em;line-height:1.1">농구 점수판</div>
       </div>
       <div class="typo-row">
         <div class="typo-meta">6xl / 48px<br>Weight 700</div>
-        <div class="typo-sample" style="font-size:48px;font-weight:700;letter-spacing:-0.04em;line-height:1.15">Planning & Building</div>
+        <div class="typo-sample" style="font-family:var(--font-sans-kr);font-size:48px;font-weight:700;letter-spacing:-0.03em;line-height:1.15">경기 결과 기록</div>
       </div>
       <div class="typo-row">
-        <div class="typo-meta">4xl / 32px<br>Weight 600</div>
-        <div class="typo-sample" style="font-size:32px;font-weight:600;letter-spacing:-0.02em;line-height:1.2">Section Heading</div>
+        <div class="typo-meta">4xl / 32px<br>Weight 700</div>
+        <div class="typo-sample" style="font-family:var(--font-sans-kr);font-size:32px;font-weight:700;letter-spacing:-0.02em;line-height:1.2">TEAM A vs TEAM B</div>
       </div>
       <div class="typo-row">
-        <div class="typo-meta">2xl / 20px<br>Weight 600</div>
-        <div class="typo-sample" style="font-size:20px;font-weight:600;letter-spacing:-0.02em">Component Title</div>
+        <div class="typo-meta">2xl / 24px<br>Weight 600</div>
+        <div class="typo-sample" style="font-family:var(--font-sans-kr);font-size:24px;font-weight:600;letter-spacing:-0.01em">1쿼터 · 남은시간 08:45</div>
+      </div>
+      <div class="typo-row">
+        <div class="typo-meta">xl / 20px<br>Weight 600</div>
+        <div class="typo-sample" style="font-family:var(--font-sans-kr);font-size:20px;font-weight:600">선수 명단 및 통계</div>
       </div>
       <div class="typo-row">
         <div class="typo-meta">lg / 16px<br>Weight 500</div>
-        <div class="typo-sample" style="font-size:16px;font-weight:500">Body Large — descriptive paragraph text</div>
+        <div class="typo-sample" style="font-family:var(--font-sans-kr);font-size:16px;font-weight:500">본문 텍스트 — 경기 상세 정보를 표시합니다</div>
       </div>
       <div class="typo-row">
         <div class="typo-meta">base / 14px<br>Weight 400</div>
-        <div class="typo-sample" style="font-size:14px;font-weight:400;color:var(--fg-secondary)">Body — default interface text used across the application</div>
+        <div class="typo-sample" style="font-family:var(--font-sans-kr);font-size:14px;font-weight:400;color:var(--fg-secondary)">기본 인터페이스 텍스트 — 앱 전반에서 사용되는 기본 텍스트 스타일</div>
       </div>
       <div class="typo-row">
         <div class="typo-meta">sm / 12px<br>Weight 500</div>
-        <div class="typo-sample" style="font-size:12px;font-weight:500;color:var(--fg-tertiary)">Caption — metadata, timestamps, secondary information</div>
+        <div class="typo-sample" style="font-family:var(--font-sans-kr);font-size:12px;font-weight:500;color:var(--fg-tertiary)">캡션 — 메타데이터, 타임스탬프, 부가 정보</div>
+      </div>
+      <div class="typo-row" style="border-bottom:none">
+        <div class="typo-meta">xs / 11px<br>Weight 600</div>
+        <div class="typo-sample" style="font-family:var(--font-sans-kr);font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--fg-tertiary)">섹션 라벨 · 오버라인</div>
+      </div>
+    </div>
+
+    <!-- English Font Scale -->
+    <div class="palette-group animate-in delay-3">
+      <div class="palette-group-title">English · Inter + Pretendard</div>
+      <div class="typo-row">
+        <div class="typo-meta">Hero / 56px<br>Weight 700</div>
+        <div class="typo-sample" style="font-size:56px;font-weight:700;letter-spacing:-0.04em;line-height:1.1">Basketball Manager</div>
       </div>
       <div class="typo-row">
-        <div class="typo-meta">xs / 11px<br>Weight 600</div>
-        <div class="typo-sample" style="font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--fg-tertiary)">Section Label · Overline</div>
+        <div class="typo-meta">4xl / 32px<br>Weight 600</div>
+        <div class="typo-sample" style="font-size:32px;font-weight:600;letter-spacing:-0.02em;line-height:1.2">Game Statistics</div>
+      </div>
+      <div class="typo-row">
+        <div class="typo-meta">2xl / 20px<br>Weight 600</div>
+        <div class="typo-sample" style="font-size:20px;font-weight:600;letter-spacing:-0.02em">Quarter 1 · Score Update</div>
+      </div>
+      <div class="typo-row">
+        <div class="typo-meta">base / 14px<br>Weight 400</div>
+        <div class="typo-sample" style="font-size:14px;font-weight:400;color:var(--fg-secondary)">Body text — default interface text used across the application</div>
       </div>
       <div class="typo-row" style="border-bottom:none">
         <div class="typo-meta">Mono / 13px<br>Weight 400</div>
-        <div class="typo-sample" style="font-family:var(--font-mono);font-size:13px;color:var(--fg-secondary)">const issueId = "ENG-2703";</div>
+        <div class="typo-sample" style="font-family:var(--font-mono);font-size:13px;color:var(--fg-secondary)">const score = { home: 88, away: 76 };</div>
+      </div>
+    </div>
+
+    <!-- Font Weights -->
+    <div class="palette-group animate-in delay-4">
+      <div class="palette-group-title">Font Weights</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));gap:12px">
+        <div style="background:var(--bg-surface);padding:16px;border-radius:var(--radius-lg);border:1px solid var(--border-subtle)">
+          <div style="font-family:var(--font-sans-kr);font-size:24px;font-weight:400;margin-bottom:4px">가나다 Aa</div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--fg-tertiary)">Regular 400</div>
+        </div>
+        <div style="background:var(--bg-surface);padding:16px;border-radius:var(--radius-lg);border:1px solid var(--border-subtle)">
+          <div style="font-family:var(--font-sans-kr);font-size:24px;font-weight:500;margin-bottom:4px">가나다 Aa</div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--fg-tertiary)">Medium 500</div>
+        </div>
+        <div style="background:var(--bg-surface);padding:16px;border-radius:var(--radius-lg);border:1px solid var(--border-subtle)">
+          <div style="font-family:var(--font-sans-kr);font-size:24px;font-weight:600;margin-bottom:4px">가나다 Aa</div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--fg-tertiary)">SemiBold 600</div>
+        </div>
+        <div style="background:var(--bg-surface);padding:16px;border-radius:var(--radius-lg);border:1px solid var(--border-subtle)">
+          <div style="font-family:var(--font-sans-kr);font-size:24px;font-weight:700;margin-bottom:4px">가나다 Aa</div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--fg-tertiary)">Bold 700</div>
+        </div>
+        <div style="background:var(--bg-surface);padding:16px;border-radius:var(--radius-lg);border:1px solid var(--border-subtle)">
+          <div style="font-family:var(--font-sans-kr);font-size:24px;font-weight:900;margin-bottom:4px">가나다 Aa</div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--fg-tertiary)">Black 900</div>
+        </div>
+        <div style="background:var(--bg-surface);padding:16px;border-radius:var(--radius-lg);border:1px solid var(--border-subtle)">
+          <div style="font-family:var(--font-score);font-size:32px;color:var(--accent);margin-bottom:4px">12:34</div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--fg-tertiary)">DSEG7 Score</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Font Stack Reference -->
+    <div class="animate-in delay-5" style="margin-top:24px">
+      <div style="background:var(--code-bg);border:1px solid var(--border-default);border-radius:var(--radius-lg);padding:16px 20px;font-family:var(--font-mono);font-size:12px;line-height:1.8">
+        <div><span style="color:var(--code-comment)">/* CSS Variables */</span></div>
+        <div><span style="color:var(--code-keyword)">--font-sans:</span> <span style="color:var(--code-string)">'Pretendard', 'Inter', -apple-system, sans-serif</span>;</div>
+        <div><span style="color:var(--code-keyword)">--font-sans-kr:</span> <span style="color:var(--code-string)">'Pretendard', 'Noto Sans KR', sans-serif</span>;</div>
+        <div><span style="color:var(--code-keyword)">--font-mono:</span> <span style="color:var(--code-string)">'JetBrains Mono', 'SF Mono', monospace</span>;</div>
+        <div><span style="color:var(--code-keyword)">--font-score:</span> <span style="color:var(--code-string)">'DSEG7', 'JetBrains Mono', monospace</span>;</div>
       </div>
     </div>
   </section>
@@ -1064,18 +1448,133 @@
     </div>
 
     <div class="comp-grid">
-      <!-- Buttons -->
-      <div class="comp-card animate-in delay-1">
+      <!-- Buttons - Full Width -->
+      <div class="comp-card animate-in delay-1" style="grid-column: 1 / -1;">
         <div class="comp-card-title">Buttons</div>
-        <div class="flex gap-2 mb-4" style="flex-wrap:wrap">
-          <button class="btn btn-primary">Primary</button>
-          <button class="btn btn-secondary">Secondary</button>
-          <button class="btn btn-ghost">Ghost</button>
+
+        <!-- Primary & Status Buttons -->
+        <div class="mb-4">
+          <div style="font-size:11px;color:var(--fg-tertiary);margin-bottom:8px;font-weight:500">PRIMARY & STATUS</div>
+          <div class="flex gap-2" style="flex-wrap:wrap">
+            <button class="btn btn-primary">Primary</button>
+            <button class="btn btn-success">Success</button>
+            <button class="btn btn-warning">Warning</button>
+            <button class="btn btn-error">Error</button>
+            <button class="btn btn-info">Info</button>
+          </div>
         </div>
-        <div class="flex gap-2" style="flex-wrap:wrap">
-          <button class="btn btn-primary btn-sm">Small</button>
-          <button class="btn btn-secondary btn-sm">Small</button>
-          <button class="btn btn-xs" style="background:rgba(255,255,255,0.06)">XS Tag</button>
+
+        <!-- Secondary & Ghost -->
+        <div class="mb-4">
+          <div style="font-size:11px;color:var(--fg-tertiary);margin-bottom:8px;font-weight:500">SECONDARY & GHOST</div>
+          <div class="flex gap-2" style="flex-wrap:wrap">
+            <button class="btn btn-secondary">Secondary</button>
+            <button class="btn btn-ghost">Ghost</button>
+            <button class="btn btn-outline">Outline</button>
+          </div>
+        </div>
+
+        <!-- Outline Variants -->
+        <div class="mb-4">
+          <div style="font-size:11px;color:var(--fg-tertiary);margin-bottom:8px;font-weight:500">OUTLINE VARIANTS</div>
+          <div class="flex gap-2" style="flex-wrap:wrap">
+            <button class="btn btn-outline-primary">Outline Primary</button>
+            <button class="btn btn-outline-success">Outline Success</button>
+            <button class="btn btn-outline-error">Outline Error</button>
+          </div>
+        </div>
+
+        <!-- Soft/Subtle Variants -->
+        <div class="mb-4">
+          <div style="font-size:11px;color:var(--fg-tertiary);margin-bottom:8px;font-weight:500">SOFT / SUBTLE</div>
+          <div class="flex gap-2" style="flex-wrap:wrap">
+            <button class="btn btn-soft-primary">Soft Primary</button>
+            <button class="btn btn-soft-success">Soft Success</button>
+            <button class="btn btn-soft-error">Soft Error</button>
+            <button class="btn btn-soft-info">Soft Info</button>
+          </div>
+        </div>
+
+        <!-- Sizes -->
+        <div class="mb-4">
+          <div style="font-size:11px;color:var(--fg-tertiary);margin-bottom:8px;font-weight:500">SIZES</div>
+          <div class="flex gap-2 items-center" style="flex-wrap:wrap">
+            <button class="btn btn-primary btn-lg">Large</button>
+            <button class="btn btn-primary">Default</button>
+            <button class="btn btn-primary btn-sm">Small</button>
+            <button class="btn btn-primary btn-xs">XS</button>
+          </div>
+        </div>
+
+        <!-- Score / Counter Buttons -->
+        <div class="mb-4">
+          <div style="font-size:11px;color:var(--fg-tertiary);margin-bottom:8px;font-weight:500">SCORE / COUNTER (점수 입력용)</div>
+          <div class="flex gap-3 items-center" style="flex-wrap:wrap">
+            <button class="btn btn-score btn-score-minus">−</button>
+            <button class="btn btn-score">0</button>
+            <button class="btn btn-score btn-score-plus">+</button>
+            <div style="width:16px"></div>
+            <button class="btn btn-score">1</button>
+            <button class="btn btn-score">2</button>
+            <button class="btn btn-score">3</button>
+          </div>
+        </div>
+
+        <!-- Icon & Circle Buttons -->
+        <div class="mb-4">
+          <div style="font-size:11px;color:var(--fg-tertiary);margin-bottom:8px;font-weight:500">ICON & CIRCLE</div>
+          <div class="flex gap-2 items-center" style="flex-wrap:wrap">
+            <button class="btn btn-icon btn-secondary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <button class="btn btn-icon btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <button class="btn btn-icon btn-error">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <div style="width:8px"></div>
+            <button class="btn btn-circle btn-secondary btn-sm">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <button class="btn btn-circle btn-secondary btn-sm">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+            <button class="btn btn-circle btn-primary btn-lg">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </button>
+            <button class="btn btn-circle btn-error btn-xl">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Button Group -->
+        <div class="mb-4">
+          <div style="font-size:11px;color:var(--fg-tertiary);margin-bottom:8px;font-weight:500">BUTTON GROUP</div>
+          <div class="flex gap-4 items-center" style="flex-wrap:wrap">
+            <div class="btn-group">
+              <button class="btn btn-secondary btn-sm">Left</button>
+              <button class="btn btn-secondary btn-sm">Center</button>
+              <button class="btn btn-secondary btn-sm">Right</button>
+            </div>
+            <div class="btn-group">
+              <button class="btn btn-primary btn-sm">1Q</button>
+              <button class="btn btn-secondary btn-sm">2Q</button>
+              <button class="btn btn-secondary btn-sm">3Q</button>
+              <button class="btn btn-secondary btn-sm">4Q</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- States -->
+        <div>
+          <div style="font-size:11px;color:var(--fg-tertiary);margin-bottom:8px;font-weight:500">STATES</div>
+          <div class="flex gap-2 items-center" style="flex-wrap:wrap">
+            <button class="btn btn-primary btn-loading">Loading</button>
+            <button class="btn btn-secondary" disabled>Disabled</button>
+            <button class="btn btn-primary btn-wide">Wide Button</button>
+          </div>
         </div>
       </div>
 
@@ -1440,6 +1939,33 @@
   </footer>
 
 </div>
+
+<script>
+  // Theme Toggle Functionality
+  (function() {
+    const themeToggle = document.getElementById('theme-toggle');
+    const html = document.documentElement;
+
+    // Check for saved theme preference or default to dark
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') {
+      html.setAttribute('data-theme', 'light');
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+      if (newTheme === 'light') {
+        html.setAttribute('data-theme', 'light');
+      } else {
+        html.removeAttribute('data-theme');
+      }
+
+      localStorage.setItem('theme', newTheme);
+    });
+  })();
+</script>
 
 </body>
 </html>

@@ -14,7 +14,7 @@ class ScoreboardChannel < ApplicationCable::Channel
       return
     end
     stream_from(stream_name)
-    transmit(
+    transmit({
       type: "state",
       payload: ScoreboardStore.fetch(
         @match_id,
@@ -23,7 +23,7 @@ class ScoreboardChannel < ApplicationCable::Channel
         possession_switch_pattern: current_user.possession_switch_pattern,
         regular_quarters: regular_quarters_for_match(@match_id)
       )
-    )
+    })
   end
 
   def update(data)

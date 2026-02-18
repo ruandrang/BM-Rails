@@ -32,6 +32,11 @@ class Match < ApplicationRecord
     games.any? && games.all? { |g| g.result != "pending" }
   end
 
+  # 경기가 중단된 상태인지 확인 (점수가 있지만 result가 pending인 게임이 있는 경우)
+  def paused?
+    games.any? { |g| g.result == "pending" && (g.home_score.to_i > 0 || g.away_score.to_i > 0) }
+  end
+
   def regular_quarters_count
     return 4 unless supports_regular_quarters_column?
 

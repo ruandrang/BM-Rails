@@ -22,10 +22,16 @@ class Game < ApplicationRecord
   end
 
   # 점수를 업데이트하고 결과도 자동으로 결정
-  def update_scores(home_score_value, away_score_value)
+  # skip_result: true면 result를 업데이트하지 않음 (저장하고 중단하기용)
+  def update_scores(home_score_value, away_score_value, skip_result: false)
+    Rails.logger.info "[Game#update_scores] skip_result=#{skip_result}, result_before=#{result}"
     self.home_score = home_score_value
     self.away_score = away_score_value
-    update_result_from_scores
+    unless skip_result
+      Rails.logger.info "[Game#update_scores] Calling update_result_from_scores"
+      update_result_from_scores
+    end
+    Rails.logger.info "[Game#update_scores] result_after=#{result}"
     save
   end
 end

@@ -1,2 +1,400 @@
+/* === 폰트 임포트 (최상단에 위치해야 함) === */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css');
+
 @import "tailwindcss";
 @plugin "daisyui";
+
+/* ============================================
+   BM-Rail 통일 디자인 시스템
+   DaisyUI v5 + Tailwind CSS v4 기반
+   ============================================ */
+
+/* === 기본 폰트 설정 === */
+html {
+  font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+}
+
+/* === 7세그먼트 폰트 (스코어보드용) === */
+@font-face {
+  font-family: 'DSEG7';
+  src: url('/fonts/7-segment-trackmania-united.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* === 점수 입력용 버튼 (순수 CSS - Tailwind v4에서 DaisyUI 클래스 @apply 불가) === */
+.btn-score-plus {
+  width: 3.5rem;
+  height: 3.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: oklch(var(--su) / 0.15);
+  border: 2px solid oklch(var(--su));
+  color: oklch(var(--su));
+}
+.btn-score-plus:hover {
+  background-color: oklch(var(--su));
+  color: oklch(var(--suc));
+}
+
+.btn-score-minus {
+  width: 3.5rem;
+  height: 3.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: oklch(var(--er) / 0.15);
+  border: 2px solid oklch(var(--er));
+  color: oklch(var(--er));
+}
+.btn-score-minus:hover {
+  background-color: oklch(var(--er));
+  color: oklch(var(--erc));
+}
+
+/* === 에러 텍스트 === */
+.error-text {
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  color: oklch(var(--er));
+}
+
+/* === 타이포그래피 통일 스타일 === */
+.page-title {
+  @apply text-3xl font-bold;
+}
+
+.section-title {
+  @apply text-xl font-semibold;
+}
+
+.card-title-unified {
+  @apply text-lg font-medium;
+}
+
+.text-body {
+  @apply text-base text-base-content;
+}
+
+.text-description {
+  @apply text-sm text-base-content/60;
+}
+
+/* === 레이아웃 통일 스타일 === */
+.page-container {
+  @apply max-w-7xl mx-auto;
+}
+
+.page-container-narrow {
+  @apply max-w-2xl mx-auto;
+}
+
+.page-container-medium {
+  @apply max-w-4xl mx-auto;
+}
+
+.section-spacing {
+  @apply mb-8;
+}
+
+.grid-unified {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+}
+
+/* === 플래시 메시지 애니메이션 === */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.alert {
+  animation: slideDown 0.3s ease-out;
+}
+
+/* === 스코어보드 색상 변수 (DaisyUI 테마 활용) === */
+:root {
+  --scoreboard-bg: #0a0a0a;
+  --scoreboard-score: #ffa500;
+  --scoreboard-timer: #00ff00;
+  --scoreboard-shot: #00ff00;
+  --scoreboard-foul: #dc2626;
+}
+
+/* === 스코어보드 컨트롤 목업 색상 === */
+:root {
+  --ctrl-primary: #FF6B35;
+  --ctrl-primary-dark: #E55A2B;
+  --ctrl-secondary: #22c55e;
+  --ctrl-secondary-dark: #15803d;
+  --ctrl-background: #f3f4f6;
+  --ctrl-surface: #ffffff;
+  --ctrl-dark-surface: #1f2937;
+  --ctrl-text-main: #111827;
+  --ctrl-text-muted: #6b7280;
+}
+
+/* === 스코어보드 컨트롤 전용 유틸리티 클래스 === */
+.ctrl-bg { background-color: var(--ctrl-background); }
+.ctrl-surface { background-color: var(--ctrl-surface); }
+.ctrl-primary { color: var(--ctrl-primary); }
+.ctrl-primary-bg { background-color: var(--ctrl-primary); }
+.ctrl-text { color: var(--ctrl-text-main); }
+.ctrl-text-muted { color: var(--ctrl-text-muted); }
+
+/* 점수 버튼 (목업 스타일 - 회색 기본, 녹색 호버) */
+.score-btn-mockup {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 0.75rem;
+  background-color: #f9fafb;
+  color: #374151;
+  border: 2px solid #e5e7eb;
+  font-weight: 900;
+  font-size: 1.25rem;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.score-btn-mockup:hover {
+  background-color: #22c55e;
+  color: white;
+  border-color: #22c55e;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.3);
+}
+.score-btn-mockup:active {
+  transform: translateY(0);
+}
+
+/* 타이머 버튼 (목업 스타일) */
+.timer-btn-gray {
+  height: 3.5rem;
+  border-radius: 0.75rem;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+  font-weight: 700;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.timer-btn-gray:hover {
+  background-color: #f3f4f6;
+  transform: scale(1.02);
+}
+
+.timer-btn-green {
+  height: 3.5rem;
+  border-radius: 0.75rem;
+  background-color: #22c55e;
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.3);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.timer-btn-green:hover {
+  background-color: #16a34a;
+  transform: scale(1.02);
+}
+
+.timer-btn-black {
+  height: 3.5rem;
+  border-radius: 0.75rem;
+  background-color: #111827;
+  color: white;
+  font-weight: 700;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.timer-btn-black:hover {
+  background-color: #1f2937;
+  transform: scale(1.02);
+}
+
+/* 샷클락 버튼 (목업 스타일 - 오렌지) */
+.shot-btn-outline {
+  height: 3rem;
+  border-radius: 0.5rem;
+  background-color: white;
+  border: 1px solid rgba(255, 107, 53, 0.2);
+  color: var(--ctrl-primary);
+  font-weight: 700;
+  transition: all 0.2s;
+}
+.shot-btn-outline:hover {
+  background-color: rgba(255, 107, 53, 0.1);
+}
+
+.shot-btn-solid {
+  height: 3rem;
+  border-radius: 0.5rem;
+  background-color: var(--ctrl-primary);
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 4px 6px -1px rgba(255, 107, 53, 0.2);
+  transition: all 0.2s;
+}
+.shot-btn-solid:hover {
+  background-color: var(--ctrl-primary-dark);
+}
+
+/* 쿼터 완료 카드 (목업 스타일 - 오렌지 그라데이션) */
+.quarter-card-mockup {
+  background: linear-gradient(to bottom right, var(--ctrl-primary), var(--ctrl-primary-dark));
+  box-shadow: 0 20px 25px -5px rgba(255, 107, 53, 0.2);
+}
+
+/* 쿼터 배지 (목업 스타일) */
+.quarter-badge-mockup {
+  padding: 0.25rem 0.75rem;
+  background-color: rgba(255, 107, 53, 0.1);
+  color: var(--ctrl-primary);
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(255, 107, 53, 0.2);
+}
+
+/* 카드 스타일 (목업) */
+.card-mockup {
+  background-color: var(--ctrl-surface);
+  border-radius: 1rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+  border: 1px solid #f3f4f6;
+}
+
+/* === 반응형 패딩 유틸리티 === */
+.responsive-padding {
+  @apply p-4 md:p-6 lg:p-8;
+}
+
+/* === 트랜지션 유틸리티 === */
+.transition-unified {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+/* === 스코어보드 컨트롤 전용 스타일 === */
+
+/* 점수 입력 필드 (동적 너비) */
+.score-input-dynamic {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  min-width: 3ch;
+  width: auto;
+  max-width: 5ch;
+}
+
+/* 점수 버튼 호버 효과 */
+.score-btn-hover {
+  transition: all 0.15s ease;
+}
+.score-btn-hover:hover {
+  transform: translateY(-2px);
+}
+.score-btn-hover:active {
+  transform: translateY(0);
+}
+
+/* Game 드래그 앤 드롭 스타일 */
+.game-group {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.game-group.dragging {
+  opacity: 0.5;
+  transform: scale(0.98);
+}
+.game-group.drag-over {
+  background: oklch(var(--p) / 0.05);
+}
+.game-placeholder tr td {
+  padding: 0.5rem;
+}
+.drag-handle {
+  opacity: 0.4;
+  transition: opacity 0.2s ease;
+}
+.game-header:hover .drag-handle {
+  opacity: 1;
+}
+
+/* 팀 카드 헤더 색상별 스타일 */
+.team-header-white {
+  background: linear-gradient(to right, #f3f4f6, #ffffff);
+  color: #1f2937;
+  border-bottom: 1px solid #e5e7eb;
+}
+.team-header-black {
+  background: linear-gradient(to right, #000000, #1f2937);
+  color: #ffffff;
+}
+.team-header-red {
+  background: linear-gradient(to right, #dc2626, #ef4444);
+  color: #ffffff;
+}
+.team-header-blue {
+  background: linear-gradient(to right, #2563eb, #3b82f6);
+  color: #ffffff;
+}
+.team-header-yellow {
+  background: linear-gradient(to right, #ca8a04, #eab308);
+  color: #1f2937;
+}
+.team-header-green {
+  background: linear-gradient(to right, #16a34a, #22c55e);
+  color: #ffffff;
+}
+.team-header-pink {
+  background: linear-gradient(to right, #db2777, #ec4899);
+  color: #ffffff;
+}
+.team-header-skyblue {
+  background: linear-gradient(to right, #0284c7, #38bdf8);
+  color: #ffffff;
+}
+.team-header-brown {
+  background: linear-gradient(to right, #78350f, #a16207);
+  color: #ffffff;
+}
+.team-header-orange {
+  background: linear-gradient(to right, #ea580c, #f97316);
+  color: #ffffff;
+}
+
+/* 디스플레이 열기 버튼 강조 */
+.btn-display-open {
+  background-color: #3b82f6;
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 4px 6px -1px rgb(59 130 246 / 0.25);
+  transition: all 0.2s;
+}
+.btn-display-open:hover {
+  background-color: #2563eb;
+  box-shadow: 0 10px 15px -3px rgb(59 130 246 / 0.3);
+}

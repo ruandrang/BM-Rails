@@ -1,10 +1,10 @@
-<%# External Sports Scoreboard Display %>
+<%# New Basketball Scoreboard Display %>
 <div id="scoreboard-root"
-     class="w-full h-screen flex flex-col bg-[#0a0a0a] overflow-hidden select-none relative pt-12"
-     data-scoreboard-root 
+     class="w-full h-screen flex flex-col bg-[#0B1120] overflow-hidden select-none relative"
+     data-scoreboard-root
      data-scoreboard-role="display"
      data-match-id="<%= @match.id %>"
-     data-teams="<%= @match.teams.to_json %>"
+     data-teams="<%= @match.teams.respond_to?(:map) ? @match.teams.map { |t| { id: t.id, label: t.respond_to?(:label) ? t.label : t.name, name: t.name, color: t.color, icon: t.respond_to?(:icon) ? t.icon : '🏀', score: 0 } }.to_json : @match.teams.to_json %>"
      data-games="<%= @games_for_scoreboard.to_json %>"
      data-teams-count="<%= @match.teams.count %>"
      data-regular-quarters="<%= @match.respond_to?(:regular_quarters) ? @match.regular_quarters : 4 %>"
@@ -16,162 +16,356 @@
      data-voice-rate="<%= current_user.voice_announcement_rate %>"
      data-possession-switch-pattern="<%= current_user.possession_switch_pattern %>">
 
-  <%# Top Bar - Team Names and Timer %>
-  <div class="h-[25%] bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] border-b-4 border-[#333] flex items-center justify-between px-12 relative overflow-visible">
-    <%# Left Team Name %>
-    <div class="flex-1 flex justify-start">
-      <div class="px-8 py-3 rounded-lg shadow-lg team-badge-left" style="background-color: #1e40af; border: 2px solid #3b82f6;">
-        <span class="text-white font-bold text-4xl tracking-wider font-['Inter']" data-team-name-left>TEAM A</span>
+  <%# Header Bar %>
+  <header class="h-28 bg-[#131B2E] flex items-center justify-between px-12 border-b border-gray-700">
+    <%# LIVE Indicator %>
+    <div class="flex items-center space-x-2">
+      <div class="w-6 h-6 rounded-full bg-red-500 animate-pulse"></div>
+      <span class="text-red-500 font-bold tracking-wider text-2xl">LIVE</span>
+    </div>
+
+    <%# Center Title %>
+    <div class="absolute left-1/2 transform -translate-x-1/2">
+      <span class="text-gray-400 font-semibold tracking-[0.2em] text-2xl uppercase">Basketball</span>
+    </div>
+
+    <%# Quarter Badge, Size Controls & Fullscreen Button %>
+    <div class="flex items-center space-x-4">
+      <div class="bg-gray-700 text-gray-200 text-2xl font-bold px-8 py-4 rounded shadow-lg uppercase tracking-wider">
+        <span data-scoreboard-quarter>1</span>Q
       </div>
-    </div>
-
-    <%# Center Timer %>
-    <div class="flex flex-col items-center gap-2">
-      <span class="text-[#00ff00] font-['DSEG7'] font-bold tracking-wider tabular-nums" 
-            style="font-size: 14rem;"
-            data-scoreboard-timer>10:00</span>
-      <span class="text-gray-500 text-sm tracking-widest uppercase" data-ui-key="game_clock_label">Game Clock</span>
-    </div>
-
-    <%# Right Team Name %>
-    <div class="flex-1 flex justify-end">
-      <div class="px-8 py-3 rounded-lg shadow-lg team-badge-right" style="background-color: #dc2626; border: 2px solid #ef4444;">
-        <span class="text-white font-bold text-4xl tracking-wider font-['Inter']" data-team-name-right>TEAM B</span>
+      <%# Text Size Controls %>
+      <div class="flex items-center space-x-2 bg-gray-800 rounded-lg px-3 py-2">
+        <button id="size-decrease-btn" class="w-10 h-10 bg-gray-700 hover:bg-gray-600 text-white text-xl font-bold rounded transition-colors flex items-center justify-center" title="<%= t('scoreboard.size_decrease', default: '글자 축소') %>">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4" /></svg>
+        </button>
+        <span class="text-gray-400 text-sm font-bold px-2" data-size-indicator>100%</span>
+        <button id="size-increase-btn" class="w-10 h-10 bg-gray-700 hover:bg-gray-600 text-white text-xl font-bold rounded transition-colors flex items-center justify-center" title="<%= t('scoreboard.size_increase', default: '글자 확대') %>">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" /></svg>
+        </button>
       </div>
+      <button id="fullscreen-btn" class="bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold px-8 py-4 rounded transition-colors uppercase tracking-wide shadow-lg">
+        <span data-ui-key="fullscreen">Full Screen</span>
+      </button>
     </div>
-  </div>
+  </header>
 
-  <%# Center Score Area %>
-  <div class="flex-1 flex items-center justify-center px-12 relative">
-    <%# Left Score %>
-    <div class="flex flex-col items-center gap-4 flex-1 justify-center">
-      <span class="text-[#ffa500] font-['DSEG7'] font-bold tabular-nums leading-none" 
-            style="font-size: 26.4rem;"
-            data-score-left>0</span>
-      <div class="px-6 py-2 bg-[#1a1a1a] border border-[#333] rounded flex items-center gap-3">
-        <span class="text-gray-400 text-xs tracking-wider uppercase" data-ui-key="foul">FOUL</span>
-        <div class="flex gap-2" data-foul-indicators-left>
-          <div class="w-8 h-8 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="0"></div>
-          <div class="w-8 h-8 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="1"></div>
-          <div class="w-8 h-8 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="2"></div>
-          <div class="w-8 h-8 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="3"></div>
-          <div class="w-8 h-8 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="4"></div>
+  <%# Main Content Area %>
+  <div class="flex-1 relative flex flex-col">
+    <div class="flex-1 flex items-center justify-center relative p-8">
+
+      <%# Left Team %>
+      <div class="flex-1 flex flex-col items-center justify-center">
+        <%# Team Name with Color Bar %>
+        <div class="flex flex-col items-center mb-2">
+          <div class="flex flex-col items-center">
+            <div class="flex items-center space-x-3 mb-2">
+              <div class="w-8 h-8 rounded-full team-color-indicator-left" style="background-color: #3b82f6;" data-team-color-left></div>
+              <h2 class="text-white text-4xl md:text-5xl font-bold tracking-wider uppercase" data-team-name-left>TEAM A</h2>
+            </div>
+            <div class="h-2 w-full rounded-full team-color-bar-left" style="background-color: #3b82f6;" data-team-bar-left></div>
+          </div>
+        </div>
+
+        <%# Score %>
+        <div class="text-[#FF6B00] font-black text-score tracking-wide tabular-nums drop-shadow-lg" data-score-left>0</div>
+
+        <%# Fouls %>
+        <div class="mt-8 flex flex-col items-center space-y-4">
+          <div class="flex items-center space-x-4">
+            <span class="text-gray-400 text-xl font-bold tracking-widest uppercase" data-ui-key="foul">Fouls</span>
+            <div class="flex space-x-2" data-foul-indicators-left>
+              <div class="w-6 h-6 rounded-full bg-gray-700 border-2 border-red-500" data-foul-circle="0"></div>
+              <div class="w-6 h-6 rounded-full bg-gray-700 border-2 border-red-500" data-foul-circle="1"></div>
+              <div class="w-6 h-6 rounded-full bg-gray-700 border-2 border-red-500" data-foul-circle="2"></div>
+              <div class="w-6 h-6 rounded-full bg-gray-700 border-2 border-red-500" data-foul-circle="3"></div>
+              <div class="w-6 h-6 rounded-full bg-gray-700 border-2 border-red-500" data-foul-circle="4"></div>
+            </div>
+          </div>
+          <span class="text-red-500 font-bold text-3xl md:text-4xl uppercase tracking-wider hidden" data-team-foul-badge-left>TEAM FOUL</span>
+        </div>
+      </div>
+
+      <%# Center Section - Clock, Possession, Shot Clock %>
+      <div class="w-1/4 flex flex-col items-center justify-start h-full pt-10 space-y-8">
+        <%# Game Clock %>
+        <div class="text-center">
+          <span class="text-gray-400 text-xl font-bold tracking-[0.15em] uppercase mb-4 block" data-ui-key="game_clock_label">Game Clock</span>
+          <div class="text-white font-bold text-clock tracking-tight leading-none" data-scoreboard-timer>10:00</div>
+        </div>
+
+        <%# Possession Indicator %>
+        <div class="flex items-center space-x-6" data-possession-indicator>
+          <div class="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center transition-all duration-300 possession-arrow-left">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-gray-500 rotate-180" viewBox="0 0 24 24" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+          </div>
+          <span class="text-gray-400 text-lg font-bold tracking-widest uppercase"><%= t('settings.possession.title', default: 'Possession') %></span>
+          <div class="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center transition-all duration-300 possession-arrow-right">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-gray-500" viewBox="0 0 24 24" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+          </div>
+        </div>
+
+        <%# Shot Clock %>
+        <div class="flex flex-col items-center w-full">
+          <span class="text-gray-400 text-xl font-bold tracking-[0.15em] uppercase mb-6" data-ui-key="shot_clock_label">Shot Clock</span>
+          <div class="border border-gray-700 bg-[#131B2E]/30 rounded-xl px-16 py-6 w-full max-w-[450px] flex justify-center">
+            <span class="text-[#39FF14] font-bold text-[160px] md:text-[200px] tabular-nums leading-none" data-scoreboard-shot>24</span>
+          </div>
+        </div>
+      </div>
+
+      <%# Right Team %>
+      <div class="flex-1 flex flex-col items-center justify-center">
+        <%# Team Name with Color Bar %>
+        <div class="flex flex-col items-center mb-2">
+          <div class="flex flex-col items-center">
+            <div class="flex items-center space-x-3 mb-2">
+              <div class="w-8 h-8 rounded-full team-color-indicator-right" style="background-color: #ef4444;" data-team-color-right></div>
+              <h2 class="text-white text-4xl md:text-5xl font-bold tracking-wider uppercase" data-team-name-right>TEAM B</h2>
+            </div>
+            <div class="h-2 w-full rounded-full team-color-bar-right" style="background-color: #ef4444;" data-team-bar-right></div>
+          </div>
+        </div>
+
+        <%# Score %>
+        <div class="text-[#FF6B00] font-black text-score tracking-wide tabular-nums drop-shadow-lg" data-score-right>0</div>
+
+        <%# Fouls %>
+        <div class="mt-8 flex flex-col items-center space-y-4">
+          <div class="flex items-center space-x-4">
+            <span class="text-gray-400 text-xl font-bold tracking-widest uppercase" data-ui-key="foul">Fouls</span>
+            <div class="flex space-x-2" data-foul-indicators-right>
+              <div class="w-6 h-6 rounded-full bg-gray-700 border-2 border-red-500" data-foul-circle="0"></div>
+              <div class="w-6 h-6 rounded-full bg-gray-700 border-2 border-red-500" data-foul-circle="1"></div>
+              <div class="w-6 h-6 rounded-full bg-gray-700 border-2 border-red-500" data-foul-circle="2"></div>
+              <div class="w-6 h-6 rounded-full bg-gray-700 border-2 border-red-500" data-foul-circle="3"></div>
+              <div class="w-6 h-6 rounded-full bg-gray-700 border-2 border-red-500" data-foul-circle="4"></div>
+            </div>
+          </div>
+          <span class="text-red-500 font-bold text-3xl md:text-4xl uppercase tracking-wider hidden" data-team-foul-badge-right>TEAM FOUL</span>
         </div>
       </div>
 
     </div>
 
-    <%# Center Info - Quarter and Possession - FIXED POSITION %>
-    <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-8" style="width: 400px;">
-      <%# Possession Arrow %>
-      <div class="h-16 flex justify-center" data-possession-indicator>
-        <svg width="80" height="64" viewBox="0 0 80 64" class="possession-arrow-left hidden">
-          <polygon points="80,32 20,0 20,24 0,24 0,40 20,40 20,64" fill="#ff0000" />
-        </svg>
-        <svg width="80" height="64" viewBox="0 0 80 64" class="possession-arrow-right hidden">
-          <polygon points="0,32 60,0 60,24 80,24 80,40 60,40 60,64" fill="#ff0000" />
-        </svg>
-      </div>
-
-      <%# Quarter Badge %>
-      <div class="px-12 py-4 bg-white border-4 border-[#666] rounded-xl shadow-2xl">
-        <span class="text-black font-['DSEG7'] text-6xl font-bold" data-scoreboard-quarter>1</span>
-      </div>
-
-      <%# Shot Clock %>
-      <div class="flex flex-col items-center gap-1">
-        <span class="text-[#00ff00] font-['DSEG7'] font-bold tabular-nums" 
-              style="font-size: 10rem;"
-              data-scoreboard-shot>24</span>
-        <span class="text-gray-500 text-xs tracking-widest uppercase" data-ui-key="shot_clock_label">Shot Clock</span>
-      </div>
-    </div>
-
-    <%# Right Score %>
-    <div class="flex flex-col items-center gap-4 flex-1 justify-center">
-      <span class="text-[#ffa500] font-['DSEG7'] font-bold tabular-nums leading-none" 
-            style="font-size: 26.4rem;"
-            data-score-right>0</span>
-      <div class="px-6 py-2 bg-[#1a1a1a] border border-[#333] rounded flex items-center gap-3">
-        <span class="text-gray-400 text-xs tracking-wider uppercase" data-ui-key="foul">FOUL</span>
-        <div class="flex gap-2" data-foul-indicators-right>
-          <div class="w-8 h-8 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="0"></div>
-          <div class="w-8 h-8 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="1"></div>
-          <div class="w-8 h-8 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="2"></div>
-          <div class="w-8 h-8 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="3"></div>
-          <div class="w-8 h-8 rounded-full" style="background-color: #1a1a1a; border: 2px solid #dc2626" data-foul-circle="4"></div>
+    <%# Sponsor Banner Area %>
+    <div class="h-auto bg-[#131B2E] border-t border-gray-700 py-6 px-12">
+      <div class="flex gap-8 justify-center">
+        <div class="bg-white rounded-xl p-6 flex items-center justify-center shadow-lg w-72 h-28 flex-shrink-0">
+          <img src="/manpo.png?v=<%= Time.now.to_i %>" alt="만포면옥" class="h-20 object-contain">
+        </div>
+        <div class="bg-white rounded-xl p-6 flex items-center justify-center shadow-lg w-72 h-28 flex-shrink-0">
+          <img src="/hongkong.png?v=<%= Time.now.to_i %>" alt="홍콩반점" class="h-20 object-contain">
+        </div>
+        <div class="bg-white rounded-xl p-6 flex items-center justify-center shadow-lg w-72 h-28 flex-shrink-0">
+          <img src="/mapo-YC.png?v=<%= Time.now.to_i %>" alt="시립마포청소년센터" class="h-20 object-contain">
         </div>
       </div>
-
     </div>
-  </div>
-
-  <%# Bottom Bar - Info and Fullscreen %>
-  <div class="h-[12%] bg-gradient-to-t from-[#1a1a1a] to-[#0f0f0f] border-t-4 border-[#333] flex items-center justify-between px-12 relative">
-    <%# League Info %>
-    <div class="flex flex-col">
-      <span class="text-[#666] text-xs tracking-[3px] uppercase">BM League</span>
-      <span class="text-gray-400 text-sm font-['JetBrains_Mono']"><%= @match.respond_to?(:date) ? @match.date.strftime("%Y.%m.%d") : Time.current.strftime("%Y.%m.%d") %> — <span data-ui-key="standalone_mode">Standalone Mode</span></span>
-    </div>
-
-    <%# Bottom Center Logos %>
-    <div class="absolute left-1/2 -translate-x-1/2 flex items-center justify-center gap-3 pointer-events-none">
-      <%= image_tag "manpo.png", alt: "Manpo", class: "h-14 md:h-16 w-auto opacity-85 object-contain" %>
-      <%= image_tag "hongkong.png", alt: "Hongkong", class: "h-14 md:h-16 w-auto opacity-85 object-contain" %>
-    </div>
-
-    <%# Fullscreen Button %>
-    <button id="fullscreen-btn" 
-            class="px-6 py-3 bg-[#1a1a1a] hover:bg-[#2a2a2a] border border-[#444] hover:border-[#666] rounded-lg transition-all duration-200 flex items-center gap-2">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-400">
-        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
-      </svg>
-      <span class="text-gray-400 text-sm font-bold tracking-wider uppercase" data-ui-key="fullscreen">Fullscreen</span>
-    </button>
   </div>
 
 </div>
 
 <style>
-  /* 7-Segment LED Font */
-  @font-face {
-    font-family: 'DSEG7';
-    src: url('/fonts/7-segment-trackmania-united.otf') format('opentype');
-    font-weight: normal;
-    font-style: normal;
+  /* === 텍스트 사이즈 조절용 CSS 변수 === */
+  :root {
+    --display-scale: 1;
   }
 
-  /* Possession Arrow Animation */
+  /* === 스코어보드 텍스트 스타일 === */
+  .text-score {
+    font-size: calc(clamp(10rem, 22vw, 18rem) * var(--display-scale));
+    line-height: 1;
+  }
+
+  .text-clock {
+    font-size: calc(clamp(6rem, 12vw, 10rem) * var(--display-scale));
+    line-height: 1;
+  }
+
+  [data-scoreboard-shot] {
+    font-size: calc(clamp(8rem, 18vw, 14rem) * var(--display-scale)) !important;
+  }
+
+  /* FORCE possession arrows to always be visible (override main JS hidden class) */
   .possession-arrow-left,
   .possession-arrow-right {
-    animation: pulse 1s ease-in-out infinite;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background-color: #374151; /* gray-700 */
+    transition: all 0.3s ease;
   }
 
-  @keyframes pulse {
+  .possession-arrow-left svg,
+  .possession-arrow-right svg {
+    color: #6B7280; /* gray-500 */
+    transition: color 0.3s ease;
+  }
+
+  /* Active possession - red circle with white arrow */
+  .possession-arrow-left.active,
+  .possession-arrow-right.active {
+    background-color: #ef4444 !important;
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+  }
+
+  .possession-arrow-left.active svg,
+  .possession-arrow-right.active svg {
+    color: white !important;
+  }
+
+  /* Team foul badge animation */
+  [data-team-foul-badge-left]:not(.hidden),
+  [data-team-foul-badge-right]:not(.hidden) {
+    animation: foul-pulse 1s ease-in-out infinite;
+  }
+
+  @keyframes foul-pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.6; }
-  }
-
-  /* Smooth transitions */
-  [data-score-left], [data-score-right] {
-    transition: all 0.3s ease;
   }
 </style>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const fullscreenBtn = document.getElementById('fullscreen-btn');
-    
-    if (fullscreenBtn) {
-      fullscreenBtn.addEventListener('click', () => {
-        if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen();
-        } else {
-          document.exitFullscreen();
-        }
-      });
+    const arrowLeft = document.querySelector('.possession-arrow-left');
+    const arrowRight = document.querySelector('.possession-arrow-right');
+
+    // Track current possession state
+    let currentPossession = null;
+
+    // === 팀 색상 매핑 (Team::COLORS → CSS 색상) ===
+    const TEAM_COLOR_MAP = {
+      'White': '#ffffff',
+      'Black': '#1f2937',
+      'Red': '#ef4444',
+      'Blue': '#3b82f6',
+      'Yellow': '#eab308',
+      'Green': '#22c55e',
+      'Pink': '#ec4899',
+      'SkyBlue': '#38bdf8',
+      'Brown': '#a16207',
+      'Orange': '#f97316'
+    };
+
+    // 팀 색상 이름을 CSS 색상으로 변환
+    const getTeamColor = (colorName) => {
+      return TEAM_COLOR_MAP[colorName] || colorName || '#3b82f6';
+    };
+
+    // === 텍스트 사이즈 조절 ===
+    const SCALE_MIN = 0.6;
+    const SCALE_MAX = 1.4;
+    const SCALE_STEP = 0.1;
+    let currentScale = parseFloat(localStorage.getItem('scoreboard-display-scale') || '1');
+
+    const sizeIndicator = document.querySelector('[data-size-indicator]');
+    const decreaseBtn = document.getElementById('size-decrease-btn');
+    const increaseBtn = document.getElementById('size-increase-btn');
+
+    const updateScale = (newScale) => {
+      currentScale = Math.max(SCALE_MIN, Math.min(SCALE_MAX, newScale));
+      document.documentElement.style.setProperty('--display-scale', currentScale);
+      if (sizeIndicator) {
+        sizeIndicator.textContent = Math.round(currentScale * 100) + '%';
+      }
+      localStorage.setItem('scoreboard-display-scale', currentScale.toString());
+      console.log('[Display] Scale updated:', currentScale);
+    };
+
+    if (decreaseBtn) {
+      decreaseBtn.addEventListener('click', () => updateScale(currentScale - SCALE_STEP));
     }
-    
-    // Badge/team synchronization is handled in app/assets/javascripts/application.js
+    if (increaseBtn) {
+      increaseBtn.addEventListener('click', () => updateScale(currentScale + SCALE_STEP));
+    }
+
+    // 초기 스케일 적용
+    updateScale(currentScale);
+
+    // Apply visual styles directly (bypass CSS class issues)
+    const applyArrowStyles = (arrow, isActive) => {
+      if (!arrow) return;
+      const icon = arrow.querySelector('svg');
+
+      if (isActive) {
+        arrow.style.backgroundColor = '#ef4444';
+        arrow.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.5)';
+        if (icon) icon.style.color = 'white';
+      } else {
+        arrow.style.backgroundColor = '#374151';
+        arrow.style.boxShadow = 'none';
+        if (icon) icon.style.color = '#6B7280';
+      }
+    };
+
+    // Function to update arrow active states
+    const updatePossessionArrows = (possession) => {
+      console.log('[Display] Updating possession arrows:', possession);
+
+      // Display page is mirrored from control page
+      // Control: left=away, right=home
+      // Display: left=home, right=away (reversed)
+      // So possession='home' means left arrow active on display
+      if (possession === 'home') {
+        applyArrowStyles(arrowLeft, true);
+        applyArrowStyles(arrowRight, false);
+      } else if (possession === 'away') {
+        applyArrowStyles(arrowLeft, false);
+        applyArrowStyles(arrowRight, true);
+      } else {
+        // No possession - both gray
+        applyArrowStyles(arrowLeft, false);
+        applyArrowStyles(arrowRight, false);
+      }
+    };
+
+    // Listen for scoreboard updates to handle new design-specific elements
+    document.addEventListener('scoreboard:updated', (e) => {
+      const { state } = e.detail;
+      if (!state) return;
+
+      console.log('[Display] scoreboard:updated received, possession:', state.possession);
+
+      // Update possession arrows (always update, not just on change)
+      currentPossession = state.possession;
+      // Use setTimeout to ensure this runs after main JS
+      setTimeout(() => updatePossessionArrows(state.possession), 50);
+
+      // Team colors are now handled by application.js render() function
+      // with setProperty(..., 'important') for proper CSS specificity
+
+      // Update team foul badges (show when fouls >= 5)
+      // On display: left = away_fouls, right = home_fouls
+      const leftFouls = state.away_fouls || 0;
+      const rightFouls = state.home_fouls || 0;
+
+      const leftBadge = document.querySelector('[data-team-foul-badge-left]');
+      const rightBadge = document.querySelector('[data-team-foul-badge-right]');
+
+      if (leftBadge) {
+        if (leftFouls >= 5) {
+          leftBadge.classList.remove('hidden');
+        } else {
+          leftBadge.classList.add('hidden');
+        }
+      }
+
+      if (rightBadge) {
+        if (rightFouls >= 5) {
+          rightBadge.classList.remove('hidden');
+        } else {
+          rightBadge.classList.add('hidden');
+        }
+      }
+    });
+
+    // Initial state - both gray
+    applyArrowStyles(arrowLeft, false);
+    applyArrowStyles(arrowRight, false);
+
+    console.log('[Display] Possession arrows initialized');
+    console.log('[Display] Team color mapping enabled');
   });
 </script>

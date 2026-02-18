@@ -7,11 +7,12 @@ class ScoreboardsController < ApplicationController
   end
 
   def standalone_control
-    @match = Struct.new(:id, :home_team, :away_team, :teams, :date, :regular_quarters).new(
+    @match = Struct.new(:id, :home_team, :away_team, :teams, :date, :played_on, :regular_quarters).new(
       "standalone_u#{current_user.id}",
       Struct.new(:id, :name, :icon, :color, :label).new(1, "HOME", "🏀", "#1e40af", "HOME"),
       Struct.new(:id, :name, :icon, :color, :label).new(2, "AWAY", "🏀", "#dc2626", "AWAY"),
       [],
+      Date.today,
       Date.today,
       4
     )
@@ -21,11 +22,12 @@ class ScoreboardsController < ApplicationController
   end
 
   def standalone_display
-    @match = Struct.new(:id, :home_team, :away_team, :teams, :date, :regular_quarters).new(
+    @match = Struct.new(:id, :home_team, :away_team, :teams, :date, :played_on, :regular_quarters).new(
       "standalone_u#{current_user.id}",
       Struct.new(:id, :name, :icon, :color, :label).new(1, "HOME", "🏀", "#1e40af", "HOME"),
       Struct.new(:id, :name, :icon, :color, :label).new(2, "AWAY", "🏀", "#dc2626", "AWAY"),
       [],
+      Date.today,
       Date.today,
       4
     )
@@ -36,13 +38,13 @@ class ScoreboardsController < ApplicationController
   end
 
   def control
-    @teams = @match.teams.order(:label).includes(:members)
-    @games_for_scoreboard = @match.games.order(:id).select(:id, :home_team_id, :away_team_id)
+    @teams = @match.teams.order(:id).includes(:members)
+    @games_for_scoreboard = @match.games.order(:id).select(:id, :home_team_id, :away_team_id, :home_score, :away_score)
   end
 
   def display
-    @teams = @match.teams.order(:label)
-    @games_for_scoreboard = @match.games.order(:id).select(:id, :home_team_id, :away_team_id)
+    @teams = @match.teams.order(:id)
+    @games_for_scoreboard = @match.games.order(:id).select(:id, :home_team_id, :away_team_id, :home_score, :away_score)
     render layout: "scoreboard_display"
   end
 
