@@ -1,3 +1,4 @@
+// Version: 2026-02-18-buzzer-fix-v6-html5audio
 // HTML escape utility to prevent XSS via innerHTML
 const escapeHtml = (str) => {
   if (str === null || str === undefined) return '';
@@ -203,7 +204,7 @@ document.addEventListener("DOMContentLoaded", () => {
         shortcuts_show: "⌨️ 상세 보기",
         possession_left: "왼쪽",
         possession_right: "오른쪽",
-        possession_toggle: "공격 전환 (%{direction})",
+        possession_toggle: "공격 전환",
         confirm_reset_all: "정말로 모든 점수와 시간을 초기화하시겠습니까?",
         alert_club_not_found: "클럽 정보를 찾을 수 없습니다.",
         alert_add_game_failed: "경기 추가에 실패했습니다.",
@@ -251,9 +252,14 @@ document.addEventListener("DOMContentLoaded", () => {
         shot_clock_label: "샷클락",
         fullscreen: "전체 화면",
         standalone_mode: "단독 모드",
-        team_label_pattern: "팀 %{label}",
+        team_label_pattern: "%{label}",
         matchup_pattern: "%{home} vs %{away}",
-        member_name_unknown: "이름없음"
+        member_name_unknown: "이름없음",
+        toggle_possession: "↔️ 공격 전환",
+        save_and_pause: "💾 저장하고 중단",
+        confirm_save_and_pause: "현재 경기 상황을 저장하고 중단하시겠습니까?",
+        alert_save_and_pause_success: "경기 상황이 저장되었습니다. 언제든 다시 시작할 수 있습니다.",
+        alert_save_and_pause_error: "저장 중 오류가 발생했습니다."
       },
       ja: {
         team_word: "チーム",
@@ -279,7 +285,7 @@ document.addEventListener("DOMContentLoaded", () => {
         shortcuts_show: "⌨️ 詳細を表示",
         possession_left: "左",
         possession_right: "右",
-        possession_toggle: "攻撃切替 (%{direction})",
+        possession_toggle: "攻撃切替",
         confirm_reset_all: "本当にすべてのスコアと時間を初期化しますか？",
         alert_club_not_found: "クラブ情報が見つかりません。",
         alert_add_game_failed: "試合の追加に失敗しました。",
@@ -327,9 +333,14 @@ document.addEventListener("DOMContentLoaded", () => {
         shot_clock_label: "ショットクロック",
         fullscreen: "全画面",
         standalone_mode: "単独モード",
-        team_label_pattern: "チーム %{label}",
+        team_label_pattern: "%{label}",
         matchup_pattern: "%{home} vs %{away}",
-        member_name_unknown: "名前なし"
+        member_name_unknown: "名前なし",
+        toggle_possession: "↔️ 攻撃方向切替",
+        save_and_pause: "💾 保存して中断",
+        confirm_save_and_pause: "現在の試合状況を保存して中断しますか?",
+        alert_save_and_pause_success: "試合状況が保存されました。いつでも再開できます。",
+        alert_save_and_pause_error: "保存中にエラーが発生しました。"
       },
       en: {
         team_word: "Team",
@@ -355,7 +366,7 @@ document.addEventListener("DOMContentLoaded", () => {
         shortcuts_show: "⌨️ Show Details",
         possession_left: "Left",
         possession_right: "Right",
-        possession_toggle: "Toggle Possession (%{direction})",
+        possession_toggle: "Toggle Possession",
         confirm_reset_all: "Reset all scores and timers?",
         alert_club_not_found: "Club information was not found.",
         alert_add_game_failed: "Failed to add game.",
@@ -403,9 +414,14 @@ document.addEventListener("DOMContentLoaded", () => {
         shot_clock_label: "Shot Clock",
         fullscreen: "Fullscreen",
         standalone_mode: "Standalone Mode",
-        team_label_pattern: "Team %{label}",
+        team_label_pattern: "%{label}",
         matchup_pattern: "%{home} vs %{away}",
-        member_name_unknown: "Unknown"
+        member_name_unknown: "Unknown",
+        toggle_possession: "↔️ Toggle Possession",
+        save_and_pause: "💾 Save & Pause",
+        confirm_save_and_pause: "Save current game status and pause?",
+        alert_save_and_pause_success: "Game status saved. You can resume anytime.",
+        alert_save_and_pause_error: "Error occurred while saving."
       },
       zh: {
         team_word: "队",
@@ -431,7 +447,7 @@ document.addEventListener("DOMContentLoaded", () => {
         shortcuts_show: "⌨️ 显示详情",
         possession_left: "左",
         possession_right: "右",
-        possession_toggle: "切换球权 (%{direction})",
+        possession_toggle: "切换球权",
         confirm_reset_all: "确定重置所有比分和时间吗？",
         alert_club_not_found: "未找到俱乐部信息。",
         alert_add_game_failed: "添加比赛失败。",
@@ -479,9 +495,14 @@ document.addEventListener("DOMContentLoaded", () => {
         shot_clock_label: "进攻计时",
         fullscreen: "全屏",
         standalone_mode: "独立模式",
-        team_label_pattern: "队 %{label}",
+        team_label_pattern: "%{label}",
         matchup_pattern: "%{home} vs %{away}",
-        member_name_unknown: "未知姓名"
+        member_name_unknown: "未知姓名",
+        toggle_possession: "↔️ 切换进攻方向",
+        save_and_pause: "💾 保存并暂停",
+        confirm_save_and_pause: "保存当前比赛状态并暂停吗?",
+        alert_save_and_pause_success: "比赛状态已保存。您可以随时继续。",
+        alert_save_and_pause_error: "保存时发生错误。"
       },
       fr: {
         team_word: "Équipe",
@@ -507,7 +528,7 @@ document.addEventListener("DOMContentLoaded", () => {
         shortcuts_show: "⌨️ Afficher les détails",
         possession_left: "Gauche",
         possession_right: "Droite",
-        possession_toggle: "Changer possession (%{direction})",
+        possession_toggle: "Changer possession",
         confirm_reset_all: "Réinitialiser tous les scores et chronos ?",
         alert_club_not_found: "Informations du club introuvables.",
         alert_add_game_failed: "Échec de l'ajout du match.",
@@ -555,9 +576,14 @@ document.addEventListener("DOMContentLoaded", () => {
         shot_clock_label: "Chrono tir",
         fullscreen: "Plein écran",
         standalone_mode: "Mode autonome",
-        team_label_pattern: "Équipe %{label}",
+        team_label_pattern: "%{label}",
         matchup_pattern: "%{home} vs %{away}",
-        member_name_unknown: "Sans nom"
+        member_name_unknown: "Sans nom",
+        toggle_possession: "↔️ Changer possession",
+        save_and_pause: "💾 Sauv. et pause",
+        confirm_save_and_pause: "Sauvegarder l'état actuel et mettre en pause ?",
+        alert_save_and_pause_success: "État du match sauvegardé. Vous pouvez reprendre à tout moment.",
+        alert_save_and_pause_error: "Erreur lors de la sauvegarde."
       },
       es: {
         team_word: "Equipo",
@@ -583,7 +609,7 @@ document.addEventListener("DOMContentLoaded", () => {
         shortcuts_show: "⌨️ Mostrar detalles",
         possession_left: "Izquierda",
         possession_right: "Derecha",
-        possession_toggle: "Cambiar posesión (%{direction})",
+        possession_toggle: "Cambiar posesión",
         confirm_reset_all: "¿Restablecer todos los marcadores y tiempos?",
         alert_club_not_found: "No se encontró la información del club.",
         alert_add_game_failed: "No se pudo agregar el juego.",
@@ -631,9 +657,14 @@ document.addEventListener("DOMContentLoaded", () => {
         shot_clock_label: "Reloj de tiro",
         fullscreen: "Pantalla completa",
         standalone_mode: "Modo independiente",
-        team_label_pattern: "Equipo %{label}",
+        team_label_pattern: "%{label}",
         matchup_pattern: "%{home} vs %{away}",
-        member_name_unknown: "Sin nombre"
+        member_name_unknown: "Sin nombre",
+        toggle_possession: "↔️ Cambiar posesión",
+        save_and_pause: "💾 Guardar y pausar",
+        confirm_save_and_pause: "¿Guardar el estado actual del juego y pausar?",
+        alert_save_and_pause_success: "Estado del juego guardado. Puede reanudar en cualquier momento.",
+        alert_save_and_pause_error: "Error al guardar."
       },
       it: {
         team_word: "Squadra",
@@ -659,7 +690,7 @@ document.addEventListener("DOMContentLoaded", () => {
         shortcuts_show: "⌨️ Mostra dettagli",
         possession_left: "Sinistra",
         possession_right: "Destra",
-        possession_toggle: "Cambia possesso (%{direction})",
+        possession_toggle: "Cambia possesso",
         confirm_reset_all: "Reimpostare tutti i punteggi e i timer?",
         alert_club_not_found: "Informazioni club non trovate.",
         alert_add_game_failed: "Aggiunta partita non riuscita.",
@@ -707,9 +738,14 @@ document.addEventListener("DOMContentLoaded", () => {
         shot_clock_label: "Crono tiro",
         fullscreen: "Schermo intero",
         standalone_mode: "Modalità standalone",
-        team_label_pattern: "Squadra %{label}",
+        team_label_pattern: "%{label}",
         matchup_pattern: "%{home} vs %{away}",
-        member_name_unknown: "Senza nome"
+        member_name_unknown: "Senza nome",
+        toggle_possession: "↔️ Cambia possesso",
+        save_and_pause: "💾 Salva e pausa",
+        confirm_save_and_pause: "Salvare lo stato attuale della partita e mettere in pausa?",
+        alert_save_and_pause_success: "Stato della partita salvato. Puoi riprendere in qualsiasi momento.",
+        alert_save_and_pause_error: "Errore durante il salvataggio."
       }
     };
     const baseEnglishMessages = UI_MESSAGES.en;
@@ -738,7 +774,7 @@ document.addEventListener("DOMContentLoaded", () => {
       shortcuts_show: "⌨️ Mostrar detalhes",
       possession_left: "Esquerda",
       possession_right: "Direita",
-      possession_toggle: "Alternar posse (%{direction})",
+      possession_toggle: "Alternar posse",
       confirm_reset_all: "Redefinir todos os placares e cronômetros?",
       alert_club_not_found: "Informações do clube não encontradas.",
       alert_add_game_failed: "Falha ao adicionar jogo.",
@@ -785,9 +821,14 @@ document.addEventListener("DOMContentLoaded", () => {
       shot_clock_label: "Cronômetro de Arremesso",
       fullscreen: "Tela Cheia",
       standalone_mode: "Modo Independente",
-      team_label_pattern: "Equipe %{label}",
+      team_label_pattern: "%{label}",
       matchup_pattern: "%{home} vs %{away}",
-      member_name_unknown: "Sem nome"
+      member_name_unknown: "Sem nome",
+      toggle_possession: "↔️ Alternar posse",
+      save_and_pause: "💾 Salvar e pausar",
+      confirm_save_and_pause: "Salvar o estado atual do jogo e pausar?",
+      alert_save_and_pause_success: "Estado do jogo salvo. Você pode retomar a qualquer momento.",
+      alert_save_and_pause_error: "Erro ao salvar."
     };
     UI_MESSAGES.tl = {
       ...baseEnglishMessages,
@@ -814,7 +855,7 @@ document.addEventListener("DOMContentLoaded", () => {
       shortcuts_show: "⌨️ Ipakita ang detalye",
       possession_left: "Kaliwa",
       possession_right: "Kanan",
-      possession_toggle: "Palitan ang possession (%{direction})",
+      possession_toggle: "Palitan ang possession",
       confirm_reset_all: "I-reset ang lahat ng score at timer?",
       alert_club_not_found: "Hindi makita ang impormasyon ng club.",
       alert_add_game_failed: "Nabigo ang pagdagdag ng laro.",
@@ -861,9 +902,14 @@ document.addEventListener("DOMContentLoaded", () => {
       shot_clock_label: "Shot Clock",
       fullscreen: "Fullscreen",
       standalone_mode: "Standalone Mode",
-      team_label_pattern: "Koponan %{label}",
+      team_label_pattern: "%{label}",
       matchup_pattern: "%{home} vs %{away}",
-      member_name_unknown: "Walang pangalan"
+      member_name_unknown: "Walang pangalan",
+      toggle_possession: "↔️ Palitan ang possession",
+      save_and_pause: "💾 I-save at i-pause",
+      confirm_save_and_pause: "I-save ang kasalukuyang estado ng laro at i-pause?",
+      alert_save_and_pause_success: "Na-save ang estado ng laro. Maaaring magpatuloy anumang oras.",
+      alert_save_and_pause_error: "May error habang sine-save."
     };
     UI_MESSAGES.de = {
       ...baseEnglishMessages,
@@ -890,7 +936,7 @@ document.addEventListener("DOMContentLoaded", () => {
       shortcuts_show: "⌨️ Details anzeigen",
       possession_left: "Links",
       possession_right: "Rechts",
-      possession_toggle: "Ballbesitz wechseln (%{direction})",
+      possession_toggle: "Ballbesitz wechseln",
       confirm_reset_all: "Alle Punktestände und Timer zurücksetzen?",
       alert_club_not_found: "Club-Informationen wurden nicht gefunden.",
       alert_add_game_failed: "Spiel konnte nicht hinzugefügt werden.",
@@ -937,9 +983,14 @@ document.addEventListener("DOMContentLoaded", () => {
       shot_clock_label: "Wurfuhr",
       fullscreen: "Vollbild",
       standalone_mode: "Standalone-Modus",
-      team_label_pattern: "Team %{label}",
+      team_label_pattern: "%{label}",
       matchup_pattern: "%{home} vs %{away}",
-      member_name_unknown: "Unbekannt"
+      member_name_unknown: "Unbekannt",
+      toggle_possession: "↔️ Ballbesitz wechseln",
+      save_and_pause: "💾 Speichern & Pause",
+      confirm_save_and_pause: "Aktuellen Spielstand speichern und pausieren?",
+      alert_save_and_pause_success: "Spielstand gespeichert. Sie können jederzeit fortfahren.",
+      alert_save_and_pause_error: "Fehler beim Speichern."
     };
     const i18nForScoreboard = (key, params = {}) => {
       const template = UI_MESSAGES[uiLocale]?.[key] ?? UI_MESSAGES.ko[key] ?? key;
@@ -1133,6 +1184,87 @@ document.addEventListener("DOMContentLoaded", () => {
       iconEl.style.backgroundColor = iconColor;
       iconEl.style.borderColor = light ? "#111827" : iconColor;
       iconEl.style.boxShadow = "0 1px 3px rgba(15, 23, 42, 0.15)";
+    };
+
+    const applyTeamHeaderColor = (headerEl, color) => {
+      if (!headerEl) return;
+      const validColors = ['white', 'black', 'red', 'blue', 'yellow', 'green', 'pink', 'skyblue', 'brown', 'orange'];
+      const colorName = String(color || 'white').toLowerCase().trim();
+      // Remove all existing team-header-* classes
+      validColors.forEach(c => headerEl.classList.remove(`team-header-${c}`));
+      // Add the appropriate class
+      const safeColor = validColors.includes(colorName) ? colorName : 'white';
+      headerEl.classList.add(`team-header-${safeColor}`);
+    };
+
+    // 파울 숫자 색상을 팀 배경색에 따라 동적으로 적용
+    const applyFoulColor = (foulEl, foulCount, teamColor) => {
+      if (!foulEl) return;
+      const colorName = String(teamColor || 'white').toLowerCase().trim();
+      const isHighFoul = foulCount >= 5;
+
+      // 빨간색 계열 배경 (red, orange, pink, brown)
+      const redishBg = ['red', 'orange', 'pink', 'brown'].includes(colorName);
+      // 어두운 배경 (black, blue, green, skyblue)
+      const darkBg = ['black', 'blue', 'green', 'skyblue'].includes(colorName);
+      // 밝은 배경 (white, yellow)
+      const lightBg = ['white', 'yellow'].includes(colorName);
+
+      if (isHighFoul) {
+        // 파울 5개 이상: 경고색
+        if (redishBg) {
+          // 빨간 계열 배경에서는 노란색으로 강조
+          foulEl.style.color = '#fef08a'; // yellow-200
+          foulEl.style.textShadow = '0 1px 2px rgba(0,0,0,0.5)';
+        } else if (darkBg) {
+          // 어두운 배경에서는 밝은 빨간색
+          foulEl.style.color = '#fca5a5'; // red-300
+          foulEl.style.textShadow = '0 1px 2px rgba(0,0,0,0.3)';
+        } else {
+          // 밝은 배경에서는 진한 빨간색
+          foulEl.style.color = '#dc2626'; // red-600
+          foulEl.style.textShadow = 'none';
+        }
+      } else {
+        // 파울 5개 미만: 기본 색상 (배경에 맞춰 가시성 확보)
+        if (darkBg || redishBg) {
+          foulEl.style.color = '#ffffff';
+          foulEl.style.textShadow = '0 1px 2px rgba(0,0,0,0.3)';
+        } else {
+          foulEl.style.color = 'inherit';
+          foulEl.style.textShadow = 'none';
+        }
+      }
+    };
+
+    // TEAM FOUL 배지 표시 (파울 5개 이상일 때)
+    const applyTeamFoulBadge = (badgeEl, foulCount, teamColor) => {
+      if (!badgeEl) return;
+      const colorName = String(teamColor || 'white').toLowerCase().trim();
+      const isHighFoul = foulCount >= 5;
+
+      if (isHighFoul) {
+        badgeEl.classList.remove('hidden');
+        // 배경색에 따른 대비 색상 설정
+        const redishBg = ['red', 'orange', 'pink', 'brown'].includes(colorName);
+        const darkBg = ['black', 'blue', 'green', 'skyblue'].includes(colorName);
+
+        if (redishBg) {
+          // 빨간 계열 배경: 노란색 배지
+          badgeEl.style.backgroundColor = '#fef08a';
+          badgeEl.style.color = '#78350f';
+        } else if (darkBg) {
+          // 어두운 배경: 밝은 빨간색 배지
+          badgeEl.style.backgroundColor = '#fca5a5';
+          badgeEl.style.color = '#7f1d1d';
+        } else {
+          // 밝은 배경: 진한 빨간색 배지
+          badgeEl.style.backgroundColor = '#dc2626';
+          badgeEl.style.color = '#ffffff';
+        }
+      } else {
+        badgeEl.classList.add('hidden');
+      }
     };
 
     const fallbackMatchupSlots = (sourceTeams) => {
@@ -1361,9 +1493,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const activeMatchupId = matchupIdForStep(state.rotation_step || 0);
       const [team1Idx, team2Idx] = matchupPairById(activeMatchupId);
       const savedScores = state.matchup_scores?.[activeMatchupId] || { team1: 0, team2: 0 };
+      const savedFouls = state.matchup_fouls?.[activeMatchupId] || { team1: 0, team2: 0 };
 
       if (state.teams[team1Idx]) state.teams[team1Idx].score = Number(savedScores.team1) || 0;
       if (state.teams[team2Idx]) state.teams[team2Idx].score = Number(savedScores.team2) || 0;
+
+      // 파울도 경기별로 복원
+      state.home_fouls = Number(savedFouls.team1) || 0;
+      state.away_fouls = Number(savedFouls.team2) || 0;
 
       if (teamsCount === 3) {
         [ 0, 1, 2 ].forEach((index) => {
@@ -1376,9 +1513,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const emptyMatchupScores = () => matchupSlots().map(() => ({ team1: 0, team2: 0 }));
 
+    // 게임 데이터에서 기존 점수를 추출하여 matchup_scores 초기화
+    const getInitialMatchupScoresFromGames = (seededSlots) => {
+      if (!Array.isArray(games) || games.length === 0) {
+        return seededSlots.map(() => ({ team1: 0, team2: 0 }));
+      }
+
+      return seededSlots.map((_, index) => {
+        const game = games[index];
+        if (!game) return { team1: 0, team2: 0 };
+
+        const homeScore = Number(game.home_score) || 0;
+        const awayScore = Number(game.away_score) || 0;
+
+        // 점수가 있으면 기존 점수 사용
+        if (homeScore > 0 || awayScore > 0) {
+          return { team1: homeScore, team2: awayScore };
+        }
+        return { team1: 0, team2: 0 };
+      });
+    };
+
     const defaultState = () => {
       const seededTeams = defaultTeams().map((team) => ({ ...team, score: 0 }));
       const seededSlots = initialMatchupSlots(seededTeams);
+      const initialScores = getInitialMatchupScoresFromGames(seededSlots);
+      const hasExistingScores = initialScores.some(s => s.team1 > 0 || s.team2 > 0);
+
+      // 기존 점수가 있으면 현재 매치업의 점수로 팀 점수 설정
+      const initialTeamScores = hasExistingScores && initialScores[0]
+        ? { home: initialScores[0].team1, away: initialScores[0].team2 }
+        : { home: 0, away: 0 };
+
+      const teamsWithScores = seededTeams.map((team, index) => {
+        // 첫 번째 매치업(index 0)의 팀1(home)과 팀2(away)에 점수 할당
+        if (seededSlots[0]) {
+          if (index === seededSlots[0].team1Idx) return { ...team, score: initialTeamScores.home };
+          if (index === seededSlots[0].team2Idx) return { ...team, score: initialTeamScores.away };
+        }
+        return { ...team, score: 0 };
+      });
 
       return {
         quarter: 1,
@@ -1399,9 +1573,10 @@ document.addEventListener("DOMContentLoaded", () => {
         rotation_step: 0,
         home_fouls: 0,
         away_fouls: 0,
-        teams: seededTeams,
+        teams: teamsWithScores,
         matchup_slots: serializeMatchupSlots(seededSlots),
-        matchup_scores: seededSlots.map(() => ({ team1: 0, team2: 0 })),
+        matchup_scores: initialScores,
+        matchup_fouls: seededSlots.map(() => ({ team1: 0, team2: 0 })),
         matchup_order: defaultMatchupOrder(seededSlots),
         quarter_history: {}, // { pairIdx: { quarterNum: { team1: score, team2: score } } }
         progression_mode: isTwoTeamMode() ? "by_game" : "by_quarter",
@@ -1462,8 +1637,50 @@ document.addEventListener("DOMContentLoaded", () => {
       const slotsForState = slotsFromPayload.length > 0 ? slotsFromPayload : initialMatchupSlots(normalized.teams);
       normalized.matchup_slots = serializeMatchupSlots(slotsForState);
 
-      normalized.matchup_scores = slotsForState.map((_, index) => {
-        const row = incomingState.matchup_scores?.[index];
+      // 서버에서 받은 점수가 모두 0인지 확인
+      const incomingScoresAllZero = !Array.isArray(incomingState.matchup_scores) ||
+        incomingState.matchup_scores.every(row =>
+          (Number(row?.team1) || 0) === 0 && (Number(row?.team2) || 0) === 0
+        );
+
+      // 게임 데이터에 점수가 있는지 확인
+      const gamesHaveScores = Array.isArray(games) && games.some(game =>
+        (Number(game.home_score) || 0) > 0 || (Number(game.away_score) || 0) > 0
+      );
+
+      // 서버 점수가 0이고 게임에 점수가 있으면 게임 점수 사용
+      if (incomingScoresAllZero && gamesHaveScores) {
+        normalized.matchup_scores = slotsForState.map((_, index) => {
+          const game = games[index];
+          if (!game) return { team1: 0, team2: 0 };
+          const homeScore = Number(game.home_score) || 0;
+          const awayScore = Number(game.away_score) || 0;
+          return { team1: homeScore, team2: awayScore };
+        });
+        // 팀 점수도 게임 점수로 설정
+        if (normalized.matchup_scores[0] && normalized.teams.length >= 2) {
+          const firstSlot = slotsForState[0];
+          if (firstSlot) {
+            if (normalized.teams[firstSlot.team1Idx]) {
+              normalized.teams[firstSlot.team1Idx].score = normalized.matchup_scores[0].team1;
+            }
+            if (normalized.teams[firstSlot.team2Idx]) {
+              normalized.teams[firstSlot.team2Idx].score = normalized.matchup_scores[0].team2;
+            }
+          }
+        }
+      } else {
+        normalized.matchup_scores = slotsForState.map((_, index) => {
+          const row = incomingState.matchup_scores?.[index];
+          return {
+            team1: Number.isFinite(Number(row?.team1)) ? Number(row.team1) : 0,
+            team2: Number.isFinite(Number(row?.team2)) ? Number(row.team2) : 0
+          };
+        });
+      }
+
+      normalized.matchup_fouls = slotsForState.map((_, index) => {
+        const row = incomingState.matchup_fouls?.[index];
         return {
           team1: Number.isFinite(Number(row?.team1)) ? Number(row.team1) : 0,
           team2: Number.isFinite(Number(row?.team2)) ? Number(row.team2) : 0
@@ -1734,7 +1951,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <span style="color: #666666; font-size: 9px; font-weight: 500; letter-spacing: 2px; font-family: Inter, sans-serif;">GAME TIME</span>
           <div style="width: 40px; height: 1px; background: #333333;"></div>
           <div style="width: 90px; height: 48px; background: #161616; border: 1px solid #333333; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;">
-            <span style="color: ${COLORS.shotClock}; font-size: 22px; font-weight: 700; font-family: 'JetBrains Mono', monospace;">${state.shot_seconds}</span>
+            <span style="color: ${COLORS.shotClock}; font-size: 22px; font-weight: 700; font-family: 'JetBrains Mono', monospace;">${state.shot_seconds < 0 ? '--' : (state.shot_seconds < 5 && state.shot_seconds > 0 ? Number(state.shot_seconds).toFixed(1) : Math.floor(state.shot_seconds))}</span>
             <span style="color: #666666; font-size: 8px; font-weight: 500; letter-spacing: 1px; font-family: Inter, sans-serif;">SHOT CLOCK</span>
           </div>
         </div>
@@ -1763,7 +1980,15 @@ document.addEventListener("DOMContentLoaded", () => {
       setText("[data-preview-home]", home.score);
       setText("[data-preview-away]", away.score);
       // Show "--" for shot clock when disabled (shot_seconds < 0)
-      const previewShotDisplay = state.shot_seconds < 0 ? "--" : state.shot_seconds;
+      // 5초 미만이면 소수점 한자리 표시, 그 외에는 정수 (올림)
+      let previewShotDisplay;
+      if (state.shot_seconds < 0) {
+        previewShotDisplay = "--";
+      } else if (state.shot_seconds < 5 && state.shot_seconds > 0) {
+        previewShotDisplay = Number(state.shot_seconds).toFixed(1);
+      } else {
+        previewShotDisplay = Math.floor(state.shot_seconds);
+      }
       setText("[data-preview-shot]", previewShotDisplay);
     };
 
@@ -1783,7 +2008,21 @@ document.addEventListener("DOMContentLoaded", () => {
       setText("[data-scoreboard-timer]", formatTime(state.period_seconds));
 
       // Show "--" for shot clock when disabled (shot_seconds < 0)
-      const shotClockDisplay = state.shot_seconds < 0 ? "--" : state.shot_seconds;
+      // 5초 미만: 소수점 한자리 표시
+      // 5~6초: floor() 사용 (음성 카운트다운과 동기화)
+      // 6초 이상: ceil() 사용 (리셋 후 1초간 숫자 유지)
+      let shotClockDisplay;
+      if (state.shot_seconds < 0) {
+        shotClockDisplay = "--";
+      } else if (state.shot_seconds < 5 && state.shot_seconds > 0) {
+        shotClockDisplay = Number(state.shot_seconds).toFixed(1);
+      } else if (state.shot_seconds < 6) {
+        // 5~6초 범위: floor()로 음성과 동기화
+        shotClockDisplay = Math.floor(state.shot_seconds);
+      } else {
+        // 6초 이상: ceil()로 리셋값이 1초간 유지되도록
+        shotClockDisplay = Math.ceil(state.shot_seconds);
+      }
       setText("[data-scoreboard-shot]", shotClockDisplay);
 
       // Team names (for new sports display)
@@ -1807,9 +2046,56 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       };
 
+      console.log('[Render] isDisplayPage:', isDisplayPage, ', role:', role);
+
       if (isDisplayPage) {
         applyDisplayBadgeStyle(".team-badge-left", leftTeam);
         applyDisplayBadgeStyle(".team-badge-right", rightTeam);
+
+        // Display 페이지 팀 색상 인디케이터 및 바 업데이트
+        const DISPLAY_TEAM_COLOR_MAP = {
+          'White': '#ffffff',
+          'Black': '#1f2937',
+          'Red': '#ef4444',
+          'Blue': '#3b82f6',
+          'Yellow': '#eab308',
+          'Green': '#22c55e',
+          'Pink': '#ec4899',
+          'SkyBlue': '#38bdf8',
+          'Brown': '#a16207',
+          'Orange': '#f97316'
+        };
+
+        const getDisplayTeamColor = (colorName) => {
+          return DISPLAY_TEAM_COLOR_MAP[colorName] || colorName || '#3b82f6';
+        };
+
+        const leftColor = getDisplayTeamColor(leftTeam?.color);
+        const rightColor = getDisplayTeamColor(rightTeam?.color);
+
+        console.log('[Display] Team colors - leftTeam:', leftTeam?.color, '→', leftColor, ', rightTeam:', rightTeam?.color, '→', rightColor);
+
+        // 팀 색상 인디케이터 (원형) - setProperty로 강제 적용
+        const leftIndicator = scoreboardRoot.querySelector('[data-team-color-left]');
+        const rightIndicator = scoreboardRoot.querySelector('[data-team-color-right]');
+        console.log('[Display] Color indicators found - left:', !!leftIndicator, ', right:', !!rightIndicator);
+        if (leftIndicator) {
+          leftIndicator.style.setProperty('background-color', leftColor, 'important');
+        }
+        if (rightIndicator) {
+          rightIndicator.style.setProperty('background-color', rightColor, 'important');
+        }
+
+        // 팀 색상 바 - setProperty로 강제 적용
+        const leftBar = scoreboardRoot.querySelector('[data-team-bar-left]');
+        const rightBar = scoreboardRoot.querySelector('[data-team-bar-right]');
+        console.log('[Display] Color bars found - left:', !!leftBar, ', right:', !!rightBar);
+        if (leftBar) {
+          leftBar.style.setProperty('background-color', leftColor, 'important');
+        }
+        if (rightBar) {
+          rightBar.style.setProperty('background-color', rightColor, 'important');
+        }
       }
 
       // Scores (new display)
@@ -1875,13 +2161,41 @@ document.addEventListener("DOMContentLoaded", () => {
       if (homeIconEl) {
         applyTeamIconColor(homeIconEl, home.color);
       }
+      const homeHeaderEl = scoreboardRoot.querySelector("[data-home-header]");
+      if (homeHeaderEl) {
+        applyTeamHeaderColor(homeHeaderEl, home.color);
+      }
 
       const awayIconEl = scoreboardRoot.querySelector("[data-away-icon]");
       if (awayIconEl) {
         applyTeamIconColor(awayIconEl, away.color);
       }
+      const awayHeaderEl = scoreboardRoot.querySelector("[data-away-header]");
+      if (awayHeaderEl) {
+        applyTeamHeaderColor(awayHeaderEl, away.color);
+      }
       setText("[data-home-fouls]", state.home_fouls || 0);
       setText("[data-away-fouls]", state.away_fouls || 0);
+
+      // 파울 숫자 색상 적용 (팀 배경색에 따른 가시성 확보)
+      const homeFoulEl = scoreboardRoot.querySelector("[data-home-fouls]");
+      if (homeFoulEl) {
+        applyFoulColor(homeFoulEl, state.home_fouls || 0, home.color);
+      }
+      const awayFoulEl = scoreboardRoot.querySelector("[data-away-fouls]");
+      if (awayFoulEl) {
+        applyFoulColor(awayFoulEl, state.away_fouls || 0, away.color);
+      }
+
+      // TEAM FOUL 배지 표시 (파울 5개 이상)
+      const homeFoulBadge = scoreboardRoot.querySelector("[data-home-team-foul-badge]");
+      if (homeFoulBadge) {
+        applyTeamFoulBadge(homeFoulBadge, state.home_fouls || 0, home.color);
+      }
+      const awayFoulBadge = scoreboardRoot.querySelector("[data-away-team-foul-badge]");
+      if (awayFoulBadge) {
+        applyTeamFoulBadge(awayFoulBadge, state.away_fouls || 0, away.color);
+      }
 
       // 마지막 라운드 도달 시 NEXT QUARTER 버튼 상태 변경
       const nextQuarterBtn = scoreboardRoot.querySelector('[data-action="next-quarter"]');
@@ -1917,15 +2231,19 @@ document.addEventListener("DOMContentLoaded", () => {
       if (cumulativeViewBtn && perQuarterViewBtn) {
         const cumulativeActive = !isPerQuarterScoreView();
 
+        // 누적 버튼: 선택되면 bg-gray-900, 비선택이면 bg-white + hover 효과
         cumulativeViewBtn.classList.toggle("bg-gray-900", cumulativeActive);
         cumulativeViewBtn.classList.toggle("text-white", cumulativeActive);
         cumulativeViewBtn.classList.toggle("bg-white", !cumulativeActive);
         cumulativeViewBtn.classList.toggle("text-gray-500", !cumulativeActive);
+        cumulativeViewBtn.classList.toggle("hover:bg-gray-100", !cumulativeActive);
 
+        // 쿼터별 버튼: 선택되면 bg-gray-900, 비선택이면 bg-white + hover 효과
         perQuarterViewBtn.classList.toggle("bg-gray-900", !cumulativeActive);
         perQuarterViewBtn.classList.toggle("text-white", !cumulativeActive);
         perQuarterViewBtn.classList.toggle("bg-white", cumulativeActive);
         perQuarterViewBtn.classList.toggle("text-gray-500", cumulativeActive);
+        perQuarterViewBtn.classList.toggle("hover:bg-gray-100", cumulativeActive);
       }
 
       const addGameBtn = scoreboardRoot.querySelector('[data-action="add-game"]');
@@ -1964,10 +2282,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const possToggleBtn = scoreboardRoot.querySelector('[data-possession-toggle-btn]');
       if (possToggleBtn) {
         const currentPossession = normalizePossession(state.possession, "away");
-        const directionLabel = currentPossession === "home"
-          ? i18nForScoreboard("possession_right")
-          : i18nForScoreboard("possession_left");
-        possToggleBtn.textContent = i18nForScoreboard("possession_toggle", { direction: directionLabel });
+        // 아이콘을 유지하면서 색상만 변경 (텍스트는 고정: "공격 전환")
         possToggleBtn.style.color = "#FFFFFF";
         possToggleBtn.style.textShadow = "0 1px 1px rgba(0,0,0,0.25)";
         if (currentPossession === "home") {
@@ -2101,9 +2416,13 @@ document.addEventListener("DOMContentLoaded", () => {
           const getScoreCell = (q) => {
             const displayScore = getQuarterScoresForDisplay(q);
             if (displayScore) {
+              const t1Won = displayScore.team1 > displayScore.team2;
+              const t2Won = displayScore.team2 > displayScore.team1;
+              const t1Class = t1Won ? "font-bold text-[#FF6B35] text-lg" : "font-bold text-gray-900 text-lg";
+              const t2Class = t2Won ? "font-bold text-[#FF6B35] text-lg" : "font-bold text-gray-500 text-lg";
               return `<div class="flex flex-col leading-none gap-1">
-                             <span class="font-bold text-gray-900 text-lg">${displayScore.team1}</span>
-                             <span class="font-bold text-gray-500 text-lg">${displayScore.team2}</span>
+                             <span class="${t1Class}">${displayScore.team1}</span>
+                             <span class="${t2Class}">${displayScore.team2}</span>
                            </div>`;
             }
             return `<span class="text-gray-300 text-lg">-</span>`;
@@ -2119,10 +2438,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           const formatTeamLabel = (label) => {
             const raw = String(label || "").trim();
-            if (!raw) return i18nForScoreboard("team_word");
-            const teamWord = i18nForScoreboard("team_word");
-            const matcher = new RegExp(`^${teamWord}\\s+`, "i");
-            return matcher.test(raw) ? raw : `${teamWord} ${raw}`;
+            return raw || "";
           };
 
           const getTeamNameStyle = (team, fallbackColor = "#111827") => {
@@ -2191,8 +2507,8 @@ document.addEventListener("DOMContentLoaded", () => {
                  ${quarterCellsHtml}
                  <td class="p-4 font-bold">
                    <div class="flex flex-col leading-none gap-1">
-                     <span class="text-gray-900 text-lg">${finalScore.team1}</span>
-                     <span class="text-gray-500 text-lg">${finalScore.team2}</span>
+                     <span class="${finalScore.team1 > finalScore.team2 ? 'text-[#FF6B35]' : 'text-gray-900'} text-lg">${finalScore.team1}</span>
+                     <span class="${finalScore.team2 > finalScore.team1 ? 'text-[#FF6B35]' : 'text-gray-500'} text-lg">${finalScore.team2}</span>
                    </div>
                  </td>
                </tr>
@@ -2232,6 +2548,12 @@ document.addEventListener("DOMContentLoaded", () => {
               state.matchup_scores[previousMatchupId] = {
                 team1: state.teams[prevTeam1Idx].score,
                 team2: state.teams[prevTeam2Idx].score
+              };
+              // 이전 경기 파울 저장
+              if (!state.matchup_fouls) state.matchup_fouls = [];
+              state.matchup_fouls[previousMatchupId] = {
+                team1: state.home_fouls || 0,
+                team2: state.away_fouls || 0
               };
             }
 
@@ -2347,59 +2669,159 @@ document.addEventListener("DOMContentLoaded", () => {
       shotLastTickAtMs = null;
     };
 
-    // Global AudioContext for buzzer (initialized on first user interaction)
-    let globalAudioContext = null;
+    // HTML5 Audio 기반 버저 (Web Audio API 대신 사용 - 더 안정적)
+    let buzzerAudio = null;
+    let buzzerPlaying = false;
+    let buzzerCooldownUntil = 0;
 
-    const initAudioContext = () => {
-      if (globalAudioContext) return;
+    // Base64 WAV 파일 생성 (440Hz 사각파, 1.5초)
+    const createBuzzerWavBase64 = () => {
+      const sampleRate = 44100;
+      const duration = 1.5;
+      const numSamples = Math.floor(sampleRate * duration);
+      const frequency = 440;
+      const amplitude = 0.15;
+
+      // WAV 파일 생성
+      const numChannels = 1;
+      const bitsPerSample = 16;
+      const byteRate = sampleRate * numChannels * bitsPerSample / 8;
+      const blockAlign = numChannels * bitsPerSample / 8;
+      const dataSize = numSamples * blockAlign;
+      const fileSize = 44 + dataSize;
+
+      const buffer = new ArrayBuffer(fileSize);
+      const view = new DataView(buffer);
+
+      // WAV 헤더
+      const writeString = (offset, str) => {
+        for (let i = 0; i < str.length; i++) {
+          view.setUint8(offset + i, str.charCodeAt(i));
+        }
+      };
+
+      writeString(0, 'RIFF');
+      view.setUint32(4, fileSize - 8, true);
+      writeString(8, 'WAVE');
+      writeString(12, 'fmt ');
+      view.setUint32(16, 16, true); // fmt chunk size
+      view.setUint16(20, 1, true);  // PCM format
+      view.setUint16(22, numChannels, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, byteRate, true);
+      view.setUint16(32, blockAlign, true);
+      view.setUint16(34, bitsPerSample, true);
+      writeString(36, 'data');
+      view.setUint32(40, dataSize, true);
+
+      // 오디오 데이터 (사각파)
+      let offset = 44;
+      for (let i = 0; i < numSamples; i++) {
+        const t = i / sampleRate;
+        const sineValue = Math.sin(2 * Math.PI * frequency * t);
+        let sample = sineValue >= 0 ? amplitude : -amplitude;
+
+        // 마지막 0.1초 페이드아웃
+        const fadeStart = duration - 0.1;
+        if (t > fadeStart) {
+          const fadeProgress = (t - fadeStart) / 0.1;
+          sample *= (1 - fadeProgress);
+        }
+
+        // 16비트 PCM으로 변환 (-32768 ~ 32767)
+        const intSample = Math.max(-32768, Math.min(32767, Math.floor(sample * 32767)));
+        view.setInt16(offset, intSample, true);
+        offset += 2;
+      }
+
+      // ArrayBuffer를 Base64로 변환
+      const bytes = new Uint8Array(buffer);
+      let binary = '';
+      for (let i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return 'data:audio/wav;base64,' + btoa(binary);
+    };
+
+    // 버저 오디오 초기화 (페이지 로드 시 한 번만)
+    const initBuzzerAudio = () => {
+      if (buzzerAudio) return;
 
       try {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        globalAudioContext = new AudioContext();
+        const wavDataUrl = createBuzzerWavBase64();
+        buzzerAudio = new Audio(wavDataUrl);
+        buzzerAudio.preload = 'auto';
+        buzzerAudio.volume = 1.0;
 
-        // Resume if suspended
-        if (globalAudioContext.state === 'suspended') {
-          globalAudioContext.resume().then(() => {
-          });
-        }
+        buzzerAudio.addEventListener('ended', () => {
+          buzzerPlaying = false;
+          console.log('[Buzzer] Buzzer sound ended');
+        });
+
+        buzzerAudio.addEventListener('error', (e) => {
+          console.error('[Buzzer] Audio error:', e);
+          buzzerPlaying = false;
+        });
+
+        console.log('[Buzzer] HTML5 Audio initialized');
       } catch (e) {
-        console.error("Failed to init AudioContext:", e);
+        console.error('[Buzzer] Failed to init Audio:', e);
       }
     };
 
     const playBuzzer = () => {
-      if (!isSoundEnabled()) return;
+      const now = Date.now();
+      console.log('[Buzzer] playBuzzer called at', now, 'cooldownUntil:', buzzerCooldownUntil, 'playing:', buzzerPlaying);
+
+      if (!isSoundEnabled()) {
+        console.log('[Buzzer] Sound disabled, skipping');
+        return;
+      }
+
+      // 쿨다운 중이면 무시
+      if (now < buzzerCooldownUntil) {
+        console.log('[Buzzer] In cooldown, remaining:', buzzerCooldownUntil - now, 'ms, skipping');
+        return;
+      }
+
+      // 이미 재생 중이면 무시
+      if (buzzerPlaying) {
+        console.log('[Buzzer] Already playing, skipping');
+        return;
+      }
+
+      // 쿨다운 시작
+      buzzerCooldownUntil = now + 3000;
+      console.log('[Buzzer] Cooldown set until', buzzerCooldownUntil);
 
       // Initialize on first call
-      if (!globalAudioContext) {
-        initAudioContext();
+      if (!buzzerAudio) {
+        initBuzzerAudio();
       }
 
       try {
-
-        if (!globalAudioContext || globalAudioContext.state === 'closed') {
-          console.error("❌ AudioContext not available");
+        if (!buzzerAudio) {
+          console.error('[Buzzer] Audio not available');
           return;
         }
 
-        // Resume if needed (for Safari)
-        if (globalAudioContext.state === 'suspended') {
-          globalAudioContext.resume();
-        }
+        buzzerPlaying = true;
 
-        const oscillator = globalAudioContext.createOscillator();
-        const gain = globalAudioContext.createGain();
-        oscillator.type = "square";
-        oscillator.frequency.value = 440;
-        gain.gain.value = 0.15;
-        oscillator.connect(gain);
-        gain.connect(globalAudioContext.destination);
-        oscillator.start();
-        setTimeout(() => {
-          oscillator.stop();
-        }, 1500);
+        // 처음부터 재생
+        buzzerAudio.currentTime = 0;
+        const playPromise = buzzerAudio.play();
+
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            console.log('[Buzzer] Playing buzzer via HTML5 Audio');
+          }).catch((error) => {
+            console.error('[Buzzer] Play failed:', error);
+            buzzerPlaying = false;
+          });
+        }
       } catch (error) {
-        console.error("❌ Buzzer error:", error);
+        console.error('[Buzzer] Buzzer error:', error);
+        buzzerPlaying = false;
       }
     };
 
@@ -2500,21 +2922,48 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const startShotTimer = () => {
-      if (shotTimer) return;
+      if (shotTimer) return; // Already running
+      // Don't start if shot clock is expired or nearly expired
+      if (state.shot_seconds < 0.1) {
+        state.shot_running = false;
+        return;
+      }
       shotLastTickAtMs = Date.now();
+      // Ensure reference values are set for display sync
+      if (!state.shot_ref_at_ms || state.shot_ref_at_ms === 0) {
+        state.shot_ref_at_ms = shotLastTickAtMs;
+        state.shot_ref_value = state.shot_seconds;
+      }
+      let lastBroadcastSec = Math.floor(state.shot_seconds);
       shotTimer = setInterval(() => {
-        const { elapsedSeconds, nextTickAtMs } = consumeElapsedSeconds(shotLastTickAtMs);
+        const currentSeconds = Math.max(0, Number.parseFloat(state.shot_seconds) || 0);
+
+        // Use same logic as main timer - consumeElapsedTime with precision mode
+        const { elapsedTime, nextTickAtMs } = consumeElapsedTime(shotLastTickAtMs, true);
         shotLastTickAtMs = nextTickAtMs;
-        if (elapsedSeconds <= 0) return;
+        if (elapsedTime <= 0) return;
 
-        const previousSeconds = Math.max(0, Number.parseInt(state.shot_seconds, 10) || 0);
-        const nextSeconds = Math.max(0, previousSeconds - elapsedSeconds);
-        state.shot_seconds = nextSeconds;
-        speakCountdownIfNeeded(previousSeconds, nextSeconds);
+        const previousSeconds = currentSeconds;
+        const nextSeconds = Math.max(0, previousSeconds - elapsedTime);
 
-        if (nextSeconds === 0) {
+        // Round to 2 decimal places for precision display
+        state.shot_seconds = Math.round(nextSeconds * 100) / 100;
+
+        // 음성 카운트다운: 화면에 표시되는 숫자(floor)가 변경될 때 읽기
+        // 5, 4, 3, 2, 1 만 읽음
+        const prevFloor = Math.floor(previousSeconds);
+        const nextFloor = Math.floor(nextSeconds);
+
+        if (prevFloor !== nextFloor && nextFloor > 0 && nextFloor <= 5) {
+          speak(nextFloor);
+        }
+
+        // 0.05초 미만이면 0으로 처리하고 버저 울림 (부동소수점 오차 방지)
+        if (nextSeconds < 0.05) {
+          state.shot_seconds = 0;
           state.shot_running = false;
           stopShotTimer();
+          console.log('[ShotClock] Timer expired, playing buzzer');
           playBuzzer();
 
           // If game time < 24 seconds, disable shot clock (set to -1)
@@ -2528,8 +2977,13 @@ document.addEventListener("DOMContentLoaded", () => {
         state.shot_ref_value = state.shot_seconds;
 
         render();
-        broadcast();
-      }, 250);
+        // 5초 미만일 때는 100ms마다 브로드캐스트, 그 외에는 표시되는 정수 초 변경 시에만
+        const nextFloorSec = Math.floor(nextSeconds);
+        if (state.shot_seconds < 5 || lastBroadcastSec !== nextFloorSec) {
+          lastBroadcastSec = nextFloorSec;
+          broadcast();
+        }
+      }, 100); // 100ms interval for smooth decimal display
     };
 
     // Track last spoken countdown to avoid duplicates
@@ -2574,16 +3028,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const syncTimers = () => {
       if (role !== "control") return;
+
+      // Main timer: always ensure correct state
       if (state.running) {
         startMainTimer();
-      } else if (mainTimer) {
-        stopMainTimer();
+      } else {
+        stopMainTimer(); // Always call stop when not running (safe if already stopped)
       }
 
+      // Shot timer: always ensure correct state
+      // Note: startShotTimer() has its own check for nearly-expired values
       if (state.shot_running) {
         startShotTimer();
-      } else if (shotTimer) {
-        stopShotTimer();
+      } else {
+        stopShotTimer(); // Always call stop when not running (safe if already stopped)
       }
     };
 
@@ -2617,7 +3075,12 @@ document.addEventListener("DOMContentLoaded", () => {
           const currentValue = Math.max(0, state.shot_ref_value - elapsed);
           const shotEl = document.querySelector("[data-scoreboard-shot]");
           if (shotEl) {
-            shotEl.textContent = Math.ceil(currentValue);
+            // 5초 미만이면 소수점 한자리 표시, 5초 이상이면 floor
+            if (currentValue < 5 && currentValue > 0) {
+              shotEl.textContent = currentValue.toFixed(1);
+            } else {
+              shotEl.textContent = Math.floor(currentValue);
+            }
           }
         }
 
@@ -2941,9 +3404,13 @@ document.addEventListener("DOMContentLoaded", () => {
       bindDirectScoreInput("[data-away-score-input]", "away");
 
       scoreboardRoot.querySelectorAll("[data-action]").forEach((btn) => {
+        // 이미 핸들러가 등록된 버튼은 건너뛰기 (중복 등록 방지)
+        if (btn.dataset.handlerAttached === "true") return;
+        btn.dataset.handlerAttached = "true";
+
         btn.addEventListener("click", () => {
-          // Initialize AudioContext on first user interaction
-          initAudioContext();
+          // Initialize buzzer audio on first user interaction
+          initBuzzerAudio();
 
           const action = btn.dataset.action;
           if (["add-home", "add-home-1", "add-home-2", "add-home-3",
@@ -2964,14 +3431,22 @@ document.addEventListener("DOMContentLoaded", () => {
                   // Update timer references for sync
                   state.main_ref_at_ms = now;
                   state.main_ref_value = state.period_seconds;
-                  // Start shot clock together if it has a valid value
-                  if (state.shot_seconds > 0) {
+                  // Start shot clock together if it has a valid value (> 0.1 to handle floating point)
+                  if (state.shot_seconds >= 0.1) {
                     state.shot_running = true;
                     state.shot_ref_at_ms = now;
                     state.shot_ref_value = state.shot_seconds;
+                  } else {
+                    // Shot clock expired or disabled - ensure it stays stopped
+                    state.shot_running = false;
                   }
                 } else {
+                  // Stopping main timer - always stop shot clock too
                   state.shot_running = false;
+                  // Preserve shot clock reference for when we resume
+                  if (state.shot_seconds > 0) {
+                    state.shot_ref_value = state.shot_seconds;
+                  }
                 }
                 break;
               }
@@ -3119,6 +3594,12 @@ document.addEventListener("DOMContentLoaded", () => {
                   team1: finishedTotals.team1,
                   team2: finishedTotals.team2
                 };
+                // 경기 완료 시 파울도 저장
+                if (!state.matchup_fouls) state.matchup_fouls = [];
+                state.matchup_fouls[finishedPairIdx] = {
+                  team1: state.home_fouls || 0,
+                  team2: state.away_fouls || 0
+                };
 
                 if (!state.quarter_history[finishedPairIdx]) {
                   state.quarter_history[finishedPairIdx] = {};
@@ -3148,7 +3629,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         away_team_id: state.teams[p2].id,
                         quarter: finishedQuarter,
                         home_score: finishedTotals.team1,
-                        away_score: finishedTotals.team2
+                        away_score: finishedTotals.team2,
+                        skip_result: true  // 쿼터 넘길 때는 결과 확정 안함 (경기 완료 시에만 확정)
                       })
                     });
                   } catch (error) {
@@ -3163,7 +3645,62 @@ document.addEventListener("DOMContentLoaded", () => {
                   if (nextQuarterBtn) {
                     nextQuarterBtn.textContent = i18nForScoreboard("saved_complete");
                     nextQuarterBtn.disabled = true;
-                    nextQuarterBtn.classList.add("opacity-50", "cursor-not-allowed");
+                    // 다른 경기 종료 버튼과 동일한 스타일 적용 (흰색 배경 + 녹색 텍스트)
+                    nextQuarterBtn.classList.remove("text-[#FF6B35]", "hover:bg-orange-50", "bg-emerald-600", "bg-green-600", "hover:bg-emerald-700");
+                    nextQuarterBtn.classList.add("opacity-50", "cursor-not-allowed", "bg-white", "text-emerald-600", "hover:bg-emerald-50");
+                  }
+                  // 마지막 경기 종료 시에도 UI 업데이트 (matchup 테이블 반영)
+                  render();
+                  syncTimers();
+                  broadcast();
+
+                  // 마지막 경기 종료 후 결과 화면으로 이동
+                  const matchId = scoreboardRoot.dataset.matchId;
+                  const clubMatch = window.location.pathname.match(/\/clubs\/(\d+)/);
+                  const clubId = clubMatch ? clubMatch[1] : null;
+                  if (clubId && !matchId.toString().startsWith('standalone_')) {
+                    // 모든 게임 점수 저장 후 결과 화면으로 이동
+                    const saveAllAndRedirect = async () => {
+                      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+                      // 모든 매치업의 게임 점수 저장
+                      for (let pairIdx = 0; pairIdx < numMatchups; pairIdx++) {
+                        const [t1, t2] = matchupPairById(pairIdx);
+                        if (t1 === undefined || t2 === undefined) continue;
+
+                        const team1 = state.teams[t1];
+                        const team2 = state.teams[t2];
+                        if (!team1 || !team2) continue;
+
+                        const gameId = matchupGameIdById(pairIdx);
+                        const scores = state.matchup_scores[pairIdx] || { team1: 0, team2: 0 };
+
+                        try {
+                          await fetch(`/clubs/${clubId}/matches/${matchId}/save_game_scores`, {
+                            method: 'PATCH',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'X-CSRF-Token': csrfToken
+                            },
+                            body: JSON.stringify({
+                              game_id: gameId,
+                              home_team_id: team1.id,
+                              away_team_id: team2.id,
+                              home_score: scores.team1,
+                              away_score: scores.team2,
+                              skip_result: true  // 결과 확정은 결과 화면에서
+                            })
+                          });
+                        } catch (error) {
+                          console.error('게임 점수 저장 중 오류:', error);
+                        }
+                      }
+
+                      // 결과 화면으로 이동
+                      window.location.href = `/clubs/${clubId}/matches/${matchId}`;
+                    };
+
+                    saveAllAndRedirect();
                   }
                   return;
                 }
@@ -3214,6 +3751,9 @@ document.addEventListener("DOMContentLoaded", () => {
                   const [c1, c2] = matchupPairById(curPairIdx);
                   if (c1 !== undefined && c2 !== undefined && state.teams[c1] && state.teams[c2]) {
                     state.matchup_scores[curPairIdx] = { team1: state.teams[c1].score, team2: state.teams[c2].score };
+                    // 파울도 저장
+                    if (!state.matchup_fouls) state.matchup_fouls = [];
+                    state.matchup_fouls[curPairIdx] = { team1: state.home_fouls || 0, team2: state.away_fouls || 0 };
                   }
 
                   state.rotation_step -= 1;
@@ -3275,8 +3815,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 state.away_fouls = 0;
                 break;
               case "buzzer":
+                console.log('[Buzzer] Button clicked, calling playBuzzer');
                 playBuzzer();
-                break;
+                return; // 버저 후 다른 처리 하지 않음
               case "possession-home":
                 state.base_possession = basePossessionForSelectedQuarterDirection(
                   currentQuarter(),
@@ -3334,6 +3875,12 @@ document.addEventListener("DOMContentLoaded", () => {
                   state.matchup_scores[activePairIdx] = {
                     team1: finishedTotals.team1,
                     team2: finishedTotals.team2
+                  };
+                  // 저장하고 중단하기 시 파울도 저장
+                  if (!state.matchup_fouls) state.matchup_fouls = [];
+                  state.matchup_fouls[activePairIdx] = {
+                    team1: state.home_fouls || 0,
+                    team2: state.away_fouls || 0
                   };
                   if (!state.quarter_history[activePairIdx]) {
                     state.quarter_history[activePairIdx] = {};
@@ -3464,21 +4011,130 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 break;
               }
-              case "toggle-shortcuts":
-                const panel = document.querySelector("[data-shortcuts-panel]");
-                if (panel) {
-                  const btn = scoreboardRoot.querySelector('[data-action="toggle-shortcuts"]');
-                  if (panel.classList.contains("hidden")) {
-                    panel.classList.remove("hidden");
-                    if (btn) btn.textContent = i18nForScoreboard("shortcuts_hide");
-                  } else {
-                    panel.classList.add("hidden");
-                    if (btn) btn.textContent = i18nForScoreboard("shortcuts_show");
+              case "save-and-pause":
+              {
+                const saveAndPause = async () => {
+                  const activePairIdx = currentMatchupId();
+                  const [team1Idx, team2Idx] = matchupPairById(activePairIdx);
+                  if (team1Idx === undefined || team2Idx === undefined) return;
+
+                  const team1 = state.teams[team1Idx];
+                  const team2 = state.teams[team2Idx];
+                  if (!team1 || !team2) return;
+
+                  const activeGameId = matchupGameIdById(activePairIdx);
+                  const matchId = scoreboardRoot.dataset.matchId;
+                  const clubMatch = window.location.pathname.match(/\/clubs\/(\d+)/);
+                  const clubId = clubMatch ? clubMatch[1] : null;
+                  if (!clubId) {
+                    alert(i18nForScoreboard("alert_club_not_found"));
+                    return;
                   }
+
+                  // 타이머 멈춤
+                  state.running = false;
+                  state.shot_running = false;
+
+                  const currentQuarterNumber = currentQuarter();
+                  const currentTotals = buildQuarterTotalsForStorage(
+                    activePairIdx,
+                    currentQuarterNumber,
+                    team1.score,
+                    team2.score
+                  );
+
+                  // 상태 업데이트
+                  state.matchup_scores[activePairIdx] = {
+                    team1: currentTotals.team1,
+                    team2: currentTotals.team2
+                  };
+                  // 경기 완료 시 파울도 저장
+                  if (!state.matchup_fouls) state.matchup_fouls = [];
+                  state.matchup_fouls[activePairIdx] = {
+                    team1: state.home_fouls || 0,
+                    team2: state.away_fouls || 0
+                  };
+                  if (!state.quarter_history[activePairIdx]) {
+                    state.quarter_history[activePairIdx] = {};
+                  }
+                  state.quarter_history[activePairIdx][currentQuarterNumber] = {
+                    team1: currentTotals.team1,
+                    team2: currentTotals.team2
+                  };
+
+                  render();
+                  broadcast();
+
+                  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+                  try {
+                    // 쿼터 점수 저장 (결과 확정 없이 점수만)
+                    const quarterRes = await fetch(`/clubs/${clubId}/matches/${matchId}/save_quarter_scores`, {
+                      method: 'PATCH',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken
+                      },
+                      body: JSON.stringify({
+                        game_id: activeGameId,
+                        home_team_id: team1.id,
+                        away_team_id: team2.id,
+                        quarter: currentQuarterNumber,
+                        home_score: currentTotals.team1,
+                        away_score: currentTotals.team2,
+                        skip_result: true  // 결과 확정 안함
+                      })
+                    });
+                    const quarterData = await quarterRes.json();
+                    console.log('[save-and-pause] save_quarter_scores response:', quarterRes.status, quarterData);
+
+                    // 게임 점수 저장 (결과 확정 없이 점수만)
+                    const gameRes = await fetch(`/clubs/${clubId}/matches/${matchId}/save_game_scores`, {
+                      method: 'PATCH',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken
+                      },
+                      body: JSON.stringify({
+                        game_id: activeGameId,
+                        home_team_id: team1.id,
+                        away_team_id: team2.id,
+                        home_score: currentTotals.team1,
+                        away_score: currentTotals.team2,
+                        skip_result: true  // 결과 확정 안함
+                      })
+                    });
+                    const gameData = await gameRes.json();
+                    console.log('[save-and-pause] save_game_scores response:', gameRes.status, gameData);
+
+                    // 결과가 pending이 아니면 경고
+                    if (gameData.result && gameData.result !== 'pending') {
+                      console.warn('[save-and-pause] WARNING: game result is not pending:', gameData.result);
+                    }
+
+                    alert(i18nForScoreboard("alert_save_and_pause_success") || "경기 상황이 저장되었습니다. 언제든 다시 시작할 수 있습니다.");
+                    // 저장 후 경기 결과 화면으로 이동
+                    window.location.href = `/clubs/${clubId}/matches/${matchId}`;
+                  } catch (error) {
+                    console.error('저장 중 오류:', error);
+                    alert(i18nForScoreboard("alert_save_and_pause_error") || "저장 중 오류가 발생했습니다.");
+                  }
+                };
+
+                if (confirm(i18nForScoreboard("confirm_save_and_pause") || "현재 경기 상황을 저장하고 중단하시겠습니까?")) {
+                  saveAndPause();
                 }
+                break;
+              }
+              case "toggle-shortcuts":
+                // control.html.erb의 별도 이벤트 핸들러에서 처리됨
                 break;
               case "swap-sides":
                 state.manual_swap = !state.manual_swap;
+                // 파울 수도 함께 스왑
+                const tempFouls = state.home_fouls;
+                state.home_fouls = state.away_fouls;
+                state.away_fouls = tempFouls;
                 break;
               case "new-game":
                 if (confirm(i18nForScoreboard("confirm_new_game_reset"))) {
@@ -3528,6 +4184,8 @@ document.addEventListener("DOMContentLoaded", () => {
       document.addEventListener("keydown", (e) => {
         if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
         if (e.ctrlKey || e.metaKey || e.altKey) return;
+        // 키보드 반복 무시 (키를 누르고 있을 때 자동 반복 방지)
+        if (e.repeat) return;
 
         // Helper to click button by action
         const clickAction = (action) => {
@@ -3601,7 +4259,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             break;
           case "KeyD":
-            clickAction("buzzer");
+            console.log('[Buzzer] Keyboard D pressed, calling playBuzzer directly');
+            playBuzzer();
             break;
           case "KeyA":
             clickAction("decrement-home-fouls");
@@ -3718,6 +4377,30 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.message?.type === "state") {
         const incomingState = normalizeState(data.message.payload);
         if (!shouldApplyIncomingState(incomingState)) return;
+
+        // 캐시된 상태에 점수가 없고 DB(games)에 점수가 있으면 병합
+        if (role === "control" && Array.isArray(games) && games.length > 0) {
+          const gamesHaveScores = games.some(g => (Number(g.home_score) || 0) > 0 || (Number(g.away_score) || 0) > 0);
+          const stateHasNoScores = !incomingState.matchup_scores ||
+            incomingState.matchup_scores.every(s => (s?.team1 || 0) === 0 && (s?.team2 || 0) === 0);
+
+          if (gamesHaveScores && stateHasNoScores) {
+            console.log('[WebSocket] 캐시에 점수 없음, DB 점수로 복원');
+            const seededSlots = initialMatchupSlots(incomingState.teams || []);
+            incomingState.matchup_scores = getInitialMatchupScoresFromGames(seededSlots);
+
+            // 첫 번째 매치업 점수로 팀 점수도 설정
+            if (incomingState.matchup_scores[0] && incomingState.teams?.length >= 2) {
+              const firstMatchupScores = incomingState.matchup_scores[0];
+              if (seededSlots[0]) {
+                const [t1Idx, t2Idx] = seededSlots[0];
+                if (incomingState.teams[t1Idx]) incomingState.teams[t1Idx].score = firstMatchupScores.team1;
+                if (incomingState.teams[t2Idx]) incomingState.teams[t2Idx].score = firstMatchupScores.team2;
+              }
+            }
+          }
+        }
+
         state = incomingState;
         refreshLocalStateVersion(state);
         render();
@@ -3749,6 +4432,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 상세 패널 정렬 기능은 실패해도 점수판 실시간 동기화에 영향 주지 않도록 마지막에 초기화
     initDetailPanelSort();
+
+    // 버저 오디오 미리 초기화 (첫 사용 시 블로킹 방지)
+    setTimeout(() => {
+      initBuzzerAudio();
+      console.log('[Buzzer] Pre-initialized on page load');
+    }, 100);
   }
 });
 

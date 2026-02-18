@@ -37,6 +37,8 @@ Rails.application.routes.draw do
         patch :save_quarter_scores
         patch :update_scores # 점수 일괄 수정
         patch :shuffle_teams # 팀 랜덤 재배치
+        patch :reset_all_scores # 모든 점수 리셋
+        patch :finish_match # 경기 종료하기
         get :scoreboard_display, to: "scoreboards#display"
       end
     end
