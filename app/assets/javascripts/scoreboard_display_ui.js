@@ -1,7 +1,11 @@
 // 스코어보드 전광판 디스플레이 UI
-// scoreboards/display 뷰의 공격방향 화살표, 팀 색상, 파울 뱃지, 텍스트 크기 조절을 담당한다.
+// scoreboards/display 뷰의 공격방향 화살표, 파울 뱃지, 텍스트 크기 조절을 담당한다.
+// 팀 색상 매핑은 application.js의 render() 함수에서 처리한다.
 
-document.addEventListener('DOMContentLoaded', () => {
+// 이전 이벤트 리스너 정리용 (turbo:load 재초기화 시 중복 방지)
+let displayAbortController = null;
+
+const initScoreboardDisplayUI = () => {
   const arrowLeft = document.querySelector('.possession-arrow-left');
   const arrowRight = document.querySelector('.possession-arrow-right');
 
@@ -10,27 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  // 현재 공격방향 상태 추적
-  let currentPossession = null;
-
-  // === 팀 색상 매핑 (Team::COLORS → CSS 색상) ===
-  const TEAM_COLOR_MAP = {
-    'White': '#ffffff',
-    'Black': '#1f2937',
-    'Red': '#ef4444',
-    'Blue': '#3b82f6',
-    'Yellow': '#eab308',
-    'Green': '#22c55e',
-    'Pink': '#ec4899',
-    'SkyBlue': '#38bdf8',
-    'Brown': '#a16207',
-    'Orange': '#f97316'
-  };
-
-  // 팀 색상 이름을 CSS 색상으로 변환
-  const getTeamColor = (colorName) => {
-    return TEAM_COLOR_MAP[colorName] || colorName || '#3b82f6';
-  };
+  // 이전 이벤트 리스너 해제
+  if (displayAbortController) displayAbortController.abort();
+  displayAbortController = new AbortController();
 
   // === 텍스트 사이즈 조절 ===
   const SCALE_MIN = 0.6;
@@ -49,39 +35,41 @@ document.addEventListener('DOMContentLoaded', () => {
       sizeIndicator.textContent = Math.round(currentScale * 100) + '%';
     }
     localStorage.setItem('scoreboard-display-scale', currentScale.toString());
-    console.log('[Display] Scale updated:', currentScale);
   };
 
   if (decreaseBtn) {
-    decreaseBtn.addEventListener('click', () => updateScale(currentScale - SCALE_STEP));
+    decreaseBtn.addEventListener('click', () => updateScale(currentScale - SCALE_STEP), { signal: displayAbortController.signal });
   }
   if (increaseBtn) {
-    increaseBtn.addEventListener('click', () => updateScale(currentScale + SCALE_STEP));
+    increaseBtn.addEventListener('click', () => updateScale(currentScale + SCALE_STEP), { signal: displayAbortController.signal });
   }
 
   // 초기 스케일 적용
   updateScale(currentScale);
 
-  // 화살표 스타일 적용
+  // 화살표 스타일 적용 (Tailwind 클래스 토글)
+  const ARROW_ACTIVE_CLASSES = ['bg-red-500', 'shadow-[0_0_20px_rgba(239,68,68,0.5)]'];
+  const ARROW_INACTIVE_CLASSES = ['bg-gray-700'];
+  const ICON_ACTIVE_CLASSES = ['text-white'];
+  const ICON_INACTIVE_CLASSES = ['text-gray-500'];
+
   const applyArrowStyles = (arrow, isActive) => {
     if (!arrow) return;
     const icon = arrow.querySelector('svg');
 
     if (isActive) {
-      arrow.style.backgroundColor = '#ef4444';
-      arrow.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.5)';
-      if (icon) icon.style.color = 'white';
+      arrow.classList.remove(...ARROW_INACTIVE_CLASSES);
+      arrow.classList.add(...ARROW_ACTIVE_CLASSES);
+      if (icon) { icon.classList.remove(...ICON_INACTIVE_CLASSES); icon.classList.add(...ICON_ACTIVE_CLASSES); }
     } else {
-      arrow.style.backgroundColor = '#374151';
-      arrow.style.boxShadow = 'none';
-      if (icon) icon.style.color = '#6B7280';
+      arrow.classList.remove(...ARROW_ACTIVE_CLASSES);
+      arrow.classList.add(...ARROW_INACTIVE_CLASSES);
+      if (icon) { icon.classList.remove(...ICON_ACTIVE_CLASSES); icon.classList.add(...ICON_INACTIVE_CLASSES); }
     }
   };
 
   // 공격방향 화살표 업데이트
   const updatePossessionArrows = (possession) => {
-    console.log('[Display] Updating possession arrows:', possession);
-
     // Display 페이지는 Control 페이지와 좌우가 반대
     // Control: left=away, right=home
     // Display: left=home, right=away (reversed)
@@ -97,15 +85,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // 스코어보드 업데이트 이벤트 리스너
+  // 스코어보드 업데이트 이벤트 리스너 (AbortController로 중복 방지)
   document.addEventListener('scoreboard:updated', (e) => {
     const { state } = e.detail;
     if (!state) return;
 
-    console.log('[Display] scoreboard:updated received, possession:', state.possession);
-
     // 공격방향 화살표 업데이트
-    currentPossession = state.possession;
+    // 50ms 지연: ActionCable 수신 후 DOM이 render() 완료된 뒤 스타일 적용하기 위함
     setTimeout(() => updatePossessionArrows(state.possession), 50);
 
     // 팀 파울 뱃지 업데이트 (5파울 이상 표시)
@@ -117,26 +103,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const rightBadge = document.querySelector('[data-team-foul-badge-right]');
 
     if (leftBadge) {
-      if (leftFouls >= 5) {
-        leftBadge.classList.remove('hidden');
-      } else {
-        leftBadge.classList.add('hidden');
-      }
+      leftBadge.classList.toggle('hidden', leftFouls < 5);
     }
 
     if (rightBadge) {
-      if (rightFouls >= 5) {
-        rightBadge.classList.remove('hidden');
-      } else {
-        rightBadge.classList.add('hidden');
-      }
+      rightBadge.classList.toggle('hidden', rightFouls < 5);
     }
-  });
+  }, { signal: displayAbortController.signal });
 
   // 초기 상태 - 모두 비활성
   applyArrowStyles(arrowLeft, false);
   applyArrowStyles(arrowRight, false);
+};
 
-  console.log('[Display] Possession arrows initialized');
-  console.log('[Display] Team color mapping enabled');
-});
+document.addEventListener('DOMContentLoaded', initScoreboardDisplayUI);
+document.addEventListener('turbo:load', initScoreboardDisplayUI);

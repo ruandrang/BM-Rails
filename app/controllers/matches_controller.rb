@@ -1,11 +1,12 @@
 class MatchesController < ApplicationController
+  include MatchHelpers
   include MatchScoring
   include MatchMembership
   include MatchGames
 
   skip_before_action :require_login, only: [ :share ]
   before_action :set_club, except: [ :share ]
-  before_action :set_match, only: [ :show, :edit, :update, :destroy, :record_results, :save_game_scores, :save_quarter_scores, :move_member, :add_member, :remove_member, :add_game, :remove_game, :shuffle_teams, :update_scores, :reset_all_scores, :finish_match ]
+  before_action :set_match, except: [ :index, :new, :create, :share ]
   before_action :set_public_club_and_match, only: [ :share ]
 
   def index
@@ -47,72 +48,22 @@ class MatchesController < ApplicationController
   def create
     @match = @club.matches.new(match_params)
     @members = @club.members.order(:sort_order, :id)
-    selected_ids = Array(params[:member_ids]).map(&:to_i)
+
+    selected_members, error = validate_member_selection
+    return render_create_error(error) if error
+
     teams_count = @match.teams_count
-
-    selected_members = @club.members.where(id: selected_ids)
-    min_required = teams_count * 2
-    max_allowed = teams_count * 6
-    games_per_match = @match.games_per_match.to_i
-    games_per_match = 1 if games_per_match <= 0
-    games_per_match = [ games_per_match, 3 ].min
-
-    if selected_members.size != selected_ids.size
-      flash.now[:alert] = "선택한 멤버를 찾을 수 없습니다."
-      render :new, status: :unprocessable_entity
-      return
-    end
-
-    if selected_members.size < min_required
-      flash.now[:alert] = "최소 #{min_required}명을 선택해주세요."
-      render :new, status: :unprocessable_entity
-      return
-    end
-
-    if selected_members.size > max_allowed
-      flash.now[:alert] = "최대 #{max_allowed}명까지 선택할 수 있습니다."
-      render :new, status: :unprocessable_entity
-      return
-    end
-
+    # team_names, team_colors — Strong Parameters 외부 접근 (저장하지 않고 라벨/색상 생성에만 사용)
     team_colors = normalize_team_colors(params[:team_colors], teams_count)
     team_names = params[:team_names] || %w[A B C]
 
     member_stats = cached_member_stats
     assignments = TeamBalancer.new(selected_members, teams_count, stats: member_stats).call
 
-    ActiveRecord::Base.transaction do
-      @match.save!
-
-      teams = teams_count.times.map do |index|
-        name = team_names[index].presence || (index < 3 ? %w[A B C][index] : "T#{index + 1}")
-        @match.teams.create!(label: name, color: team_colors[index])
-      end
-
-      teams.each_with_index do |team, index|
-        assignments[index].each do |member|
-          team.team_members.create!(member: member)
-        end
-      end
-
-      if teams_count == 3
-        matchups = [
-          [ teams[0], teams[1] ],
-          [ teams[1], teams[2] ],
-          [ teams[2], teams[0] ]
-        ]
-        matchups.each do |home, away|
-          @match.games.create!(home_team: home, away_team: away, result: "pending")
-        end
-      else
-        games_per_match.times do
-          @match.games.create!(home_team: teams[0], away_team: teams[1], result: "pending")
-        end
-      end
-    end
+    build_teams_and_games(assignments, team_names, team_colors)
 
     redirect_to club_match_path(@club, @match), notice: "팀이 생성되었습니다."
-  rescue StandardError => e
+  rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotFound => e
     Rails.logger.error("팀 생성 실패: #{e.class} - #{e.message}")
     flash.now[:alert] = "팀 생성에 실패했습니다. 입력 값을 확인해주세요."
     render :new, status: :unprocessable_entity
@@ -153,14 +104,14 @@ class MatchesController < ApplicationController
 
   def record_results
     results = params[:games] || {}
+    games_by_id = @match.games.index_by { |g| g.id.to_s }
 
     ActiveRecord::Base.transaction do
-      game_ids = @match.games.pluck(:id).map(&:to_s)
       results.each do |game_id, result|
-        next unless game_ids.include?(game_id.to_s)
+        game = games_by_id[game_id.to_s]
+        next unless game
         next unless Game::RESULTS.include?(result)
 
-        game = @match.games.find(game_id)
         game.update!(result: result)
       end
     end
@@ -170,7 +121,8 @@ class MatchesController < ApplicationController
   end
 
   def shuffle_teams
-    if @match.games.any? { |g| g.result != "pending" || g.home_score > 0 || g.away_score > 0 }
+    games = @match.games.to_a
+    if games.any? { |g| g.result != "pending" || g.home_score > 0 || g.away_score > 0 }
       return redirect_to club_match_path(@club, @match), alert: "이미 진행된 게임이 있어 팀을 섞을 수 없습니다."
     end
 
@@ -198,7 +150,7 @@ class MatchesController < ApplicationController
     end
 
     redirect_to club_match_path(@club, @match), notice: "팀을 랜덤하게 새로 섞었습니다."
-  rescue StandardError => e
+  rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotFound => e
     Rails.logger.error("팀 섞기 실패: #{e.class} - #{e.message}")
     redirect_to club_match_path(@club, @match), alert: "팀 섞기에 실패했습니다."
   end
@@ -218,7 +170,8 @@ class MatchesController < ApplicationController
     @club = Club.find(params[:club_id])
     @match = @club.matches.find(params[:id])
 
-    unless params[:token].present? && ActiveSupport::SecurityUtils.secure_compare(params[:token].to_s, @match.share_token.to_s)
+    unless params[:token].present? && @match.share_token.present? &&
+           ActiveSupport::SecurityUtils.secure_compare(params[:token].to_s, @match.share_token.to_s)
       render plain: "공유 링크가 유효하지 않습니다.", status: :not_found
     end
   end
@@ -231,6 +184,67 @@ class MatchesController < ApplicationController
 
   def match_update_params
     params.require(:match).permit(:played_on, :note)
+  end
+
+  def validate_member_selection
+    selected_ids = Array(params[:member_ids]).map(&:to_i)
+    teams_count = @match.teams_count
+    selected_members = @club.members.where(id: selected_ids)
+    min_required = teams_count * 2
+    max_allowed = teams_count * 6
+
+    if selected_members.size != selected_ids.size
+      return [ nil, "선택한 멤버를 찾을 수 없습니다." ]
+    end
+
+    if selected_members.size < min_required
+      return [ nil, "최소 #{min_required}명을 선택해주세요." ]
+    end
+
+    if selected_members.size > max_allowed
+      return [ nil, "최대 #{max_allowed}명까지 선택할 수 있습니다." ]
+    end
+
+    [ selected_members, nil ]
+  end
+
+  def render_create_error(message)
+    flash.now[:alert] = message
+    render :new, status: :unprocessable_entity
+  end
+
+  def build_teams_and_games(assignments, team_names, team_colors)
+    teams_count = @match.teams_count
+    games_per_match = @match.games_per_match.to_i.clamp(1, 3)
+
+    ActiveRecord::Base.transaction do
+      @match.save!
+
+      teams = teams_count.times.map do |index|
+        name = team_names[index].presence || (index < 3 ? %w[A B C][index] : "T#{index + 1}")
+        @match.teams.create!(label: name, color: team_colors[index])
+      end
+
+      teams.each_with_index do |team, index|
+        assignments[index].each do |member|
+          team.team_members.create!(member: member)
+        end
+      end
+
+      create_games_for_teams(teams, teams_count, games_per_match)
+    end
+  end
+
+  def create_games_for_teams(teams, teams_count, games_per_match)
+    if teams_count == 3
+      [ [ teams[0], teams[1] ], [ teams[1], teams[2] ], [ teams[2], teams[0] ] ].each do |home, away|
+        @match.games.create!(home_team: home, away_team: away, result: "pending")
+      end
+    else
+      games_per_match.times do
+        @match.games.create!(home_team: teams[0], away_team: teams[1], result: "pending")
+      end
+    end
   end
 
   def normalize_team_colors(raw_colors, teams_count)
@@ -249,48 +263,6 @@ class MatchesController < ApplicationController
     colors.map do |color|
       Team::COLORS.include?(color) ? color : Team::COLORS.first
     end
-  end
-
-  def game_started?(game)
-    return true if game.result != "pending"
-    return true if game.home_score.to_i > 0 || game.away_score.to_i > 0
-
-    quarter_scores = game.quarter_scores
-    return false if quarter_scores.blank?
-
-    quarter_scores.values.any? do |score|
-      score.is_a?(Hash) && (score["home"].to_i > 0 || score["away"].to_i > 0)
-    end
-  end
-
-  # Strong parameters가 중첩 해시를 자동으로 처리하지 못할 때 안전하게 추출
-  def extract_scores_from_params
-    return nil unless params[:scores].respond_to?(:each)
-
-    max_regular_quarters = regular_quarters_count(@match)
-    scores = {}
-    params[:scores].each do |game_id, score_data|
-      next unless game_id.to_s.match?(/\A\d+\z/)
-
-      sanitized = {}
-      quarters = score_data[:quarters] || score_data["quarters"]
-      if quarters.respond_to?(:each)
-        sanitized_quarters = {}
-        quarters.each do |q_num, q_data|
-          next unless q_num.to_s.match?(/\A\d+\z/)
-          quarter_number = q_num.to_i
-          next unless quarter_number.between?(1, max_regular_quarters)
-
-          sanitized_quarters[quarter_number.to_s] = {
-            "home" => q_data[:home].to_i,
-            "away" => q_data[:away].to_i
-          }
-        end
-        sanitized["quarters"] = sanitized_quarters
-      end
-      scores[game_id] = sanitized
-    end
-    scores.presence
   end
 
   def ordered_games_for_display(games)
@@ -331,12 +303,5 @@ class MatchesController < ApplicationController
     end
 
     normalized
-  end
-
-  def regular_quarters_count(match)
-    return 4 unless match.respond_to?(:regular_quarters)
-
-    value = match.regular_quarters.to_i
-    [ 3, 4 ].include?(value) ? value : 4
   end
 end

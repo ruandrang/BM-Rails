@@ -1,0 +1,146 @@
+<!-- Keyboard Shortcuts Card -->
+<div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-[0_10px_15px_-3px_rgba(0,0,0,0.05),0_4px_6px_-2px_rgba(0,0,0,0.025)] draggable-section" id="keyboard-shortcuts-section" draggable="true" data-section-id="keyboard-shortcuts">
+  <div class="p-4 bg-gray-50/50 flex items-center justify-between cursor-pointer hover:bg-gray-100/50 transition-colors"
+       data-action="toggle-shortcuts"
+       data-toggle-section="keyboard-shortcuts">
+    <div class="flex items-center gap-2">
+      <span class="drag-handle cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 mr-1" title="<%= t('scoreboards.control.drag_to_reorder') %>">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+        </svg>
+      </span>
+      <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm9 7H8v-2h8v2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"/>
+      </svg>
+      <span class="font-bold text-gray-700" data-ui-key="shortcuts_title"><%= t('scoreboards.control.shortcuts_title') %></span>
+    </div>
+    <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-gray-400 transition-transform rotate-180" id="keyboard-shortcuts-toggle-icon" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"/>
+    </svg>
+  </div>
+  <div id="keyboard-shortcuts-content" class="border-t border-gray-100 p-5 hidden" data-shortcuts-panel>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <%# 타이머 %>
+      <div class="p-4 rounded-xl bg-gray-50 border border-gray-200">
+        <h4 class="text-xs font-bold text-gray-700 mb-3 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61l1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42A9 9 0 1 0 12 22a9 9 0 0 0 6.03-15.61zM12 20a7 7 0 1 1 0-14 7 7 0 0 1 0 14z"/>
+          </svg>
+          <%= t('scoreboards.control.shortcut_timer') %>
+        </h4>
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-gray-600"><%= t('scoreboards.control.shortcut_start_stop') %></span>
+            <kbd class="px-2 py-0.5 bg-white border border-gray-300 rounded text-[10px] font-bold text-gray-600 shadow-sm">SPACE</kbd>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-gray-600"><%= t('scoreboards.control.shortcut_14_reset') %></span>
+            <kbd class="px-2 py-0.5 bg-white border border-gray-300 rounded text-[10px] font-bold text-gray-600 shadow-sm">Z</kbd>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-gray-600"><%= t('scoreboards.control.shortcut_24_reset') %></span>
+            <kbd class="px-2 py-0.5 bg-white border border-gray-300 rounded text-[10px] font-bold text-gray-600 shadow-sm">X</kbd>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-gray-600"><%= t('scoreboards.control.shortcut_shot_toggle') %></span>
+            <kbd class="px-2 py-0.5 bg-white border border-gray-300 rounded text-[10px] font-bold text-gray-600 shadow-sm">C</kbd>
+          </div>
+        </div>
+      </div>
+
+      <%# 왼쪽 팀 점수 %>
+      <div class="p-4 rounded-xl bg-gray-50 border border-gray-200">
+        <h4 class="text-xs font-bold text-gray-700 mb-3 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/>
+          </svg>
+          <%= t('scoreboards.control.shortcut_left_score') %>
+        </h4>
+        <div class="space-y-2">
+          <% [ ["+1", "1"], ["+2", "2"], ["+3", "3"], ["-1", "5"] ].each do |label, key| %>
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-gray-600"><%= label %></span>
+              <kbd class="px-2 py-0.5 bg-white border border-gray-300 rounded text-[10px] font-bold text-gray-600 shadow-sm"><%= key %></kbd>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <%# 오른쪽 팀 점수 %>
+      <div class="p-4 rounded-xl bg-gray-50 border border-gray-200">
+        <h4 class="text-xs font-bold text-gray-700 mb-3 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+          </svg>
+          <%= t('scoreboards.control.shortcut_right_score') %>
+        </h4>
+        <div class="space-y-2">
+          <% [ ["+1", "8"], ["+2", "9"], ["+3", "0"], ["-1", "6"] ].each do |label, key| %>
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-gray-600"><%= label %></span>
+              <kbd class="px-2 py-0.5 bg-white border border-gray-300 rounded text-[10px] font-bold text-gray-600 shadow-sm"><%= key %></kbd>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <%# 파울 %>
+      <div class="p-4 rounded-xl bg-gray-50 border border-gray-200">
+        <h4 class="text-xs font-bold text-gray-700 mb-3 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+          <%= t('scoreboards.control.shortcut_foul') %>
+        </h4>
+        <div class="space-y-2">
+          <% [ ["shortcut_left_plus", "A"], ["shortcut_left_minus", "S"], ["shortcut_right_plus", "K"], ["shortcut_right_minus", "L"] ].each do |label_key, key| %>
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-gray-600"><%= t("scoreboards.control.#{label_key}") %></span>
+              <kbd class="px-2 py-0.5 bg-white border border-gray-300 rounded text-[10px] font-bold text-gray-600 shadow-sm"><%= key %></kbd>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <%# 음성 안내 %>
+      <div class="p-4 rounded-xl bg-gray-50 border border-gray-200">
+        <h4 class="text-xs font-bold text-gray-700 mb-3 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+          </svg>
+          <%= t('scoreboards.control.shortcut_voice') %>
+        </h4>
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-gray-600"><%= t('scoreboards.control.shortcut_voice_on') %></span>
+            <kbd class="px-2 py-0.5 bg-white border border-gray-300 rounded text-[10px] font-bold text-gray-600 shadow-sm">B</kbd>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-gray-600"><%= t('scoreboards.control.shortcut_voice_off') %></span>
+            <kbd class="px-2 py-0.5 bg-white border border-gray-300 rounded text-[10px] font-bold text-gray-600 shadow-sm">V</kbd>
+          </div>
+        </div>
+      </div>
+
+      <%# 시스템 %>
+      <div class="p-4 rounded-xl bg-gray-50 border border-gray-200">
+        <h4 class="text-xs font-bold text-gray-700 mb-3 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+          </svg>
+          <%= t('scoreboards.control.shortcut_system') %>
+        </h4>
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-gray-600"><%= t('scoreboards.control.buzzer') %></span>
+            <kbd class="px-2 py-0.5 bg-white border border-gray-300 rounded text-[10px] font-bold text-gray-600 shadow-sm">D</kbd>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-gray-600"><%= t('scoreboards.control.shortcut_next_quarter') %></span>
+            <kbd class="px-2 py-0.5 bg-white border border-gray-300 rounded text-[10px] font-bold text-gray-600 shadow-sm">N</kbd>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

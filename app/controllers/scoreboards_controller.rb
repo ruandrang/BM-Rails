@@ -17,6 +17,7 @@ class ScoreboardsController < ApplicationController
       4
     )
     @match.teams = [ @match.home_team, @match.away_team ]
+    @teams_json = @match.teams.to_json
     @games_for_scoreboard = []
     render :control
   end
@@ -39,6 +40,7 @@ class ScoreboardsController < ApplicationController
 
   def control
     @teams = @match.teams.order(:id).includes(:members)
+    @teams_json = @teams.to_json(include: :members)
     @games_for_scoreboard = @match.games.order(:id).select(:id, :home_team_id, :away_team_id, :home_score, :away_score)
   end
 

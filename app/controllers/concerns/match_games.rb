@@ -7,8 +7,9 @@ module MatchGames
       return render json: { success: false, error: "2팀 경기에서만 경기 추가가 가능합니다." }, status: :unprocessable_entity
     end
 
-    if @match.games.count >= 3
-      total_quarters = 3 * regular_quarters_count(@match)
+    current_count = @match.games.count
+    if current_count >= 3
+      total_quarters = 3 * @match.regular_quarters_count
       return render json: { success: false, error: "최대 3게임(총 #{total_quarters}쿼터)까지 추가할 수 있습니다." }, status: :unprocessable_entity
     end
 
@@ -18,9 +19,10 @@ module MatchGames
     end
 
     game = nil
+    new_count = current_count + 1
     ActiveRecord::Base.transaction do
       game = @match.games.create!(home_team: teams[0], away_team: teams[1], result: "pending")
-      @match.update!(games_per_match: @match.games.count)
+      @match.update!(games_per_match: new_count)
     end
 
     render json: {
@@ -30,7 +32,7 @@ module MatchGames
         home_team_id: game.home_team_id,
         away_team_id: game.away_team_id
       },
-      games_per_match: @match.games.count
+      games_per_match: new_count
     }
   rescue StandardError => e
     Rails.logger.error("경기 추가 실패: #{e.class} - #{e.message}")
@@ -43,7 +45,8 @@ module MatchGames
       return
     end
 
-    if @match.games.count <= 1
+    current_count = @match.games.count
+    if current_count <= 1
       redirect_to club_match_path(@club, @match), alert: "최소 1경기는 유지되어야 합니다."
       return
     end
@@ -54,9 +57,10 @@ module MatchGames
       return
     end
 
+    remaining_count = [ current_count - 1, 1 ].max
     ActiveRecord::Base.transaction do
       game.destroy!
-      @match.update!(games_per_match: [ @match.games.count, 1 ].max)
+      @match.update!(games_per_match: remaining_count)
     end
 
     Rails.cache.delete("scoreboard_state_#{@match.id}")

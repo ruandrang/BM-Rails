@@ -12,9 +12,13 @@ module MatchMembership
       team_member.update!(team_id: target_team.id)
       render json: { success: true }
     else
-      render json: { success: false, error: "Member not found in this match" }, status: :unprocessable_entity
+      render json: { success: false, error: "이 경기에서 멤버를 찾을 수 없습니다." }, status: :unprocessable_entity
     end
-  rescue StandardError
+  rescue ActiveRecord::RecordNotFound => e
+    Rails.logger.error("멤버 이동 실패 (대상 없음): #{e.class} - #{e.message}")
+    render json: { success: false, error: "멤버 또는 팀을 찾을 수 없습니다." }, status: :not_found
+  rescue ActiveRecord::RecordInvalid => e
+    Rails.logger.error("멤버 이동 실패: #{e.class} - #{e.message}")
     render json: { success: false, error: "멤버 이동에 실패했습니다." }, status: :unprocessable_entity
   end
 
@@ -29,11 +33,12 @@ module MatchMembership
 
     target_team.team_members.create!(member: member)
     respond_member_update_success("멤버가 팀에 추가되었습니다.")
+  rescue ActiveRecord::RecordNotFound => e
+    Rails.logger.error("멤버 추가 실패 (대상 없음): #{e.class} - #{e.message}")
+    respond_member_update_error("멤버 또는 팀을 찾을 수 없습니다.")
   rescue ActiveRecord::RecordInvalid => e
-    respond_member_update_error(e.record.errors.full_messages.first || "멤버 추가에 실패했습니다.")
-  rescue StandardError => e
     Rails.logger.error("멤버 추가 실패: #{e.class} - #{e.message}")
-    respond_member_update_error("멤버 추가에 실패했습니다.")
+    respond_member_update_error(e.record.errors.full_messages.first || "멤버 추가에 실패했습니다.")
   end
 
   def remove_member
@@ -46,7 +51,10 @@ module MatchMembership
 
     team_member.destroy!
     render json: { success: true }
-  rescue StandardError => e
+  rescue ActiveRecord::RecordNotFound => e
+    Rails.logger.error("멤버 삭제 실패 (대상 없음): #{e.class} - #{e.message}")
+    render json: { success: false, error: "멤버를 찾을 수 없습니다." }, status: :not_found
+  rescue ActiveRecord::RecordNotDestroyed => e
     Rails.logger.error("멤버 삭제 실패: #{e.class} - #{e.message}")
     render json: { success: false, error: "멤버 삭제에 실패했습니다." }, status: :unprocessable_entity
   end

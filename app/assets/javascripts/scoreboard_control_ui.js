@@ -1,7 +1,15 @@
 // 스코어보드 컨트롤 화면 UI 상호작용
 // scoreboards/control 뷰의 섹션 토글, 음성 토글, 다음 쿼터 버튼 상태, 드래그 정렬을 담당한다.
 
-document.addEventListener('DOMContentLoaded', function() {
+// 이전 MutationObserver 정리용 (turbo:load 재초기화 시 중복 방지)
+let controlQuarterObserver = null;
+
+const initScoreboardControlUI = function() {
+  // 이전 observer 해제
+  if (controlQuarterObserver) {
+    controlQuarterObserver.disconnect();
+    controlQuarterObserver = null;
+  }
   // 스코어보드 컨트롤 페이지인지 확인
   if (!document.querySelector('[data-action="toggle-announcements-btn"]') &&
       !document.querySelector('[data-toggle-section="score-table"]') &&
@@ -9,90 +17,63 @@ document.addEventListener('DOMContentLoaded', function() {
     return;
   }
 
+  // 음성 안내 토글 UI 업데이트 헬퍼
+  const updateVoiceToggleUI = (btn, enabled) => {
+    const status = btn.querySelector('[data-voice-status]');
+    const icon = btn.querySelector('[data-voice-icon]');
+    const label = btn.querySelector('[data-voice-label]');
+    const swap = (el, remove, add) => { if (el) { el.classList.remove(...remove); el.classList.add(...add); } };
+
+    if (enabled) {
+      swap(btn, ['border-gray-200', 'bg-gray-50', 'hover:bg-gray-100'], ['border-blue-200', 'bg-blue-50', 'hover:bg-blue-100']);
+      swap(icon, ['text-gray-400'], ['text-blue-500']);
+      swap(label, ['text-gray-500'], ['text-blue-700']);
+      if (status) { status.textContent = 'ON'; swap(status, ['bg-gray-400'], ['bg-blue-500']); }
+    } else {
+      swap(btn, ['border-blue-200', 'bg-blue-50', 'hover:bg-blue-100'], ['border-gray-200', 'bg-gray-50', 'hover:bg-gray-100']);
+      swap(icon, ['text-blue-500'], ['text-gray-400']);
+      swap(label, ['text-blue-700'], ['text-gray-500']);
+      if (status) { status.textContent = 'OFF'; swap(status, ['bg-blue-500'], ['bg-gray-400']); }
+    }
+  };
+
   // 음성 안내 토글 버튼
   const voiceToggleBtn = document.querySelector('[data-action="toggle-announcements-btn"]');
   if (voiceToggleBtn) {
-    voiceToggleBtn.addEventListener('click', function(e) {
+    voiceToggleBtn.addEventListener('click', function() {
       const checkbox = this.querySelector('[data-action="toggle-announcements"]');
-      const status = this.querySelector('[data-voice-status]');
       const isEnabled = this.dataset.voiceEnabled === 'true';
-
-      // 상태 토글
       const newState = !isEnabled;
       this.dataset.voiceEnabled = String(newState);
       checkbox.checked = newState;
-
-      // UI 업데이트
-      if (newState) {
-        this.classList.remove('border-gray-200', 'bg-gray-50', 'hover:bg-gray-100');
-        this.classList.add('border-blue-200', 'bg-blue-50', 'hover:bg-blue-100');
-        this.querySelector('[data-voice-icon]').classList.remove('text-gray-400');
-        this.querySelector('[data-voice-icon]').classList.add('text-blue-500');
-        this.querySelector('[data-voice-label]').classList.remove('text-gray-500');
-        this.querySelector('[data-voice-label]').classList.add('text-blue-700');
-        status.textContent = 'ON';
-        status.classList.remove('bg-gray-400');
-        status.classList.add('bg-blue-500');
-      } else {
-        this.classList.remove('border-blue-200', 'bg-blue-50', 'hover:bg-blue-100');
-        this.classList.add('border-gray-200', 'bg-gray-50', 'hover:bg-gray-100');
-        this.querySelector('[data-voice-icon]').classList.remove('text-blue-500');
-        this.querySelector('[data-voice-icon]').classList.add('text-gray-400');
-        this.querySelector('[data-voice-label]').classList.remove('text-blue-700');
-        this.querySelector('[data-voice-label]').classList.add('text-gray-500');
-        status.textContent = 'OFF';
-        status.classList.remove('bg-blue-500');
-        status.classList.add('bg-gray-400');
-      }
-
-      // 기존 핸들러를 위해 change 이벤트 발생
+      updateVoiceToggleUI(this, newState);
       checkbox.dispatchEvent(new Event('change', { bubbles: true }));
     });
   }
 
-  // 스코어 테이블 접기/펼치기
-  const scoreTableToggle = document.querySelector('[data-toggle-section="score-table"]');
-  if (scoreTableToggle) {
-    scoreTableToggle.addEventListener('click', function(e) {
-      // 누적/쿼터별 버튼 클릭 시 테이블 접힘 방지
-      if (e.target.closest('[data-action="set-quarter-view-cumulative"]') ||
-          e.target.closest('[data-action="set-quarter-view-per-quarter"]')) {
-        return;
-      }
-      const content = document.getElementById('score-table-content');
-      const icon = document.getElementById('score-table-toggle-icon');
-      if (content && icon) {
-        if (content.style.display === 'none') {
-          content.style.display = '';
-          icon.style.transform = 'rotate(0deg)';
-        } else {
-          content.style.display = 'none';
-          icon.style.transform = 'rotate(180deg)';
-        }
-      }
-    });
-  }
+  // 섹션 접기/펼치기 범용 함수
+  const initSectionToggle = (sectionName, skipSelectors) => {
+    const toggle = document.querySelector(`[data-toggle-section="${sectionName}"]`);
+    if (!toggle) return;
 
-  // 키보드 단축키 섹션 접기/펼치기
-  const shortcutsToggle = document.querySelector('[data-toggle-section="keyboard-shortcuts"]');
-  if (shortcutsToggle) {
-    shortcutsToggle.addEventListener('click', function(e) {
-      const content = document.getElementById('keyboard-shortcuts-content');
-      const icon = document.getElementById('keyboard-shortcuts-toggle-icon');
+    toggle.addEventListener('click', function(e) {
+      if (skipSelectors && skipSelectors.some(sel => e.target.closest(sel))) return;
+
+      const content = document.getElementById(`${sectionName}-content`);
+      const icon = document.getElementById(`${sectionName}-toggle-icon`);
       if (content && icon) {
-        const isHidden = content.style.display === 'none' || content.classList.contains('hidden');
-        if (isHidden) {
-          content.style.display = '';
-          content.classList.remove('hidden');
-          icon.style.transform = 'rotate(0deg)';
-        } else {
-          content.style.display = 'none';
-          content.classList.add('hidden');
-          icon.style.transform = 'rotate(180deg)';
-        }
+        const isHidden = content.classList.contains('hidden');
+        content.classList.toggle('hidden');
+        icon.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
       }
     });
-  }
+  };
+
+  initSectionToggle('score-table', [
+    '[data-action="set-quarter-view-cumulative"]',
+    '[data-action="set-quarter-view-per-quarter"]'
+  ]);
+  initSectionToggle('keyboard-shortcuts');
 
   // 다음 쿼터 버튼 상태 업데이트 (마지막 쿼터이면 "경기 종료"로 변경)
   const updateNextQuarterButton = function() {
@@ -104,26 +85,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (quarterEl && nextQuarterBtn) {
       const currentQuarter = parseInt(quarterEl.textContent.replace(/\D/g, '')) || 1;
+      const finishText = nextQuarterBtn.dataset.finishText || 'Finish';
+      const nextText = nextQuarterBtn.dataset.nextText || 'Next';
 
       if (currentQuarter >= regularQuarters) {
         // 경기 종료: 녹색 그라데이션
         nextQuarterBtn.classList.remove('from-[#FF6B35]', 'to-[#E55A2B]', 'border-[#FF6B35]', 'hover:shadow-orange-500/25');
         nextQuarterBtn.classList.add('from-emerald-500', 'to-emerald-600', 'border-emerald-500', 'hover:shadow-emerald-500/25');
         if (nextQuarterTitle) {
-          nextQuarterTitle.textContent = '경기 종료';
+          nextQuarterTitle.textContent = finishText;
         }
         if (nextQuarterIcon) {
-          nextQuarterIcon.innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
+          const path = nextQuarterIcon.querySelector('path');
+          if (path) path.setAttribute('d', 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z');
         }
       } else {
         // 다음 쿼터: 오렌지 그라데이션
         nextQuarterBtn.classList.add('from-[#FF6B35]', 'to-[#E55A2B]', 'border-[#FF6B35]', 'hover:shadow-orange-500/25');
         nextQuarterBtn.classList.remove('from-emerald-500', 'to-emerald-600', 'border-emerald-500', 'hover:shadow-emerald-500/25');
         if (nextQuarterTitle) {
-          nextQuarterTitle.textContent = '다음 쿼터';
+          nextQuarterTitle.textContent = nextText;
         }
         if (nextQuarterIcon) {
-          nextQuarterIcon.innerHTML = '<path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z"/>';
+          const path = nextQuarterIcon.querySelector('path');
+          if (path) path.setAttribute('d', 'M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z');
         }
       }
     }
@@ -132,14 +117,15 @@ document.addEventListener('DOMContentLoaded', function() {
   // 초기 업데이트
   updateNextQuarterButton();
 
-  // 쿼터 변경 관찰
-  const quarterObserver = new MutationObserver(updateNextQuarterButton);
+  // 쿼터 변경 관찰 (모듈 변수로 관리하여 재초기화 시 disconnect 가능)
+  controlQuarterObserver = new MutationObserver(updateNextQuarterButton);
   const quarterEl = document.querySelector('[data-scoreboard-quarter]');
   if (quarterEl) {
-    quarterObserver.observe(quarterEl, { childList: true, characterData: true, subtree: true });
+    controlQuarterObserver.observe(quarterEl, { childList: true, characterData: true, subtree: true });
   }
 
-  // 섹션 드래그 앤 드롭 정렬
+  // 컨트롤 화면 섹션 순서 변경용 드래그 (HTML5 Drag API)
+  // drag_and_drop.js는 점수 테이블의 대진 순서 변경용으로 별도 목적
   const container = document.getElementById('draggable-sections-container');
   if (container) {
     const sections = container.querySelectorAll('.draggable-section');
@@ -159,8 +145,8 @@ document.addEventListener('DOMContentLoaded', function() {
             container.appendChild(section);
           }
         });
-      } catch (e) {
-        console.warn('Failed to restore section order:', e);
+      } catch (_e) {
+        // 저장된 순서 복원 실패 시 기본 순서 유지
       }
     }
 
@@ -235,4 +221,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-});
+};
+
+document.addEventListener('DOMContentLoaded', initScoreboardControlUI);
+document.addEventListener('turbo:load', initScoreboardControlUI);

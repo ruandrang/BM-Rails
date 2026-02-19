@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <%= csrf_meta_tags %>
 
-    <%# Google Fonts - Inter with proper loading %>
+    <%# Google Fonts - Inter (오프라인 환경에서는 시스템 폰트 폴백 사용) %>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -14,7 +14,6 @@
 
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-    <%= javascript_include_tag "sortable.min", defer: true %>
     <%= javascript_include_tag "application", defer: true %>
     <%= javascript_include_tag "scoreboard_display_ui", defer: true %>
 
@@ -33,6 +32,7 @@
         --color-panel-dark: #131B2E;
         --color-accent-red: #EF4444;
         --color-accent-green: #10B981;
+        --display-scale: 1;
       }
 
       /* Score text responsive sizing */
@@ -81,27 +81,21 @@
     <%= yield %>
 
     <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const setupFullscreen = () => {
-          const btn = document.getElementById("fullscreen-btn");
-          if (!btn) return;
+      const setupFullscreen = () => {
+        const btn = document.getElementById("fullscreen-btn");
+        if (!btn) return;
 
-          btn.addEventListener("click", () => {
-            if (!document.fullscreenElement) {
-              document.documentElement.requestFullscreen().catch(err => {
-                console.error(`Error enabling fullscreen: ${err.message}`);
-              });
-            } else {
-              if (document.exitFullscreen) {
-                document.exitFullscreen();
-              }
-            }
-          });
-        };
+        btn.addEventListener("click", () => {
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+          } else if (document.exitFullscreen) {
+            document.exitFullscreen();
+          }
+        });
+      };
 
-        setupFullscreen();
-        document.addEventListener("turbo:load", setupFullscreen);
-      });
+      document.addEventListener("DOMContentLoaded", setupFullscreen);
+      document.addEventListener("turbo:load", setupFullscreen);
     </script>
   </body>
 </html>
