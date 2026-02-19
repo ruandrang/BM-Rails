@@ -1,0 +1,6 @@
+@echo off
+echo Starting Tailwind CSS watcher...
+start "tailwind" ruby bin/rails tailwindcss:watch
+
+echo Starting Rails server on port 3000...
+ruby bin/rails server -p 3000

@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-02-19T05:16:08.455Z",
+  "lastUpdated": "2026-02-19T15:26:00.677Z",
   "activeFeatures": [
     "admin-edit",
     "admin-ui-improvement",
@@ -11,7 +11,8 @@
     "channels",
     "migrate",
     "javascripts",
-    "concerns"
+    "concerns",
+    "bin"
   ],
   "primaryFeature": "admin-edit",
   "features": {
@@ -177,9 +178,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-08T12:00:40.100Z",
-        "lastUpdated": "2026-02-19T05:16:08.455Z"
+        "lastUpdated": "2026-02-19T15:26:00.677Z"
       },
-      "lastFile": "/Users/dunkey/Develop/BM-rail/app/assets/javascripts/list_sort.js"
+      "lastFile": "/c/Users/ike/dev/BM-Rails/app/assets/javascripts/application.js"
     },
     "concerns": {
       "phase": "do",
@@ -193,6 +194,19 @@
         "lastUpdated": "2026-02-19T05:10:18.144Z"
       },
       "lastFile": "/Users/dunkey/Develop/BM-rail/app/controllers/concerns/match_membership.rb"
+    },
+    "bin": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-02-19T15:03:37.436Z",
+        "lastUpdated": "2026-02-19T15:06:58.646Z"
+      },
+      "lastFile": "/c/Users/ike/dev/BM-Rails/bin/dev.bat"
     }
   },
   "pipeline": {
@@ -203,7 +217,7 @@
   "session": {
     "startedAt": "2026-02-05T12:09:52.734Z",
     "onboardingCompleted": true,
-    "lastActivity": "2026-02-19T05:16:08.455Z"
+    "lastActivity": "2026-02-19T15:26:00.677Z"
   },
   "history": [
     {
@@ -1078,6 +1092,48 @@
     },
     {
       "timestamp": "2026-02-19T05:16:08.455Z",
+      "feature": "javascripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-19T14:54:54.562Z",
+      "feature": "javascripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-19T14:55:30.781Z",
+      "feature": "javascripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-19T14:55:47.407Z",
+      "feature": "javascripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-19T15:03:37.436Z",
+      "feature": "bin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-19T15:06:58.646Z",
+      "feature": "bin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-19T15:25:30.322Z",
+      "feature": "javascripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-19T15:26:00.677Z",
       "feature": "javascripts",
       "phase": "do",
       "action": "updated"

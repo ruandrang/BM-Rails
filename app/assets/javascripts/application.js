@@ -2929,13 +2929,75 @@ document.addEventListener("DOMContentLoaded", () => {
     // Track last spoken countdown to avoid duplicates
     let lastSpokenCountdown = -1;
 
+    // 플랫폼 감지
+    const isMac = /Macintosh|MacIntel|MacPPC|Mac68K/i.test(navigator.userAgent);
+    const isWindows = /Win/i.test(navigator.userAgent);
+    const isChrome = /Chrome/i.test(navigator.userAgent) && !/Edge|Edg/i.test(navigator.userAgent);
+    const platform = isMac ? "mac" : isWindows ? "win" : "other";
+    console.log("🔊 Voice platform:", platform, isChrome ? "(Chrome)" : "(non-Chrome)");
+
     const safeSpeak = (utterance) => {
       if (!window.speechSynthesis) return;
-      if (window.speechSynthesis.speaking) {
-        window.speechSynthesis.cancel();
+
+      if (platform === "mac" && isChrome) {
+        // Mac Chrome: cancel() 후 즉시 speak() 하면 무시되는 버그 우회
+        // cancel 후 짧은 딜레이를 줘야 음성이 재생됨
+        if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+          window.speechSynthesis.cancel();
+          setTimeout(() => window.speechSynthesis.speak(utterance), 50);
+        } else {
+          window.speechSynthesis.speak(utterance);
+        }
+      } else {
+        // Windows/기타: 기존 로직
+        if (window.speechSynthesis.speaking) {
+          window.speechSynthesis.cancel();
+        }
+        window.speechSynthesis.speak(utterance);
       }
-      window.speechSynthesis.speak(utterance);
     };
+
+    // 음성 선택: 플랫폼별 우선순위
+    let cachedBestVoice = null;
+    let cachedVoiceLang = null;
+
+    const selectBestVoice = (langPrefix) => {
+      if (cachedBestVoice && cachedVoiceLang === langPrefix) return cachedBestVoice;
+
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length === 0) return null;
+
+      const matching = voices.filter((v) => String(v.lang || "").toLowerCase().startsWith(langPrefix));
+      let selected = null;
+
+      if (platform === "mac") {
+        // Mac: macOS 네이티브 음성 우선 (품질 우수), Google 음성 2순위
+        // Mac 네이티브 음성 예: "Yuna" (ko), "Kyoko" (ja), "Samantha" (en)
+        const nativeVoice = matching.find((v) => !(/^google/i.test(v.name)) && v.localService === true);
+        const googleVoice = matching.find((v) => /^google/i.test(v.name));
+        selected = nativeVoice || googleVoice || matching[0] || null;
+      } else {
+        // Windows/기타: Google 음성 우선 (OS 음성보다 자연스러움)
+        const googleVoice = matching.find((v) => /^google/i.test(v.name));
+        selected = googleVoice || matching[0] || null;
+      }
+
+      if (selected) {
+        cachedBestVoice = selected;
+        cachedVoiceLang = langPrefix;
+        console.log("🔊 Selected voice:", selected.name, selected.lang, "(platform:", platform + ")");
+      }
+
+      return selected;
+    };
+
+    // 음성 목록이 변경되면 캐시 초기화
+    if (window.speechSynthesis) {
+      window.speechSynthesis.addEventListener("voiceschanged", () => {
+        cachedBestVoice = null;
+        cachedVoiceLang = null;
+      });
+    }
 
     const speak = (text) => {
       if (!isVoiceEnabled() || !("speechSynthesis" in window)) return;
@@ -2958,9 +3020,8 @@ document.addEventListener("DOMContentLoaded", () => {
       utterance.volume = 1.0;
 
       const langPrefix = String(scoreboardVoiceLang || "").toLowerCase().split("-")[0];
-      const voices = window.speechSynthesis.getVoices();
-      const matchingVoice = voices.find((voice) => String(voice.lang || "").toLowerCase().startsWith(langPrefix));
-      if (matchingVoice) utterance.voice = matchingVoice;
+      const bestVoice = selectBestVoice(langPrefix);
+      if (bestVoice) utterance.voice = bestVoice;
 
       safeSpeak(utterance);
     };
@@ -3073,10 +3134,20 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!isVoiceEnabled() || !("speechSynthesis" in window)) return;
       if (voiceInitialized) return;
 
-      // Play a silent utterance to activate speech synthesis
-      const silent = new SpeechSynthesisUtterance("");
-      silent.volume = 0;
-      window.speechSynthesis.speak(silent);
+      if (platform === "mac" && isChrome) {
+        // Mac Chrome: 무음 재생 + 음성 목록 미리 로드
+        const silent = new SpeechSynthesisUtterance("");
+        silent.volume = 0;
+        window.speechSynthesis.speak(silent);
+        // Mac Chrome은 음성 목록 로딩이 늦을 수 있으므로 미리 트리거
+        window.speechSynthesis.getVoices();
+        console.log("🔊 Voice initialized (Mac Chrome mode)");
+      } else {
+        // Windows/기타: 기존 무음 초기화
+        const silent = new SpeechSynthesisUtterance("");
+        silent.volume = 0;
+        window.speechSynthesis.speak(silent);
+      }
       voiceInitialized = true;
     };
 
@@ -3167,14 +3238,13 @@ document.addEventListener("DOMContentLoaded", () => {
       utterance.volume = 1.0;
       utterance.pitch = 1.0;
 
-      // Match a voice by selected locale when available.
+      // Google 음성 우선 선택 (OS 무관 동일 음성)
       const speakWithVoice = () => {
-        const voices = window.speechSynthesis.getVoices();
         const langPrefix = String(scoreboardVoiceLang || "").toLowerCase().split("-")[0];
-        const matchingVoice = voices.find((voice) => String(voice.lang || "").toLowerCase().startsWith(langPrefix));
-        if (matchingVoice) {
-          utterance.voice = matchingVoice;
-          console.log("🔊 Using voice:", matchingVoice.name, matchingVoice.lang);
+        const bestVoice = selectBestVoice(langPrefix);
+        if (bestVoice) {
+          utterance.voice = bestVoice;
+          console.log("🔊 Using voice:", bestVoice.name, bestVoice.lang);
         } else {
           console.log("🔊 No matching voice found for:", langPrefix, "- using default");
         }
@@ -3196,11 +3266,11 @@ document.addEventListener("DOMContentLoaded", () => {
         safeSpeak(utterance);
       };
 
-      // Check if voices are already loaded
+      // 음성 목록이 이미 로드되었으면 바로 실행
       if (window.speechSynthesis.getVoices().length > 0) {
         speakWithVoice();
       } else {
-        // Wait for voices to load with a timeout fallback
+        // 음성 목록 로드 대기
         let spoken = false;
         const handleVoicesLoaded = () => {
           if (spoken) return;
@@ -3208,7 +3278,6 @@ document.addEventListener("DOMContentLoaded", () => {
           speakWithVoice();
         };
         window.speechSynthesis.addEventListener("voiceschanged", handleVoicesLoaded, { once: true });
-        // Fallback timeout in case voiceschanged never fires
         setTimeout(() => {
           if (!spoken) {
             console.log("🔊 Voices load timeout, speaking with default voice");
