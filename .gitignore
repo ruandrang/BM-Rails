@@ -46,6 +46,32 @@
 # Claude Code worktrees
 .claude/worktrees/
 
-# bkit agent state
+# bkit 내부 파일
 .bkit/
 docs/.bkit-memory.json
+docs/.pdca-snapshots/
+docs/.pdca-status.json
+
+# 디자인 파일
+*.pen
+
+# HTML 프로토타입/목업
+public/score-board.html
+public/scoreboard-new-design.html
+public/test-score-board.html
+public/design-system.html
+
+# 백업 파일
+/backup/
+
+# CSV 데이터
+/app/resource/
+
+# 구형 문서
+/guide.md
+/prev_README.md
+/roadmap.md
+/ui_structure.md
+/CLAUDE_CODE_GUIDE.md
+/DB.md
+/DESIGN_INSTALL_GUIDE.md
