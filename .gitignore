@@ -48,3 +48,4 @@
 
 # bkit agent state
 .bkit/
+docs/.bkit-memory.json
