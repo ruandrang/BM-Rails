@@ -65,7 +65,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **에셋 파이프라인**: Propshaft (Sprockets 아님)
 - **프론트엔드**: Tailwind CSS v4 + DaisyUI v5 (plugin via `@plugin "daisyui"`)
 - **JS**: Stimulus.js + 바닐라 JS (importmap 미사용, `app/assets/javascripts/application.js`에서 직접 작성)
-- **배포**: Kamal (Docker 기반)
+- **배포**: Railway (메인, Docker), Render (백업, Docker)
+- **프로덕션 DB**: PostgreSQL (Railway/Render), 개발은 SQLite3 유지
+- **프로덕션 캐시**: memory_store (단일 프로세스)
+- **프로덕션 ActionCable**: async 어댑터 (단일 프로세스)
 - **테스트**: 테스트 프레임워크 미설정 (`rails/test_unit/railtie` 비활성화)
 
 ## 주요 명령어
@@ -145,7 +148,7 @@ ActionCable 기반 실시간 점수판 기능이 있으며, 두 가지 화면으
 - **ScoreboardChannel**: WebSocket 채널, `ScoreboardStore`(Rails.cache 기반, 24시간 TTL)로 상태 관리
 - `ScoreboardStore` 클래스는 `app/channels/scoreboard_channel.rb` 파일 내에 함께 정의됨
 - 스트림 이름: `scoreboard:#{match_id}`
-- ActionCable 어댑터: 개발=async, 프로덕션=Redis (`config/cable.yml`)
+- ActionCable 어댑터: 개발=async, 프로덕션=async (`config/cable.yml`)
 
 ### 레이아웃 구조
 
@@ -316,3 +319,52 @@ docs/                     # 문서 및 분석 자료
 - 위치: `public/` 디렉토리 (manpo.png, hongkong.png, mapo-YC.png)
 - display.html.erb 하단 배너 영역에 표시
 - 캐시 무효화: `?v=<%= Time.now.to_i %>` 쿼리스트링 사용
+
+## 배포 환경
+
+### Railway (메인)
+- URL: `bm-rail-production.up.railway.app`
+- Custom Start Command: `bundle exec puma -C config/puma.rb`
+- 환경변수: `DATABASE_URL`, `RAILS_MASTER_KEY`, `RAILS_ENV=production`
+- DB: PostgreSQL (bm-rail-db, Railway 내부 네트워크)
+- db:prepare는 Start Command에 포함하면 타임아웃 발생 → 별도 실행 필요
+- 마이그레이션 필요 시 Railway Shell에서 `bundle exec rails db:migrate` 실행
+
+### Render (백업)
+- URL: `bm-rail.onrender.com`
+- render.yaml Blueprint으로 배포
+- 무료 플랜 (15분 비활성 시 슬립)
+- Shell 접근 불가 (유료만) → ADMIN_EMAIL 환경변수로 관리자 설정
+
+### Docker 빌드 주의사항
+- Dockerfile에 nodejs/npm 설치 필요 (DaisyUI 빌드용)
+- `npm ci`로 node_modules 설치 단계 포함
+- Gemfile.lock에 `aarch64-linux` 플랫폼 필요 (Docker 컨테이너용)
+- `libpq-dev` (빌드), `libpq5` (런타임) 필요 (pg gem용)
+
+## 다음 작업: 소셜 로그인 + 회원 등급 시스템
+
+### 기능 개요
+PDCA 방식으로 진행 (`/pdca plan auth-social-role`)
+
+### 1. 소셜 로그인 (OAuth)
+- **카카오톡 로그인**: Kakao OAuth 2.0 연동
+- **구글 로그인**: Google OAuth 2.0 연동
+- 기존 이메일/비밀번호 가입도 유지
+- gem 후보: `omniauth`, `omniauth-kakao`, `omniauth-google-oauth2`
+
+### 2. 회원 등급 시스템
+- **클럽 운영자**: 클럽 생성자, 경기/선수 관리 가능
+- **클럽 멤버**: 운영자가 초대, 제한된 권한 (점수판 조회 등)
+- 현재 `User → Club` 관계를 `User → ClubMembership → Club`으로 변경 필요 (역할 포함)
+
+### 사전 준비 (사용자가 미리 할 것)
+- [ ] 카카오 개발자 앱 등록: https://developers.kakao.com
+  - REST API 키, Redirect URI 설정
+- [ ] 구글 OAuth 클라이언트 등록: https://console.cloud.google.com
+  - Client ID, Client Secret, Redirect URI 설정
+
+### 고려사항
+- 소셜 로그인 사용자는 password 없이 가입 → `has_secure_password` 조건부 처리
+- 같은 이메일로 소셜/이메일 가입 시 계정 연결 로직
+- 클럽 멤버십 역할 변경 시 기존 데이터 마이그레이션
