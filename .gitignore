@@ -45,3 +45,6 @@
 
 # Claude Code worktrees
 .claude/worktrees/
+
+# bkit agent state
+.bkit/
