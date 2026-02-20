@@ -1,8 +1,6 @@
 #!/bin/bash -e
 
-# If running the rails server then create or migrate existing database
-if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
-  ./bin/rails db:prepare
-fi
+# 배포 시 항상 마이그레이션 실행
+./bin/rails db:prepare
 
 exec "${@}"
