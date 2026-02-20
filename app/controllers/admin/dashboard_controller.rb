@@ -53,7 +53,8 @@ class Admin::DashboardController < Admin::BaseController
   def safe_table_count(connection, table_name)
     quoted_table = connection.quote_table_name(table_name)
     connection.select_value("SELECT COUNT(*) FROM #{quoted_table}").to_i
-  rescue StandardError
+  rescue StandardError => e
+    Rails.logger.error "[ADMIN] #{table_name} COUNT 실패: #{e.class} - #{e.message}"
     0
   end
 
@@ -68,7 +69,8 @@ class Admin::DashboardController < Admin::BaseController
 
     sql = "SELECT * FROM #{quoted_table}#{order_clause} LIMIT #{limit.to_i}"
     connection.exec_query(sql).to_a
-  rescue StandardError
+  rescue StandardError => e
+    Rails.logger.error "[ADMIN] #{table_name} 조회 실패: #{e.class} - #{e.message}"
     []
   end
 end
