@@ -13,6 +13,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - 커밋 메시지는 항상 한국어로 작성
 - 코드 리뷰 → 수정 → 테스트 → 커밋 → 푸시를 하나의 흐름으로 처리. 테스트 실패 시에만 멈출 것
+- **브랜치 전략**: 로컬 작업은 `dev` 브랜치에서 진행. 사용자가 명시적으로 요청하지 않으면 `main`에 머지하지 않는다
+- `main` 머지 및 배포는 사용자의 별도 요청이 있을 때만 진행한다
+- 커밋/푸시는 `dev` 브랜치 → `origin dev`로 한다
 
 ## 언어 규칙
 
@@ -326,9 +329,10 @@ docs/                     # 문서 및 분석 자료
 - URL: `bm-rail-production.up.railway.app`
 - Custom Start Command: `bundle exec puma -C config/puma.rb`
 - 환경변수: `DATABASE_URL`, `RAILS_MASTER_KEY`, `RAILS_ENV=production`
+- 소셜 로그인 환경변수: `KAKAO_CLIENT_ID`, `KAKAO_CLIENT_SECRET`, `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
 - DB: PostgreSQL (bm-rail-db, Railway 내부 네트워크)
-- db:prepare는 Start Command에 포함하면 타임아웃 발생 → 별도 실행 필요
-- 마이그레이션 필요 시 Railway Shell에서 `bundle exec rails db:migrate` 실행
+- `bin/docker-entrypoint`에서 매 배포 시 `db:prepare` 자동 실행
+- Railway Shell 접근 불가 → 마이그레이션은 entrypoint에서 자동 처리됨
 
 ### Render (백업)
 - URL: `bm-rail.onrender.com`
@@ -342,29 +346,20 @@ docs/                     # 문서 및 분석 자료
 - Gemfile.lock에 `aarch64-linux` 플랫폼 필요 (Docker 컨테이너용)
 - `libpq-dev` (빌드), `libpq5` (런타임) 필요 (pg gem용)
 
-## 다음 작업: 소셜 로그인 + 회원 등급 시스템
+### 배포 시 주의사항
+- **DB 마이그레이션 필수 확인**: 배포 전에 새로운 마이그레이션 파일이 있는지 반드시 확인한다
+- `bin/docker-entrypoint`에서 `db:prepare`가 자동 실행되지만, 마이그레이션 내용이 큰 경우 타임아웃 가능성이 있으므로 주의
+- 배포 시 SQLite(개발) → PostgreSQL(프로덕션) 차이에 주의 (예: `change_column_null` 동작 차이)
+- `lib/omniauth/`는 Zeitwerk 오토로드에서 제외됨 (`config/application.rb`의 `autoload_lib ignore` 설정). OmniAuth 대소문자 충돌 방지
+- 배포 순서: `dev`에서 개발 → 사용자 요청 시 `main` 머지 → `origin main` 푸시 → Railway 자동 배포
 
-### 기능 개요
-PDCA 방식으로 진행 (`/pdca plan auth-social-role`)
+## 완료된 작업
 
-### 1. 소셜 로그인 (OAuth)
-- **카카오톡 로그인**: Kakao OAuth 2.0 연동
-- **구글 로그인**: Google OAuth 2.0 연동
-- 기존 이메일/비밀번호 가입도 유지
-- gem 후보: `omniauth`, `omniauth-kakao`, `omniauth-google-oauth2`
-
-### 2. 회원 등급 시스템
-- **클럽 운영자**: 클럽 생성자, 경기/선수 관리 가능
-- **클럽 멤버**: 운영자가 초대, 제한된 권한 (점수판 조회 등)
-- 현재 `User → Club` 관계를 `User → ClubMembership → Club`으로 변경 필요 (역할 포함)
-
-### 사전 준비 (사용자가 미리 할 것)
-- [ ] 카카오 개발자 앱 등록: https://developers.kakao.com
-  - REST API 키, Redirect URI 설정
-- [ ] 구글 OAuth 클라이언트 등록: https://console.cloud.google.com
-  - Client ID, Client Secret, Redirect URI 설정
-
-### 고려사항
-- 소셜 로그인 사용자는 password 없이 가입 → `has_secure_password` 조건부 처리
-- 같은 이메일로 소셜/이메일 가입 시 계정 연결 로직
-- 클럽 멤버십 역할 변경 시 기존 데이터 마이그레이션
+### 소셜 로그인 + 회원 등급 시스템 (v0.3 Beta)
+- **소셜 로그인**: 카카오, 네이버, 구글 OAuth2 연동 완료
+- **회원 등급**: ClubMembership (owner/admin/member) 역할 시스템 구현
+- **클럽 초대**: 초대 코드 생성/관리 기능
+- **프로필**: 닉네임/아바타 수정 기능
+- **피드백**: 앱 내 피드백 수집 기능
+- **설명서**: 사용 가이드 페이지
+- **UI 통일**: 모든 페이지 rounded-2xl 섹션 카드 디자인 패턴 적용
