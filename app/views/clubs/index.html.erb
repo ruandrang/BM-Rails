@@ -9,43 +9,34 @@
 
   <!-- 통계 요약 카드 -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-    <div class="stats shadow bg-primary text-primary-content">
-      <div class="stat">
-        <div class="stat-figure text-primary-content/50">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
-        </div>
-        <div class="stat-title text-primary-content/70"><%= t('clubs.index.stats.total_clubs') %></div>
-        <div class="stat-value"><%= @clubs.count %></div>
-        <div class="stat-desc text-primary-content/60"><%= t('clubs.index.stats.clubs_operating') %></div>
+    <div class="stats-card-modern">
+      <div class="stats-icon" style="background-color: oklch(var(--p) / 0.1);">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
       </div>
+      <div class="stats-value"><%= @clubs.count %></div>
+      <div class="stats-label"><%= t('clubs.index.stats.total_clubs') %></div>
     </div>
 
-    <div class="stats shadow bg-secondary text-secondary-content">
-      <div class="stat">
-        <div class="stat-figure text-secondary-content/50">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-          </svg>
-        </div>
-        <div class="stat-title text-secondary-content/70"><%= t('clubs.index.stats.total_members') %></div>
-        <div class="stat-value"><%= @total_members %></div>
-        <div class="stat-desc text-secondary-content/60"><%= t('clubs.index.stats.all_members_sum') %></div>
+    <div class="stats-card-modern">
+      <div class="stats-icon" style="background-color: oklch(var(--s) / 0.1);">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
       </div>
+      <div class="stats-value"><%= @total_members %></div>
+      <div class="stats-label"><%= t('clubs.index.stats.total_members') %></div>
     </div>
 
-    <div class="stats shadow bg-accent text-accent-content">
-      <div class="stat">
-        <div class="stat-figure text-accent-content/50">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-          </svg>
-        </div>
-        <div class="stat-title text-accent-content/70"><%= t('clubs.index.stats.monthly_matches') %></div>
-        <div class="stat-value"><%= @monthly_matches %></div>
-        <div class="stat-desc text-accent-content/60"><%= l(Time.current, format: '%Y-%m') %></div>
+    <div class="stats-card-modern">
+      <div class="stats-icon" style="background-color: oklch(var(--a) / 0.1);">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+        </svg>
       </div>
+      <div class="stats-value"><%= @monthly_matches %></div>
+      <div class="stats-label"><%= t('clubs.index.stats.monthly_matches') %> (<%= l(Time.current, format: '%Y-%m') %>)</div>
     </div>
   </div>
 
@@ -76,7 +67,7 @@
   <% if @clubs.any? %>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <% @clubs.each do |club| %>
-        <%= link_to club_path(club), class: "card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer h-full" do %>
+        <%= link_to club_path(club), class: "card-modern cursor-pointer h-full" do %>
           <div class="card-body flex flex-col h-full">
             <!-- 클럽 아이콘 & 이름 -->
             <div class="flex items-center gap-4 mb-4">
@@ -137,22 +128,20 @@
     </div>
   <% else %>
     <!-- 빈 상태 -->
-    <div class="hero min-h-[400px] bg-base-200 rounded-box">
-      <div class="hero-content text-center">
-        <div class="max-w-md">
-          <div class="text-6xl mb-4">🏀</div>
-          <h1 class="text-3xl font-bold mb-4"><%= t('clubs.index.empty.title') %></h1>
-          <p class="mb-6 text-base-content/70">
-            <%= t('clubs.index.empty.description') %>
-          </p>
-          <%= link_to new_club_path, class: "btn btn-primary btn-lg gap-2" do %>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            <%= t('clubs.index.empty.create_first') %>
-          <% end %>
-        </div>
+    <div class="empty-state">
+      <div class="empty-state-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
       </div>
+      <h2 class="empty-state-title"><%= t('clubs.index.empty.title') %></h2>
+      <p class="empty-state-description"><%= t('clubs.index.empty.description') %></p>
+      <%= link_to new_club_path, class: "btn btn-primary gap-2" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        <%= t('clubs.index.empty.create_first') %>
+      <% end %>
     </div>
   <% end %>
 </div>

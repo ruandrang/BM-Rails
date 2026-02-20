@@ -70,7 +70,7 @@
   <!-- 빠른 액션 카드들 -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
     <!-- 1. 멤버 관리 -->
-    <%= link_to club_members_path(@club), class: "card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1" do %>
+    <%= link_to club_members_path(@club), class: "card-modern" do %>
       <div class="card-body items-center text-center">
         <div class="text-4xl mb-2">👥</div>
         <h2 class="card-title"><%= t('clubs.show.cards.members.title') %></h2>
@@ -80,7 +80,7 @@
     <% end %>
 
     <!-- 2. 팀생성 & 경기 -->
-    <%= link_to club_matches_path(@club), class: "card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1" do %>
+    <%= link_to club_matches_path(@club), class: "card-modern" do %>
       <div class="card-body items-center text-center">
         <div class="text-4xl mb-2">🏆</div>
         <h2 class="card-title"><%= t('clubs.show.cards.matches.title') %></h2>
@@ -90,7 +90,7 @@
     <% end %>
 
     <!-- 3. 통계 -->
-    <%= link_to club_stats_path(@club), class: "card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1" do %>
+    <%= link_to club_stats_path(@club), class: "card-modern" do %>
       <div class="card-body items-center text-center">
         <div class="text-4xl mb-2">📊</div>
         <h2 class="card-title"><%= t('clubs.show.cards.stats.title') %></h2>
@@ -100,7 +100,7 @@
     <% end %>
 
     <!-- 4. 멤버십 관리 -->
-    <%= link_to club_memberships_path(@club), class: "card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1" do %>
+    <%= link_to club_memberships_path(@club), class: "card-modern" do %>
       <div class="card-body items-center text-center">
         <div class="text-4xl mb-2">🤝</div>
         <h2 class="card-title">멤버십</h2>
@@ -110,7 +110,7 @@
     <% end %>
 
     <!-- 5. 궁합 보기 -->
-    <a href="#" class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 group">
+    <a href="#" class="card-modern group">
       <div class="card-body items-center text-center">
         <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">❤️</div>
         <h2 class="card-title"><%= t('clubs.show.cards.chemistry.title') %></h2>
@@ -121,7 +121,7 @@
 
     <!-- 7. 새 경기 만들기 (admin 이상) -->
     <% if @current_membership&.admin? %>
-      <%= link_to new_club_match_path(@club), class: "card bg-primary text-primary-content shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1" do %>
+      <%= link_to new_club_match_path(@club), class: "card-modern !bg-primary !text-primary-content !border-primary" do %>
         <div class="card-body items-center text-center">
           <div class="text-4xl mb-2 text-white">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -139,7 +139,7 @@
   <!-- 데이터 백업 섹션 -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
     <!-- 최근 경기 -->
-    <div class="card bg-base-100 shadow-xl">
+    <div class="card-modern-static">
       <div class="card-body">
         <div class="flex items-center justify-between mb-4">
           <h2 class="card-title gap-2">
@@ -187,7 +187,7 @@
     </div>
 
     <!-- 멤버 미리보기 -->
-    <div class="card bg-base-100 shadow-xl">
+    <div class="card-modern-static">
       <div class="card-body">
         <div class="flex items-center justify-between mb-4">
           <h2 class="card-title gap-2">
