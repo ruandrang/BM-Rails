@@ -1,74 +1,100 @@
 <% content_for :title, t('clubs.backup.page_title', app_name: t('app.name')) %>
 
-<div class="max-w-4xl mx-auto">
-  <!-- 뒤로가기 -->
-  <div class="mb-4">
-    <%= link_to clubs_path, class: "btn btn-ghost btn-sm gap-2" do %>
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-      </svg>
-      <%= t('common.back') %>
-    <% end %>
-  </div>
-
-  <div class="mb-8">
-    <h1 class="text-3xl font-bold mb-2"><%= t('clubs.backup.title') %></h1>
+<div class="max-w-5xl mx-auto">
+  <div class="mb-6">
+    <h1 class="page-title text-base-content mb-2"><%= t('clubs.backup.title') %></h1>
     <p class="text-base-content/60"><%= t('clubs.backup.subtitle') %></p>
   </div>
 
-  <!-- 데이터 백업 섹션 -->
-  <div class="card bg-base-100 shadow-xl border border-base-200/50">
-    <div class="card-body">
-      <h2 class="card-title gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-        </svg>
-        <%= t('clubs.backup.section_title') %>
-      </h2>
-      <p class="text-base-content/60"><%= t('clubs.backup.section_description') %></p>
-
-      <div class="flex flex-wrap items-center gap-4 mt-6">
-        <%= link_to export_all_clubs_path, class: "btn btn-outline btn-primary gap-2" do %>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <!-- 데이터 내보내기 -->
+  <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6 mb-6">
+    <div class="mb-4">
+      <div class="flex items-center gap-3 mb-1">
+        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
           </svg>
-          <%= t('clubs.backup.export_button') %>
-        <% end %>
+        </div>
+        <h2 class="text-xl font-bold text-base-content"><%= t('clubs.backup.export_button', default: '데이터 내보내기') %></h2>
+      </div>
+      <p class="text-base-content/60 mt-1 text-sm">모든 클럽 데이터를 JSON 파일로 다운로드합니다.</p>
+    </div>
 
-        <div class="divider lg:divider-horizontal"><%= t('common.or') %></div>
+    <div class="rounded-xl bg-base-200/40 p-4 flex items-center justify-between">
+      <div>
+        <p class="text-sm font-semibold text-base-content">전체 클럽 백업 파일</p>
+        <p class="text-xs text-base-content/50 mt-0.5">클럽, 선수, 경기 기록이 모두 포함됩니다</p>
+      </div>
+      <%= link_to export_all_clubs_path, class: "btn btn-primary btn-sm gap-2" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+        <%= t('clubs.backup.export_button') %>
+      <% end %>
+    </div>
+  </section>
 
-        <%= form_with url: import_all_clubs_path, local: true, multipart: true, class: "flex items-center gap-2", html: { onsubmit: "showLoading()" } do %>
-          <input type="file" name="file" accept="application/json" class="file-input file-input-bordered file-input-sm w-full max-w-xs" />
-          <button type="submit" class="btn btn-outline btn-sm gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <!-- 데이터 가져오기 -->
+  <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6 mb-6">
+    <div class="mb-4">
+      <div class="flex items-center gap-3 mb-1">
+        <div class="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-info" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+          </svg>
+        </div>
+        <h2 class="text-xl font-bold text-base-content"><%= t('clubs.backup.import_button', default: '데이터 가져오기') %></h2>
+      </div>
+      <p class="text-base-content/60 mt-1 text-sm">이전에 백업한 JSON 파일을 업로드하여 복원합니다.</p>
+    </div>
+
+    <div class="rounded-xl bg-base-200/40 p-4">
+      <%= form_with url: import_all_clubs_path, local: true, multipart: true, html: { onsubmit: "showLoading()" } do %>
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <input type="file" name="file" accept="application/json" class="file-input file-input-bordered file-input-sm w-full sm:max-w-xs bg-base-100" />
+          <button type="submit" class="btn btn-info btn-sm gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
             </svg>
             <%= t('clubs.backup.import_button') %>
           </button>
-        <% end %>
-      </div>
-
-      <div class="alert alert-info mt-8">
-        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <div>
-          <h3 class="font-bold"><%= t('clubs.backup.info.title') %></h3>
-          <div class="text-xs">
-            <%= raw t('clubs.backup.info.backup_desc') %><br/>
-            <%= raw t('clubs.backup.info.restore_desc') %>
-          </div>
         </div>
+      <% end %>
+    </div>
+  </section>
+
+  <!-- 안내사항 -->
+  <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
+    <div class="mb-4">
+      <div class="flex items-center gap-3 mb-1">
+        <div class="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h2 class="text-xl font-bold text-base-content"><%= t('clubs.backup.info.title', default: '안내사항') %></h2>
       </div>
     </div>
-  </div>
-  <!-- 로딩 오버레이 -->
-  <div id="loading-overlay" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden backdrop-blur-sm">
-    <div class="card bg-base-100 shadow-xl p-8 text-center min-w-[300px]">
-      <div class="loading loading-spinner loading-lg text-primary mx-auto mb-4"></div>
-      <h3 class="text-xl font-bold mb-2"><%= t('clubs.backup.loading.title') %></h3>
-      <p class="text-base-content/60"><%= t('clubs.backup.loading.description').html_safe.gsub("\n", "<br>").html_safe %></p>
+
+    <div class="rounded-xl bg-base-200/40 p-4 space-y-2">
+      <div class="flex items-start gap-2">
+        <span class="text-base-content/40 mt-0.5">•</span>
+        <p class="text-sm text-base-content/70"><%= t('clubs.backup.info.backup_desc', default: '내보내기로 다운로드한 파일은 안전한 곳에 보관하세요.') %></p>
+      </div>
+      <div class="flex items-start gap-2">
+        <span class="text-base-content/40 mt-0.5">•</span>
+        <p class="text-sm text-base-content/70"><%= t('clubs.backup.info.restore_desc', default: '가져오기 시 기존 데이터와 중복되지 않도록 주의하세요.') %></p>
+      </div>
     </div>
+  </section>
+</div>
+
+<!-- 로딩 오버레이 -->
+<div id="loading-overlay" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden backdrop-blur-sm">
+  <div class="rounded-2xl bg-base-100 shadow-xl p-8 text-center min-w-[300px]">
+    <div class="loading loading-spinner loading-lg text-primary mx-auto mb-4"></div>
+    <h3 class="text-xl font-bold mb-2"><%= t('clubs.backup.loading.title') %></h3>
+    <p class="text-base-content/60 text-sm"><%= t('clubs.backup.loading.description').html_safe.gsub("\n", "<br>").html_safe %></p>
   </div>
 </div>
 
