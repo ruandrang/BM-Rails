@@ -1,11 +1,11 @@
 <% content_for :title, t("auth.profile.page_title", default: "프로필 설정") %>
 
 <div class="min-h-screen flex items-center justify-center p-4">
-  <div class="card bg-base-100 shadow-xl w-full max-w-md">
-    <div class="card-body">
+  <div class="card-modern-static w-full max-w-md p-8">
+    <div>
       <div class="text-center mb-6">
         <div class="text-6xl mb-4">🏀</div>
-        <h1 class="text-2xl font-bold"><%= t("auth.profile.title", default: "프로필 설정") %></h1>
+        <h1 class="text-2xl font-extrabold tracking-tight"><%= t("auth.profile.title", default: "프로필 설정") %></h1>
         <p class="text-base-content/60 mt-2"><%= t("auth.profile.subtitle", default: "닉네임을 확인하고 시작하세요") %></p>
       </div>
 
@@ -36,7 +36,7 @@
               required: true,
               autocomplete: "nickname",
               placeholder: t("auth.fields.nickname_placeholder", default: "닉네임을 입력하세요"),
-              class: "input input-bordered w-full" %>
+              class: "input input-bordered w-full focus:input-primary" %>
         </div>
 
         <div class="form-control mt-6">

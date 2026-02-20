@@ -1,12 +1,12 @@
 <% content_for :title, t("auth.login.page_title") %>
 
 <div class="min-h-screen flex items-center justify-center p-4">
-  <div class="card bg-base-100 shadow-xl w-full max-w-md">
-    <div class="card-body">
+  <div class="card-modern-static w-full max-w-md p-8">
+    <div>
       <!-- 로고 & 타이틀 -->
       <div class="text-center mb-6">
         <div class="text-6xl mb-4">🏀</div>
-        <h1 class="text-3xl font-bold"><%= t("auth.login.title") %></h1>
+        <h1 class="text-3xl font-extrabold tracking-tight"><%= t("auth.login.title") %></h1>
         <p class="text-base-content/60 mt-2"><%= t("auth.login.subtitle") %></p>
       </div>
 
@@ -49,7 +49,7 @@
               required: true,
               autocomplete: "email",
               placeholder: "your@email.com",
-              class: "input input-bordered w-full" %>
+              class: "input input-bordered w-full focus:input-primary" %>
         </div>
 
         <div class="form-control w-full">
@@ -60,7 +60,7 @@
               required: true,
               autocomplete: "current-password",
               placeholder: "••••••••",
-              class: "input input-bordered w-full" %>
+              class: "input input-bordered w-full focus:input-primary" %>
         </div>
 
         <div class="form-control mt-2">
@@ -76,3 +76,4 @@
     </div>
   </div>
 </div>
+
