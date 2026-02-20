@@ -194,6 +194,28 @@
                 <span data-ui-key="reset"><%= t('scoreboards.control.score_reset') %></span>
               </button>
             </div>
+            <%# 타임아웃 %>
+            <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-bold text-gray-500 uppercase tracking-wide" data-ui-key="timeout_label"><%= t('scoreboards.control.timeout', default: 'T/O') %></span>
+                <div class="flex gap-1.5" data-timeout-indicators-home>
+                  <div class="w-6 h-6 rounded border-2 border-yellow-400 flex items-center justify-center text-xs font-bold" data-timeout data-timeout-active="false">
+                    <span class="text-gray-300">-</span>
+                  </div>
+                  <div class="w-6 h-6 rounded border-2 border-yellow-400 flex items-center justify-center text-xs font-bold" data-timeout data-timeout-active="false">
+                    <span class="text-gray-300">-</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button class="px-3 py-1.5 rounded-lg bg-yellow-50 text-yellow-700 border border-yellow-200 hover:bg-yellow-100 transition-colors text-sm font-bold" data-action="home-timeout">
+                  + T/O
+                </button>
+                <button class="px-3 py-1.5 rounded-lg bg-gray-50 text-gray-500 border border-gray-200 hover:bg-gray-100 transition-colors text-sm font-bold" data-action="reset-home-timeouts">
+                  <%= t('scoreboards.control.score_reset', default: 'Reset') %>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -276,6 +298,28 @@
               <button class="flex-1 py-2.5 px-3 rounded-lg bg-gray-50 text-gray-600 font-semibold hover:bg-gray-100 transition-colors text-sm uppercase tracking-wide" data-action="reset-away-score">
                 <span data-ui-key="reset"><%= t('scoreboards.control.score_reset') %></span>
               </button>
+            </div>
+            <%# 타임아웃 %>
+            <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-bold text-gray-500 uppercase tracking-wide" data-ui-key="timeout_label"><%= t('scoreboards.control.timeout', default: 'T/O') %></span>
+                <div class="flex gap-1.5" data-timeout-indicators-away>
+                  <div class="w-6 h-6 rounded border-2 border-yellow-400 flex items-center justify-center text-xs font-bold" data-timeout data-timeout-active="false">
+                    <span class="text-gray-300">-</span>
+                  </div>
+                  <div class="w-6 h-6 rounded border-2 border-yellow-400 flex items-center justify-center text-xs font-bold" data-timeout data-timeout-active="false">
+                    <span class="text-gray-300">-</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button class="px-3 py-1.5 rounded-lg bg-yellow-50 text-yellow-700 border border-yellow-200 hover:bg-yellow-100 transition-colors text-sm font-bold" data-action="away-timeout">
+                  + T/O
+                </button>
+                <button class="px-3 py-1.5 rounded-lg bg-gray-50 text-gray-500 border border-gray-200 hover:bg-gray-100 transition-colors text-sm font-bold" data-action="reset-away-timeouts">
+                  <%= t('scoreboards.control.score_reset', default: 'Reset') %>
+                </button>
+              </div>
             </div>
           </div>
         </div>

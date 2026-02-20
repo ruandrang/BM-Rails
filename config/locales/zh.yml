@@ -369,6 +369,7 @@ zh:
       shot_14: "14秒"
       minus_one: "-1 调整"
       score_reset: "重置比分"
+      timeout: "暂停"
       drag_to_reorder: "拖拽排序"
       shortcuts_title: "键盘快捷键"
       shortcut_timer: "计时器"

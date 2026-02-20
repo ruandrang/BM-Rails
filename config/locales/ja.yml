@@ -369,6 +369,7 @@ ja:
       shot_14: "14秒"
       minus_one: "-1 調整"
       score_reset: "スコアリセット"
+      timeout: "タイムアウト"
       drag_to_reorder: "ドラッグして並べ替え"
       shortcuts_title: "キーボードショートカット"
       shortcut_timer: "タイマー"

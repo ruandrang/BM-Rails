@@ -369,6 +369,7 @@ en:
       shot_14: "14s"
       minus_one: "-1 Adjust"
       score_reset: "Reset Score"
+      timeout: "Timeout"
       drag_to_reorder: "Drag to reorder"
       shortcuts_title: "Keyboard Shortcuts"
       shortcut_timer: "Timer"

@@ -26,23 +26,13 @@
       /* Custom colors */
       :root {
         --color-primary: #FF6B00;
-        --color-background-dark: #0B1120;
-        --color-panel-dark: #131B2E;
+        --color-background-dark: #0A0E1A;
+        --color-panel-dark: #111827;
         --color-accent-red: #EF4444;
         --color-accent-green: #10B981;
         --display-scale: 1;
-      }
-
-      /* Score text responsive sizing */
-      .text-score {
-        font-size: clamp(10rem, 28vw, 22rem);
-        line-height: 1;
-      }
-
-      /* Clock text responsive sizing */
-      .text-clock {
-        font-size: clamp(6rem, 14vw, 12rem);
-        line-height: 1;
+        --team-left-color: #FF6B00;
+        --team-right-color: #FF6B00;
       }
 
       /* Hide scrollbars */
@@ -75,7 +65,7 @@
       }
     </style>
   </head>
-  <body class="bg-[#0B1120] text-white min-h-screen overflow-hidden">
+  <body class="bg-[#0A0E1A] text-white min-h-screen overflow-hidden">
     <%= yield %>
 
     <script>

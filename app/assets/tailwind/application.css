@@ -306,6 +306,25 @@
   transform: scale(1.02);
 }
 
+/* 타이머 실행 중 STOP 버튼 (빨간색) */
+.timer-btn-red {
+  height: 3.5rem;
+  border-radius: 0.75rem;
+  background-color: #ef4444;
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.3);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.timer-btn-red:hover {
+  background-color: #dc2626;
+  transform: scale(1.02);
+}
+
 .timer-btn-black {
   height: 3.5rem;
   border-radius: 0.75rem;
@@ -472,6 +491,26 @@
 .team-header-orange {
   background: linear-gradient(to right, #ea580c, #f97316);
   color: #ffffff;
+}
+
+/* 모바일 터치 타겟 확대 (1024px 미만) */
+@media (max-width: 1023px) {
+  .score-btn-mockup {
+    width: 5rem;
+    height: 5rem;
+    font-size: 1.5rem;
+  }
+  .timer-btn-gray,
+  .timer-btn-green,
+  .timer-btn-red,
+  .timer-btn-black {
+    height: 4rem;
+    font-size: 1rem;
+  }
+  .shot-btn-outline,
+  .shot-btn-solid {
+    height: 3.5rem;
+  }
 }
 
 /* 디스플레이 열기 버튼 강조 */

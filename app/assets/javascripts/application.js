@@ -146,6 +146,11 @@ document.addEventListener("DOMContentLoaded", () => {
         possession_right: "오른쪽",
         possession_toggle: "공격 전환",
         confirm_reset_all: "정말로 모든 점수와 시간을 초기화하시겠습니까?",
+        confirm_reset_timer: "타이머를 초기화하시겠습니까?",
+        confirm_reset_score: "점수를 초기화하시겠습니까?",
+        connection_lost: "연결 끊김",
+        reconnecting: "재연결 중...",
+        timeout_label: "타임아웃",
         alert_club_not_found: "클럽 정보를 찾을 수 없습니다.",
         alert_add_game_failed: "경기 추가에 실패했습니다.",
         alert_add_game_error: "경기 추가 중 오류가 발생했습니다.",
@@ -227,6 +232,11 @@ document.addEventListener("DOMContentLoaded", () => {
         possession_right: "右",
         possession_toggle: "攻撃切替",
         confirm_reset_all: "本当にすべてのスコアと時間を初期化しますか？",
+        confirm_reset_timer: "タイマーをリセットしますか？",
+        confirm_reset_score: "スコアをリセットしますか？",
+        connection_lost: "接続切断",
+        reconnecting: "再接続中...",
+        timeout_label: "タイムアウト",
         alert_club_not_found: "クラブ情報が見つかりません。",
         alert_add_game_failed: "試合の追加に失敗しました。",
         alert_add_game_error: "試合追加中にエラーが発生しました。",
@@ -308,6 +318,11 @@ document.addEventListener("DOMContentLoaded", () => {
         possession_right: "Right",
         possession_toggle: "Toggle Possession",
         confirm_reset_all: "Reset all scores and timers?",
+        confirm_reset_timer: "Reset the timer?",
+        confirm_reset_score: "Reset the score?",
+        connection_lost: "Connection Lost",
+        reconnecting: "Reconnecting...",
+        timeout_label: "Timeout",
         alert_club_not_found: "Club information was not found.",
         alert_add_game_failed: "Failed to add game.",
         alert_add_game_error: "An error occurred while adding the game.",
@@ -389,6 +404,11 @@ document.addEventListener("DOMContentLoaded", () => {
         possession_right: "右",
         possession_toggle: "切换球权",
         confirm_reset_all: "确定重置所有比分和时间吗？",
+        confirm_reset_timer: "确定重置计时器吗？",
+        confirm_reset_score: "确定重置比分吗？",
+        connection_lost: "连接断开",
+        reconnecting: "重新连接中...",
+        timeout_label: "暂停",
         alert_club_not_found: "未找到俱乐部信息。",
         alert_add_game_failed: "添加比赛失败。",
         alert_add_game_error: "添加比赛时发生错误。",
@@ -470,6 +490,11 @@ document.addEventListener("DOMContentLoaded", () => {
         possession_right: "Droite",
         possession_toggle: "Changer possession",
         confirm_reset_all: "Réinitialiser tous les scores et chronos ?",
+        confirm_reset_timer: "Réinitialiser le chrono ?",
+        confirm_reset_score: "Réinitialiser le score ?",
+        connection_lost: "Connexion perdue",
+        reconnecting: "Reconnexion...",
+        timeout_label: "Temps mort",
         alert_club_not_found: "Informations du club introuvables.",
         alert_add_game_failed: "Échec de l'ajout du match.",
         alert_add_game_error: "Une erreur est survenue pendant l'ajout du match.",
@@ -551,6 +576,11 @@ document.addEventListener("DOMContentLoaded", () => {
         possession_right: "Derecha",
         possession_toggle: "Cambiar posesión",
         confirm_reset_all: "¿Restablecer todos los marcadores y tiempos?",
+        confirm_reset_timer: "¿Restablecer el cronómetro?",
+        confirm_reset_score: "¿Restablecer el marcador?",
+        connection_lost: "Conexión perdida",
+        reconnecting: "Reconectando...",
+        timeout_label: "Tiempo muerto",
         alert_club_not_found: "No se encontró la información del club.",
         alert_add_game_failed: "No se pudo agregar el juego.",
         alert_add_game_error: "Se produjo un error al agregar el juego.",
@@ -632,6 +662,11 @@ document.addEventListener("DOMContentLoaded", () => {
         possession_right: "Destra",
         possession_toggle: "Cambia possesso",
         confirm_reset_all: "Reimpostare tutti i punteggi e i timer?",
+        confirm_reset_timer: "Reimpostare il timer?",
+        confirm_reset_score: "Reimpostare il punteggio?",
+        connection_lost: "Connessione persa",
+        reconnecting: "Riconnessione...",
+        timeout_label: "Time-out",
         alert_club_not_found: "Informazioni club non trovate.",
         alert_add_game_failed: "Aggiunta partita non riuscita.",
         alert_add_game_error: "Si è verificato un errore durante l'aggiunta della partita.",
@@ -716,6 +751,11 @@ document.addEventListener("DOMContentLoaded", () => {
       possession_right: "Direita",
       possession_toggle: "Alternar posse",
       confirm_reset_all: "Redefinir todos os placares e cronômetros?",
+      confirm_reset_timer: "Redefinir o cronômetro?",
+      confirm_reset_score: "Redefinir o placar?",
+      connection_lost: "Conexão perdida",
+      reconnecting: "Reconectando...",
+      timeout_label: "Tempo esgotado",
       alert_club_not_found: "Informações do clube não encontradas.",
       alert_add_game_failed: "Falha ao adicionar jogo.",
       alert_add_game_error: "Ocorreu um erro ao adicionar o jogo.",
@@ -797,6 +837,11 @@ document.addEventListener("DOMContentLoaded", () => {
       possession_right: "Kanan",
       possession_toggle: "Palitan ang possession",
       confirm_reset_all: "I-reset ang lahat ng score at timer?",
+      confirm_reset_timer: "I-reset ang timer?",
+      confirm_reset_score: "I-reset ang score?",
+      connection_lost: "Nawala ang koneksyon",
+      reconnecting: "Nagkokonekta muli...",
+      timeout_label: "Timeout",
       alert_club_not_found: "Hindi makita ang impormasyon ng club.",
       alert_add_game_failed: "Nabigo ang pagdagdag ng laro.",
       alert_add_game_error: "Nagkaroon ng error habang nagdadagdag ng laro.",
@@ -878,6 +923,11 @@ document.addEventListener("DOMContentLoaded", () => {
       possession_right: "Rechts",
       possession_toggle: "Ballbesitz wechseln",
       confirm_reset_all: "Alle Punktestände und Timer zurücksetzen?",
+      confirm_reset_timer: "Timer zurücksetzen?",
+      confirm_reset_score: "Punktestand zurücksetzen?",
+      connection_lost: "Verbindung verloren",
+      reconnecting: "Verbindung wird wiederhergestellt...",
+      timeout_label: "Auszeit",
       alert_club_not_found: "Club-Informationen wurden nicht gefunden.",
       alert_add_game_failed: "Spiel konnte nicht hinzugefügt werden.",
       alert_add_game_error: "Beim Hinzufügen des Spiels ist ein Fehler aufgetreten.",
@@ -1513,6 +1563,8 @@ document.addEventListener("DOMContentLoaded", () => {
         rotation_step: 0,
         home_fouls: 0,
         away_fouls: 0,
+        home_timeouts: 0,
+        away_timeouts: 0,
         teams: teamsWithScores,
         matchup_slots: serializeMatchupSlots(seededSlots),
         matchup_scores: initialScores,
@@ -2042,21 +2094,21 @@ document.addEventListener("DOMContentLoaded", () => {
       setText("[data-score-left]", leftTeam.score);
       setText("[data-score-right]", rightTeam.score);
 
-      // Fouls (new display) - Fill circles based on count
+      // Fouls (new display) - Fill circles based on count + data-foul-active attribute
       const updateFoulCircles = (containerSelector, foulCount) => {
         const container = scoreboardRoot.querySelector(containerSelector);
         if (!container) return;
 
         const circles = container.querySelectorAll('[data-foul-circle]');
         circles.forEach((circle, index) => {
-          if (index < foulCount) {
+          const isActive = index < foulCount;
+          if (isActive) {
             circle.style.backgroundColor = '#dc2626'; // red-600
           } else {
-            circle.style.backgroundColor = '#1a1a1a'; // dark/empty
+            circle.style.backgroundColor = ''; // CSS 기본값 사용
           }
+          circle.setAttribute('data-foul-active', isActive ? 'true' : 'false');
         });
-
-
       };
 
       updateFoulCircles('[data-foul-indicators-left]', leftFouls);
@@ -2544,22 +2596,39 @@ document.addEventListener("DOMContentLoaded", () => {
       setText("[data-home-total]", home.score);
       setText("[data-away-total]", away.score);
 
-      // renderTeamsControl();
-      // renderDisplayScores();
-      // Update Main Timer Button Text/Style
+      // Update Main Timer Button Text/Style (CSS 클래스 기반)
       const mainToggleBtn = scoreboardRoot.querySelector('[data-action="toggle-main"]');
       if (mainToggleBtn) {
         const span = mainToggleBtn.querySelector('span');
+        const svg = mainToggleBtn.querySelector('svg');
         if (state.running) {
           if (span) span.textContent = i18nForScoreboard("main_stop");
-          mainToggleBtn.classList.remove("bg-[#22C55E]", "hover:bg-[#15803d]");
-          mainToggleBtn.classList.add("bg-[#ef4444]", "hover:bg-[#b91c1c]"); // Red for Stop
+          mainToggleBtn.classList.remove("timer-btn-green", "bg-[#22C55E]", "hover:bg-[#15803d]");
+          mainToggleBtn.classList.add("timer-btn-red");
+          if (svg) svg.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'; // pause icon
         } else {
           if (span) span.textContent = i18nForScoreboard("main_start");
-          mainToggleBtn.classList.remove("bg-[#ef4444]", "hover:bg-[#b91c1c]");
-          mainToggleBtn.classList.add("bg-[#22C55E]", "hover:bg-[#15803d]"); // Green for Start
+          mainToggleBtn.classList.remove("timer-btn-red", "bg-[#ef4444]", "hover:bg-[#b91c1c]");
+          mainToggleBtn.classList.add("timer-btn-green");
+          if (svg) svg.innerHTML = '<path d="M8 5v14l11-7z"/>'; // play icon
         }
       }
+
+      // Update Control timeout indicators
+      const updateControlTimeouts = (selector, count) => {
+        const container = scoreboardRoot.querySelector(selector);
+        if (!container) return;
+        const indicators = container.querySelectorAll('[data-timeout]');
+        indicators.forEach((ind, idx) => {
+          const active = idx < count;
+          ind.setAttribute('data-timeout-active', active ? 'true' : 'false');
+          ind.querySelector('span').textContent = active ? 'T/O' : '-';
+          ind.querySelector('span').className = active ? 'text-yellow-600 font-bold' : 'text-gray-300';
+          ind.style.backgroundColor = active ? '#fef3c7' : 'transparent';
+        });
+      };
+      updateControlTimeouts('[data-timeout-indicators-home]', state.home_timeouts || 0);
+      updateControlTimeouts('[data-timeout-indicators-away]', state.away_timeouts || 0);
 
       // Update Shot Clock Toggle Icon/Text with color
       const shotToggleBtn = scoreboardRoot.querySelector('[data-action="toggle-shot"]');
@@ -3355,13 +3424,13 @@ document.addEventListener("DOMContentLoaded", () => {
       else if (action === "add-home-1") state.teams[homeIdx].score += 1;
       else if (action === "add-home-2") state.teams[homeIdx].score += 2;
       else if (action === "add-home-3") state.teams[homeIdx].score += 3;
-      else if (action === "reset-home-score") state.teams[homeIdx].score = 0;
+      else if (action === "reset-home-score") { if (!confirm(i18nForScoreboard("confirm_reset_score"))) return; state.teams[homeIdx].score = 0; }
       else if (action === "add-away") state.teams[awayIdx].score += 1;
       else if (action === "sub-away") state.teams[awayIdx].score = Math.max(0, state.teams[awayIdx].score - 1);
       else if (action === "add-away-1") state.teams[awayIdx].score += 1;
       else if (action === "add-away-2") state.teams[awayIdx].score += 2;
       else if (action === "add-away-3") state.teams[awayIdx].score += 3;
-      else if (action === "reset-away-score") state.teams[awayIdx].score = 0;
+      else if (action === "reset-away-score") { if (!confirm(i18nForScoreboard("confirm_reset_score"))) return; state.teams[awayIdx].score = 0; }
 
       // Reset shot clock to 24 when score is added (or disable if game time < 24)
       if (isScoreAddAction) {
@@ -3464,6 +3533,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 state.shot_running = false;
                 break;
               case "reset-main":
+                if (!confirm(i18nForScoreboard("confirm_reset_timer"))) return;
                 state.period_seconds = defaultPeriodSeconds;
                 state.main_ref_value = defaultPeriodSeconds;
                 state.running = false;
@@ -3479,6 +3549,8 @@ document.addEventListener("DOMContentLoaded", () => {
                   state.shot_running = false;
                   state.home_fouls = 0;
                   state.away_fouls = 0;
+                  state.home_timeouts = 0;
+                  state.away_timeouts = 0;
                   state.teams.forEach(t => t.score = 0);
                 }
                 break;
@@ -3822,6 +3894,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 break;
               case "reset-away-fouls":
                 state.away_fouls = 0;
+                break;
+              case "home-timeout":
+                state.home_timeouts = Math.min((state.home_timeouts || 0) + 1, 2);
+                break;
+              case "away-timeout":
+                state.away_timeouts = Math.min((state.away_timeouts || 0) + 1, 2);
+                break;
+              case "reset-home-timeouts":
+                state.home_timeouts = 0;
+                break;
+              case "reset-away-timeouts":
+                state.away_timeouts = 0;
                 break;
               case "buzzer":
                 console.log('[Buzzer] Button clicked, calling playBuzzer');
@@ -4366,6 +4450,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     socket.addEventListener("open", () => {
       socket.send(JSON.stringify({ command: "subscribe", identifier }));
+      document.dispatchEvent(new CustomEvent('scoreboard:connected'));
     });
 
     socket.addEventListener("message", (event) => {
@@ -4423,6 +4508,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     socket.addEventListener("close", () => {
       ensureState();
+      document.dispatchEvent(new CustomEvent('scoreboard:disconnected'));
     });
     const fullscreenBtn = document.getElementById("fullscreen-toggle");
     if (fullscreenBtn) {

@@ -371,6 +371,7 @@ ko:
       shot_14: "14초"
       minus_one: "-1 조정"
       score_reset: "점수 리셋"
+      timeout: "타임아웃"
       drag_to_reorder: "드래그하여 순서 변경"
       shortcuts_title: "키보드 단축키"
       shortcut_timer: "타이머"
