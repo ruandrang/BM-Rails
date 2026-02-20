@@ -4,6 +4,39 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+/* === Basketball 커스텀 테마 (DaisyUI v5 형식) === */
+@plugin "daisyui/theme" {
+  name: "basketball";
+  default: true;
+  color-scheme: light;
+  --color-primary: oklch(70.45% 0.1926 39.23);
+  --color-primary-content: oklch(100% 0 0);
+  --color-secondary: oklch(34.62% 0.0736 256.04);
+  --color-secondary-content: oklch(100% 0 0);
+  --color-accent: oklch(69.59% 0.1491 162.48);
+  --color-accent-content: oklch(100% 0 0);
+  --color-neutral: oklch(27.81% 0.0296 256.85);
+  --color-neutral-content: oklch(96.70% 0.0029 264.54);
+  --color-base-100: oklch(100% 0 0);
+  --color-base-200: oklch(96.25% 0.0080 253.85);
+  --color-base-300: oklch(92.88% 0.0126 255.51);
+  --color-base-content: oklch(20.77% 0.0398 265.75);
+  --color-info: oklch(62.31% 0.1880 259.81);
+  --color-info-content: oklch(100% 0 0);
+  --color-success: oklch(72.27% 0.1920 149.58);
+  --color-success-content: oklch(100% 0 0);
+  --color-warning: oklch(76.86% 0.1647 70.08);
+  --color-warning-content: oklch(100% 0 0);
+  --color-error: oklch(63.68% 0.2078 25.33);
+  --color-error-content: oklch(100% 0 0);
+  --rounded-box: 1rem;
+  --rounded-btn: 0.5rem;
+  --rounded-badge: 1.9rem;
+  --animation-btn: 0.25s;
+  --animation-input: 0.2s;
+  --btn-focus-scale: 0.95;
+}
+
 /* Tailwind v4 기본 폰트를 Pretendard로 덮어쓰기 (Mac/Windows 동일) */
 @theme {
   --font-sans: 'Pretendard Variable', 'Pretendard', system-ui, sans-serif;
@@ -29,13 +62,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: oklch(var(--su) / 0.15);
-  border: 2px solid oklch(var(--su));
-  color: oklch(var(--su));
+  background-color: color-mix(in oklab, var(--color-success) 15%, transparent);
+  border: 2px solid var(--color-success);
+  color: var(--color-success);
 }
 .btn-score-plus:hover {
-  background-color: oklch(var(--su));
-  color: oklch(var(--suc));
+  background-color: var(--color-success);
+  color: var(--color-success-content);
 }
 
 .btn-score-minus {
@@ -48,20 +81,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: oklch(var(--er) / 0.15);
-  border: 2px solid oklch(var(--er));
-  color: oklch(var(--er));
+  background-color: color-mix(in oklab, var(--color-error) 15%, transparent);
+  border: 2px solid var(--color-error);
+  color: var(--color-error);
 }
 .btn-score-minus:hover {
-  background-color: oklch(var(--er));
-  color: oklch(var(--erc));
+  background-color: var(--color-error);
+  color: var(--color-error-content);
 }
 
 /* === 에러 텍스트 === */
 .error-text {
   font-size: 0.875rem;
   margin-top: 0.25rem;
-  color: oklch(var(--er));
+  color: var(--color-error);
 }
 
 /* === 타이포그래피 통일 스타일 === */
@@ -87,23 +120,23 @@
 
 /* === 모던 카드 스타일 === */
 .card-modern {
-  background-color: var(--fallback-b1, oklch(var(--b1)));
+  background-color: var(--color-base-100);
   border-radius: 1rem;
-  border: 1px solid oklch(var(--b3) / 0.5);
+  border: 1px solid color-mix(in oklab, var(--color-base-300) 50%, transparent);
   box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
   transition: all 0.2s ease;
 }
 .card-modern:hover {
-  border-color: oklch(var(--p) / 0.2);
+  border-color: color-mix(in oklab, var(--color-primary) 30%, transparent);
   box-shadow: 0 4px 12px 0 rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.04);
   transform: translateY(-1px);
 }
 
 /* 호버 효과 없는 모던 카드 (폼, 정적 콘텐츠용) */
 .card-modern-static {
-  background-color: var(--fallback-b1, oklch(var(--b1)));
+  background-color: var(--color-base-100);
   border-radius: 1rem;
-  border: 1px solid oklch(var(--b3) / 0.5);
+  border: 1px solid color-mix(in oklab, var(--color-base-300) 50%, transparent);
   box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
 }
 
@@ -114,7 +147,7 @@
 
 .empty-state-icon {
   @apply w-20 h-20 rounded-2xl flex items-center justify-center mb-6;
-  background-color: oklch(var(--p) / 0.1);
+  background-color: color-mix(in oklab, var(--color-primary) 10%, transparent);
 }
 
 .empty-state-title {
@@ -128,8 +161,8 @@
 /* === 통계 카드 모던 스타일 === */
 .stats-card-modern {
   @apply rounded-xl p-5;
-  background-color: var(--fallback-b1, oklch(var(--b1)));
-  border: 1px solid oklch(var(--b3) / 0.5);
+  background-color: var(--color-base-100);
+  border: 1px solid color-mix(in oklab, var(--color-base-300) 50%, transparent);
   box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04);
 }
 
@@ -385,7 +418,7 @@
   transform: scale(0.98);
 }
 .game-group.drag-over {
-  background: oklch(var(--p) / 0.05);
+  background: color-mix(in oklab, var(--color-primary) 5%, transparent);
 }
 .game-placeholder tr td {
   padding: 0.5rem;
