@@ -12,6 +12,39 @@
         <%= form.hidden_field :default_game_minutes, data: { minute_input: true } %>
 
         <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
+          <div class="mb-4">
+            <h2 class="text-2xl font-bold text-base-content"><%= t("settings.profile.title", default: "프로필") %></h2>
+            <p class="text-base-content/60 mt-1"><%= t("settings.profile.description", default: "다른 사용자에게 표시되는 이름입니다.") %></p>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <% if @user.avatar_url.present? %>
+              <div class="avatar">
+                <div class="w-16 rounded-full">
+                  <img src="<%= @user.avatar_url %>" alt="<%= @user.display_name %>" />
+                </div>
+              </div>
+            <% else %>
+              <div class="avatar placeholder">
+                <div class="bg-primary text-primary-content rounded-full w-16">
+                  <span class="text-2xl"><%= @user.display_name[0].upcase %></span>
+                </div>
+              </div>
+            <% end %>
+            <div class="flex-1">
+              <label class="label" for="user_nickname">
+                <span class="label-text font-semibold"><%= t("settings.profile.nickname_label", default: "표시 이름") %></span>
+              </label>
+              <%= form.text_field :nickname,
+                  required: true,
+                  placeholder: t("settings.profile.nickname_placeholder", default: "닉네임을 입력하세요"),
+                  class: "input input-bordered w-full" %>
+            </div>
+          </div>
+          <p class="text-sm text-base-content/50 mt-2"><%= t("settings.profile.email_info", default: "이메일: %{email}") % { email: @user.email } %></p>
+        </section>
+
+        <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
           <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 class="text-2xl font-bold text-base-content"><%= t("settings.game_time.title") %></h2>
@@ -164,6 +197,33 @@
       <% end %>
     </div>
   </div>
+
+  <!-- 연결된 소셜 계정 -->
+  <% if current_user.identities.any? %>
+    <div class="card bg-base-100 shadow-xl border border-base-300 mt-6">
+      <div class="card-body p-6 md:p-8">
+        <h2 class="text-xl font-bold text-base-content mb-4">연결된 소셜 계정</h2>
+        <div class="space-y-3">
+          <% current_user.identities.each do |identity| %>
+            <div class="flex items-center gap-3 p-3 rounded-lg bg-base-200/50">
+              <% case identity.provider %>
+              <% when "kakao" %>
+                <span class="text-xl">💬</span>
+                <span class="font-medium">카카오</span>
+              <% when "naver" %>
+                <span class="text-xl font-bold text-green-500">N</span>
+                <span class="font-medium">네이버</span>
+              <% when "google_oauth2" %>
+                <span class="text-xl">G</span>
+                <span class="font-medium">Google</span>
+              <% end %>
+              <span class="text-sm text-base-content/50 ml-auto"><%= identity.email || identity.name %></span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
 </div>
 
 <script>

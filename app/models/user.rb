@@ -16,16 +16,21 @@ class User < ApplicationRecord
   VOICE_ANNOUNCEMENT_RATES = [ 1.0, 1.1, 0.9 ].freeze
   DEFAULT_VOICE_ANNOUNCEMENT_RATE = 1.0
 
-  has_secure_password
+  has_secure_password validations: false
 
-  has_many :clubs, dependent: :destroy
+  attr_accessor :skip_password_validation
 
-  validates :name, presence: true
+  has_many :identities, dependent: :destroy
+  has_many :club_memberships, dependent: :destroy
+  has_many :clubs, through: :club_memberships
+  has_many :owned_clubs, class_name: "Club", foreign_key: :user_id, dependent: :nullify
+  has_many :feedbacks, dependent: :destroy
+
+  validates :nickname, presence: true
   validates :email, presence: true,
                     uniqueness: { case_sensitive: false },
                     format: { with: URI::MailTo::EMAIL_REGEXP }
-  validates :password, length: { minimum: 6 }, on: :create
-  validates :password, length: { minimum: 6 }, allow_nil: true, on: :update
+  validates :password, length: { minimum: 6 }, if: :password_required?
   validates :default_game_minutes, numericality: {
     only_integer: true,
     greater_than_or_equal_to: MIN_GAME_MINUTES,
@@ -44,6 +49,18 @@ class User < ApplicationRecord
     admin
   end
 
+  def display_name
+    nickname.presence || name.presence || email.split("@").first
+  end
+
+  def social_only?
+    password_digest.blank?
+  end
+
+  def has_provider?(provider_name)
+    identities.exists?(provider: provider_name)
+  end
+
   def default_period_seconds
     default_game_minutes.to_i * 60
   end
@@ -53,6 +70,12 @@ class User < ApplicationRecord
   end
 
   private
+
+  def password_required?
+    return false if skip_password_validation
+    return false if identities.any? && password_digest.blank? && !password.present?
+    password.present? || password_digest.blank?
+  end
 
   def normalize_preferred_locale
     value = preferred_locale.to_s

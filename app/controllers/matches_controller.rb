@@ -1,11 +1,16 @@
 class MatchesController < ApplicationController
+  include ClubAuthorization
   include MatchHelpers
   include MatchScoring
   include MatchMembership
   include MatchGames
 
   skip_before_action :require_login, only: [ :share ]
-  before_action :set_club, except: [ :share ]
+  before_action :set_authorized_club, except: [ :share ]
+  before_action :require_club_admin, only: [ :new, :create, :edit, :update, :destroy,
+    :record_results, :shuffle_teams, :reset_all_scores, :finish_match,
+    :move_member, :add_member, :remove_member, :add_game, :remove_game,
+    :save_game_scores, :save_quarter_scores, :update_scores ]
   before_action :set_match, except: [ :index, :new, :create, :share ]
   before_action :set_public_club_and_match, only: [ :share ]
 
@@ -156,10 +161,6 @@ class MatchesController < ApplicationController
   end
 
   private
-
-  def set_club
-    @club = current_user.clubs.find(params[:club_id])
-  end
 
   def set_match
     @match = @club.matches.find(params[:id])

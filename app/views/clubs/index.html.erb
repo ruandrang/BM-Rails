@@ -50,13 +50,26 @@
   </div>
 
   <!-- 빠른 액션 버튼 -->
-  <div class="flex flex-wrap gap-4 mb-8">
+  <div class="flex flex-wrap items-center gap-4 mb-8">
     <%= link_to new_club_path, class: "btn btn-primary gap-2" do %>
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
       </svg>
       <%= t('clubs.index.new_club') %>
     <% end %>
+
+    <!-- 초대 코드로 참여 -->
+    <%= form_with url: nil, method: :get, local: true, class: "flex items-center gap-2", id: "join-code-form" do %>
+      <input type="text" name="code" placeholder="초대 코드 입력" class="input input-bordered input-sm w-36" maxlength="6" pattern="[A-Za-z0-9]{6}" />
+      <button type="submit" class="btn btn-outline btn-sm">참여</button>
+    <% end %>
+    <script>
+      document.getElementById('join-code-form')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const code = this.querySelector('input[name="code"]').value.trim().toUpperCase();
+        if (code.length === 6) window.location.href = '/clubs/join/' + code;
+      });
+    </script>
   </div>
 
   <!-- 클럽 목록 -->
@@ -74,6 +87,17 @@
                 <h2 class="card-title text-2xl">
                   <%= club.name %>
                 </h2>
+                <% membership = club.membership_for(current_user) %>
+                <% if membership %>
+                  <% case membership.role %>
+                  <% when "owner" %>
+                    <span class="badge badge-warning badge-sm">소유자</span>
+                  <% when "admin" %>
+                    <span class="badge badge-info badge-sm">운영자</span>
+                  <% when "member" %>
+                    <span class="badge badge-ghost badge-sm">멤버</span>
+                  <% end %>
+                <% end %>
               </div>
             </div>
 

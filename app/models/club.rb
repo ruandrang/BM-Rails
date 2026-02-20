@@ -14,14 +14,23 @@ class Club < ApplicationRecord
   }.freeze
 
   belongs_to :user
+  has_many :club_memberships, dependent: :destroy
+  has_many :users, through: :club_memberships
+  has_many :club_invitations, dependent: :destroy
   has_many :members, dependent: :destroy
   has_many :matches, dependent: :destroy
-
-
 
   validates :name, presence: true
   validates :icon, presence: true, inclusion: { in: ICONS }
   validate :validate_meeting_days
+
+  def owner
+    club_memberships.find_by(role: "owner")&.user
+  end
+
+  def membership_for(user)
+    club_memberships.find_by(user: user)
+  end
 
   private
 

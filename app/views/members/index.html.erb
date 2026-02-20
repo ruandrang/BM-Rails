@@ -38,31 +38,33 @@
     <% end %>
   </div>
 
-  <!-- 액션 버튼들 -->
-  <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-    <div class="flex gap-2">
-      <%= link_to new_club_member_path(@club), class: "btn btn-primary gap-2" do %>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-        </svg>
-        <%= t('members.index.add_member') %>
-      <% end %>
-    </div>
+  <!-- 액션 버튼들 (admin 이상) -->
+  <% if @current_membership&.admin? %>
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div class="flex gap-2">
+        <%= link_to new_club_member_path(@club), class: "btn btn-primary gap-2" do %>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          <%= t('members.index.add_member') %>
+        <% end %>
+      </div>
 
-    <div class="flex gap-2">
-      <%= link_to export_csv_club_members_path(@club), class: "btn btn-ghost btn-sm gap-2" do %>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-        </svg>
-        <%= t('members.index.export_csv') %>
-      <% end %>
+      <div class="flex gap-2">
+        <%= link_to export_csv_club_members_path(@club), class: "btn btn-ghost btn-sm gap-2" do %>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          <%= t('members.index.export_csv') %>
+        <% end %>
 
-      <%= form_with url: import_csv_club_members_path(@club), local: true, multipart: true, class: "flex flex-nowrap items-center gap-2" do %>
-        <input type="file" name="file" accept=".csv,text/csv" class="file-input file-input-bordered file-input-sm w-[260px] md:w-[320px]" />
-        <button type="submit" class="btn btn-ghost btn-sm whitespace-nowrap shrink-0"><%= t('members.index.import_csv') %></button>
-      <% end %>
+        <%= form_with url: import_csv_club_members_path(@club), local: true, multipart: true, class: "flex flex-nowrap items-center gap-2" do %>
+          <input type="file" name="file" accept=".csv,text/csv" class="file-input file-input-bordered file-input-sm w-[260px] md:w-[320px]" />
+          <button type="submit" class="btn btn-ghost btn-sm whitespace-nowrap shrink-0"><%= t('members.index.import_csv') %></button>
+        <% end %>
+      </div>
     </div>
-  </div>
+  <% end %>
 
   <!-- 멤버 목록 -->
   <% if @members.any? %>
@@ -89,7 +91,8 @@
              data-winrate="<%= stats[:win_rate] %>"
              data-games="<%= stats[:games] %>">
           <div class="card-body p-5">
-            <!-- 삭제 버튼 (우측 상단 절대 위치) -->
+            <!-- 삭제 버튼 (admin 이상, 우측 상단 절대 위치) -->
+            <% if @current_membership&.admin? %>
             <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation();">
               <%= button_to club_member_path(@club, member),
                   method: :delete,
@@ -100,6 +103,7 @@
                 </svg>
               <% end %>
             </div>
+            <% end %>
 
             <div class="flex items-start justify-between mb-4">
               <div>

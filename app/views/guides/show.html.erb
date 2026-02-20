@@ -1,0 +1,249 @@
+<% content_for :title, t("guide.page_title", default: "사용 설명서") %>
+
+<div class="max-w-5xl mx-auto">
+  <div class="mb-6">
+    <h1 class="page-title text-base-content mb-2"><%= t("guide.page_title", default: "사용 설명서") %></h1>
+    <p class="text-base-content/60"><%= t("guide.page_subtitle", default: "농구 클럽 매니저의 주요 기능을 안내합니다.") %></p>
+  </div>
+
+  <div class="alert alert-warning shadow-lg mb-6">
+    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+    </svg>
+    <div>
+      <p class="font-semibold">현재 베타 서비스 운영 중입니다.</p>
+      <p class="text-sm">개발 진행 중이므로 서비스 주소 변경이나 데이터 초기화가 발생할 수 있습니다. 문제가 있으시면 피드백을 통해 관리자에게 알려주시면 빠르게 대응하겠습니다.</p>
+    </div>
+  </div>
+
+  <div class="card bg-base-100 shadow-xl border border-base-300">
+    <div class="card-body p-6 md:p-8 space-y-6">
+
+      <!-- 1. 클럽 관리 -->
+      <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="bg-primary/10 text-primary rounded-xl w-12 h-12 flex items-center justify-center text-2xl shrink-0">🏀</div>
+          <div>
+            <h2 class="text-xl font-bold text-base-content">클럽 관리</h2>
+            <p class="text-base-content/50 text-sm">클럽 생성, 수정, 삭제</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-1">클럽 만들기</p>
+            <p class="text-sm text-base-content/70">홈 화면에서 <kbd class="kbd kbd-xs">+ 새 클럽</kbd>을 눌러 클럽을 생성합니다. 이름, 아이콘, 정기 모임 요일을 설정할 수 있습니다.</p>
+          </div>
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-1">클럽 수정 / 삭제</p>
+            <p class="text-sm text-base-content/70">클럽 상세 페이지에서 수정(연필) 또는 삭제(휴지통)가 가능합니다. 삭제는 클럽 소유자만 할 수 있습니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. 선수 관리 -->
+      <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="bg-secondary/10 text-secondary rounded-xl w-12 h-12 flex items-center justify-center text-2xl shrink-0">👥</div>
+          <div>
+            <h2 class="text-xl font-bold text-base-content">선수 관리</h2>
+            <p class="text-base-content/50 text-sm">선수 등록, CSV 관리, 순서 변경</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-1">선수 등록</p>
+            <p class="text-sm text-base-content/70">이름, 포지션(PG/SG/SF/PF/C), 등번호, 나이, 키를 입력하여 선수를 추가합니다.</p>
+          </div>
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-1">CSV 가져오기 / 내보내기</p>
+            <p class="text-sm text-base-content/70">CSV 파일로 여러 선수를 한번에 등록하거나, 기존 목록을 내보낼 수 있습니다.</p>
+          </div>
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-1">순서 변경</p>
+            <p class="text-sm text-base-content/70">선수 카드를 드래그하여 순서를 변경합니다. 변경 즉시 자동 저장됩니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. 경기 & 팀 배정 -->
+      <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="bg-accent/10 text-accent rounded-xl w-12 h-12 flex items-center justify-center text-2xl shrink-0">🏆</div>
+          <div>
+            <h2 class="text-xl font-bold text-base-content">경기 & 팀 배정</h2>
+            <p class="text-base-content/50 text-sm">경기 생성, 자동 팀 배정, 셔플</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-1">경기 만들기</p>
+            <p class="text-sm text-base-content/70">날짜를 선택하고 참가 선수를 체크한 뒤, 2팀전 또는 3팀전을 선택합니다.</p>
+          </div>
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-1">자동 팀 배정</p>
+            <p class="text-sm text-base-content/70">포지션 균형과 과거 승률을 기반으로 자동 배정합니다. 5경기 미만인 선수는 승률 50%로 계산됩니다.</p>
+          </div>
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-1">팀 재배치</p>
+            <p class="text-sm text-base-content/70"><kbd class="kbd kbd-xs">셔플</kbd> 버튼으로 다시 배정하거나, 선수를 수동으로 이동할 수 있습니다.</p>
+          </div>
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-1">3팀전</p>
+            <p class="text-sm text-base-content/70">3팀전 선택 시 A vs B, A vs C, B vs C 총 3경기가 자동 생성됩니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. 스코어보드 -->
+      <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="bg-info/10 text-info rounded-xl w-12 h-12 flex items-center justify-center text-2xl shrink-0">📺</div>
+          <div>
+            <h2 class="text-xl font-bold text-base-content">스코어보드 (전광판)</h2>
+            <p class="text-base-content/50 text-sm">실시간 점수판, 타이머, 음성 안내</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-1">연결형 스코어보드</p>
+            <p class="text-sm text-base-content/70">경기와 연결된 스코어보드입니다. 조작 화면과 전광판 디스플레이가 실시간 동기화됩니다.</p>
+          </div>
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-1">독립형 스코어보드</p>
+            <p class="text-sm text-base-content/70">경기 생성 없이 바로 사용합니다. 사이드 메뉴의 <kbd class="kbd kbd-xs">독립 스코어보드</kbd>에서 접근합니다.</p>
+          </div>
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-1">주요 기능</p>
+            <p class="text-sm text-base-content/70">점수 +/- 조작, 쿼터별 타이머, 샷클락, 음성 안내, 공격 방향 전환을 지원합니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. 통계 -->
+      <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="bg-success/10 text-success rounded-xl w-12 h-12 flex items-center justify-center text-2xl shrink-0">📊</div>
+          <div>
+            <h2 class="text-xl font-bold text-base-content">통계</h2>
+            <p class="text-base-content/50 text-sm">선수별 승률, 경기 결과 공유</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-1">선수별 통계</p>
+            <p class="text-sm text-base-content/70">클럽 대시보드의 <kbd class="kbd kbd-xs">통계</kbd>에서 각 선수의 승/패/무/승률을 확인합니다.</p>
+          </div>
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-1">경기 결과 공유</p>
+            <p class="text-sm text-base-content/70">경기 상세에서 공유 링크를 생성하면, 로그인 없이 결과를 볼 수 있습니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. 멤버십 & 초대 -->
+      <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="bg-warning/10 text-warning rounded-xl w-12 h-12 flex items-center justify-center text-2xl shrink-0">🤝</div>
+          <div>
+            <h2 class="text-xl font-bold text-base-content">멤버십 & 초대</h2>
+            <p class="text-base-content/50 text-sm">역할 관리, 초대 코드</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-2">역할 구분</p>
+            <div class="flex flex-wrap gap-2">
+              <div class="badge badge-primary gap-1">소유자 <span class="opacity-70">· 모든 권한</span></div>
+              <div class="badge badge-secondary gap-1">관리자 <span class="opacity-70">· 경기/선수/초대</span></div>
+              <div class="badge gap-1">멤버 <span class="opacity-70">· 조회/스코어보드</span></div>
+            </div>
+          </div>
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-1">초대하기</p>
+            <p class="text-sm text-base-content/70">멤버십 페이지에서 초대 코드를 생성합니다. 만료 시간, 최대 사용 횟수를 설정할 수 있으며, 링크를 공유하면 상대방이 참여합니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. 데이터 백업 -->
+      <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="bg-error/10 text-error rounded-xl w-12 h-12 flex items-center justify-center text-2xl shrink-0">💾</div>
+          <div>
+            <h2 class="text-xl font-bold text-base-content">데이터 백업 / 복원</h2>
+            <p class="text-base-content/50 text-sm">JSON 파일로 데이터 관리</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-1">백업 (내보내기)</p>
+            <p class="text-sm text-base-content/70">사이드 메뉴의 <kbd class="kbd kbd-xs">데이터 백업</kbd>에서 모든 클럽, 선수, 경기 데이터를 JSON 파일로 다운로드합니다.</p>
+          </div>
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-1">복원 (가져오기)</p>
+            <p class="text-sm text-base-content/70">같은 페이지에서 백업 파일을 업로드하면 데이터가 복원됩니다. 이미 존재하는 데이터는 건너뜁니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. 설정 -->
+      <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="bg-neutral/10 text-neutral rounded-xl w-12 h-12 flex items-center justify-center text-2xl shrink-0">⚙️</div>
+          <div>
+            <h2 class="text-xl font-bold text-base-content">설정</h2>
+            <p class="text-base-content/50 text-sm">프로필, 경기 시간, 음성, 언어</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-1">프로필</p>
+            <p class="text-sm text-base-content/70">다른 사용자에게 표시되는 닉네임을 변경합니다.</p>
+          </div>
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-1">경기 시간</p>
+            <p class="text-sm text-base-content/70">기본 쿼터 시간을 1~60분 사이로 설정합니다.</p>
+          </div>
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-1">음성 안내</p>
+            <p class="text-sm text-base-content/70">점수 변경, 타이머 종료 시 음성 안내 켜기/끄기 및 속도를 조절합니다.</p>
+          </div>
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-1">언어</p>
+            <p class="text-sm text-base-content/70">한국어, 일본어, 영어, 중국어 중 선택합니다.</p>
+          </div>
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-1">공격 방향 전환</p>
+            <p class="text-sm text-base-content/70">쿼터별 전환 패턴을 선택합니다. (1·2Q/3·4Q 또는 1·3Q/2·4Q)</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9. 로그인 -->
+      <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="bg-primary/10 text-primary rounded-xl w-12 h-12 flex items-center justify-center text-2xl shrink-0">🔐</div>
+          <div>
+            <h2 class="text-xl font-bold text-base-content">로그인</h2>
+            <p class="text-base-content/50 text-sm">소셜 로그인, 이메일 로그인</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-1">소셜 로그인</p>
+            <p class="text-sm text-base-content/70">카카오, 네이버, Google 계정으로 간편하게 로그인합니다. 최초 로그인 시 자동으로 계정이 생성됩니다.</p>
+          </div>
+          <div class="rounded-xl bg-base-200/40 p-4">
+            <p class="font-semibold text-base-content mb-1">이메일 로그인</p>
+            <p class="text-sm text-base-content/70">이메일과 비밀번호로 가입 및 로그인이 가능합니다. 비밀번호는 6자 이상 필요합니다.</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <div class="mt-6 text-center text-base-content/40 text-sm">
+    ver. 0.3 Beta
+  </div>
+</div>

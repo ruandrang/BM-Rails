@@ -10,7 +10,32 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_12_044739) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_20_075154) do
+  create_table "club_invitations", force: :cascade do |t|
+    t.integer "club_id", null: false
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.integer "created_by_id", null: false
+    t.datetime "expires_at"
+    t.integer "max_uses"
+    t.datetime "updated_at", null: false
+    t.integer "use_count", default: 0, null: false
+    t.index ["club_id"], name: "index_club_invitations_on_club_id"
+    t.index ["code"], name: "index_club_invitations_on_code", unique: true
+    t.index ["created_by_id"], name: "index_club_invitations_on_created_by_id"
+  end
+
+  create_table "club_memberships", force: :cascade do |t|
+    t.integer "club_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "joined_at"
+    t.string "role"
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["club_id"], name: "index_club_memberships_on_club_id"
+    t.index ["user_id"], name: "index_club_memberships_on_user_id"
+  end
+
   create_table "clubs", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
@@ -20,6 +45,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_12_044739) do
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
     t.index ["user_id"], name: "index_clubs_on_user_id"
+  end
+
+  create_table "feedbacks", force: :cascade do |t|
+    t.string "category", default: "general", null: false
+    t.text "content", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["user_id"], name: "index_feedbacks_on_user_id"
   end
 
   create_table "games", force: :cascade do |t|
@@ -36,6 +70,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_12_044739) do
     t.index ["home_team_id"], name: "index_games_on_home_team_id"
     t.index ["match_id", "home_team_id", "away_team_id"], name: "index_games_on_match_id_and_home_team_id_and_away_team_id"
     t.index ["match_id"], name: "index_games_on_match_id"
+  end
+
+  create_table "identities", force: :cascade do |t|
+    t.string "avatar_url"
+    t.datetime "created_at", null: false
+    t.string "email"
+    t.string "name"
+    t.string "provider", null: false
+    t.string "uid", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["provider", "uid"], name: "index_identities_on_provider_and_uid", unique: true
+    t.index ["user_id", "provider"], name: "index_identities_on_user_id_and_provider", unique: true
+    t.index ["user_id"], name: "index_identities_on_user_id"
   end
 
   create_table "matches", force: :cascade do |t|
@@ -87,11 +135,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_12_044739) do
 
   create_table "users", force: :cascade do |t|
     t.boolean "admin", default: false, null: false
+    t.string "avatar_url"
     t.datetime "created_at", null: false
     t.integer "default_game_minutes", default: 8, null: false
     t.string "email", null: false
     t.string "name"
-    t.string "password_digest", null: false
+    t.string "nickname"
+    t.string "password_digest"
     t.string "possession_switch_pattern", default: "q12_q34", null: false
     t.string "preferred_locale", default: "ko", null: false
     t.boolean "scoreboard_sound_enabled", default: true, null: false
@@ -101,10 +151,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_12_044739) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  add_foreign_key "club_invitations", "clubs"
+  add_foreign_key "club_invitations", "users", column: "created_by_id"
+  add_foreign_key "club_memberships", "clubs"
+  add_foreign_key "club_memberships", "users"
   add_foreign_key "clubs", "users"
+  add_foreign_key "feedbacks", "users"
   add_foreign_key "games", "matches"
   add_foreign_key "games", "teams", column: "away_team_id"
   add_foreign_key "games", "teams", column: "home_team_id"
+  add_foreign_key "identities", "users"
   add_foreign_key "matches", "clubs"
   add_foreign_key "members", "clubs"
   add_foreign_key "team_members", "members"

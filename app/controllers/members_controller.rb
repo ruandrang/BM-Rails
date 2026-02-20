@@ -1,7 +1,10 @@
 require "csv"
 
 class MembersController < ApplicationController
-  before_action :set_club
+  include ClubAuthorization
+
+  before_action :set_authorized_club
+  before_action :require_club_admin, except: [ :index ]
   before_action :set_member, only: [ :edit, :update, :destroy ]
 
   def index
@@ -109,10 +112,6 @@ class MembersController < ApplicationController
   end
 
   private
-
-  def set_club
-    @club = current_user.clubs.find(params[:club_id])
-  end
 
   def set_member
     @member = @club.members.find(params[:id])

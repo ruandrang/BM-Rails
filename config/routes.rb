@@ -2,10 +2,23 @@ Rails.application.routes.draw do
   mount ActionCable.server => "/cable"
   root "clubs#index"
 
+  # OmniAuth 콜백
+  get "/auth/:provider/callback", to: "omniauth_callbacks#create"
+  get "/auth/failure", to: "omniauth_callbacks#failure"
+
+  # 프로필 설정 (소셜 로그인 후 닉네임 수정)
+  resource :profile, only: [ :edit, :update ]
+
   resource :session, only: [ :new, :create, :destroy ]
   resource :registration, only: [ :new, :create ]
   resource :setting, only: [ :show, :update ]
+  resource :guide, only: [ :show ]
+  resources :feedbacks, only: [ :new, :create ]
   resources :scoreboards, only: [ :index ]
+
+  # 초대 링크로 클럽 참여
+  get "clubs/join/:code", to: "club_joins#show", as: :club_join
+  post "clubs/join/:code", to: "club_joins#create"
 
   resources :clubs do
     collection do
@@ -44,6 +57,19 @@ Rails.application.routes.draw do
     end
 
     resources :stats, only: [ :index ]
+
+    # 초대 코드 관리 (운영자용)
+    resources :invitations, controller: "club_invitations", only: [ :index, :create, :destroy ]
+
+    # 멤버십 관리
+    resources :memberships, controller: "club_memberships", only: [ :index, :destroy ] do
+      member do
+        patch :update_role
+      end
+      collection do
+        patch :transfer_ownership
+      end
+    end
   end
 
   get "standalone_scoreboard", to: "scoreboards#standalone_control", as: :standalone_scoreboard
@@ -62,6 +88,7 @@ Rails.application.routes.draw do
     resources :teams, only: [ :index, :show, :edit, :update ]
     resources :team_members, only: [ :index, :show ]
     resources :games, only: [ :index, :show, :edit, :update ]
+    resources :feedbacks, only: [ :index, :show, :destroy ]
   end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

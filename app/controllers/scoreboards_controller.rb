@@ -1,6 +1,9 @@
 class ScoreboardsController < ApplicationController
-  before_action :set_club
-  before_action :set_club_and_match, only: [ :control, :display ]
+  include ClubAuthorization
+
+  before_action :set_authorized_club, only: [ :control, :display ]
+  before_action :require_club_admin, only: [ :control ]
+  before_action :set_match, only: [ :control, :display ]
 
   def index
     @clubs = current_user.clubs.includes(:matches).order(created_at: :desc)
@@ -52,12 +55,7 @@ class ScoreboardsController < ApplicationController
 
   private
 
-  def set_club
-    @club = current_user.clubs.find(params[:club_id]) if params[:club_id]
-  end
-
-  def set_club_and_match
-    @club = current_user.clubs.find(params[:club_id])
+  def set_match
     @match = @club.matches.find(params[:id])
   end
 end

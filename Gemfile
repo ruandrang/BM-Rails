@@ -18,6 +18,13 @@ gem "jbuilder"
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 gem "bcrypt", "~> 3.1.7"
 
+# OAuth 소셜 로그인
+gem "omniauth"
+gem "omniauth-oauth2"
+gem "omniauth-naver"
+gem "omniauth-google-oauth2"
+gem "omniauth-rails_csrf_protection"
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ mingw mswin x64_mingw jruby ]
 
@@ -36,6 +43,9 @@ gem "kamal", require: false
 gem "thruster", require: false
 
 group :development, :test do
+  # 환경변수 관리 (.env 파일)
+  gem "dotenv-rails"
+
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
 

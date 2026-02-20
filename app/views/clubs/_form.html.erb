@@ -1,84 +1,93 @@
 <%= form_with model: @club, local: true, class: "space-y-6" do |form| %>
+
   <% if @club.errors.any? %>
-    <div class="alert alert-error shadow-lg">
+    <div class="alert alert-error shadow-lg mb-6">
+      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
       <div>
-        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <div>
-          <h3 class="font-bold"><%= t('common.input_error') %></h3>
-          <ul class="text-sm list-disc list-inside">
-            <% @club.errors.full_messages.each do |message| %>
-              <li><%= message %></li>
-            <% end %>
-          </ul>
-        </div>
+        <ul class="text-sm list-disc list-inside">
+          <% @club.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
       </div>
     </div>
   <% end %>
 
-  <div class="form-control w-full">
-    <%= form.label :name, t('clubs.form.name_label'), class: "label" %>
-    <%= form.text_field :name,
-        required: true,
-        placeholder: t('clubs.form.name_placeholder'),
-        class: "input input-bordered w-full" %>
-    <label class="label">
-      <span class="label-text-alt text-base-content/60"><%= t('clubs.form.name_hint') %></span>
-    </label>
-  </div>
+  <!-- 기본 정보 -->
+  <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
+    <div class="mb-4">
+      <h2 class="text-xl font-bold text-base-content"><%= t('clubs.form.name_label', default: '기본 정보') %></h2>
+      <p class="text-base-content/60 mt-1 text-sm">클럽의 이름과 소개를 입력해주세요.</p>
+    </div>
+
+    <div class="space-y-4">
+      <div class="rounded-xl bg-base-200/40 p-4">
+        <label class="text-sm font-semibold text-base-content mb-2 block"><%= t('clubs.form.name_label') %></label>
+        <%= form.text_field :name,
+            required: true,
+            placeholder: t('clubs.form.name_placeholder'),
+            class: "input input-bordered w-full bg-base-100 focus:outline-primary" %>
+        <p class="text-xs text-base-content/40 mt-2"><%= t('clubs.form.name_hint') %></p>
+      </div>
+
+      <div class="rounded-xl bg-base-200/40 p-4">
+        <label class="text-sm font-semibold text-base-content mb-2 block"><%= t('clubs.form.description_label') %></label>
+        <%= form.text_area :description,
+            rows: 3,
+            placeholder: t('clubs.form.description_placeholder'),
+            class: "textarea textarea-bordered w-full bg-base-100 focus:outline-primary" %>
+      </div>
+    </div>
+  </section>
 
   <!-- 정기 운동 요일 -->
-  <div class="form-control w-full">
-    <%= form.label :meeting_days, t('clubs.form.meeting_days_label'), class: "label" %>
-    <div class="flex flex-wrap gap-2">
-      <% Club::MEETING_DAYS.each do |day| %>
-        <label class="cursor-pointer">
-          <%= check_box_tag "club[meeting_days][]", day, @club.meeting_days&.include?(day), class: "peer hidden" %>
-          <span class="btn btn-sm w-12 bg-base-100 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary peer-checked:hover:bg-primary/70">
-            <%= day %>
-          </span>
-        </label>
-      <% end %>
+  <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
+    <div class="mb-4">
+      <h2 class="text-xl font-bold text-base-content"><%= t('clubs.form.meeting_days_label') %></h2>
+      <p class="text-base-content/60 mt-1 text-sm"><%= t('clubs.form.meeting_days_hint') %></p>
     </div>
-    <label class="label">
-      <span class="label-text-alt text-base-content/60"><%= t('clubs.form.meeting_days_hint') %></span>
-    </label>
-  </div>
 
-  <!-- 클럽 소개 -->
-  <div class="form-control w-full">
-    <%= form.label :description, t('clubs.form.description_label'), class: "label" %>
-    <%= form.text_area :description,
-        rows: 3,
-        placeholder: t('clubs.form.description_placeholder'),
-        class: "textarea textarea-bordered w-full" %>
-  </div>
+    <div class="rounded-xl bg-base-200/40 p-4">
+      <div class="flex flex-wrap gap-2">
+        <% Club::MEETING_DAYS.each do |day| %>
+          <label class="cursor-pointer">
+            <%= check_box_tag "club[meeting_days][]", day, @club.meeting_days&.include?(day), class: "peer hidden" %>
+            <span class="btn btn-sm w-14 bg-base-100 border-base-300 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary peer-checked:hover:bg-primary/70 transition-colors">
+              <%= day %>
+            </span>
+          </label>
+        <% end %>
+      </div>
+    </div>
+  </section>
 
   <!-- 클럽 아이콘 선택 -->
-  <div class="form-control w-full">
-    <label class="label">
-      <span class="label-text font-medium"><%= t('clubs.form.icon_label') %></span>
-    </label>
+  <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
+    <div class="mb-4">
+      <h2 class="text-xl font-bold text-base-content"><%= t('clubs.form.icon_label') %></h2>
+      <p class="text-base-content/60 mt-1 text-sm">클럽을 대표할 아이콘을 선택해주세요.</p>
+    </div>
+
     <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
       <% Club::ICONS.each do |icon| %>
         <label class="cursor-pointer">
           <input type="radio" name="club[icon]" value="<%= icon %>"
                  class="hidden peer"
                  <%= "checked" if @club.icon == icon || (@club.new_record? && Club::ICONS.first == icon) %>>
-          <div class="card bg-base-200 hover:bg-base-300 peer-checked:bg-primary peer-checked:text-primary-content transition-all duration-200 peer-checked:ring-2 peer-checked:ring-primary">
-            <div class="card-body items-center p-4">
-              <span class="text-4xl"><%= club_icon(icon) %></span>
-            </div>
+          <div class="rounded-xl border-2 border-base-300 bg-base-200/30 p-4 flex items-center justify-center hover:border-primary/40 transition-colors peer-checked:border-primary peer-checked:bg-primary/5">
+            <span class="text-4xl"><%= club_icon(icon) %></span>
           </div>
         </label>
       <% end %>
     </div>
-  </div>
+  </section>
 
-  <!-- 제출 버튼 -->
-  <div class="form-control mt-8">
+  <!-- 제출 -->
+  <div class="flex items-center gap-3">
     <%= form.submit @club.new_record? ? t('clubs.form.submit_create') : t('common.save'),
-        class: "btn btn-primary btn-lg w-full gap-2" %>
+        class: "btn btn-primary px-7" %>
+    <%= link_to t('common.cancel', default: '취소'), @club.new_record? ? clubs_path : club_path(@club), class: "btn btn-ghost" %>
   </div>
 <% end %>

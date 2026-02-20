@@ -1,8 +1,12 @@
 class ClubsController < ApplicationController
-  before_action :set_club, only: [ :show, :edit, :update, :destroy ]
+  include ClubAuthorization
+
+  before_action :set_authorized_club, only: [ :show, :edit, :update, :destroy ]
+  before_action :require_club_admin, only: [ :edit, :update ]
+  before_action :require_club_owner, only: [ :destroy ]
 
   def index
-    @clubs = current_user.clubs.includes(:members, :matches).order(created_at: :desc)
+    @clubs = current_user.clubs.includes(:members, :matches, :club_memberships).order(created_at: :desc)
     club_ids = @clubs.map(&:id)
     @total_members = Member.where(club_id: club_ids).count
     @monthly_matches = Match.where(club_id: club_ids)
@@ -24,12 +28,16 @@ class ClubsController < ApplicationController
   end
 
   def new
-    @club = current_user.clubs.new(icon: Club::ICONS.first)
+    @club = Club.new(icon: Club::ICONS.first)
   end
 
   def create
-    @club = current_user.clubs.new(club_params)
+    @club = Club.new(club_params)
+    @club.user = current_user
     if @club.save
+      @club.club_memberships.create!(
+        user: current_user, role: "owner", joined_at: Time.current
+      )
       redirect_to @club, notice: "클럽이 생성되었습니다."
     else
       render :new, status: :unprocessable_entity
@@ -89,10 +97,6 @@ class ClubsController < ApplicationController
   end
 
   private
-
-  def set_club
-    @club = current_user.clubs.find(params[:id])
-  end
 
   def club_params
     params.require(:club).permit(:name, :icon, :description, meeting_days: [])

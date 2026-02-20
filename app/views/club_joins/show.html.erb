@@ -1,0 +1,26 @@
+<div class="max-w-md mx-auto mt-16">
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body text-center">
+      <div class="text-5xl mb-4">🏀</div>
+      <h2 class="card-title justify-center text-2xl mb-2">클럽 초대</h2>
+      <p class="text-base-content/70 mb-6">
+        <span class="font-bold text-primary"><%= @club.name %></span> 클럽에 초대되었습니다.
+      </p>
+
+      <div class="divider"></div>
+
+      <div class="text-sm text-base-content/60 mb-6">
+        <% if @club.description.present? %>
+          <p><%= @club.description %></p>
+        <% end %>
+        <p class="mt-2">멤버 수: <%= @club.club_memberships.count %>명</p>
+      </div>
+
+      <%= button_to "클럽 참여하기", club_join_path(@invitation.code), method: :post, class: "btn btn-primary btn-lg w-full" %>
+
+      <div class="mt-4">
+        <%= link_to "홈으로 돌아가기", clubs_path, class: "btn btn-ghost btn-sm" %>
+      </div>
+    </div>
+  </div>
+</div>

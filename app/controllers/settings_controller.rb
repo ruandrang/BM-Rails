@@ -30,7 +30,9 @@ class SettingsController < ApplicationController
       return
     end
 
+    nickname = setting_params[:nickname].presence || @user.nickname
     @user.update_columns(
+      nickname: nickname,
       default_game_minutes: minutes,
       scoreboard_sound_enabled: announcements_enabled,
       voice_announcement_enabled: announcements_enabled,
@@ -49,6 +51,7 @@ class SettingsController < ApplicationController
 
   def setting_params
     params.require(:user).permit(
+      :nickname,
       :default_game_minutes,
       :announcements_enabled,
       :scoreboard_sound_enabled,

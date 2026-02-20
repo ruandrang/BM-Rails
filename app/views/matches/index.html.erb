@@ -18,11 +18,13 @@
       <p class="text-base-content/60"><%= t('matches.index.subtitle', club_name: @club.name) %></p>
     </div>
 
-    <%= link_to new_club_match_path(@club), class: "btn btn-primary gap-2" do %>
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-      </svg>
-      <%= t('matches.index.new_match') %>
+    <% if @current_membership&.admin? %>
+      <%= link_to new_club_match_path(@club), class: "btn btn-primary gap-2" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        <%= t('matches.index.new_match') %>
+      <% end %>
     <% end %>
   </div>
 

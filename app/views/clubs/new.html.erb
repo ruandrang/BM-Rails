@@ -1,27 +1,10 @@
 <% content_for :title, t('clubs.new.page_title', app_name: t('app.name')) %>
 
-<div class="max-w-7xl mx-auto">
-  <!-- 뒤로가기 -->
-  <div class="mb-4">
-    <%= link_to clubs_path, class: "btn btn-ghost btn-sm gap-2" do %>
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-      </svg>
-      <%= t('common.back') %>
-    <% end %>
-  </div>
-
-  <!-- 페이지 헤더 -->
-  <div class="mb-8 text-center">
-    <div class="text-6xl mb-4">🏀</div>
-    <h1 class="text-4xl font-bold text-base-content mb-2"><%= t('clubs.new.title') %></h1>
+<div class="max-w-5xl mx-auto">
+  <div class="mb-6">
+    <h1 class="page-title text-base-content mb-2"><%= t('clubs.new.title') %></h1>
     <p class="text-base-content/60"><%= t('clubs.new.subtitle') %></p>
   </div>
 
-  <!-- 폼 카드 -->
-  <div class="card bg-base-100 shadow-xl max-w-4xl mx-auto">
-    <div class="card-body">
-      <%= render "form" %>
-    </div>
-  </div>
+  <%= render "form" %>
 </div>

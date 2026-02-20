@@ -1,5 +1,7 @@
 class StatsController < ApplicationController
-  before_action :set_club
+  include ClubAuthorization
+
+  before_action :set_authorized_club
 
   def index
     # 전체 통계 (공통 캐시 사용)
@@ -29,11 +31,5 @@ class StatsController < ApplicationController
     else
                stats.sort_by { |row| row[:member].name.to_s }
     end
-  end
-
-  private
-
-  def set_club
-    @club = current_user.clubs.find(params[:club_id])
   end
 end

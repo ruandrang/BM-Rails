@@ -1,0 +1,95 @@
+<div class="max-w-4xl mx-auto">
+  <!-- 뒤로가기 -->
+  <div class="mb-4">
+    <%= link_to club_path(@club), class: "btn btn-ghost btn-sm gap-2" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      <%= t('common.back') %>
+    <% end %>
+  </div>
+
+  <!-- 페이지 헤더 -->
+  <div class="mb-8">
+    <h1 class="page-title text-base-content mb-2">초대 코드 관리</h1>
+    <p class="text-base-content/60"><%= @club.name %>의 초대 코드를 관리합니다.</p>
+  </div>
+
+  <!-- 초대 코드 생성 폼 (admin 이상) -->
+  <% if @current_membership&.admin? %>
+    <div class="card bg-base-100 shadow-xl mb-8">
+      <div class="card-body">
+        <h2 class="card-title text-lg mb-4">새 초대 코드 생성</h2>
+        <%= form_with model: [@club, ClubInvitation.new], url: club_invitations_path(@club), local: true, class: "flex flex-wrap items-end gap-4" do |f| %>
+          <div class="form-control">
+            <label class="label"><span class="label-text">만료 시간 (선택)</span></label>
+            <%= f.datetime_local_field :expires_at, class: "input input-bordered input-sm" %>
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text">최대 사용 횟수 (선택)</span></label>
+            <%= f.number_field :max_uses, min: 1, placeholder: "무제한", class: "input input-bordered input-sm w-32" %>
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm">코드 생성</button>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- 초대 코드 목록 -->
+  <% if @invitations.any? %>
+    <div class="space-y-4">
+      <% @invitations.each do |invitation| %>
+        <div class="card bg-base-100 shadow-lg">
+          <div class="card-body p-4 flex-row items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="font-mono text-xl font-bold tracking-wider text-primary"><%= invitation.code %></div>
+              <div class="text-sm text-base-content/60">
+                <% if invitation.expired? %>
+                  <span class="badge badge-error badge-sm">만료됨</span>
+                <% elsif invitation.max_uses_reached? %>
+                  <span class="badge badge-warning badge-sm">사용 완료</span>
+                <% else %>
+                  <span class="badge badge-success badge-sm">활성</span>
+                <% end %>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+              <div class="text-xs text-base-content/50 text-right">
+                <div>사용: <%= invitation.use_count %><%= "/#{invitation.max_uses}" if invitation.max_uses %></div>
+                <% if invitation.expires_at %>
+                  <div>만료: <%= l(invitation.expires_at, format: :short) rescue invitation.expires_at.strftime('%m/%d %H:%M') %></div>
+                <% else %>
+                  <div>만료: 없음</div>
+                <% end %>
+              </div>
+
+              <% if @current_membership&.admin? %>
+                <button type="button"
+                  class="btn btn-ghost btn-sm"
+                  onclick="navigator.clipboard.writeText('<%= club_join_url(invitation.code) %>').then(() => alert('초대 링크가 복사되었습니다!'))">
+                  복사
+                </button>
+                <%= button_to club_invitation_path(@club, invitation),
+                    method: :delete,
+                    form: { onsubmit: "return confirm('이 초대 코드를 삭제하시겠습니까?');" },
+                    class: "btn btn-ghost btn-sm text-error" do %>
+                  삭제
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="hero min-h-[200px] bg-base-200 rounded-box">
+      <div class="hero-content text-center">
+        <div class="max-w-md">
+          <div class="text-4xl mb-4">🔗</div>
+          <p class="text-base-content/70">아직 초대 코드가 없습니다.</p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
