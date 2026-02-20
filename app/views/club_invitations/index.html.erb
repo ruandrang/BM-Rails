@@ -17,7 +17,7 @@
 
   <!-- 초대 코드 생성 폼 (admin 이상) -->
   <% if @current_membership&.admin? %>
-    <div class="card bg-base-100 shadow-xl mb-8">
+    <div class="card-modern-static mb-8">
       <div class="card-body">
         <h2 class="card-title text-lg mb-4">새 초대 코드 생성</h2>
         <%= form_with model: [@club, ClubInvitation.new], url: club_invitations_path(@club), local: true, class: "flex flex-wrap items-end gap-4" do |f| %>
@@ -39,7 +39,7 @@
   <% if @invitations.any? %>
     <div class="space-y-4">
       <% @invitations.each do |invitation| %>
-        <div class="card bg-base-100 shadow-lg">
+        <div class="card-modern-static">
           <div class="card-body p-4 flex-row items-center justify-between">
             <div class="flex items-center gap-4">
               <div class="font-mono text-xl font-bold tracking-wider text-primary"><%= invitation.code %></div>
@@ -83,13 +83,13 @@
       <% end %>
     </div>
   <% else %>
-    <div class="hero min-h-[200px] bg-base-200 rounded-box">
-      <div class="hero-content text-center">
-        <div class="max-w-md">
-          <div class="text-4xl mb-4">🔗</div>
-          <p class="text-base-content/70">아직 초대 코드가 없습니다.</p>
-        </div>
+    <div class="empty-state">
+      <div class="empty-state-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+        </svg>
       </div>
+      <p class="empty-state-description">아직 초대 코드가 없습니다.</p>
     </div>
   <% end %>
 </div>

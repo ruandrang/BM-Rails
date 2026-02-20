@@ -29,7 +29,7 @@
   <!-- 클럽별 경기 목록 -->
   <div class="space-y-8">
     <% if @clubs.empty? %>
-      <div class="alert alert-info shadow-lg">
+      <div class="alert alert-info">
         <div>
           <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -41,7 +41,7 @@
     <% end %>
 
     <% @clubs.each do |club| %>
-      <div class="card bg-base-100 shadow-xl">
+      <div class="card-modern-static">
         <div class="card-body">
           <h2 class="card-title text-2xl mb-4">
             <span class="text-3xl"><%= club_icon(club.icon) %></span>
@@ -51,7 +51,7 @@
           <% if club.matches.any? %>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <% club.matches.order(played_on: :desc).each do |match| %>
-                <div class="card bg-base-200 shadow hover:shadow-lg transition-shadow">
+                <div class="card bg-base-200 border border-base-300 shadow-sm hover:shadow-md transition-shadow">
                   <div class="card-body p-5">
                     <!-- 경기 날짜 -->
                     <div class="flex items-center justify-between mb-3">

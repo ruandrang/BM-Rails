@@ -13,12 +13,12 @@
 
   <!-- 페이지 헤더 -->
   <div class="mb-8">
-    <h1 class="text-4xl font-bold text-base-content mb-2"><%= t('members.edit.title') %></h1>
+    <h1 class="page-title text-base-content mb-2"><%= t('members.edit.title') %></h1>
     <p class="text-base-content/60"><%= t('members.edit.subtitle', member_name: @member.name) %></p>
   </div>
 
   <!-- 폼 카드 -->
-  <div class="card bg-base-100 shadow-xl max-w-2xl mx-auto">
+  <div class="card-modern-static max-w-2xl mx-auto">
     <div class="card-body">
       <%= render "form" %>
     </div>

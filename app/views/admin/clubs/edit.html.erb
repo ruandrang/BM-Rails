@@ -15,7 +15,7 @@
     <p class="text-base-content/60"><%= @club.name %></p>
   </div>
 
-  <div class="card bg-base-100 shadow-xl">
+  <div class="card-modern-static">
     <div class="card-body">
       <%= form_with model: [:admin, @club], class: "space-y-6" do |f| %>
         <% if @club.errors.any? %>

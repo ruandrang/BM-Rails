@@ -53,7 +53,7 @@
   </div>
 
   <!-- DB 대시보드 -->
-  <div class="card bg-base-100 shadow-xl mb-8">
+  <div class="card-modern-static mb-8">
     <div class="card-body">
       <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
         <div>
@@ -185,7 +185,7 @@
       { name: t('admin.dashboard.stats.teams'), count: @stats[:teams], path: admin_teams_path, icon: "👕" },
       { name: t('admin.dashboard.stats.games'), count: @stats[:games], path: admin_games_path, icon: "🎮" }
     ].each do |item| %>
-      <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300">
+      <div class="card-modern">
         <div class="card-body items-center text-center">
           <div class="text-4xl mb-2"><%= item[:icon] %></div>
           <h2 class="card-title"><%= item[:name] %> <%= t('admin.common.manage') %></h2>

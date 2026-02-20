@@ -37,7 +37,7 @@
   </div>
 
   <!-- 클럽 정보 카드 -->
-  <div class="card bg-base-100 shadow-xl mb-6">
+  <div class="card-modern-static mb-6">
     <div class="card-body">
       <h2 class="card-title mb-4"><%= t('admin.clubs.sections.info') %></h2>
       <div class="overflow-x-auto">
@@ -57,7 +57,7 @@
 
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <!-- 멤버 목록 카드 -->
-    <div class="card bg-base-100 shadow-xl">
+    <div class="card-modern-static">
       <div class="card-body">
         <h2 class="card-title mb-4"><%= t('admin.clubs.sections.members') %></h2>
         <% if @club.members.any? %>
@@ -81,7 +81,7 @@
     </div>
 
     <!-- 경기 목록 카드 -->
-    <div class="card bg-base-100 shadow-xl">
+    <div class="card-modern-static">
       <div class="card-body">
         <h2 class="card-title mb-4"><%= t('admin.clubs.sections.matches') %></h2>
         <% if @club.matches.any? %>

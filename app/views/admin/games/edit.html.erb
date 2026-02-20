@@ -15,7 +15,7 @@
     <p class="text-base-content/60"><%= @game.match.club.name %> - <%= @game.match.played_on.strftime("%Y-%m-%d") %></p>
   </div>
 
-  <div class="card bg-base-100 shadow-xl">
+  <div class="card-modern-static">
     <div class="card-body">
       <%= form_with model: [:admin, @game], class: "space-y-6" do |f| %>
         <% if @game.errors.any? %>

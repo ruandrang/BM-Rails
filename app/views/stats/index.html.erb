@@ -14,7 +14,7 @@
   <!-- 페이지 헤더 -->
   <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
     <div>
-      <h1 class="text-4xl font-bold text-base-content mb-2"><%= t('stats.index.title') %></h1>
+      <h1 class="page-title text-base-content mb-2"><%= t('stats.index.title') %></h1>
       <p class="text-base-content/60"><%= t('stats.index.subtitle', club_name: @club.name) %></p>
     </div>
 
@@ -34,7 +34,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       <!-- 선수 현황 -->
-      <div class="card bg-base-100 shadow-xl border-l-4 border-primary">
+      <div class="card bg-base-100 shadow-sm border border-base-300 border-l-4 border-l-primary">
         <div class="card-body p-6 flex-row items-center gap-4">
           <div class="p-3 bg-primary/10 rounded-2xl">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -49,7 +49,7 @@
       </div>
 
       <!-- 성과 지표 -->
-      <div class="card bg-base-100 shadow-xl border-l-4 border-secondary">
+      <div class="card bg-base-100 shadow-sm border border-base-300 border-l-4 border-l-secondary">
         <div class="card-body p-6 flex-row items-center gap-4">
           <div class="p-3 bg-secondary/10 rounded-2xl">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -65,7 +65,7 @@
 
       <!-- 월간 MVP -->
       <% if @monthly_mvp %>
-        <div class="card bg-neutral text-neutral-content shadow-xl border-l-4 border-accent">
+        <div class="card bg-neutral text-neutral-content shadow-sm border border-base-300 border-l-4 border-l-accent">
           <div class="card-body p-6 flex-row items-center gap-4">
             <div class="p-3 bg-accent rounded-2xl">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -79,7 +79,7 @@
           </div>
         </div>
       <% else %>
-         <div class="card bg-base-100 shadow-xl">
+         <div class="card bg-base-100 shadow-sm border border-base-300">
            <div class="card-body p-6 flex-row items-center gap-4 opacity-50">
              <div class="p-3 bg-base-200 rounded-2xl">
                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -96,7 +96,7 @@
     </div>
 
     <!-- 통계 테이블 -->
-    <div class="card bg-base-100 shadow-xl overflow-hidden">
+    <div class="card-modern-static overflow-hidden">
       <div class="card-body p-0">
         <div class="overflow-x-auto">
           <table class="table w-full">
@@ -154,22 +154,20 @@
     </div>
   <% else %>
     <!-- 빈 상태 -->
-    <div class="hero min-h-[400px] bg-base-200 rounded-box">
-      <div class="hero-content text-center">
-        <div class="max-w-md">
-          <div class="text-6xl mb-4">📊</div>
-          <h1 class="text-3xl font-bold mb-4"><%= t('stats.index.empty.title') %></h1>
-          <p class="mb-6 text-base-content/70">
-            <%= t('stats.index.empty.description') %>
-          </p>
-          <%= link_to new_club_match_path(@club), class: "btn btn-primary btn-lg gap-2" do %>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            <%= t('stats.index.empty.create_first') %>
-          <% end %>
-        </div>
+    <div class="empty-state">
+      <div class="empty-state-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
       </div>
+      <h2 class="empty-state-title"><%= t('stats.index.empty.title') %></h2>
+      <p class="empty-state-description"><%= t('stats.index.empty.description') %></p>
+      <%= link_to new_club_match_path(@club), class: "btn btn-primary gap-2" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        <%= t('stats.index.empty.create_first') %>
+      <% end %>
     </div>
   <% end %>
 </div>

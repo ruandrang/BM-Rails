@@ -91,7 +91,7 @@
 
 <!-- 로딩 오버레이 -->
 <div id="loading-overlay" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden backdrop-blur-sm">
-  <div class="rounded-2xl bg-base-100 shadow-xl p-8 text-center min-w-[300px]">
+  <div class="rounded-2xl bg-base-100 shadow-lg border border-base-300 p-8 text-center min-w-[300px]">
     <div class="loading loading-spinner loading-lg text-primary mx-auto mb-4"></div>
     <h3 class="text-xl font-bold mb-2"><%= t('clubs.backup.loading.title') %></h3>
     <p class="text-base-content/60 text-sm"><%= t('clubs.backup.loading.description').html_safe.gsub("\n", "<br>").html_safe %></p>

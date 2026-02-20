@@ -15,7 +15,7 @@
     <p class="text-base-content/60"><%= t('admin.common.team_label', label: @team.label) %> - <%= @team.match.club.name %></p>
   </div>
 
-  <div class="card bg-base-100 shadow-xl">
+  <div class="card-modern-static">
     <div class="card-body">
       <%= form_with model: [:admin, @team], class: "space-y-6" do |f| %>
         <% if @team.errors.any? %>
