@@ -148,6 +148,7 @@ en:
     connected_scoreboard: "Connected Scoreboard"
     standalone_scoreboard: "Standalone Scoreboard"
     tournament_mode: "Tournament Mode"
+    tools: "Tools"
     backup_data: "Data Backup"
     settings: "Settings"
     admin_group: "Admin"

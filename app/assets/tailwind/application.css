@@ -66,15 +66,15 @@
 
 /* === 타이포그래피 통일 스타일 === */
 .page-title {
-  @apply text-3xl font-bold;
+  @apply text-3xl font-extrabold tracking-tight;
 }
 
 .section-title {
-  @apply text-xl font-semibold;
+  @apply text-xl font-bold tracking-tight;
 }
 
 .card-title-unified {
-  @apply text-lg font-medium;
+  @apply text-lg font-semibold;
 }
 
 .text-body {
@@ -83,6 +83,66 @@
 
 .text-description {
   @apply text-sm text-base-content/60;
+}
+
+/* === 모던 카드 스타일 === */
+.card-modern {
+  background-color: var(--fallback-b1, oklch(var(--b1)));
+  border-radius: 1rem;
+  border: 1px solid oklch(var(--b3) / 0.5);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+  transition: all 0.2s ease;
+}
+.card-modern:hover {
+  border-color: oklch(var(--p) / 0.2);
+  box-shadow: 0 4px 12px 0 rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.04);
+  transform: translateY(-1px);
+}
+
+/* 호버 효과 없는 모던 카드 (폼, 정적 콘텐츠용) */
+.card-modern-static {
+  background-color: var(--fallback-b1, oklch(var(--b1)));
+  border-radius: 1rem;
+  border: 1px solid oklch(var(--b3) / 0.5);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+}
+
+/* === 빈 상태 (Empty State) === */
+.empty-state {
+  @apply flex flex-col items-center justify-center py-16 px-4;
+}
+
+.empty-state-icon {
+  @apply w-20 h-20 rounded-2xl flex items-center justify-center mb-6;
+  background-color: oklch(var(--p) / 0.1);
+}
+
+.empty-state-title {
+  @apply text-xl font-bold text-base-content mb-2;
+}
+
+.empty-state-description {
+  @apply text-base-content/60 text-center max-w-sm mb-6;
+}
+
+/* === 통계 카드 모던 스타일 === */
+.stats-card-modern {
+  @apply rounded-xl p-5;
+  background-color: var(--fallback-b1, oklch(var(--b1)));
+  border: 1px solid oklch(var(--b3) / 0.5);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04);
+}
+
+.stats-card-modern .stats-icon {
+  @apply w-10 h-10 rounded-lg flex items-center justify-center mb-3;
+}
+
+.stats-card-modern .stats-value {
+  @apply text-2xl font-extrabold tracking-tight;
+}
+
+.stats-card-modern .stats-label {
+  @apply text-sm text-base-content/60 mt-1;
 }
 
 /* === 레이아웃 통일 스타일 === */

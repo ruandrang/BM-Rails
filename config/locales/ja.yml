@@ -148,6 +148,7 @@ ja:
     connected_scoreboard: "連動スコアボード"
     standalone_scoreboard: "単独スコアボード"
     tournament_mode: "大会モード"
+    tools: "ツール"
     backup_data: "データバックアップ"
     settings: "設定"
     admin_group: "管理"

@@ -148,6 +148,7 @@ ko:
     connected_scoreboard: "연동 점수판"
     standalone_scoreboard: "단독 점수판"
     tournament_mode: "대회 모드"
+    tools: "도구"
     backup_data: "데이터 백업"
     settings: "세팅"
     admin_group: "관리"

@@ -80,7 +80,7 @@
           <!-- Flash 메시지 -->
           <div id="flash-messages" class="absolute top-2 left-0 w-full flex flex-col items-center gap-2 z-50 pointer-events-none px-4">
             <% flash.each do |type, message| %>
-              <div class="alert <%= type == 'notice' ? 'alert-success' : 'alert-error' %> shadow-xl pointer-events-auto flex flex-row items-center gap-3 p-3 w-auto max-w-lg min-w-[300px]">
+              <div class="alert <%= type == 'notice' ? 'alert-success' : 'alert-error' %> shadow-md pointer-events-auto flex flex-row items-center gap-3 p-3 w-auto max-w-lg min-w-[300px] border border-base-300/50">
                 <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -97,7 +97,7 @@
       <!-- 사이드바 (데스크탑용) -->
       <div class="drawer-side">
         <label for="app-drawer" class="drawer-overlay"></label>
-        <aside class="w-80 bg-base-200 h-full flex flex-col">
+        <aside class="w-80 bg-base-100 border-r border-base-300 h-full flex flex-col">
           <!-- 로고 -->
           <div class="bg-primary text-primary-content p-6">
             <%= link_to logged_in? ? clubs_path : new_session_path, class: "flex items-center gap-3" do %>
@@ -112,12 +112,12 @@
           <!-- 네비게이션 메뉴 -->
           <% if logged_in? %>
             <div class="flex-1 overflow-y-auto">
-              <ul class="menu p-4 gap-2">
+              <ul class="menu p-4 gap-1">
                 <li class="menu-title">
                   <span><%= t("menu.main") %></span>
                 </li>
                 <li>
-                  <%= link_to clubs_path, class: "gap-3" do %>
+                  <%= link_to clubs_path, class: "gap-3 rounded-lg #{current_page?(clubs_path) ? 'bg-primary/10 text-primary font-semibold' : 'hover:bg-base-200'}" do %>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                     </svg>
@@ -125,7 +125,7 @@
                   <% end %>
                 </li>
                 <li>
-                  <%= link_to new_club_path, class: "gap-3" do %>
+                  <%= link_to new_club_path, class: "gap-3 rounded-lg #{current_page?(new_club_path) ? 'bg-primary/10 text-primary font-semibold' : 'hover:bg-base-200'}" do %>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
@@ -133,7 +133,7 @@
                   <% end %>
                 </li>
                 <li>
-                  <%= link_to scoreboards_path, class: "gap-3" do %>
+                  <%= link_to scoreboards_path, class: "gap-3 rounded-lg #{current_page?(scoreboards_path) ? 'bg-primary/10 text-primary font-semibold' : 'hover:bg-base-200'}" do %>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-5a2 2 0 012-2h2a2 2 0 012 2v5m-6 0h6m4 0a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2h14z" />
                     </svg>
@@ -141,7 +141,7 @@
                   <% end %>
                 </li>
                 <li>
-                  <%= link_to standalone_scoreboard_path, class: "gap-3" do %>
+                  <%= link_to standalone_scoreboard_path, class: "gap-3 rounded-lg #{current_page?(standalone_scoreboard_path) ? 'bg-primary/10 text-primary font-semibold' : 'hover:bg-base-200'}" do %>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
@@ -149,7 +149,7 @@
                   <% end %>
                 </li>
                 <li>
-                  <a href="#" class="gap-3 group">
+                  <a href="#" class="gap-3 rounded-lg hover:bg-base-200 group">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                     </svg>
@@ -157,9 +157,12 @@
                     <span class="badge badge-xs badge-info badge-outline ml-auto"><%= t("common.coming_soon") %></span>
                   </a>
                 </li>
-                
+
+                <li class="menu-title mt-4">
+                  <span><%= t("menu.tools", default: "도구") %></span>
+                </li>
                 <li>
-                  <%= link_to backup_clubs_path, class: "gap-3" do %>
+                  <%= link_to backup_clubs_path, class: "gap-3 rounded-lg #{current_page?(backup_clubs_path) ? 'bg-primary/10 text-primary font-semibold' : 'hover:bg-base-200'}" do %>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
@@ -167,7 +170,7 @@
                   <% end %>
                 </li>
                 <li>
-                  <%= link_to setting_path, class: "gap-3" do %>
+                  <%= link_to setting_path, class: "gap-3 rounded-lg #{current_page?(setting_path) ? 'bg-primary/10 text-primary font-semibold' : 'hover:bg-base-200'}" do %>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.983 5.968a2 2 0 014.034 0 2 2 0 002.56 1.642 2 2 0 012.853 2.853 2 2 0 001.642 2.56 2 2 0 010 4.034 2 2 0 00-1.642 2.56 2 2 0 01-2.853 2.853 2 2 0 00-2.56 1.642 2 2 0 01-4.034 0 2 2 0 00-2.56-1.642 2 2 0 01-2.853-2.853 2 2 0 00-1.642-2.56 2 2 0 010-4.034 2 2 0 001.642-2.56 2 2 0 012.853-2.853 2 2 0 002.56-1.642z" />
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -176,7 +179,7 @@
                   <% end %>
                 </li>
                 <li>
-                  <%= link_to guide_path, class: "gap-3" do %>
+                  <%= link_to guide_path, class: "gap-3 rounded-lg #{current_page?(guide_path) ? 'bg-primary/10 text-primary font-semibold' : 'hover:bg-base-200'}" do %>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
@@ -184,7 +187,7 @@
                   <% end %>
                 </li>
                 <li>
-                  <%= link_to new_feedback_path, class: "gap-3" do %>
+                  <%= link_to new_feedback_path, class: "gap-3 rounded-lg #{current_page?(new_feedback_path) ? 'bg-primary/10 text-primary font-semibold' : 'hover:bg-base-200'}" do %>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                     </svg>
@@ -197,7 +200,7 @@
                     <span><%= t("menu.admin_group") %></span>
                   </li>
                   <li>
-                    <%= link_to admin_root_path, class: "gap-3" do %>
+                    <%= link_to admin_root_path, class: "gap-3 rounded-lg #{current_page?(admin_root_path) ? 'bg-primary/10 text-primary font-semibold' : 'hover:bg-base-200'}" do %>
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -230,8 +233,8 @@
                   </p>
                 </div>
               </div>
-              <%= link_to t("settings.profile.title", default: "프로필"), edit_profile_path, class: "btn btn-outline btn-block btn-sm mb-2" %>
-              <%= button_to t("common.logout"), session_path, method: :delete, class: "btn btn-outline btn-error btn-block btn-sm" %>
+              <%= link_to t("settings.profile.title", default: "프로필"), edit_profile_path, class: "btn btn-ghost btn-block btn-sm mb-1 justify-start" %>
+              <%= button_to t("common.logout"), session_path, method: :delete, class: "btn btn-ghost btn-block btn-sm text-error justify-start" %>
             </div>
           <% else %>
             <!-- 로그인 전 메뉴 -->

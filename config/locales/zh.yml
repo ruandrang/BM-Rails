@@ -148,6 +148,7 @@ zh:
     connected_scoreboard: "联动记分牌"
     standalone_scoreboard: "独立记分牌"
     tournament_mode: "赛事模式"
+    tools: "工具"
     backup_data: "数据备份"
     settings: "设置"
     admin_group: "管理"
