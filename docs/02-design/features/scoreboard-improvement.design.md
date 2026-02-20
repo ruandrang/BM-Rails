@@ -135,9 +135,10 @@ root.style.setProperty('--team-right-color', TEAM_COLOR_MAP[rightTeam.color]);
 
 ### 1.2 점수 폰트 개선
 
-#### 7-segment 폰트 적용 (선택적)
-현재: 시스템 기본 폰트 (font-black)
-변경: DSEG7 폰트를 점수와 타이머에 선택적 적용
+#### 7-segment 폰트 적용 (미적용 확정)
+현재: 시스템 기본 폰트 (font-black) → 유지
+결정: DSEG7 폰트는 @font-face만 유지하고, 실제 적용은 보류 (가독성 테스트 후 결정)
+text-shadow glow 효과는 팀 색상 기반으로 적용 완료
 
 ```css
 .text-score {
@@ -457,9 +458,11 @@ max_timeouts_per_half: 2,  // 전반/후반 각 2회 (FIBA 기준)
 
 JS: ActionCable `disconnected` 콜백에서 오버레이 표시, `connected`에서 숨김
 
-### 4.3 쿼터별 누적 점수 하단 표시 (Display)
+### 4.3 쿼터별 누적 점수 하단 표시 (Display) - Phase 5 이후 별도 구현
 
-선택적으로 Display 하단에 미니 스코어 테이블 표시:
+> **이관 사유**: Control의 score-table 기능으로 쿼터별 점수 확인 가능. Display 하단 미니 테이블은 별도 PDCA로 진행.
+
+선택적으로 Display 하단에 미니 스코어 테이블 표시 (미구현, 추후 진행):
 ```
 ┌──────────────────────────────────┐
 │      1Q   2Q   3Q   4Q   Total  │
@@ -467,8 +470,6 @@ JS: ActionCable `disconnected` 콜백에서 오버레이 표시, `connected`에�
 │ AWAY  10  14   11   --    35    │
 └──────────────────────────────────┘
 ```
-
-Control에서 토글 가능 (state에 `show_quarter_scores: false` 추가)
 
 ---
 
