@@ -21,19 +21,22 @@
   <% position_counts = @members.group_by(&:position).transform_values(&:count) %>
 
   <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-    <div class="stats shadow bg-primary text-primary-content">
-      <div class="stat p-4">
-        <div class="stat-title text-primary-content/70 text-xs"><%= t('members.index.stats.total') %></div>
-        <div class="stat-value text-2xl"><%= @members.count %></div>
+    <div class="stats-card-modern">
+      <div class="stats-icon" style="background-color: oklch(var(--p) / 0.1);">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
       </div>
+      <div class="stats-value"><%= @members.count %></div>
+      <div class="stats-label"><%= t('members.index.stats.total') %></div>
     </div>
     <% Member::POSITIONS.each do |pos| %>
-      <div class="stats shadow" style="background-color: <%= Member::POSITION_COLORS[pos] %>;">
-        <div class="stat p-4">
-          <div class="stat-title text-white/70 text-xs"><%= pos %></div>
-          <div class="stat-value text-2xl text-white"><%= position_counts[pos] || 0 %></div>
-          <div class="stat-desc text-white/60 text-xs"><%= position_display(pos) %></div>
+      <div class="stats-card-modern">
+        <div class="stats-icon" style="background-color: <%= Member::POSITION_COLORS[pos] %>20;">
+          <span class="text-xs font-bold" style="color: <%= Member::POSITION_COLORS[pos] %>;"><%= pos %></span>
         </div>
+        <div class="stats-value"><%= position_counts[pos] || 0 %></div>
+        <div class="stats-label"><%= position_display(pos) %></div>
       </div>
     <% end %>
   </div>
@@ -82,7 +85,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="member-list">
       <% @members.each do |member| %>
         <% stats = @member_stats[member.id] || { games: 0, win_rate: 0.0 } %>
-        <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 member-item cursor-pointer relative group"
+        <div class="card-modern member-item cursor-pointer relative group"
              onclick="location.href='<%= edit_club_member_path(@club, member) %>'"
              data-name="<%= member.name %>"
              data-position="<%= member.position %>"
@@ -147,22 +150,20 @@
     </div>
   <% else %>
     <!-- 빈 상태 -->
-    <div class="hero min-h-[400px] bg-base-200 rounded-box">
-      <div class="hero-content text-center">
-        <div class="max-w-md">
-          <div class="text-6xl mb-4">👥</div>
-          <h1 class="text-3xl font-bold mb-4"><%= t('members.index.empty.title') %></h1>
-          <p class="mb-6 text-base-content/70">
-            <%= t('members.index.empty.description') %>
-          </p>
-          <%= link_to new_club_member_path(@club), class: "btn btn-primary btn-lg gap-2" do %>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            <%= t('members.index.empty.add_first') %>
-          <% end %>
-        </div>
+    <div class="empty-state">
+      <div class="empty-state-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
       </div>
+      <h2 class="empty-state-title"><%= t('members.index.empty.title') %></h2>
+      <p class="empty-state-description"><%= t('members.index.empty.description') %></p>
+      <%= link_to new_club_member_path(@club), class: "btn btn-primary gap-2" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        <%= t('members.index.empty.add_first') %>
+      <% end %>
     </div>
   <% end %>
 </div>
