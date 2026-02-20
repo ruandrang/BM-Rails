@@ -14,7 +14,7 @@
   <!-- 페이지 헤더 -->
   <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
     <div>
-      <h1 class="text-4xl font-bold text-base-content mb-2"><%= t('matches.index.title') %></h1>
+      <h1 class="page-title text-base-content mb-2"><%= t('matches.index.title') %></h1>
       <p class="text-base-content/60"><%= t('matches.index.subtitle', club_name: @club.name) %></p>
     </div>
 
@@ -32,7 +32,7 @@
   <% if @matches.any? %>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <% @matches.each do |match| %>
-        <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer h-full" data-href="<%= club_match_path(@club, match) %>">
+        <div class="card-modern cursor-pointer h-full" data-href="<%= club_match_path(@club, match) %>">
           <div class="card-body">
             <!-- 날짜 & 팀 수 -->
             <div class="flex items-center justify-between mb-4">
@@ -86,22 +86,20 @@
     </div>
   <% else %>
     <!-- 빈 상태 -->
-    <div class="hero min-h-[400px] bg-base-200 rounded-box">
-      <div class="hero-content text-center">
-        <div class="max-w-md">
-          <div class="text-6xl mb-4">🏆</div>
-          <h1 class="text-3xl font-bold mb-4"><%= t('matches.index.empty.title') %></h1>
-          <p class="mb-6 text-base-content/70">
-            <%= t('matches.index.empty.description') %>
-          </p>
-          <%= link_to new_club_match_path(@club), class: "btn btn-primary btn-lg gap-2" do %>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            <%= t('matches.index.empty.create_first') %>
-          <% end %>
-        </div>
+    <div class="empty-state">
+      <div class="empty-state-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+        </svg>
       </div>
+      <h2 class="empty-state-title"><%= t('matches.index.empty.title') %></h2>
+      <p class="empty-state-description"><%= t('matches.index.empty.description') %></p>
+      <%= link_to new_club_match_path(@club), class: "btn btn-primary gap-2" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        <%= t('matches.index.empty.create_first') %>
+      <% end %>
     </div>
   <% end %>
 </div>

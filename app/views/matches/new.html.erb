@@ -18,7 +18,7 @@
   </div>
 
   <!-- 폼 카드 -->
-  <div class="card bg-base-100 shadow-xl">
+  <div class="card-modern-static">
     <div class="card-body">
       <%= form_with model: [@club, @match], local: true, class: "space-y-6" do |form| %>
         <% selected_teams_count = @match.teams_count.to_i.in?([2, 3]) ? @match.teams_count.to_i : 3 %>

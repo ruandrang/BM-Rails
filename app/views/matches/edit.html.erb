@@ -13,12 +13,12 @@
 
   <!-- 페이지 헤더 -->
   <div class="mb-8">
-    <h1 class="text-4xl font-bold text-base-content mb-2"><%= t('matches.edit.title') %></h1>
+    <h1 class="page-title text-base-content mb-2"><%= t('matches.edit.title') %></h1>
     <p class="text-base-content/60"><%= @club.name %> · <%= l(@match.played_on, format: :long) %></p>
   </div>
 
   <!-- 폼 카드 -->
-  <div class="card bg-base-100 shadow-xl max-w-2xl mx-auto">
+  <div class="card-modern-static max-w-2xl mx-auto">
     <div class="card-body">
       <%= form_with model: [@club, @match], local: true, class: "space-y-6" do |form| %>
         <!-- 경기 날짜 -->
