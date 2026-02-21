@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_20_075154) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_21_161026) do
   create_table "club_invitations", force: :cascade do |t|
     t.integer "club_id", null: false
     t.string "code", null: false
@@ -142,7 +142,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_075154) do
     t.string "name"
     t.string "nickname"
     t.string "password_digest"
-    t.string "possession_switch_pattern", default: "q12_q34", null: false
+    t.string "possession_switch_pattern", default: "fiba", null: false
     t.string "preferred_locale", default: "ko", null: false
     t.boolean "scoreboard_sound_enabled", default: true, null: false
     t.datetime "updated_at", null: false

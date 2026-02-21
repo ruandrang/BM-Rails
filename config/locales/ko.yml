@@ -190,12 +190,12 @@ ko:
     possession:
       title: "공격방향 전환 설정"
       description: "쿼터 진행 시 공격방향 자동 전환 규칙을 선택합니다."
-      option_q12_q34:
-        title: "1,2쿼터 / 3,4쿼터 전환"
-        description: "전반(1·2Q) 동일, 후반(3·4Q)에서 방향을 바꿉니다."
-      option_q13_q24:
-        title: "1,3쿼터 / 2,4쿼터 전환"
-        description: "쿼터마다 번갈아 공격방향을 자동 전환합니다."
+      option_fiba:
+        title: "FIBA 룰"
+        description: "Q1→Q2 전환, Q3→Q4 전환 (짝수 쿼터에서 방향 변경)"
+      option_nba:
+        title: "NBA 룰"
+        description: "Q2·Q3 방향 전환, Q4에서 Q1 방향으로 복귀"
   members:
     index:
       page_title: "멤버 관리 - %{club_name}"
@@ -357,6 +357,7 @@ ko:
       quarter_reset_off: "쿼터 리셋 OFF"
       game_timer: "경기 타이머"
       one_minute: "1분"
+      one_second: "1초"
       start: "시작"
       possession_direction: "공격방향"
       toggle_possession: "공격 전환"
@@ -364,6 +365,7 @@ ko:
       swap_short: "스왑"
       switch_short: "전환"
       control_center: "컨트롤 센터"
+      reset_all: "전체 리셋"
       buzzer: "버저"
       save_and_pause: "저장하고 중단"
       stop: "멈춤"

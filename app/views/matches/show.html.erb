@@ -97,12 +97,12 @@
             </svg>
             <%= t('matches.show.edit') %>
           <% end %>
-          <%= link_to share_club_match_path(@club, @match, token: @match.share_token), class: "btn btn-ghost btn-sm", target: "_blank" do %>
+          <button type="button" class="btn btn-ghost btn-sm" id="share-download-btn" onclick="captureAndDownload()">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
             <%= t('matches.show.share') %>
-          <% end %>
+          </button>
         </div>
       </div>
     </div>
@@ -139,7 +139,7 @@
 
   <!-- 팀 랜덤 재배치 버튼 (게임 기록 없을 때만) -->
   <% if @match.games.none? { |g| g.result != 'pending' || g.home_score > 0 || g.away_score > 0 } %>
-    <div class="flex justify-end mb-4">
+    <div class="flex justify-end mb-4" data-share-hide>
       <%= button_to shuffle_teams_club_match_path(@club, @match),
           method: :patch,
           class: "btn btn-warning gap-2 btn-sm",
@@ -210,7 +210,7 @@
             <% end %>
           </div>
 
-          <div class="mt-3 flex items-center justify-between">
+          <div class="mt-3 flex items-center justify-between" data-share-hide>
             <p class="text-xs text-base-content/50"><%= t('matches.show.member_drag_hint') %></p>
             <% if can_add_member %>
               <button type="button" class="btn btn-xs btn-outline" onclick="document.getElementById('add_member_modal_<%= team.id %>').showModal()">
@@ -257,14 +257,26 @@
     <% end %>
   </div>
 
-  <div data-member-trash-zone class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden opacity-0 translate-y-2 pointer-events-none transition-all duration-150">
-    <div class="flex items-center gap-2 px-5 py-3 rounded-full bg-red-600 text-white shadow-2xl border border-red-700">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-      </svg>
-      <span class="font-bold text-sm tracking-wide"><%= t('matches.show.trash_hint') %></span>
+  <style>
+    [data-member-trash-zone] > .sortable-ghost {
+      max-height: 0 !important;
+      overflow: hidden !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: none !important;
+      opacity: 0 !important;
+    }
+  </style>
+  <% unless @match.finished? %>
+    <div data-member-trash-zone data-share-hide class="w-fit mx-auto -mt-4 mb-8">
+      <div class="flex items-center gap-2 px-5 py-3 rounded-full border-2 border-dashed border-base-content/20 text-base-content/40 transition-all duration-200">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+        <span class="font-bold text-sm tracking-wide"><%= t('matches.show.trash_hint') %></span>
+      </div>
     </div>
-  </div>
+  <% end %>
 
   <!-- 경기 결과 (스코어보드 섹션) -->
   <div class="card bg-neutral text-neutral-content shadow-2xl mb-8">
@@ -305,7 +317,7 @@
                           method: :patch,
                           params: { game_id: game.id },
                           class: "btn btn-xs btn-outline btn-error",
-                          data: { confirm: t('matches.show.delete_game_confirm') } %>
+                          data: { confirm: t('matches.show.delete_game_confirm'), share_hide: "" } %>
                     <% end %>
                   </div>
                 </div>
@@ -420,7 +432,7 @@
           <% end %>
         </div>
 
-        <div class="flex justify-center gap-4 mt-12">
+        <div class="flex justify-center gap-4 mt-12" data-share-hide>
           <!-- 점수 수정 모달 트리거 -->
           <button type="button" class="btn btn-primary btn-lg px-12 text-xl italic font-black rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all" onclick="document.getElementById('score_edit_modal').showModal()">
             <%= t('matches.show.edit_scores') %>
@@ -441,7 +453,7 @@
         </div>
 
         <!-- 점수 수정 모달 -->
-        <dialog id="score_edit_modal" class="modal modal-bottom sm:modal-middle text-base-content">
+        <dialog id="score_edit_modal" class="modal modal-bottom sm:modal-middle text-base-content" data-share-hide>
           <div class="modal-box">
             <h3 class="font-bold text-lg mb-4"><%= t('matches.show.edit_scores_title') %></h3>
 
@@ -563,4 +575,249 @@
         </dialog>
     </div>
   </div>
+  <%= content_tag :script, type: "application/json", id: "share-match-data" do %>
+    <%= raw({
+      clubName: @club.name,
+      matchDate: l(@match.played_on, format: :long),
+      matchDateShort: @match.played_on.strftime("%Y%m%d"),
+      teams: @teams.map { |team|
+        record = team_records[team.id] || { wins: 0, draws: 0, losses: 0 }
+        {
+          label: team.label,
+          color: team.color,
+          cssColor: team.css_color,
+          wins: record[:wins],
+          draws: record[:draws],
+          losses: record[:losses],
+          members: team.members.map { |m| { name: m.name, position: m.position } }
+        }
+      },
+      games: @games.map { |game|
+        {
+          homeTeamLabel: game.home_team.label,
+          awayTeamLabel: game.away_team.label,
+          homeScore: game.home_score,
+          awayScore: game.away_score,
+          homeColor: game.home_team.css_color,
+          awayColor: game.away_team.css_color
+        }
+      }
+    }.to_json) %>
+  <% end %>
+
+  <script>
+    function fillRR(c,x,y,w,h,r){
+      if(typeof r==='number')r=[r,r,r,r];
+      c.beginPath();c.moveTo(x+r[0],y);c.lineTo(x+w-r[1],y);
+      c.quadraticCurveTo(x+w,y,x+w,y+r[1]);c.lineTo(x+w,y+h-r[2]);
+      c.quadraticCurveTo(x+w,y+h,x+w-r[2],y+h);c.lineTo(x+r[3],y+h);
+      c.quadraticCurveTo(x,y+h,x,y+h-r[3]);c.lineTo(x,y+r[0]);
+      c.quadraticCurveTo(x,y,x+r[0],y);c.closePath();c.fill();
+    }
+    function posClr(p){return{PG:'#3b82f6',SG:'#22c55e',SF:'#f97316',PF:'#ef4444',C:'#a855f7'}[p]||'#6b7280';}
+
+    function captureAndDownload() {
+      var btn = document.getElementById('share-download-btn');
+      btn.disabled = true;
+      btn.classList.add('loading');
+
+      try {
+        var d = JSON.parse(document.getElementById('share-match-data').textContent);
+        var canvas = document.createElement('canvas');
+        var c = canvas.getContext('2d');
+        var W = 1080, P = 48, CW = W - P * 2;
+        var tc = d.teams.length;
+        var tGap = 20;
+        var tW = (CW - (tc - 1) * tGap) / tc;
+        var maxM = 0;
+        d.teams.forEach(function(t){ if(t.members.length > maxM) maxM = t.members.length; });
+
+        var mH = 28;
+        var tCardH = 130 + maxM * mH + 16;
+        var gH = 80, gGap = 12;
+        var totalH = P + 130 + 32 + tCardH + 40 + d.games.length * (gH + gGap) + 48 + P;
+
+        canvas.width = W; canvas.height = totalH;
+
+        // 배경 그라데이션
+        var bg = c.createLinearGradient(0, 0, 0, totalH);
+        bg.addColorStop(0, '#0f172a'); bg.addColorStop(1, '#1e293b');
+        c.fillStyle = bg; c.fillRect(0, 0, W, totalH);
+
+        // === 헤더 ===
+        var y = P;
+        c.textAlign = 'center'; c.textBaseline = 'middle';
+        c.fillStyle = '#f97316';
+        c.font = 'bold 44px system-ui, sans-serif';
+        c.fillText(d.clubName, W/2, y + 44);
+        c.fillStyle = 'rgba(255,255,255,0.5)';
+        c.font = '22px system-ui, sans-serif';
+        c.fillText(d.matchDate, W/2, y + 88);
+
+        // 팀 수 배지
+        c.fillStyle = 'rgba(249,115,22,0.15)';
+        var bTxt = tc + ' Teams';
+        c.font = 'bold 14px system-ui, sans-serif';
+        var bW = c.measureText(bTxt).width + 24;
+        fillRR(c, W/2 - bW/2, y + 102, bW, 26, 13);
+        c.fillStyle = '#f97316';
+        c.fillText(bTxt, W/2, y + 115);
+        y += 130;
+
+        // 구분선
+        c.fillStyle = 'rgba(255,255,255,0.06)';
+        c.fillRect(P, y, CW, 1);
+        y += 32;
+
+        // === 팀 카드 ===
+        d.teams.forEach(function(team, i) {
+          var x = P + i * (tW + tGap);
+
+          // 카드 배경
+          c.fillStyle = 'rgba(255,255,255,0.04)';
+          fillRR(c, x, y, tW, tCardH, 12);
+
+          // 팀 색상 상단 바
+          c.fillStyle = team.cssColor;
+          fillRR(c, x, y, tW, 5, [12, 12, 0, 0]);
+
+          // 팀 라벨
+          c.textAlign = 'center';
+          c.fillStyle = '#ffffff';
+          c.font = 'bold 26px system-ui, sans-serif';
+          c.fillText('TEAM ' + team.label, x + tW/2, y + 36);
+
+          // 색상명
+          c.fillStyle = 'rgba(255,255,255,0.3)';
+          c.font = '14px system-ui, sans-serif';
+          c.fillText(team.color, x + tW/2, y + 58);
+
+          // W-D-L 전적
+          var rY = y + 82;
+          var rW = tW / 3;
+          c.font = 'bold 30px system-ui, sans-serif';
+          c.fillStyle = '#22c55e'; c.fillText(team.wins.toString(), x + rW * 0.5, rY);
+          c.fillStyle = '#ffffff';  c.fillText(team.draws.toString(), x + rW * 1.5, rY);
+          c.fillStyle = '#ef4444'; c.fillText(team.losses.toString(), x + rW * 2.5, rY);
+          c.font = 'bold 10px system-ui, sans-serif';
+          c.fillStyle = 'rgba(255,255,255,0.3)';
+          c.fillText('WIN', x + rW * 0.5, rY + 18);
+          c.fillText('DRAW', x + rW * 1.5, rY + 18);
+          c.fillText('LOSS', x + rW * 2.5, rY + 18);
+
+          // 구분선
+          c.fillStyle = 'rgba(255,255,255,0.06)';
+          c.fillRect(x + 12, y + 108, tW - 24, 1);
+
+          // 멤버 목록
+          c.textAlign = 'left';
+          team.members.forEach(function(m, mi) {
+            var mY = y + 126 + mi * mH;
+            c.fillStyle = 'rgba(255,255,255,0.8)';
+            c.font = '15px system-ui, sans-serif';
+            c.fillText(m.name, x + 16, mY);
+
+            // 포지션 배지
+            c.font = 'bold 11px system-ui, sans-serif';
+            var pw = c.measureText(m.position).width + 10;
+            c.fillStyle = posClr(m.position);
+            fillRR(c, x + tW - 16 - pw, mY - 9, pw, 18, 4);
+            c.fillStyle = '#ffffff'; c.textAlign = 'center';
+            c.fillText(m.position, x + tW - 16 - pw/2, mY);
+            c.textAlign = 'left';
+          });
+        });
+
+        y += tCardH + 24;
+
+        // 구분선
+        c.fillStyle = 'rgba(255,255,255,0.06)';
+        c.fillRect(P, y, CW, 1);
+        y += 16;
+
+        // 섹션 타이틀
+        c.textAlign = 'left';
+        c.fillStyle = '#f97316';
+        c.font = 'bold 13px system-ui, sans-serif';
+        c.fillText('GAME SCOREBOARD', P + 4, y + 8);
+        y += 24;
+
+        // === 게임 결과 ===
+        d.games.forEach(function(g, i) {
+          var gy = y + i * (gH + gGap);
+          c.fillStyle = 'rgba(0,0,0,0.3)';
+          fillRR(c, P, gy, CW, gH, 10);
+
+          // Game 라벨
+          c.textAlign = 'left';
+          c.fillStyle = 'rgba(249,115,22,0.6)';
+          c.font = 'bold 12px system-ui, sans-serif';
+          c.fillText('GAME ' + (i + 1), P + 16, gy + 18);
+
+          c.textAlign = 'center';
+          var cx = W / 2, sy = gy + 52;
+          var hW = g.homeScore > g.awayScore, aW = g.awayScore > g.homeScore;
+
+          // WIN/LOSE 라벨
+          if (hW || aW) {
+            c.font = 'bold 12px system-ui, sans-serif';
+            c.fillStyle = hW ? '#22c55e' : 'rgba(255,255,255,0.2)';
+            c.fillText(hW ? 'WIN' : 'LOSE', cx - 80, sy - 22);
+            c.fillStyle = aW ? '#22c55e' : 'rgba(255,255,255,0.2)';
+            c.fillText(aW ? 'WIN' : 'LOSE', cx + 80, sy - 22);
+          }
+
+          // 홈팀 색상 바 + 라벨
+          c.fillStyle = g.homeColor;
+          fillRR(c, cx - 240, sy - 12, 4, 24, 2);
+          c.fillStyle = '#ffffff';
+          c.font = 'bold 20px system-ui, sans-serif';
+          c.fillText(g.homeTeamLabel, cx - 200, sy);
+
+          // 홈 점수
+          c.fillStyle = hW ? '#fbbf24' : 'rgba(255,255,255,0.8)';
+          c.font = 'bold 36px system-ui, sans-serif';
+          c.fillText(g.homeScore.toString(), cx - 80, sy + 2);
+
+          // VS
+          c.fillStyle = 'rgba(255,255,255,0.2)';
+          c.font = 'bold 16px system-ui, sans-serif';
+          c.fillText('VS', cx, sy);
+
+          // 어웨이 점수
+          c.fillStyle = aW ? '#fbbf24' : 'rgba(255,255,255,0.8)';
+          c.font = 'bold 36px system-ui, sans-serif';
+          c.fillText(g.awayScore.toString(), cx + 80, sy + 2);
+
+          // 어웨이팀 라벨 + 색상 바
+          c.fillStyle = '#ffffff';
+          c.font = 'bold 20px system-ui, sans-serif';
+          c.fillText(g.awayTeamLabel, cx + 200, sy);
+          c.fillStyle = g.awayColor;
+          fillRR(c, cx + 236, sy - 12, 4, 24, 2);
+        });
+
+        // 푸터
+        y += d.games.length * (gH + gGap) + 16;
+        c.textAlign = 'center';
+        c.fillStyle = 'rgba(255,255,255,0.12)';
+        c.font = '12px system-ui, sans-serif';
+        c.fillText('BM-Rail', W/2, y + 8);
+
+        // 다운로드
+        var link = document.createElement('a');
+        link.download = d.clubName + '_' + d.matchDateShort + '.png';
+        link.href = canvas.toDataURL('image/png');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch(err) {
+        console.error('이미지 생성 실패:', err);
+        alert('이미지 생성에 실패했습니다: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('loading');
+      }
+    }
+  </script>
 </div>

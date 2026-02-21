@@ -190,12 +190,12 @@ en:
     possession:
       title: "Possession Switch"
       description: "Choose the auto-switch pattern for possession direction by quarter."
-      option_q12_q34:
-        title: "Q1,Q2 / Q3,Q4 Switch"
-        description: "Keep direction in first half, switch in second half."
-      option_q13_q24:
-        title: "Q1,Q3 / Q2,Q4 Switch"
-        description: "Auto-switch every quarter alternately."
+      option_fiba:
+        title: "FIBA Rules"
+        description: "Switch on Q2 and Q4 (even quarters change direction)"
+      option_nba:
+        title: "NBA Rules"
+        description: "Switch on Q2 and Q3, return to Q1 direction in Q4"
   members:
     index:
       page_title: "Members - %{club_name}"
@@ -355,6 +355,7 @@ en:
       quarter_reset_off: "Quarter Reset OFF"
       game_timer: "Game Timer"
       one_minute: "1 min"
+      one_second: "1 sec"
       start: "Start"
       possession_direction: "Possession"
       toggle_possession: "Switch"
@@ -362,6 +363,7 @@ en:
       swap_short: "Swap"
       switch_short: "Switch"
       control_center: "Control Center"
+      reset_all: "Reset All"
       buzzer: "Buzzer"
       save_and_pause: "Save & Pause"
       stop: "Stop"

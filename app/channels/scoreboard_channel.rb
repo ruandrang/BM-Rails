@@ -4,6 +4,7 @@ class ScoreboardChannel < ApplicationCable::Channel
     teams rotation_step home_fouls away_fouls matchup_scores matchup_order matchup_slots quarter_history possession
     manual_swap sound_enabled voice_enabled voice_rate base_possession possession_switch_pattern progression_mode
     quarter_score_reset_enabled regular_quarters state_version updated_at_ms source_client_id
+    main_ref_at_ms main_ref_value shot_ref_at_ms shot_ref_value
   ].freeze
   MAX_PAYLOAD_SIZE = 50_000
 
@@ -132,8 +133,8 @@ class ScoreboardStore
         ],
         "matchup_order" => [],
         "quarter_history" => {},
-        "possession" => "away",
-        "base_possession" => "away",
+        "possession" => "home",
+        "base_possession" => "home",
         "possession_switch_pattern" => sanitized_possession_switch_pattern,
         "progression_mode" => "by_quarter",
         "manual_swap" => false,
@@ -143,7 +144,11 @@ class ScoreboardStore
         "voice_rate" => sanitized_voice_rate,
         "state_version" => 0,
         "updated_at_ms" => 0,
-        "source_client_id" => nil
+        "source_client_id" => nil,
+        "main_ref_at_ms" => 0,
+        "main_ref_value" => sanitized_period_seconds,
+        "shot_ref_at_ms" => 0,
+        "shot_ref_value" => 24
       }
     end
 

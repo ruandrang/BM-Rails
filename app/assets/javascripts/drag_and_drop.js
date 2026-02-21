@@ -61,21 +61,24 @@
       });
     };
 
+    const trashInnerEl = trashZone ? trashZone.querySelector('div') : null;
+
     const showTrashZone = () => {
-      if (!trashZone) return;
-      trashZone.classList.remove('hidden', 'opacity-0', 'translate-y-2', 'pointer-events-none');
-      trashZone.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+      if (!trashInnerEl) return;
+      trashInnerEl.style.backgroundColor = '#dc2626';
+      trashInnerEl.style.color = '#ffffff';
+      trashInnerEl.style.borderStyle = 'solid';
+      trashInnerEl.style.borderColor = '#b91c1c';
+      trashInnerEl.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.1)';
     };
 
     const hideTrashZone = () => {
-      if (!trashZone) return;
-      trashZone.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
-      trashZone.classList.add('opacity-0', 'translate-y-2', 'pointer-events-none');
-      setTimeout(() => {
-        if (!trashZone.classList.contains('opacity-100')) {
-          trashZone.classList.add('hidden');
-        }
-      }, 150);
+      if (!trashInnerEl) return;
+      trashInnerEl.style.backgroundColor = '';
+      trashInnerEl.style.color = '';
+      trashInnerEl.style.borderStyle = '';
+      trashInnerEl.style.borderColor = '';
+      trashInnerEl.style.boxShadow = '';
     };
 
     if (trashZone && !trashZone.dataset.sortableInitialized) {
@@ -115,6 +118,22 @@
           }
         }
       });
+
+      // 멤버 카드가 휴지통 위에 올라왔을 때 시각적 피드백
+      if (trashInnerEl) {
+        const trashObserver = new MutationObserver(() => {
+          const ghost = trashZone.querySelector('.sortable-ghost');
+          if (ghost) {
+            trashInnerEl.style.transform = 'scale(1.15)';
+            trashInnerEl.style.backgroundColor = '#991b1b';
+            trashInnerEl.style.boxShadow = '0 0 30px rgba(239, 68, 68, 0.6)';
+            trashInnerEl.style.borderColor = '#ef4444';
+          } else {
+            trashInnerEl.style.transform = '';
+          }
+        });
+        trashObserver.observe(trashZone, { childList: true });
+      }
 
       trashZone.dataset.sortableInitialized = 'true';
     }

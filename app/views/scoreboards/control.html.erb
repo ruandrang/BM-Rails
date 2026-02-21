@@ -97,18 +97,28 @@
                  style="font-variant-numeric: tabular-nums; letter-spacing: -0.02em;"
                  id="control-game-clock"
                  data-scoreboard-timer>
-              10:00
+              <%= "%d:%02d" % [current_user.default_period_seconds / 60, current_user.default_period_seconds % 60] %>
             </div>
           </div>
-          <div class="grid grid-cols-4 gap-4 z-10">
+          <div class="grid grid-cols-4 gap-3 z-10">
             <button class="timer-btn-gray" data-action="minus-minute">
               <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13H5v-2h14v2z"/></svg>
               <%= t('scoreboards.control.one_minute') %>
+            </button>
+            <button class="timer-btn-gray" data-action="minus-second">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13H5v-2h14v2z"/></svg>
+              <%= t('scoreboards.control.one_second', default: '1초') %>
+            </button>
+            <button class="timer-btn-gray" data-action="plus-second">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+              <%= t('scoreboards.control.one_second', default: '1초') %>
             </button>
             <button class="timer-btn-gray" data-action="plus-minute">
               <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
               <%= t('scoreboards.control.one_minute') %>
             </button>
+          </div>
+          <div class="grid grid-cols-2 gap-3 mt-3 z-10">
             <button class="timer-btn-green"
                     data-action="toggle-main"
                     data-start-text="<%= t('scoreboards.control.start') %>"
@@ -194,28 +204,6 @@
                 <span data-ui-key="reset"><%= t('scoreboards.control.score_reset') %></span>
               </button>
             </div>
-            <%# 타임아웃 %>
-            <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-              <div class="flex items-center gap-2">
-                <span class="text-sm font-bold text-gray-500 uppercase tracking-wide" data-ui-key="timeout_label"><%= t('scoreboards.control.timeout', default: 'T/O') %></span>
-                <div class="flex gap-1.5" data-timeout-indicators-home>
-                  <div class="w-6 h-6 rounded border-2 border-yellow-400 flex items-center justify-center text-xs font-bold" data-timeout data-timeout-active="false">
-                    <span class="text-gray-300">-</span>
-                  </div>
-                  <div class="w-6 h-6 rounded border-2 border-yellow-400 flex items-center justify-center text-xs font-bold" data-timeout data-timeout-active="false">
-                    <span class="text-gray-300">-</span>
-                  </div>
-                </div>
-              </div>
-              <div class="flex items-center gap-2">
-                <button class="px-3 py-1.5 rounded-lg bg-yellow-50 text-yellow-700 border border-yellow-200 hover:bg-yellow-100 transition-colors text-sm font-bold" data-action="home-timeout">
-                  + T/O
-                </button>
-                <button class="px-3 py-1.5 rounded-lg bg-gray-50 text-gray-500 border border-gray-200 hover:bg-gray-100 transition-colors text-sm font-bold" data-action="reset-home-timeouts">
-                  <%= t('scoreboards.control.score_reset', default: 'Reset') %>
-                </button>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -299,28 +287,6 @@
                 <span data-ui-key="reset"><%= t('scoreboards.control.score_reset') %></span>
               </button>
             </div>
-            <%# 타임아웃 %>
-            <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-              <div class="flex items-center gap-2">
-                <span class="text-sm font-bold text-gray-500 uppercase tracking-wide" data-ui-key="timeout_label"><%= t('scoreboards.control.timeout', default: 'T/O') %></span>
-                <div class="flex gap-1.5" data-timeout-indicators-away>
-                  <div class="w-6 h-6 rounded border-2 border-yellow-400 flex items-center justify-center text-xs font-bold" data-timeout data-timeout-active="false">
-                    <span class="text-gray-300">-</span>
-                  </div>
-                  <div class="w-6 h-6 rounded border-2 border-yellow-400 flex items-center justify-center text-xs font-bold" data-timeout data-timeout-active="false">
-                    <span class="text-gray-300">-</span>
-                  </div>
-                </div>
-              </div>
-              <div class="flex items-center gap-2">
-                <button class="px-3 py-1.5 rounded-lg bg-yellow-50 text-yellow-700 border border-yellow-200 hover:bg-yellow-100 transition-colors text-sm font-bold" data-action="away-timeout">
-                  + T/O
-                </button>
-                <button class="px-3 py-1.5 rounded-lg bg-gray-50 text-gray-500 border border-gray-200 hover:bg-gray-100 transition-colors text-sm font-bold" data-action="reset-away-timeouts">
-                  <%= t('scoreboards.control.score_reset', default: 'Reset') %>
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -393,6 +359,15 @@
             </div>
             <input type="checkbox" checked class="hidden" data-action="toggle-announcements" />
           </button>
+          <% if @match.id.to_s.start_with?("standalone_") %>
+            <button class="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 transition-all font-bold group"
+                    data-action="reset-all">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-6 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+              </svg>
+              <span class="text-sm"><%= t('scoreboards.control.reset_all', default: '전체 리셋') %></span>
+            </button>
+          <% end %>
           <% unless @match.id.to_s.start_with?("standalone_") %>
             <button class="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-600 transition-all font-bold group"
                     data-action="save-and-pause"

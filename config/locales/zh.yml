@@ -190,12 +190,12 @@ zh:
     possession:
       title: "进攻方向切换"
       description: "选择每节自动切换规则。"
-      option_q12_q34:
-        title: "第1/2节， 第3/4节切换"
-        description: "上半场方向一致，下半场切换方向。"
-      option_q13_q24:
-        title: "第1/3节， 第2/4节切换"
-        description: "每节交替自动切换方向。"
+      option_fiba:
+        title: "FIBA规则"
+        description: "Q2、Q4切换方向（偶数节变更方向）"
+      option_nba:
+        title: "NBA规则"
+        description: "Q2、Q3切换方向，Q4恢复Q1方向"
   members:
     index:
       page_title: "成员管理 - %{club_name}"
@@ -355,6 +355,7 @@ zh:
       quarter_reset_off: "节重置 OFF"
       game_timer: "比赛计时"
       one_minute: "1分钟"
+      one_second: "1秒"
       start: "开始"
       possession_direction: "进攻方向"
       toggle_possession: "切换进攻"
@@ -362,6 +363,7 @@ zh:
       swap_short: "交换"
       switch_short: "切换"
       control_center: "控制中心"
+      reset_all: "全部重置"
       buzzer: "蜂鸣器"
       save_and_pause: "保存并暂停"
       stop: "停止"

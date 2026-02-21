@@ -60,7 +60,7 @@
       <%# === Small 전용: Clock + Possession 상단 배치 === %>
       <div class="md:hidden w-full flex flex-col items-center gap-2 mb-2 order-first">
         <%# Game Clock %>
-        <div class="text-white font-bold text-clock-sm tracking-tight leading-none" data-scoreboard-timer>10:00</div>
+        <div class="text-white font-bold text-clock-sm tracking-tight leading-none tabular-nums text-center" data-scoreboard-timer><%= "%d:%02d" % [current_user.default_period_seconds / 60, current_user.default_period_seconds % 60] %></div>
         <%# Possession Indicator (소형) %>
         <div class="flex items-center space-x-3" data-possession-indicator>
           <div class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center transition-all duration-300 possession-arrow-left">
@@ -76,11 +76,8 @@
       <%# Left Team %>
       <div class="flex-1 flex flex-col items-center justify-center relative
                   max-md:flex-row max-md:w-full max-md:gap-4 max-md:px-4 max-md:py-2">
-        <%# 팀 색상 배경 그라데이션 (Large/Medium) %>
-        <div class="absolute inset-0 pointer-events-none hidden md:block team-bg-gradient-left"></div>
-
         <%# Team Name with Color Bar %>
-        <div class="flex flex-col items-center mb-1 md:mb-2 relative z-10
+        <div class="flex flex-col items-center mb-1 md:mb-2
                     max-md:order-1">
           <div class="flex items-center space-x-2 md:space-x-3 mb-1">
             <div class="w-5 h-5 md:w-6 md:h-6 lg:w-8 lg:h-8 rounded-full team-color-indicator-left" style="background-color: #3b82f6;" data-team-color-left></div>
@@ -90,13 +87,12 @@
         </div>
 
         <%# Score %>
-        <div class="font-black text-score tracking-wide tabular-nums drop-shadow-lg relative z-10
+        <div class="font-black text-score tracking-wide tabular-nums text-orange-500
                     max-md:order-2 max-md:text-score-sm"
-             data-score-left
-             style="color: var(--team-left-color, #FF6B00); text-shadow: 0 0 30px var(--team-left-color, #FF6B00), 0 0 60px color-mix(in srgb, var(--team-left-color, #FF6B00) 30%, transparent);">0</div>
+             data-score-left>0</div>
 
         <%# Fouls (Large/Medium) %>
-        <div class="mt-2 md:mt-4 lg:mt-8 flex flex-col items-center space-y-2 md:space-y-3 relative z-10
+        <div class="mt-2 md:mt-4 lg:mt-8 flex flex-col items-center space-y-2 md:space-y-3
                     max-md:order-3 max-md:mt-0">
           <div class="flex items-center space-x-2 md:space-x-3">
             <span class="text-gray-400 text-xs md:text-sm lg:text-xl font-bold tracking-widest uppercase" data-ui-key="foul">Fouls</span>
@@ -109,21 +105,15 @@
             </div>
           </div>
           <span class="text-red-500 font-bold text-lg md:text-2xl lg:text-4xl uppercase tracking-wider hidden" data-team-foul-badge-left>TEAM FOUL</span>
-          <%# Timeout Indicators %>
-          <div class="flex items-center space-x-1.5 md:space-x-2" data-timeout-indicators-left>
-            <span class="text-gray-500 text-[10px] md:text-xs font-bold uppercase tracking-wider">T/O</span>
-            <div class="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 rounded bg-gray-700 border border-yellow-500 transition-all duration-300" data-timeout="0" data-timeout-active="false"></div>
-            <div class="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 rounded bg-gray-700 border border-yellow-500 transition-all duration-300" data-timeout="1" data-timeout-active="false"></div>
-          </div>
         </div>
       </div>
 
       <%# Center Section - Clock, Possession, Shot Clock (Medium/Large만) %>
-      <div class="w-1/4 hidden md:flex flex-col items-center justify-start h-full pt-4 lg:pt-10 space-y-4 lg:space-y-8">
+      <div class="w-1/4 hidden md:flex flex-col items-center justify-center h-full space-y-4 lg:space-y-8">
         <%# Game Clock %>
         <div class="text-center">
           <span class="text-gray-400 text-sm lg:text-xl font-bold tracking-[0.15em] uppercase mb-2 lg:mb-4 block" data-ui-key="game_clock_label">Game Clock</span>
-          <div class="text-white font-bold text-clock tracking-tight leading-none transition-all duration-500" data-scoreboard-timer>10:00</div>
+          <div class="text-white font-bold text-clock tracking-tight leading-none transition-all duration-500 tabular-nums text-center" data-scoreboard-timer><%= "%d:%02d" % [current_user.default_period_seconds / 60, current_user.default_period_seconds % 60] %></div>
         </div>
 
         <%# Possession Indicator %>
@@ -141,7 +131,7 @@
         <div class="flex flex-col items-center w-full">
           <span class="text-gray-400 text-sm lg:text-xl font-bold tracking-[0.15em] uppercase mb-2 lg:mb-6" data-ui-key="shot_clock_label">Shot Clock</span>
           <div class="border border-gray-700 bg-[#111827]/60 backdrop-blur-sm rounded-xl px-6 lg:px-16 py-3 lg:py-6 w-full max-w-[450px] flex justify-center">
-            <span class="text-[#39FF14] font-bold text-[80px] md:text-[120px] lg:text-[160px] xl:text-[200px] tabular-nums leading-none" data-scoreboard-shot>24</span>
+            <span class="text-[#39FF14] font-bold text-[64px] md:text-[96px] lg:text-[128px] xl:text-[160px] tabular-nums leading-none" data-scoreboard-shot>24</span>
           </div>
         </div>
       </div>
@@ -149,11 +139,8 @@
       <%# Right Team %>
       <div class="flex-1 flex flex-col items-center justify-center relative
                   max-md:flex-row max-md:w-full max-md:gap-4 max-md:px-4 max-md:py-2">
-        <%# 팀 색상 배경 그라데이션 (Large/Medium) %>
-        <div class="absolute inset-0 pointer-events-none hidden md:block team-bg-gradient-right"></div>
-
         <%# Team Name with Color Bar %>
-        <div class="flex flex-col items-center mb-1 md:mb-2 relative z-10
+        <div class="flex flex-col items-center mb-1 md:mb-2
                     max-md:order-1">
           <div class="flex items-center space-x-2 md:space-x-3 mb-1">
             <div class="w-5 h-5 md:w-6 md:h-6 lg:w-8 lg:h-8 rounded-full team-color-indicator-right" style="background-color: #ef4444;" data-team-color-right></div>
@@ -163,13 +150,12 @@
         </div>
 
         <%# Score %>
-        <div class="font-black text-score tracking-wide tabular-nums drop-shadow-lg relative z-10
+        <div class="font-black text-score tracking-wide tabular-nums text-orange-500
                     max-md:order-2 max-md:text-score-sm"
-             data-score-right
-             style="color: var(--team-right-color, #FF6B00); text-shadow: 0 0 30px var(--team-right-color, #FF6B00), 0 0 60px color-mix(in srgb, var(--team-right-color, #FF6B00) 30%, transparent);">0</div>
+             data-score-right>0</div>
 
         <%# Fouls (Large/Medium) %>
-        <div class="mt-2 md:mt-4 lg:mt-8 flex flex-col items-center space-y-2 md:space-y-3 relative z-10
+        <div class="mt-2 md:mt-4 lg:mt-8 flex flex-col items-center space-y-2 md:space-y-3
                     max-md:order-3 max-md:mt-0">
           <div class="flex items-center space-x-2 md:space-x-3">
             <span class="text-gray-400 text-xs md:text-sm lg:text-xl font-bold tracking-widest uppercase" data-ui-key="foul">Fouls</span>
@@ -182,12 +168,6 @@
             </div>
           </div>
           <span class="text-red-500 font-bold text-lg md:text-2xl lg:text-4xl uppercase tracking-wider hidden" data-team-foul-badge-right>TEAM FOUL</span>
-          <%# Timeout Indicators %>
-          <div class="flex items-center space-x-1.5 md:space-x-2" data-timeout-indicators-right>
-            <span class="text-gray-500 text-[10px] md:text-xs font-bold uppercase tracking-wider">T/O</span>
-            <div class="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 rounded bg-gray-700 border border-yellow-500 transition-all duration-300" data-timeout="0" data-timeout-active="false"></div>
-            <div class="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 rounded bg-gray-700 border border-yellow-500 transition-all duration-300" data-timeout="1" data-timeout-active="false"></div>
-          </div>
         </div>
       </div>
 
@@ -195,7 +175,7 @@
       <div class="md:hidden w-full flex justify-center py-2 order-last">
         <div class="border border-gray-700 bg-[#111827]/60 rounded-xl px-8 py-3 flex flex-col items-center">
           <span class="text-gray-500 text-[10px] font-bold tracking-widest uppercase mb-1">SHOT CLOCK</span>
-          <span class="text-[#39FF14] font-bold text-[64px] tabular-nums leading-none" data-scoreboard-shot>24</span>
+          <span class="text-[#39FF14] font-bold text-[51px] tabular-nums leading-none" data-scoreboard-shot>24</span>
         </div>
       </div>
     </div>
@@ -257,7 +237,7 @@
   }
 
   [data-scoreboard-shot] {
-    font-size: calc(clamp(8rem, 18vw, 14rem) * var(--display-scale)) !important;
+    font-size: calc(clamp(6.4rem, 14.4vw, 11.2rem) * var(--display-scale)) !important;
   }
 
   /* === Medium (768px ~ 1279px) === */
@@ -283,16 +263,8 @@
 
   @media (max-width: 767px) {
     [data-scoreboard-shot] {
-      font-size: calc(clamp(3rem, 14vw, 5rem) * var(--display-scale)) !important;
+      font-size: calc(clamp(2.4rem, 11.2vw, 4rem) * var(--display-scale)) !important;
     }
-  }
-
-  /* === 팀 색상 배경 그라데이션 === */
-  .team-bg-gradient-left {
-    background: linear-gradient(to right, color-mix(in srgb, var(--team-left-color) 8%, transparent), transparent);
-  }
-  .team-bg-gradient-right {
-    background: linear-gradient(to left, color-mix(in srgb, var(--team-right-color) 8%, transparent), transparent);
   }
 
   /* === Possession arrows === */
@@ -330,12 +302,6 @@
     transform: scale(1.15);
   }
 
-  /* === 타임아웃 인디케이터 활성화 === */
-  [data-timeout-active="true"] {
-    background-color: #EAB308 !important;
-    border-color: #EAB308 !important;
-    box-shadow: 0 0 8px rgba(234, 179, 8, 0.5);
-  }
 
   /* === Team foul badge animation === */
   [data-team-foul-badge-left]:not(.hidden),
@@ -348,19 +314,8 @@
     50% { opacity: 0.6; }
   }
 
-  /* === 타이머 실행 중 glow === */
-  [data-scoreboard-timer].timer-running {
-    text-shadow: 0 0 30px rgba(255,255,255,0.5), 0 0 60px rgba(255,255,255,0.2);
-    animation: clock-glow 2s ease-in-out infinite;
-  }
-
   [data-scoreboard-timer]:not(.timer-running) {
     opacity: 0.75;
     transition: opacity 0.5s ease;
-  }
-
-  @keyframes clock-glow {
-    0%, 100% { text-shadow: 0 0 30px rgba(255,255,255,0.5); }
-    50% { text-shadow: 0 0 50px rgba(255,255,255,0.7), 0 0 80px rgba(255,255,255,0.3); }
   }
 </style>

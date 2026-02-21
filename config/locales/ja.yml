@@ -190,12 +190,12 @@ ja:
     possession:
       title: "攻撃方向切替設定"
       description: "クォーター進行時の自動切替ルールを選択します。"
-      option_q12_q34:
-        title: "1,2Q / 3,4Q 切替"
-        description: "前半は同じ方向、後半で方向を切り替えます。"
-      option_q13_q24:
-        title: "1,3Q / 2,4Q 切替"
-        description: "クォーターごとに交互で自動切替します。"
+      option_fiba:
+        title: "FIBAルール"
+        description: "Q2・Q4で方向転換（偶数クォーターで切替）"
+      option_nba:
+        title: "NBAルール"
+        description: "Q2・Q3で方向転換、Q4でQ1の方向に戻る"
   members:
     index:
       page_title: "メンバー管理 - %{club_name}"
@@ -355,6 +355,7 @@ ja:
       quarter_reset_off: "Qリセット OFF"
       game_timer: "ゲームタイマー"
       one_minute: "1分"
+      one_second: "1秒"
       start: "開始"
       possession_direction: "攻撃方向"
       toggle_possession: "攻撃切替"
@@ -362,6 +363,7 @@ ja:
       swap_short: "入替"
       switch_short: "切替"
       control_center: "コントロールセンター"
+      reset_all: "全リセット"
       buzzer: "ブザー"
       save_and_pause: "保存して中断"
       stop: "停止"

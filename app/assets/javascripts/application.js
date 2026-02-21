@@ -196,6 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
         game_clock_label: "경기 시계",
         shot_clock_label: "샷클락",
         fullscreen: "전체 화면",
+        exit_fullscreen: "화면 축소",
         standalone_mode: "단독 모드",
         team_label_pattern: "%{label}",
         matchup_pattern: "%{home} vs %{away}",
@@ -282,6 +283,7 @@ document.addEventListener("DOMContentLoaded", () => {
         game_clock_label: "ゲームクロック",
         shot_clock_label: "ショットクロック",
         fullscreen: "全画面",
+        exit_fullscreen: "全画面解除",
         standalone_mode: "単独モード",
         team_label_pattern: "%{label}",
         matchup_pattern: "%{home} vs %{away}",
@@ -368,6 +370,7 @@ document.addEventListener("DOMContentLoaded", () => {
         game_clock_label: "Game Clock",
         shot_clock_label: "Shot Clock",
         fullscreen: "Fullscreen",
+        exit_fullscreen: "Exit Full",
         standalone_mode: "Standalone Mode",
         team_label_pattern: "%{label}",
         matchup_pattern: "%{home} vs %{away}",
@@ -454,6 +457,7 @@ document.addEventListener("DOMContentLoaded", () => {
         game_clock_label: "比赛时钟",
         shot_clock_label: "进攻计时",
         fullscreen: "全屏",
+        exit_fullscreen: "退出全屏",
         standalone_mode: "独立模式",
         team_label_pattern: "%{label}",
         matchup_pattern: "%{home} vs %{away}",
@@ -540,6 +544,7 @@ document.addEventListener("DOMContentLoaded", () => {
         game_clock_label: "Horloge de match",
         shot_clock_label: "Chrono tir",
         fullscreen: "Plein écran",
+        exit_fullscreen: "Quitter",
         standalone_mode: "Mode autonome",
         team_label_pattern: "%{label}",
         matchup_pattern: "%{home} vs %{away}",
@@ -626,6 +631,7 @@ document.addEventListener("DOMContentLoaded", () => {
         game_clock_label: "Reloj de juego",
         shot_clock_label: "Reloj de tiro",
         fullscreen: "Pantalla completa",
+        exit_fullscreen: "Salir",
         standalone_mode: "Modo independiente",
         team_label_pattern: "%{label}",
         matchup_pattern: "%{home} vs %{away}",
@@ -712,6 +718,7 @@ document.addEventListener("DOMContentLoaded", () => {
         game_clock_label: "Cronometro gara",
         shot_clock_label: "Crono tiro",
         fullscreen: "Schermo intero",
+        exit_fullscreen: "Esci",
         standalone_mode: "Modalità standalone",
         team_label_pattern: "%{label}",
         matchup_pattern: "%{home} vs %{away}",
@@ -800,6 +807,7 @@ document.addEventListener("DOMContentLoaded", () => {
       game_clock_label: "Relógio de Jogo",
       shot_clock_label: "Cronômetro de Arremesso",
       fullscreen: "Tela Cheia",
+      exit_fullscreen: "Sair",
       standalone_mode: "Modo Independente",
       team_label_pattern: "%{label}",
       matchup_pattern: "%{home} vs %{away}",
@@ -886,6 +894,7 @@ document.addEventListener("DOMContentLoaded", () => {
       game_clock_label: "Game Clock",
       shot_clock_label: "Shot Clock",
       fullscreen: "Fullscreen",
+      exit_fullscreen: "Exit Full",
       standalone_mode: "Standalone Mode",
       team_label_pattern: "%{label}",
       matchup_pattern: "%{home} vs %{away}",
@@ -972,6 +981,7 @@ document.addEventListener("DOMContentLoaded", () => {
       game_clock_label: "Spieluhr",
       shot_clock_label: "Wurfuhr",
       fullscreen: "Vollbild",
+      exit_fullscreen: "Beenden",
       standalone_mode: "Standalone-Modus",
       team_label_pattern: "%{label}",
       matchup_pattern: "%{home} vs %{away}",
@@ -1020,10 +1030,10 @@ document.addEventListener("DOMContentLoaded", () => {
       away: formatTeamName(awayTeam)
     });
     applyStaticUiText();
-    const POSSESSION_SWITCH_PATTERNS = ["q12_q34", "q13_q24"];
+    const POSSESSION_SWITCH_PATTERNS = ["fiba", "nba"];
     const defaultPossessionSwitchPattern = POSSESSION_SWITCH_PATTERNS.includes(scoreboardRoot.dataset.possessionSwitchPattern)
       ? scoreboardRoot.dataset.possessionSwitchPattern
-      : "q12_q34";
+      : "fiba";
     const readQuarterScoreViewMode = () => {
       try {
         const raw = window.localStorage.getItem(quarterScoreViewStorageKey);
@@ -1407,11 +1417,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const quarterNumber = Number.parseInt(quarter, 10);
       const safeQuarter = Number.isFinite(quarterNumber) && quarterNumber > 0 ? quarterNumber : 1;
 
-      if (pattern === "q13_q24") {
-        return safeQuarter % 2 === 0;
+      if (pattern === "nba") {
+        return safeQuarter === 2 || safeQuarter === 3;
       }
 
-      return safeQuarter >= 3;
+      return safeQuarter % 2 === 0;
     };
 
     const possessionForQuarter = (quarter, basePossession, pattern) => {
@@ -1572,9 +1582,9 @@ document.addEventListener("DOMContentLoaded", () => {
         matchup_order: defaultMatchupOrder(seededSlots),
         quarter_history: {}, // { pairIdx: { quarterNum: { team1: score, team2: score } } }
         progression_mode: isTwoTeamMode() ? "by_game" : "by_quarter",
-        base_possession: "away",
+        base_possession: "home",
         possession_switch_pattern: defaultPossessionSwitchPattern,
-        possession: "away", // 'home' or 'away'
+        possession: "home", // 'home' or 'away'
         manual_swap: false,
         quarter_score_reset_enabled: totalRegularQuarters() === 3,
         state_version: 0,
@@ -1742,7 +1752,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         normalized.base_possession = basePossessionForSelectedQuarterDirection(
           normalized.quarter,
-          normalizePossession(incomingState.possession, "away"),
+          normalizePossession(incomingState.possession, "home"),
           normalized.possession_switch_pattern
         );
       }
@@ -1799,8 +1809,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const setText = (selector, value) => {
-      const el = scoreboardRoot.querySelector(selector);
-      if (el) el.textContent = value;
+      scoreboardRoot.querySelectorAll(selector).forEach(el => { el.textContent = value; });
     };
 
     const setTextOrValue = (selector, value) => {
@@ -1894,12 +1903,14 @@ document.addEventListener("DOMContentLoaded", () => {
           else if (action === "add-away-2") state.teams[awayIdx].score += 2;
           else if (action === "add-away-3") state.teams[awayIdx].score += 3;
 
-          // Reset shot clock to 24 when score is added (or disable if game time < 24)
+          // 득점 시 샷클락 리셋
           if (isScoreAddAction) {
-            if (state.period_seconds < 24) {
-              state.shot_seconds = -1; // Disable shot clock
-            } else {
+            if (state.period_seconds >= 24) {
               state.shot_seconds = 24;
+            } else if (state.period_seconds >= 14) {
+              state.shot_seconds = 14;
+            } else {
+              state.shot_seconds = -1; // 경기 시간 14초 미만이면 비활성화
             }
             state.shot_running = false;
           }
@@ -2001,19 +2012,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Show "--" for shot clock when disabled (shot_seconds < 0)
       // 5초 미만: 소수점 한자리 표시
-      // 5~6초: floor() 사용 (음성 카운트다운과 동기화)
-      // 6초 이상: ceil() 사용 (리셋 후 1초간 숫자 유지)
+      // 5초 이상: floor() 사용 (전광판과 동일하게 즉시 반영)
       let shotClockDisplay;
       if (state.shot_seconds < 0) {
         shotClockDisplay = "--";
       } else if (state.shot_seconds < 5 && state.shot_seconds > 0) {
         shotClockDisplay = Number(state.shot_seconds).toFixed(1);
-      } else if (state.shot_seconds < 6) {
-        // 5~6초 범위: floor()로 음성과 동기화
-        shotClockDisplay = Math.floor(state.shot_seconds);
       } else {
-        // 6초 이상: ceil()로 리셋값이 1초간 유지되도록
-        shotClockDisplay = Math.ceil(state.shot_seconds);
+        shotClockDisplay = Math.floor(state.shot_seconds);
       }
       setText("[data-scoreboard-shot]", shotClockDisplay);
 
@@ -2037,8 +2043,6 @@ document.addEventListener("DOMContentLoaded", () => {
           label.style.color = light ? "#111827" : "#ffffff";
         }
       };
-
-      console.log('[Render] isDisplayPage:', isDisplayPage, ', role:', role);
 
       if (isDisplayPage) {
         applyDisplayBadgeStyle(".team-badge-left", leftTeam);
@@ -2065,12 +2069,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const leftColor = getDisplayTeamColor(leftTeam?.color);
         const rightColor = getDisplayTeamColor(rightTeam?.color);
 
-        console.log('[Display] Team colors - leftTeam:', leftTeam?.color, '→', leftColor, ', rightTeam:', rightTeam?.color, '→', rightColor);
-
         // 팀 색상 인디케이터 (원형) - setProperty로 강제 적용
         const leftIndicator = scoreboardRoot.querySelector('[data-team-color-left]');
         const rightIndicator = scoreboardRoot.querySelector('[data-team-color-right]');
-        console.log('[Display] Color indicators found - left:', !!leftIndicator, ', right:', !!rightIndicator);
         if (leftIndicator) {
           leftIndicator.style.setProperty('background-color', leftColor, 'important');
         }
@@ -2081,7 +2082,6 @@ document.addEventListener("DOMContentLoaded", () => {
         // 팀 색상 바 - setProperty로 강제 적용
         const leftBar = scoreboardRoot.querySelector('[data-team-bar-left]');
         const rightBar = scoreboardRoot.querySelector('[data-team-bar-right]');
-        console.log('[Display] Color bars found - left:', !!leftBar, ', right:', !!rightBar);
         if (leftBar) {
           leftBar.style.setProperty('background-color', leftColor, 'important');
         }
@@ -2093,6 +2093,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Scores (new display)
       setText("[data-score-left]", leftTeam.score);
       setText("[data-score-right]", rightTeam.score);
+
 
       // Fouls (new display) - Fill circles based on count + data-foul-active attribute
       const updateFoulCircles = (containerSelector, foulCount) => {
@@ -2133,11 +2134,13 @@ document.addEventListener("DOMContentLoaded", () => {
       };
 
       if (state.possession === 'home' || state.possession === 'away') {
-        // Control page uses direction-based UI (left=away, right=home)
-        // Display page keeps existing team-based rendering.
-        const showLeft = role === 'control'
+        // Q3/Q4에서 카드 스왑(isSidesSwapped)과 공격방향 스왑(possessionForQuarter)이
+        // 동시에 일어나면 상쇄되므로, 화살표 방향을 한 번 더 반전시킨다.
+        const swapped = isSidesSwapped();
+        let showLeft = role === 'control'
           ? state.possession === 'away'
           : state.possession === 'home';
+        if (swapped) showLeft = !showLeft;
         showArrows(arrowsLeft, showLeft);
         showArrows(arrowsRight, !showLeft);
       } else {
@@ -2679,158 +2682,71 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // HTML5 Audio 기반 버저 (Web Audio API 대신 사용 - 더 안정적)
-    let buzzerAudio = null;
-    let buzzerPlaying = false;
+    // Web Audio API 기반 부저
+    let buzzerCtx = null;
     let buzzerCooldownUntil = 0;
 
-    // Base64 WAV 파일 생성 (440Hz 사각파, 1.5초)
-    const createBuzzerWavBase64 = () => {
-      const sampleRate = 44100;
-      const duration = 1.5;
-      const numSamples = Math.floor(sampleRate * duration);
-      const frequency = 440;
-      const amplitude = 0.15;
-
-      // WAV 파일 생성
-      const numChannels = 1;
-      const bitsPerSample = 16;
-      const byteRate = sampleRate * numChannels * bitsPerSample / 8;
-      const blockAlign = numChannels * bitsPerSample / 8;
-      const dataSize = numSamples * blockAlign;
-      const fileSize = 44 + dataSize;
-
-      const buffer = new ArrayBuffer(fileSize);
-      const view = new DataView(buffer);
-
-      // WAV 헤더
-      const writeString = (offset, str) => {
-        for (let i = 0; i < str.length; i++) {
-          view.setUint8(offset + i, str.charCodeAt(i));
-        }
-      };
-
-      writeString(0, 'RIFF');
-      view.setUint32(4, fileSize - 8, true);
-      writeString(8, 'WAVE');
-      writeString(12, 'fmt ');
-      view.setUint32(16, 16, true); // fmt chunk size
-      view.setUint16(20, 1, true);  // PCM format
-      view.setUint16(22, numChannels, true);
-      view.setUint32(24, sampleRate, true);
-      view.setUint32(28, byteRate, true);
-      view.setUint16(32, blockAlign, true);
-      view.setUint16(34, bitsPerSample, true);
-      writeString(36, 'data');
-      view.setUint32(40, dataSize, true);
-
-      // 오디오 데이터 (사각파)
-      let offset = 44;
-      for (let i = 0; i < numSamples; i++) {
-        const t = i / sampleRate;
-        const sineValue = Math.sin(2 * Math.PI * frequency * t);
-        let sample = sineValue >= 0 ? amplitude : -amplitude;
-
-        // 마지막 0.1초 페이드아웃
-        const fadeStart = duration - 0.1;
-        if (t > fadeStart) {
-          const fadeProgress = (t - fadeStart) / 0.1;
-          sample *= (1 - fadeProgress);
-        }
-
-        // 16비트 PCM으로 변환 (-32768 ~ 32767)
-        const intSample = Math.max(-32768, Math.min(32767, Math.floor(sample * 32767)));
-        view.setInt16(offset, intSample, true);
-        offset += 2;
+    const initBuzzerAudio = () => {
+      if (buzzerCtx) return;
+      try {
+        buzzerCtx = new (window.AudioContext || window.webkitAudioContext)();
+        console.log('[Buzzer] AudioContext created, state:', buzzerCtx.state);
+      } catch (e) {
+        console.error('[Buzzer] AudioContext not supported:', e);
       }
-
-      // ArrayBuffer를 Base64로 변환
-      const bytes = new Uint8Array(buffer);
-      let binary = '';
-      for (let i = 0; i < bytes.length; i++) {
-        binary += String.fromCharCode(bytes[i]);
-      }
-      return 'data:audio/wav;base64,' + btoa(binary);
     };
 
-    // 버저 오디오 초기화 (페이지 로드 시 한 번만)
-    const initBuzzerAudio = () => {
-      if (buzzerAudio) return;
-
-      try {
-        const wavDataUrl = createBuzzerWavBase64();
-        buzzerAudio = new Audio(wavDataUrl);
-        buzzerAudio.preload = 'auto';
-        buzzerAudio.volume = 1.0;
-
-        buzzerAudio.addEventListener('ended', () => {
-          buzzerPlaying = false;
-          console.log('[Buzzer] Buzzer sound ended');
-        });
-
-        buzzerAudio.addEventListener('error', (e) => {
-          console.error('[Buzzer] Audio error:', e);
-          buzzerPlaying = false;
-        });
-
-        console.log('[Buzzer] HTML5 Audio initialized');
-      } catch (e) {
-        console.error('[Buzzer] Failed to init Audio:', e);
+    const resumeBuzzerCtx = () => {
+      if (buzzerCtx && buzzerCtx.state === 'suspended') {
+        buzzerCtx.resume().then(() => {
+          console.log('[Buzzer] AudioContext resumed');
+        }).catch(() => {});
       }
     };
 
     const playBuzzer = () => {
       const now = Date.now();
-      console.log('[Buzzer] playBuzzer called at', now, 'cooldownUntil:', buzzerCooldownUntil, 'playing:', buzzerPlaying);
+      console.log('[Buzzer] playBuzzer called, soundEnabled:', isSoundEnabled());
 
-      if (!isSoundEnabled()) {
-        console.log('[Buzzer] Sound disabled, skipping');
-        return;
-      }
+      if (!isSoundEnabled()) return;
 
-      // 쿨다운 중이면 무시
       if (now < buzzerCooldownUntil) {
-        console.log('[Buzzer] In cooldown, remaining:', buzzerCooldownUntil - now, 'ms, skipping');
+        console.log('[Buzzer] In cooldown, skipping');
         return;
       }
-
-      // 이미 재생 중이면 무시
-      if (buzzerPlaying) {
-        console.log('[Buzzer] Already playing, skipping');
-        return;
-      }
-
-      // 쿨다운 시작
       buzzerCooldownUntil = now + 3000;
-      console.log('[Buzzer] Cooldown set until', buzzerCooldownUntil);
 
-      // Initialize on first call
-      if (!buzzerAudio) {
-        initBuzzerAudio();
+      if (!buzzerCtx) initBuzzerAudio();
+      if (!buzzerCtx) {
+        console.error('[Buzzer] No AudioContext');
+        return;
+      }
+
+      // suspended 상태면 resume 시도
+      if (buzzerCtx.state === 'suspended') {
+        buzzerCtx.resume().catch(() => {});
       }
 
       try {
-        if (!buzzerAudio) {
-          console.error('[Buzzer] Audio not available');
-          return;
-        }
+        // 440Hz 사각파 2초 + 페이드아웃 (경기장용 큰 소리)
+        const osc = buzzerCtx.createOscillator();
+        const gain = buzzerCtx.createGain();
+        osc.connect(gain);
+        gain.connect(buzzerCtx.destination);
 
-        buzzerPlaying = true;
+        osc.type = 'square';
+        osc.frequency.value = 440;
+        gain.gain.setValueAtTime(1.0, buzzerCtx.currentTime);
+        gain.gain.setValueAtTime(1.0, buzzerCtx.currentTime + 1.5);
+        gain.gain.exponentialRampToValueAtTime(0.01, buzzerCtx.currentTime + 2.0);
 
-        // 처음부터 재생
-        buzzerAudio.currentTime = 0;
-        const playPromise = buzzerAudio.play();
+        osc.start(buzzerCtx.currentTime);
+        osc.stop(buzzerCtx.currentTime + 2.0);
+        osc.onended = () => { osc.disconnect(); gain.disconnect(); };
 
-        if (playPromise !== undefined) {
-          playPromise.then(() => {
-            console.log('[Buzzer] Playing buzzer via HTML5 Audio');
-          }).catch((error) => {
-            console.error('[Buzzer] Play failed:', error);
-            buzzerPlaying = false;
-          });
-        }
-      } catch (error) {
-        console.error('[Buzzer] Buzzer error:', error);
-        buzzerPlaying = false;
+        console.log('[Buzzer] Playing via Web Audio API');
+      } catch (e) {
+        console.error('[Buzzer] Play error:', e);
       }
     };
 
@@ -2975,8 +2891,8 @@ document.addEventListener("DOMContentLoaded", () => {
           console.log('[ShotClock] Timer expired, playing buzzer');
           playBuzzer();
 
-          // If game time < 24 seconds, disable shot clock (set to -1)
-          if (state.period_seconds < 24) {
+          // 경기 시간 < 14초이면 샷클락 비활성화 (14초 리셋도 불가능한 상황)
+          if (state.period_seconds < 14) {
             state.shot_seconds = -1;
           }
         }
@@ -3120,6 +3036,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (role !== "display") return;
       if (displayAnimFrame) return;
 
+      let prevMainValue = -1;
+      let prevShotValue = -1;
+
       const updateDisplayTimers = () => {
         if (!state) {
           displayAnimFrame = requestAnimationFrame(updateDisplayTimers);
@@ -3128,30 +3047,58 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const now = Date.now();
 
-        // Interpolate main timer
-        if (state.running && state.main_ref_at_ms > 0) {
-          const elapsed = (now - state.main_ref_at_ms) / 1000;
-          const currentValue = Math.max(0, state.main_ref_value - elapsed);
-          // Update display only (don't modify state.period_seconds as that comes from control)
-          const timerEl = document.querySelector("[data-scoreboard-timer]");
-          if (timerEl) {
-            timerEl.textContent = formatTime(currentValue);
+        // Interpolate main timer (모든 반응형 타이머 요소 업데이트)
+        const timerEls = scoreboardRoot.querySelectorAll("[data-scoreboard-timer]");
+        if (timerEls.length > 0) {
+          let timerText;
+          let currentMainValue;
+          if (state.running && state.main_ref_at_ms > 0) {
+            const elapsed = (now - state.main_ref_at_ms) / 1000;
+            currentMainValue = Math.max(0, state.main_ref_value - elapsed);
+            timerText = formatTime(currentMainValue);
+          } else {
+            currentMainValue = state.period_seconds;
+            timerText = formatTime(currentMainValue);
           }
+          timerEls.forEach(el => { el.textContent = timerText; });
+
+          // 경기 타이머가 0에 도달하면 부저
+          if (prevMainValue > 0 && currentMainValue <= 0) {
+            playBuzzer();
+          }
+          prevMainValue = currentMainValue;
         }
 
-        // Interpolate shot timer
-        if (state.shot_running && state.shot_ref_at_ms > 0 && state.shot_seconds > 0) {
-          const elapsed = (now - state.shot_ref_at_ms) / 1000;
-          const currentValue = Math.max(0, state.shot_ref_value - elapsed);
-          const shotEl = document.querySelector("[data-scoreboard-shot]");
-          if (shotEl) {
-            // 5초 미만이면 소수점 한자리 표시, 5초 이상이면 floor
-            if (currentValue < 5 && currentValue > 0) {
-              shotEl.textContent = currentValue.toFixed(1);
+        // Interpolate shot timer (모든 반응형 샷클락 요소 업데이트)
+        const shotEls = scoreboardRoot.querySelectorAll("[data-scoreboard-shot]");
+        if (shotEls.length > 0) {
+          let shotText;
+          let currentShotValue;
+          if (state.shot_running && state.shot_ref_at_ms > 0 && state.shot_seconds > 0) {
+            const elapsed = (now - state.shot_ref_at_ms) / 1000;
+            currentShotValue = Math.max(0, state.shot_ref_value - elapsed);
+            if (currentShotValue < 5 && currentShotValue > 0) {
+              shotText = currentShotValue.toFixed(1);
             } else {
-              shotEl.textContent = Math.floor(currentValue);
+              shotText = Math.floor(currentShotValue);
+            }
+          } else {
+            currentShotValue = state.shot_seconds;
+            if (currentShotValue < 0) {
+              shotText = "--";
+            } else if (currentShotValue < 5 && currentShotValue > 0) {
+              shotText = Number(currentShotValue).toFixed(1);
+            } else {
+              shotText = Math.floor(currentShotValue);
             }
           }
+          shotEls.forEach(el => { el.textContent = shotText; });
+
+          // 샷클락이 0에 도달하면 부저
+          if (prevShotValue > 0.05 && currentShotValue <= 0.05 && currentShotValue >= 0) {
+            playBuzzer();
+          }
+          prevShotValue = currentShotValue;
         }
 
         displayAnimFrame = requestAnimationFrame(updateDisplayTimers);
@@ -3432,12 +3379,14 @@ document.addEventListener("DOMContentLoaded", () => {
       else if (action === "add-away-3") state.teams[awayIdx].score += 3;
       else if (action === "reset-away-score") { if (!confirm(i18nForScoreboard("confirm_reset_score"))) return; state.teams[awayIdx].score = 0; }
 
-      // Reset shot clock to 24 when score is added (or disable if game time < 24)
+      // 득점 시 샷클락 리셋
       if (isScoreAddAction) {
-        if (state.period_seconds < 24) {
-          state.shot_seconds = -1; // Disable shot clock
-        } else {
+        if (state.period_seconds >= 24) {
           state.shot_seconds = 24;
+        } else if (state.period_seconds >= 14) {
+          state.shot_seconds = 14;
+        } else {
+          state.shot_seconds = -1; // 경기 시간 14초 미만이면 비활성화
         }
         state.shot_running = false;
       }
@@ -3487,8 +3436,9 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.dataset.handlerAttached = "true";
 
         btn.addEventListener("click", () => {
-          // Initialize buzzer audio on first user interaction
+          // Initialize and resume buzzer audio on first user interaction
           initBuzzerAudio();
+          resumeBuzzerCtx();
 
           const action = btn.dataset.action;
           if (["add-home", "add-home-1", "add-home-2", "add-home-3",
@@ -3561,12 +3511,17 @@ document.addEventListener("DOMContentLoaded", () => {
               case "plus-minute":
                 state.period_seconds += 60;
                 break;
+              case "minus-second":
+                state.period_seconds = Math.max(0, state.period_seconds - 1);
+                break;
+              case "plus-second":
+                state.period_seconds += 1;
+                break;
               case "toggle-shot":
                 // Don't start shot clock if:
                 // - game clock is not running
-                // - shot clock is disabled (-1)
-                // - game time is under 24 seconds
-                if (!state.shot_running && (!state.running || state.shot_seconds < 0 || state.period_seconds < 24)) {
+                // - shot clock is disabled (-1) or 0
+                if (!state.shot_running && (!state.running || state.shot_seconds < 0.1)) {
                   break;
                 }
                 state.shot_running = !state.shot_running;
@@ -3576,12 +3531,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 break;
               case "reset-shot-24":
-                // If game time < 24 seconds, disable shot clock instead of resetting
-                if (state.period_seconds < 24) {
-                  state.shot_seconds = -1;
-                } else {
+                // 경기 시간에 따라 적절한 샷클락 값 설정
+                if (state.period_seconds >= 24) {
                   state.shot_seconds = 24;
                   state.shot_ref_value = 24;
+                } else if (state.period_seconds >= 14) {
+                  // 경기 시간 14~24초: 14초로 리셋
+                  state.shot_seconds = 14;
+                  state.shot_ref_value = 14;
+                } else {
+                  state.shot_seconds = -1;
                 }
                 // Shot clock stops on reset - user must manually start
                 state.shot_running = false;
@@ -3745,7 +3704,7 @@ document.addEventListener("DOMContentLoaded", () => {
                       const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
                       // 모든 매치업의 게임 점수 저장
-                      for (let pairIdx = 0; pairIdx < numMatchups; pairIdx++) {
+                      for (let pairIdx = 0; pairIdx < roundsPerQuarter(); pairIdx++) {
                         const [t1, t2] = matchupPairById(pairIdx);
                         if (t1 === undefined || t2 === undefined) continue;
 
@@ -4510,8 +4469,16 @@ document.addEventListener("DOMContentLoaded", () => {
       ensureState();
       document.dispatchEvent(new CustomEvent('scoreboard:disconnected'));
     });
-    const fullscreenBtn = document.getElementById("fullscreen-toggle");
+    const fullscreenBtn = document.getElementById("fullscreen-btn");
     if (fullscreenBtn) {
+      const fullscreenLabel = fullscreenBtn.querySelector("[data-ui-key='fullscreen']");
+
+      const updateFullscreenLabel = () => {
+        if (fullscreenLabel) {
+          fullscreenLabel.textContent = document.fullscreenElement ? i18nForScoreboard("exit_fullscreen") : i18nForScoreboard("fullscreen");
+        }
+      };
+
       fullscreenBtn.addEventListener("click", () => {
         if (!document.fullscreenElement) {
           document.documentElement.requestFullscreen().catch((e) => {
@@ -4523,6 +4490,8 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
       });
+
+      document.addEventListener("fullscreenchange", updateFullscreenLabel);
     }
 
     // 상세 패널 정렬 기능은 실패해도 점수판 실시간 동기화에 영향 주지 않도록 마지막에 초기화
@@ -4533,5 +4502,16 @@ document.addEventListener("DOMContentLoaded", () => {
       initBuzzerAudio();
       console.log('[Buzzer] Pre-initialized on page load');
     }, 100);
+
+    // 첫 사용자 상호작용 시 AudioContext resume (브라우저 autoplay 정책 대응)
+    const unlockBuzzer = () => {
+      initBuzzerAudio();
+      resumeBuzzerCtx();
+      document.removeEventListener("click", unlockBuzzer);
+      document.removeEventListener("touchstart", unlockBuzzer);
+      console.log('[Buzzer] AudioContext unlocked via user interaction');
+    };
+    document.addEventListener("click", unlockBuzzer, { once: true });
+    document.addEventListener("touchstart", unlockBuzzer, { once: true });
   }
 });

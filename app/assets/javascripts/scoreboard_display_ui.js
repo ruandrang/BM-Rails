@@ -38,7 +38,7 @@ const initScoreboardDisplayUI = () => {
 
   // === 텍스트 사이즈 조절 ===
   const SCALE_MIN = 0.6;
-  const SCALE_MAX = 1.4;
+  const SCALE_MAX = 1.8;
   const SCALE_STEP = 0.1;
   let currentScale = parseFloat(localStorage.getItem('scoreboard-display-scale') || '1');
 
@@ -87,18 +87,26 @@ const initScoreboardDisplayUI = () => {
   };
 
   // 공격방향 화살표 업데이트
-  const updatePossessionArrows = (possession) => {
+  const updatePossessionArrows = (state) => {
     // Display 페이지는 Control 페이지와 좌우가 반대
     // Control: left=away, right=home
     // Display: left=home, right=away (reversed)
     const allArrowsLeft = document.querySelectorAll('.possession-arrow-left');
     const allArrowsRight = document.querySelectorAll('.possession-arrow-right');
 
+    // Q3/Q4 카드 스왑과 공격방향 스왑이 동시에 일어나면 상쇄되므로 반전 필요
+    const quarter = state.quarter || 1;
+    const autoSwap = quarter >= 3;
+    const swapped = state.manual_swap ? !autoSwap : autoSwap;
+
+    let showLeft = state.possession === 'home';
+    if (swapped) showLeft = !showLeft;
+
     allArrowsLeft.forEach(arrow => {
-      applyArrowStyles(arrow, possession === 'home');
+      applyArrowStyles(arrow, showLeft);
     });
     allArrowsRight.forEach(arrow => {
-      applyArrowStyles(arrow, possession === 'away');
+      applyArrowStyles(arrow, !showLeft);
     });
   };
 
@@ -190,7 +198,7 @@ const initScoreboardDisplayUI = () => {
     // 50ms 지연: ActionCable 수신 후 DOM이 render() 완료된 뒤 스타일 적용
     setTimeout(() => {
       // 공격방향 화살표
-      updatePossessionArrows(state.possession);
+      updatePossessionArrows(state);
 
       // 팀 색상 CSS 변수
       updateTeamColors(state);
