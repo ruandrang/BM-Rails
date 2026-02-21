@@ -580,6 +580,7 @@
       clubName: @club.name,
       matchDate: l(@match.played_on, format: :long),
       matchDateShort: @match.played_on.strftime("%Y%m%d"),
+      regularQuarters: regular_quarters,
       teams: @teams.map { |team|
         record = team_records[team.id] || { wins: 0, draws: 0, losses: 0 }
         {
@@ -599,7 +600,14 @@
           homeScore: game.home_score,
           awayScore: game.away_score,
           homeColor: game.home_team.css_color,
-          awayColor: game.away_team.css_color
+          awayColor: game.away_team.css_color,
+          quarters: (1..regular_quarters).map { |q|
+            h = game.quarter_scores&.dig(q.to_s, "home") || 0
+            hp = q > 1 ? (game.quarter_scores&.dig((q - 1).to_s, "home") || 0) : 0
+            a = game.quarter_scores&.dig(q.to_s, "away") || 0
+            ap = q > 1 ? (game.quarter_scores&.dig((q - 1).to_s, "away") || 0) : 0
+            { home: h - hp, away: a - ap }
+          }
         }
       }
     }.to_json) %>
@@ -634,7 +642,8 @@
 
         var mH = 28;
         var tCardH = 130 + maxM * mH + 16;
-        var gH = 80, gGap = 12;
+        var nQ = d.regularQuarters || 4;
+        var gH = 150, gGap = 12;
         var totalH = P + 130 + 32 + tCardH + 40 + d.games.length * (gH + gGap) + 48 + P;
 
         canvas.width = W; canvas.height = totalH;
@@ -795,6 +804,66 @@
           c.fillText(g.awayTeamLabel, cx + 200, sy);
           c.fillStyle = g.awayColor;
           fillRR(c, cx + 236, sy - 12, 4, 24, 2);
+
+          // === 박스스코어 (쿼터별 점수) ===
+          if (g.quarters && g.quarters.length > 0) {
+            var bsY = sy + 22;
+            var cols = nQ + 2; // TEAM + quarters + TOT
+            var colW = 56;
+            var teamColW = 80;
+            var tableW = teamColW + nQ * colW + colW;
+            var tableX = cx - tableW / 2;
+
+            // 박스스코어 배경
+            c.fillStyle = 'rgba(0,0,0,0.25)';
+            fillRR(c, tableX - 8, bsY - 2, tableW + 16, 64, 6);
+
+            // 헤더 행
+            c.font = 'bold 11px system-ui, sans-serif';
+            c.fillStyle = 'rgba(255,255,255,0.25)';
+            c.textAlign = 'left';
+            c.fillText('TEAM', tableX, bsY + 10);
+            c.textAlign = 'center';
+            for (var q = 0; q < nQ; q++) {
+              c.fillText((q + 1) + 'Q', tableX + teamColW + q * colW + colW / 2, bsY + 10);
+            }
+            c.fillStyle = 'rgba(255,255,255,0.35)';
+            c.fillText('TOT', tableX + teamColW + nQ * colW + colW / 2, bsY + 10);
+
+            // 홈 행
+            var rowY = bsY + 28;
+            c.textAlign = 'left';
+            c.fillStyle = '#ffffff';
+            c.font = 'bold 13px system-ui, sans-serif';
+            c.fillText(g.homeTeamLabel, tableX, rowY);
+            c.textAlign = 'center';
+            c.font = 'bold 14px system-ui, sans-serif';
+            for (var q = 0; q < nQ; q++) {
+              var hd = g.quarters[q] ? g.quarters[q].home : 0;
+              var ad = g.quarters[q] ? g.quarters[q].away : 0;
+              c.fillStyle = (hd > ad) ? '#fbbf24' : 'rgba(255,255,255,0.6)';
+              c.fillText(hd.toString(), tableX + teamColW + q * colW + colW / 2, rowY);
+            }
+            c.fillStyle = 'rgba(255,255,255,0.5)';
+            c.fillText(g.homeScore.toString(), tableX + teamColW + nQ * colW + colW / 2, rowY);
+
+            // 어웨이 행
+            rowY += 20;
+            c.textAlign = 'left';
+            c.fillStyle = '#ffffff';
+            c.font = 'bold 13px system-ui, sans-serif';
+            c.fillText(g.awayTeamLabel, tableX, rowY);
+            c.textAlign = 'center';
+            c.font = 'bold 14px system-ui, sans-serif';
+            for (var q = 0; q < nQ; q++) {
+              var hd = g.quarters[q] ? g.quarters[q].home : 0;
+              var ad = g.quarters[q] ? g.quarters[q].away : 0;
+              c.fillStyle = (ad > hd) ? '#fbbf24' : 'rgba(255,255,255,0.6)';
+              c.fillText(ad.toString(), tableX + teamColW + q * colW + colW / 2, rowY);
+            }
+            c.fillStyle = 'rgba(255,255,255,0.5)';
+            c.fillText(g.awayScore.toString(), tableX + teamColW + nQ * colW + colW / 2, rowY);
+          }
         });
 
         // 푸터
