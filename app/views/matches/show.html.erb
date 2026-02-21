@@ -622,6 +622,14 @@
       c.quadraticCurveTo(x,y+h,x,y+h-r[3]);c.lineTo(x,y+r[0]);
       c.quadraticCurveTo(x,y,x+r[0],y);c.closePath();c.fill();
     }
+    function strokeRR(c,x,y,w,h,r){
+      if(typeof r==='number')r=[r,r,r,r];
+      c.beginPath();c.moveTo(x+r[0],y);c.lineTo(x+w-r[1],y);
+      c.quadraticCurveTo(x+w,y,x+w,y+r[1]);c.lineTo(x+w,y+h-r[2]);
+      c.quadraticCurveTo(x+w,y+h,x+w-r[2],y+h);c.lineTo(x+r[3],y+h);
+      c.quadraticCurveTo(x,y+h,x,y+h-r[3]);c.lineTo(x,y+r[0]);
+      c.quadraticCurveTo(x,y,x+r[0],y);c.closePath();c.stroke();
+    }
     function posClr(p){return{PG:'#3b82f6',SG:'#22c55e',SF:'#f97316',PF:'#ef4444',C:'#a855f7'}[p]||'#6b7280';}
 
     function captureAndDownload() {
@@ -633,245 +641,367 @@
         var d = JSON.parse(document.getElementById('share-match-data').textContent);
         var canvas = document.createElement('canvas');
         var c = canvas.getContext('2d');
-        var W = 1080, P = 48, CW = W - P * 2;
+
+        var W = 1080, P = 40, CW = W - P * 2;
         var tc = d.teams.length;
-        var tGap = 20;
+        var tGap = 16;
         var tW = (CW - (tc - 1) * tGap) / tc;
+        var nQ = d.regularQuarters || 4;
+
+        // 멤버 최대 수 → 2열 그리드 행 수
         var maxM = 0;
         d.teams.forEach(function(t){ if(t.members.length > maxM) maxM = t.members.length; });
+        var memberRows = Math.ceil(maxM / 2);
+        var mRowH = 34;
 
-        var mH = 28;
-        var tCardH = 130 + maxM * mH + 16;
-        var nQ = d.regularQuarters || 4;
-        var gH = 150, gGap = 12;
-        var totalH = P + 130 + 32 + tCardH + 40 + d.games.length * (gH + gGap) + 48 + P;
+        // 팀 카드 높이
+        var cardBorderTop = 8, cardPad = 20, headH = 48, dashH = 88;
+        var tCardH = cardBorderTop + cardPad + headH + 16 + dashH + 16 + memberRows * mRowH + cardPad;
 
-        canvas.width = W; canvas.height = totalH;
+        // 게임 카드 높이
+        var gamePad = 20, gameHeadH = 34, scoreH = 100, boxH = 92;
+        var gCardH = gamePad + gameHeadH + scoreH + 16 + boxH + gamePad;
+        var gGap = 16;
 
-        // 배경 그라데이션
+        // 스코어보드 섹션 높이
+        var sbPad = 24, sbHeadH = 56;
+        var sbH = sbPad + sbHeadH + d.games.length * (gCardH + gGap) - gGap + sbPad;
+
+        // 전체 높이
+        var headerH = 148;
+        var totalH = P + headerH + 24 + tCardH + 32 + sbH + 40 + P;
+
+        canvas.width = W;
+        canvas.height = totalH;
+        c.textBaseline = 'middle';
+
+        // 배경
         var bg = c.createLinearGradient(0, 0, 0, totalH);
-        bg.addColorStop(0, '#0f172a'); bg.addColorStop(1, '#1e293b');
-        c.fillStyle = bg; c.fillRect(0, 0, W, totalH);
+        bg.addColorStop(0, '#0f172a');
+        bg.addColorStop(1, '#1e293b');
+        c.fillStyle = bg;
+        c.fillRect(0, 0, W, totalH);
 
-        // === 헤더 ===
+        // ========== 헤더 ==========
         var y = P;
-        c.textAlign = 'center'; c.textBaseline = 'middle';
+        c.textAlign = 'center';
         c.fillStyle = '#f97316';
         c.font = 'bold 44px system-ui, sans-serif';
-        c.fillText(d.clubName, W/2, y + 44);
-        c.fillStyle = 'rgba(255,255,255,0.5)';
+        c.fillText(d.clubName, W / 2, y + 32);
+
+        c.fillStyle = 'rgba(255,255,255,0.6)';
         c.font = '22px system-ui, sans-serif';
-        c.fillText(d.matchDate, W/2, y + 88);
+        c.fillText(d.matchDate, W / 2, y + 76);
 
-        // 팀 수 배지
-        c.fillStyle = 'rgba(249,115,22,0.15)';
-        var bTxt = tc + ' Teams';
-        c.font = 'bold 14px system-ui, sans-serif';
-        var bW = c.measureText(bTxt).width + 24;
-        fillRR(c, W/2 - bW/2, y + 102, bW, 26, 13);
-        c.fillStyle = '#f97316';
-        c.fillText(bTxt, W/2, y + 115);
-        y += 130;
+        // 배지: N Teams + N Quarters
+        c.font = 'bold 13px system-ui, sans-serif';
+        var b1 = tc + ' Teams', b2 = nQ + ' Quarters';
+        var b1W = c.measureText(b1).width + 22;
+        var b2W = c.measureText(b2).width + 22;
+        var bTotalW = b1W + 8 + b2W;
+        var bX = W / 2 - bTotalW / 2, bY = y + 104;
+        c.fillStyle = 'rgba(255,255,255,0.08)';
+        fillRR(c, bX, bY, b1W, 28, 14);
+        fillRR(c, bX + b1W + 8, bY, b2W, 28, 14);
+        c.fillStyle = 'rgba(255,255,255,0.5)';
+        c.fillText(b1, bX + b1W / 2, bY + 14);
+        c.fillText(b2, bX + b1W + 8 + b2W / 2, bY + 14);
+        y += headerH + 24;
 
-        // 구분선
-        c.fillStyle = 'rgba(255,255,255,0.06)';
-        c.fillRect(P, y, CW, 1);
-        y += 32;
-
-        // === 팀 카드 ===
+        // ========== 팀 카드 ==========
         d.teams.forEach(function(team, i) {
-          var x = P + i * (tW + tGap);
+          var tx = P + i * (tW + tGap);
 
           // 카드 배경
-          c.fillStyle = 'rgba(255,255,255,0.04)';
-          fillRR(c, x, y, tW, tCardH, 12);
+          c.fillStyle = 'rgba(255,255,255,0.05)';
+          fillRR(c, tx, y, tW, tCardH, 16);
 
-          // 팀 색상 상단 바
+          // 상단 색상 바 (border-t-8)
           c.fillStyle = team.cssColor;
-          fillRR(c, x, y, tW, 5, [12, 12, 0, 0]);
+          fillRR(c, tx, y, tW, cardBorderTop, [16, 16, 0, 0]);
 
-          // 팀 라벨
-          c.textAlign = 'center';
-          c.fillStyle = '#ffffff';
-          c.font = 'bold 26px system-ui, sans-serif';
-          c.fillText('TEAM ' + team.label, x + tW/2, y + 36);
+          var ix = tx + cardPad, iw = tW - cardPad * 2;
+          var iy = y + cardBorderTop + cardPad;
 
-          // 색상명
-          c.fillStyle = 'rgba(255,255,255,0.3)';
-          c.font = '14px system-ui, sans-serif';
-          c.fillText(team.color, x + tW/2, y + 58);
-
-          // W-D-L 전적
-          var rY = y + 82;
-          var rW = tW / 3;
-          c.font = 'bold 30px system-ui, sans-serif';
-          c.fillStyle = '#22c55e'; c.fillText(team.wins.toString(), x + rW * 0.5, rY);
-          c.fillStyle = '#ffffff';  c.fillText(team.draws.toString(), x + rW * 1.5, rY);
-          c.fillStyle = '#ef4444'; c.fillText(team.losses.toString(), x + rW * 2.5, rY);
-          c.font = 'bold 10px system-ui, sans-serif';
-          c.fillStyle = 'rgba(255,255,255,0.3)';
-          c.fillText('WIN', x + rW * 0.5, rY + 18);
-          c.fillText('DRAW', x + rW * 1.5, rY + 18);
-          c.fillText('LOSS', x + rW * 2.5, rY + 18);
-
-          // 구분선
-          c.fillStyle = 'rgba(255,255,255,0.06)';
-          c.fillRect(x + 12, y + 108, tW - 24, 1);
-
-          // 멤버 목록
+          // TEAM 라벨 (왼쪽)
           c.textAlign = 'left';
-          team.members.forEach(function(m, mi) {
-            var mY = y + 126 + mi * mH;
-            c.fillStyle = 'rgba(255,255,255,0.8)';
-            c.font = '15px system-ui, sans-serif';
-            c.fillText(m.name, x + 16, mY);
+          c.fillStyle = '#ffffff';
+          c.font = 'italic bold 28px system-ui, sans-serif';
+          c.fillText('TEAM ' + team.label, ix, iy + 20);
 
-            // 포지션 배지
-            c.font = 'bold 11px system-ui, sans-serif';
+          // 색상 배지 (오른쪽)
+          c.font = 'bold 12px system-ui, sans-serif';
+          var cbW = c.measureText(team.color).width + 20;
+          c.fillStyle = team.cssColor;
+          fillRR(c, ix + iw - cbW, iy + 6, cbW, 26, 13);
+          c.fillStyle = '#ffffff';
+          c.textAlign = 'center';
+          c.fillText(team.color, ix + iw - cbW / 2, iy + 19);
+
+          iy += headH + 16;
+
+          // W/D/L 대시보드 (ring 배경)
+          c.fillStyle = 'rgba(255,255,255,0.06)';
+          fillRR(c, ix, iy, iw, dashH, 12);
+          c.strokeStyle = 'rgba(255,255,255,0.08)';
+          c.lineWidth = 1;
+          strokeRR(c, ix, iy, iw, dashH, 12);
+
+          var third = iw / 3;
+
+          // Wins
+          c.textAlign = 'center';
+          c.fillStyle = 'rgba(255,255,255,0.35)';
+          c.font = 'bold 10px system-ui, sans-serif';
+          c.fillText('WINS', ix + third * 0.5, iy + 24);
+          c.fillStyle = '#22c55e';
+          c.font = 'bold 34px system-ui, sans-serif';
+          c.fillText(team.wins.toString(), ix + third * 0.5, iy + 58);
+
+          // 구분선 1
+          c.fillStyle = 'rgba(255,255,255,0.1)';
+          c.fillRect(ix + third - 0.5, iy + 16, 1, dashH - 32);
+
+          // Draws
+          c.fillStyle = 'rgba(255,255,255,0.35)';
+          c.font = 'bold 10px system-ui, sans-serif';
+          c.fillText('DRAWS', ix + third * 1.5, iy + 24);
+          c.fillStyle = '#ffffff';
+          c.font = 'bold 34px system-ui, sans-serif';
+          c.fillText(team.draws.toString(), ix + third * 1.5, iy + 58);
+
+          // 구분선 2
+          c.fillStyle = 'rgba(255,255,255,0.1)';
+          c.fillRect(ix + third * 2 - 0.5, iy + 16, 1, dashH - 32);
+
+          // Losses
+          c.fillStyle = 'rgba(255,255,255,0.35)';
+          c.font = 'bold 10px system-ui, sans-serif';
+          c.fillText('LOSSES', ix + third * 2.5, iy + 24);
+          c.fillStyle = '#ef4444';
+          c.font = 'bold 34px system-ui, sans-serif';
+          c.fillText(team.losses.toString(), ix + third * 2.5, iy + 58);
+
+          iy += dashH + 16;
+
+          // 멤버 2열 그리드
+          var colGap = 8, colW = (iw - colGap) / 2;
+          team.members.forEach(function(m, mi) {
+            var row = Math.floor(mi / 2), col = mi % 2;
+            var mx = ix + col * (colW + colGap);
+            var my = iy + row * mRowH;
+
+            c.fillStyle = 'rgba(255,255,255,0.04)';
+            fillRR(c, mx, my, colW, mRowH - 4, 8);
+            c.strokeStyle = 'rgba(255,255,255,0.06)';
+            c.lineWidth = 1;
+            strokeRR(c, mx, my, colW, mRowH - 4, 8);
+
+            c.textAlign = 'left';
+            c.fillStyle = 'rgba(255,255,255,0.85)';
+            c.font = 'bold 14px system-ui, sans-serif';
+            c.fillText(m.name, mx + 10, my + (mRowH - 4) / 2);
+
+            c.font = 'bold 10px system-ui, sans-serif';
             var pw = c.measureText(m.position).width + 10;
             c.fillStyle = posClr(m.position);
-            fillRR(c, x + tW - 16 - pw, mY - 9, pw, 18, 4);
-            c.fillStyle = '#ffffff'; c.textAlign = 'center';
-            c.fillText(m.position, x + tW - 16 - pw/2, mY);
-            c.textAlign = 'left';
+            fillRR(c, mx + colW - 10 - pw, my + (mRowH - 4) / 2 - 9, pw, 18, 4);
+            c.fillStyle = '#ffffff';
+            c.textAlign = 'center';
+            c.fillText(m.position, mx + colW - 10 - pw / 2, my + (mRowH - 4) / 2);
           });
         });
 
-        y += tCardH + 24;
+        y += tCardH + 32;
 
-        // 구분선
-        c.fillStyle = 'rgba(255,255,255,0.06)';
-        c.fillRect(P, y, CW, 1);
-        y += 16;
+        // ========== 스코어보드 섹션 ==========
+        // 섹션 배경 (neutral)
+        c.fillStyle = '#1d232a';
+        fillRR(c, P, y, CW, sbH, 20);
 
-        // 섹션 타이틀
-        c.textAlign = 'left';
+        var sy = y + sbPad;
+
+        // GAME SCOREBOARD 헤더
         c.fillStyle = '#f97316';
-        c.font = 'bold 13px system-ui, sans-serif';
-        c.fillText('GAME SCOREBOARD', P + 4, y + 8);
-        y += 24;
+        fillRR(c, P + 24, sy + 6, 36, 36, 8);
+        c.fillStyle = '#ffffff';
+        c.font = 'bold 18px system-ui, sans-serif';
+        c.textAlign = 'center';
+        c.fillText('\u26A1', P + 42, sy + 24);
 
-        // === 게임 결과 ===
-        d.games.forEach(function(g, i) {
-          var gy = y + i * (gH + gGap);
-          c.fillStyle = 'rgba(0,0,0,0.3)';
-          fillRR(c, P, gy, CW, gH, 10);
+        c.textAlign = 'left';
+        c.fillStyle = '#ffffff';
+        c.font = 'italic bold 24px system-ui, sans-serif';
+        c.fillText('GAME SCOREBOARD', P + 68, sy + 26);
 
-          // Game 라벨
+        c.fillStyle = 'rgba(255,255,255,0.08)';
+        c.fillRect(P + 24, sy + sbHeadH - 8, CW - 48, 1);
+        sy += sbHeadH;
+
+        // ========== 각 게임 ==========
+        d.games.forEach(function(g, gi) {
+          var gy = sy + gi * (gCardH + gGap);
+          var gx = P + 24, gw = CW - 48;
+
+          // 게임 카드 배경 + 테두리
+          c.fillStyle = 'rgba(0,0,0,0.4)';
+          fillRR(c, gx, gy, gw, gCardH, 12);
+          c.strokeStyle = 'rgba(255,255,255,0.1)';
+          c.lineWidth = 1;
+          strokeRR(c, gx, gy, gw, gCardH, 12);
+
+          // GAME N 배지
+          var gLbl = 'GAME ' + (gi + 1);
+          c.font = 'bold 10px system-ui, sans-serif';
+          var gLblW = c.measureText(gLbl).width + 16;
+          c.fillStyle = 'rgba(249,115,22,0.2)';
+          fillRR(c, gx + gamePad, gy + gamePad, gLblW, 22, 4);
+          c.fillStyle = '#f97316';
           c.textAlign = 'left';
-          c.fillStyle = 'rgba(249,115,22,0.6)';
-          c.font = 'bold 12px system-ui, sans-serif';
-          c.fillText('GAME ' + (i + 1), P + 16, gy + 18);
+          c.fillText(gLbl, gx + gamePad + 8, gy + gamePad + 11);
 
+          // Match Result 라벨
+          c.textAlign = 'right';
+          c.fillStyle = 'rgba(255,255,255,0.15)';
+          c.font = 'bold 9px system-ui, sans-serif';
+          c.fillText('MATCH RESULT', gx + gw - gamePad, gy + gamePad + 11);
+
+          // 헤더 구분선
+          c.fillStyle = 'rgba(255,255,255,0.05)';
+          c.fillRect(gx + gamePad, gy + gamePad + gameHeadH - 2, gw - gamePad * 2, 1);
+
+          // === 3열 점수판 ===
+          var sY = gy + gamePad + gameHeadH + 10;
+          var cx = gx + gw / 2;
+          var hWin = g.homeScore > g.awayScore;
+          var aWin = g.awayScore > g.homeScore;
+          var isDraw = g.homeScore === g.awayScore && g.homeScore > 0;
+
+          // 홈팀 (왼쪽): 색상바 + 라벨
+          c.fillStyle = g.homeColor;
+          fillRR(c, gx + gamePad + 8, sY + 14, 6, 48, 3);
+          c.textAlign = 'left';
+          c.fillStyle = '#ffffff';
+          c.font = 'italic bold 32px system-ui, sans-serif';
+          c.fillText(g.homeTeamLabel, gx + gamePad + 24, sY + 40);
+
+          // 홈 점수 (큰 숫자)
           c.textAlign = 'center';
-          var cx = W / 2, sy = gy + 52;
-          var hW = g.homeScore > g.awayScore, aW = g.awayScore > g.homeScore;
+          c.font = 'bold 68px system-ui, monospace';
+          c.fillStyle = hWin ? '#facc15' : '#ffffff';
+          c.fillText(g.homeScore.toString(), cx - 120, sY + 48);
 
-          // WIN/LOSE 라벨
-          if (hW || aW) {
-            c.font = 'bold 12px system-ui, sans-serif';
-            c.fillStyle = hW ? '#22c55e' : 'rgba(255,255,255,0.2)';
-            c.fillText(hW ? 'WIN' : 'LOSE', cx - 80, sy - 22);
-            c.fillStyle = aW ? '#22c55e' : 'rgba(255,255,255,0.2)';
-            c.fillText(aW ? 'WIN' : 'LOSE', cx + 80, sy - 22);
+          // 중앙: WIN|LOSE 또는 VS
+          if (hWin || aWin) {
+            c.font = 'bold 14px system-ui, sans-serif';
+            c.fillStyle = hWin ? '#22c55e' : 'rgba(255,255,255,0.25)';
+            c.fillText(hWin ? 'WIN' : 'LOSE', cx - 24, sY + 40);
+            c.fillStyle = 'rgba(255,255,255,0.2)';
+            c.fillRect(cx - 0.5, sY + 24, 1, 32);
+            c.fillStyle = aWin ? '#22c55e' : 'rgba(255,255,255,0.25)';
+            c.fillText(aWin ? 'WIN' : 'LOSE', cx + 24, sY + 40);
+          } else if (isDraw) {
+            c.font = 'bold 14px system-ui, sans-serif';
+            c.fillStyle = '#fbbf24';
+            c.fillText('DRAW', cx - 24, sY + 40);
+            c.fillStyle = 'rgba(255,255,255,0.2)';
+            c.fillRect(cx - 0.5, sY + 24, 1, 32);
+            c.fillStyle = '#fbbf24';
+            c.fillText('DRAW', cx + 24, sY + 40);
+          } else {
+            c.font = 'italic bold 22px system-ui, sans-serif';
+            c.fillStyle = 'rgba(255,255,255,0.3)';
+            c.fillText('VS', cx, sY + 40);
           }
 
-          // 홈팀 색상 바 + 라벨
-          c.fillStyle = g.homeColor;
-          fillRR(c, cx - 240, sy - 12, 4, 24, 2);
-          c.fillStyle = '#ffffff';
-          c.font = 'bold 20px system-ui, sans-serif';
-          c.fillText(g.homeTeamLabel, cx - 200, sy);
-
-          // 홈 점수
-          c.fillStyle = hW ? '#fbbf24' : 'rgba(255,255,255,0.8)';
-          c.font = 'bold 36px system-ui, sans-serif';
-          c.fillText(g.homeScore.toString(), cx - 80, sy + 2);
-
-          // VS
-          c.fillStyle = 'rgba(255,255,255,0.2)';
-          c.font = 'bold 16px system-ui, sans-serif';
-          c.fillText('VS', cx, sy);
-
           // 어웨이 점수
-          c.fillStyle = aW ? '#fbbf24' : 'rgba(255,255,255,0.8)';
-          c.font = 'bold 36px system-ui, sans-serif';
-          c.fillText(g.awayScore.toString(), cx + 80, sy + 2);
+          c.font = 'bold 68px system-ui, monospace';
+          c.fillStyle = aWin ? '#facc15' : '#ffffff';
+          c.fillText(g.awayScore.toString(), cx + 120, sY + 48);
 
-          // 어웨이팀 라벨 + 색상 바
+          // 어웨이팀 (오른쪽): 라벨 + 색상바
+          c.textAlign = 'right';
           c.fillStyle = '#ffffff';
-          c.font = 'bold 20px system-ui, sans-serif';
-          c.fillText(g.awayTeamLabel, cx + 200, sy);
+          c.font = 'italic bold 32px system-ui, sans-serif';
+          c.fillText(g.awayTeamLabel, gx + gw - gamePad - 24, sY + 40);
           c.fillStyle = g.awayColor;
-          fillRR(c, cx + 236, sy - 12, 4, 24, 2);
+          fillRR(c, gx + gw - gamePad - 14, sY + 14, 6, 48, 3);
 
-          // === 박스스코어 (쿼터별 점수) ===
+          // === 박스스코어 ===
           if (g.quarters && g.quarters.length > 0) {
-            var bsY = sy + 22;
-            var cols = nQ + 2; // TEAM + quarters + TOT
-            var colW = 56;
-            var teamColW = 80;
-            var tableW = teamColW + nQ * colW + colW;
-            var tableX = cx - tableW / 2;
+            var bsX = gx + gamePad + 4;
+            var bsW = gw - gamePad * 2 - 8;
+            var bsY = sY + scoreH + 8;
 
-            // 박스스코어 배경
-            c.fillStyle = 'rgba(0,0,0,0.25)';
-            fillRR(c, tableX - 8, bsY - 2, tableW + 16, 64, 6);
+            c.fillStyle = 'rgba(0,0,0,0.2)';
+            fillRR(c, bsX, bsY, bsW, boxH, 8);
+            c.strokeStyle = 'rgba(255,255,255,0.05)';
+            c.lineWidth = 1;
+            strokeRR(c, bsX, bsY, bsW, boxH, 8);
 
-            // 헤더 행
+            var teamColW = 100, totColW = 64;
+            var qColW = (bsW - 16 - teamColW - totColW) / nQ;
+            var startX = bsX + 8;
+
+            // 헤더
             c.font = 'bold 11px system-ui, sans-serif';
-            c.fillStyle = 'rgba(255,255,255,0.25)';
+            c.fillStyle = 'rgba(255,255,255,0.2)';
             c.textAlign = 'left';
-            c.fillText('TEAM', tableX, bsY + 10);
+            c.fillText('TEAM', startX + 8, bsY + 18);
             c.textAlign = 'center';
             for (var q = 0; q < nQ; q++) {
-              c.fillText((q + 1) + 'Q', tableX + teamColW + q * colW + colW / 2, bsY + 10);
+              c.fillText((q + 1) + 'Q', startX + teamColW + q * qColW + qColW / 2, bsY + 18);
             }
             c.fillStyle = 'rgba(255,255,255,0.35)';
-            c.fillText('TOT', tableX + teamColW + nQ * colW + colW / 2, bsY + 10);
+            c.fillText('TOT', startX + teamColW + nQ * qColW + totColW / 2, bsY + 18);
 
             // 홈 행
-            var rowY = bsY + 28;
+            var hRowY = bsY + 44;
             c.textAlign = 'left';
+            c.fillStyle = g.homeColor;
+            fillRR(c, startX + 8, hRowY - 6, 3, 12, 2);
             c.fillStyle = '#ffffff';
             c.font = 'bold 13px system-ui, sans-serif';
-            c.fillText(g.homeTeamLabel, tableX, rowY);
+            c.fillText(g.homeTeamLabel, startX + 16, hRowY);
             c.textAlign = 'center';
-            c.font = 'bold 14px system-ui, sans-serif';
+            c.font = 'bold 17px system-ui, monospace';
             for (var q = 0; q < nQ; q++) {
               var hd = g.quarters[q] ? g.quarters[q].home : 0;
               var ad = g.quarters[q] ? g.quarters[q].away : 0;
-              c.fillStyle = (hd > ad) ? '#fbbf24' : 'rgba(255,255,255,0.6)';
-              c.fillText(hd.toString(), tableX + teamColW + q * colW + colW / 2, rowY);
+              c.fillStyle = (hd > ad) ? '#facc15' : 'rgba(255,255,255,0.6)';
+              c.fillText(hd.toString(), startX + teamColW + q * qColW + qColW / 2, hRowY);
             }
             c.fillStyle = 'rgba(255,255,255,0.5)';
-            c.fillText(g.homeScore.toString(), tableX + teamColW + nQ * colW + colW / 2, rowY);
+            c.font = 'bold 17px system-ui, monospace';
+            c.fillText(g.homeScore.toString(), startX + teamColW + nQ * qColW + totColW / 2, hRowY);
 
             // 어웨이 행
-            rowY += 20;
+            var aRowY = hRowY + 26;
             c.textAlign = 'left';
+            c.fillStyle = g.awayColor;
+            fillRR(c, startX + 8, aRowY - 6, 3, 12, 2);
             c.fillStyle = '#ffffff';
             c.font = 'bold 13px system-ui, sans-serif';
-            c.fillText(g.awayTeamLabel, tableX, rowY);
+            c.fillText(g.awayTeamLabel, startX + 16, aRowY);
             c.textAlign = 'center';
-            c.font = 'bold 14px system-ui, sans-serif';
+            c.font = 'bold 17px system-ui, monospace';
             for (var q = 0; q < nQ; q++) {
               var hd = g.quarters[q] ? g.quarters[q].home : 0;
               var ad = g.quarters[q] ? g.quarters[q].away : 0;
-              c.fillStyle = (ad > hd) ? '#fbbf24' : 'rgba(255,255,255,0.6)';
-              c.fillText(ad.toString(), tableX + teamColW + q * colW + colW / 2, rowY);
+              c.fillStyle = (ad > hd) ? '#facc15' : 'rgba(255,255,255,0.6)';
+              c.fillText(ad.toString(), startX + teamColW + q * qColW + qColW / 2, aRowY);
             }
             c.fillStyle = 'rgba(255,255,255,0.5)';
-            c.fillText(g.awayScore.toString(), tableX + teamColW + nQ * colW + colW / 2, rowY);
+            c.font = 'bold 17px system-ui, monospace';
+            c.fillText(g.awayScore.toString(), startX + teamColW + nQ * qColW + totColW / 2, aRowY);
           }
         });
 
         // 푸터
-        y += d.games.length * (gH + gGap) + 16;
         c.textAlign = 'center';
-        c.fillStyle = 'rgba(255,255,255,0.12)';
+        c.fillStyle = 'rgba(255,255,255,0.15)';
         c.font = '12px system-ui, sans-serif';
-        c.fillText('BM-Rail', W/2, y + 8);
+        c.fillText('BM-Rail', W / 2, y + sbH + 24);
 
         // 다운로드
         var link = document.createElement('a');
