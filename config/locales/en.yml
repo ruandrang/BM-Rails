@@ -196,6 +196,9 @@ en:
       option_nba:
         title: "NBA Rules"
         description: "Switch on Q2 and Q3, return to Q1 direction in Q4"
+      option_club:
+        title: "Club Rules"
+        description: "Same direction in 1st half (Q1·Q2), opposite in 2nd half (Q3·Q4)"
   members:
     index:
       page_title: "Members - %{club_name}"

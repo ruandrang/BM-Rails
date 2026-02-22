@@ -196,6 +196,9 @@ ja:
       option_nba:
         title: "NBAルール"
         description: "Q2・Q3で方向転換、Q4でQ1の方向に戻る"
+      option_club:
+        title: "同好会ルール"
+        description: "前半(Q1・Q2)同じ方向、後半(Q3・Q4)反対方向"
   members:
     index:
       page_title: "メンバー管理 - %{club_name}"

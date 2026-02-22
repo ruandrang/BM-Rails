@@ -196,6 +196,9 @@ ko:
       option_nba:
         title: "NBA 룰"
         description: "Q2·Q3 방향 전환, Q4에서 Q1 방향으로 복귀"
+      option_club:
+        title: "동호회 룰"
+        description: "전반(Q1·Q2) 같은 방향, 후반(Q3·Q4) 반대 방향"
   members:
     index:
       page_title: "멤버 관리 - %{club_name}"

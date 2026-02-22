@@ -196,6 +196,9 @@ zh:
       option_nba:
         title: "NBA规则"
         description: "Q2、Q3切换方向，Q4恢复Q1方向"
+      option_club:
+        title: "俱乐部规则"
+        description: "上半场(Q1·Q2)相同方向，下半场(Q3·Q4)反方向"
   members:
     index:
       page_title: "成员管理 - %{club_name}"

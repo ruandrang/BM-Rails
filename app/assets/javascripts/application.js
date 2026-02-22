@@ -1030,7 +1030,7 @@ document.addEventListener("DOMContentLoaded", () => {
       away: formatTeamName(awayTeam)
     });
     applyStaticUiText();
-    const POSSESSION_SWITCH_PATTERNS = ["fiba", "nba"];
+    const POSSESSION_SWITCH_PATTERNS = ["fiba", "nba", "club"];
     const defaultPossessionSwitchPattern = POSSESSION_SWITCH_PATTERNS.includes(scoreboardRoot.dataset.possessionSwitchPattern)
       ? scoreboardRoot.dataset.possessionSwitchPattern
       : "fiba";
@@ -1048,7 +1048,7 @@ document.addEventListener("DOMContentLoaded", () => {
       (window.location.protocol === "https:" ? "wss://" : "ws://") +
       window.location.host +
       "/cable";
-    const socket = new WebSocket(cableUrl);
+    let socket = new WebSocket(cableUrl);
     const identifier = JSON.stringify({ channel: "ScoreboardChannel", match_id: matchId });
     let state = null;
     const buildClientId = () => {
@@ -1066,6 +1066,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let matchupSortInstance = null;
     let isMatchupDragging = false;
     let displayAnimFrame = null;
+    let wsReconnectDelay = 1000;
+    const bcChannel = (typeof BroadcastChannel !== "undefined")
+      ? new BroadcastChannel(`scoreboard_${matchId}`)
+      : null;
 
     // Colors
     const COLORS = {
@@ -1419,6 +1423,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (pattern === "nba") {
         return safeQuarter === 2 || safeQuarter === 3;
+      }
+
+      if (pattern === "club") {
+        return safeQuarter >= 3;
       }
 
       return safeQuarter % 2 === 0;
@@ -3137,10 +3145,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const broadcast = () => {
       if (role !== "control") return;
-      if (socket.readyState !== WebSocket.OPEN) return;
       stampStateForBroadcast();
-      const payload = JSON.stringify({ action: "update", payload: state });
-      socket.send(JSON.stringify({ command: "message", identifier, data: payload }));
+      // WebSocket이 연결되어 있으면 서버 경유 동기화
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        const payload = JSON.stringify({ action: "update", payload: state });
+        socket.send(JSON.stringify({ command: "message", identifier, data: payload }));
+      }
+      // BroadcastChannel로 같은 기기 내 탭 간 직접 동기화 (오프라인에서도 동작)
+      if (bcChannel) {
+        try { bcChannel.postMessage({ type: "state", payload: state }); } catch (e) { /* ignore */ }
+      }
     };
 
     // Voice initialization flag to bypass browser autoplay policy
@@ -3869,7 +3883,11 @@ document.addEventListener("DOMContentLoaded", () => {
               case "buzzer":
                 console.log('[Buzzer] Button clicked, calling playBuzzer');
                 playBuzzer();
-                return; // 버저 후 다른 처리 하지 않음
+                // BroadcastChannel로 display 탭에 부저 전달
+                if (bcChannel) {
+                  try { bcChannel.postMessage({ type: "buzzer" }); } catch (e) { /* ignore */ }
+                }
+                return;
               case "possession-home":
                 state.base_possession = basePossessionForSelectedQuarterDirection(
                   currentQuarter(),
@@ -4407,13 +4425,8 @@ document.addEventListener("DOMContentLoaded", () => {
     ensureState();
     attachControlHandlers();
 
-    socket.addEventListener("open", () => {
-      socket.send(JSON.stringify({ command: "subscribe", identifier }));
-      document.dispatchEvent(new CustomEvent('scoreboard:connected'));
-    });
-
-    socket.addEventListener("message", (event) => {
-      const data = JSON.parse(event.data);
+    // WebSocket 메시지 처리 함수 (재연결 시 재사용)
+    const handleSocketData = (data) => {
       if (data.type === "ping" || data.type === "welcome") return;
       if (data.type === "confirm_subscription") {
         if (role === "control") {
@@ -4422,7 +4435,6 @@ document.addEventListener("DOMContentLoaded", () => {
           render();
           broadcast();
         } else if (role === "display") {
-          // Start smooth timer interpolation for display
           startDisplayTimerSync();
         }
         return;
@@ -4431,7 +4443,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const incomingState = normalizeState(data.message.payload);
         if (!shouldApplyIncomingState(incomingState)) return;
 
-        // 캐시된 상태에 점수가 없고 DB(games)에 점수가 있으면 병합
         if (role === "control" && Array.isArray(games) && games.length > 0) {
           const gamesHaveScores = games.some(g => (Number(g.home_score) || 0) > 0 || (Number(g.away_score) || 0) > 0);
           const stateHasNoScores = !incomingState.matchup_scores ||
@@ -4442,7 +4453,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const seededSlots = initialMatchupSlots(incomingState.teams || []);
             incomingState.matchup_scores = getInitialMatchupScoresFromGames(seededSlots);
 
-            // 첫 번째 매치업 점수로 팀 점수도 설정
             if (incomingState.matchup_scores[0] && incomingState.teams?.length >= 2) {
               const firstMatchupScores = incomingState.matchup_scores[0];
               if (seededSlots[0]) {
@@ -4458,17 +4468,73 @@ document.addEventListener("DOMContentLoaded", () => {
         refreshLocalStateVersion(state);
         render();
         syncTimers();
-        // Ensure display timer sync is running
         if (role === "display") {
           startDisplayTimerSync();
         }
       }
+    };
+
+    // WebSocket 재연결 함수
+    const reconnectWebSocket = () => {
+      setTimeout(() => {
+        try {
+          const ws = new WebSocket(cableUrl);
+          ws.addEventListener("open", () => {
+            socket = ws;
+            wsReconnectDelay = 1000;
+            ws.send(JSON.stringify({ command: "subscribe", identifier }));
+            document.dispatchEvent(new CustomEvent('scoreboard:connected'));
+          });
+          ws.addEventListener("message", (ev) => {
+            handleSocketData(JSON.parse(ev.data));
+          });
+          ws.addEventListener("close", () => {
+            ensureState();
+            document.dispatchEvent(new CustomEvent('scoreboard:disconnected'));
+            wsReconnectDelay = Math.min(wsReconnectDelay * 2, 30000);
+            reconnectWebSocket();
+          });
+          ws.addEventListener("error", () => {});
+        } catch (e) {
+          wsReconnectDelay = Math.min(wsReconnectDelay * 2, 30000);
+          reconnectWebSocket();
+        }
+      }, wsReconnectDelay);
+    };
+
+    socket.addEventListener("open", () => {
+      socket.send(JSON.stringify({ command: "subscribe", identifier }));
+      document.dispatchEvent(new CustomEvent('scoreboard:connected'));
+    });
+
+    socket.addEventListener("message", (event) => {
+      handleSocketData(JSON.parse(event.data));
     });
 
     socket.addEventListener("close", () => {
       ensureState();
       document.dispatchEvent(new CustomEvent('scoreboard:disconnected'));
+      wsReconnectDelay = Math.min(wsReconnectDelay * 2, 30000);
+      reconnectWebSocket();
     });
+
+    // BroadcastChannel 수신 (같은 기기의 control ↔ display 탭 간 오프라인 동기화)
+    if (bcChannel) {
+      bcChannel.onmessage = (event) => {
+        const msg = event.data;
+        if (msg?.type === "state") {
+          const incomingState = normalizeState(msg.payload);
+          if (!shouldApplyIncomingState(incomingState)) return;
+          state = incomingState;
+          refreshLocalStateVersion(state);
+          render();
+          syncTimers();
+          if (role === "display") startDisplayTimerSync();
+        } else if (msg?.type === "buzzer") {
+          playBuzzer();
+        }
+      };
+    }
     const fullscreenBtn = document.getElementById("fullscreen-btn");
     if (fullscreenBtn) {
       const fullscreenLabel = fullscreenBtn.querySelector("[data-ui-key='fullscreen']");
