@@ -12,8 +12,8 @@ class ScoreboardsController < ApplicationController
   def standalone_control
     @match = Struct.new(:id, :home_team, :away_team, :teams, :date, :played_on, :regular_quarters).new(
       "standalone_u#{current_user.id}",
-      Struct.new(:id, :name, :icon, :color, :label).new(1, "HOME", "🏀", "#1e40af", "HOME"),
-      Struct.new(:id, :name, :icon, :color, :label).new(2, "AWAY", "🏀", "#dc2626", "AWAY"),
+      Struct.new(:id, :name, :icon, :color, :label).new(1, "HOME", "🏀", "blue", "HOME"),
+      Struct.new(:id, :name, :icon, :color, :label).new(2, "AWAY", "🏀", "red", "AWAY"),
       [],
       Date.today,
       Date.today,
@@ -28,8 +28,8 @@ class ScoreboardsController < ApplicationController
   def standalone_display
     @match = Struct.new(:id, :home_team, :away_team, :teams, :date, :played_on, :regular_quarters).new(
       "standalone_u#{current_user.id}",
-      Struct.new(:id, :name, :icon, :color, :label).new(1, "HOME", "🏀", "#1e40af", "HOME"),
-      Struct.new(:id, :name, :icon, :color, :label).new(2, "AWAY", "🏀", "#dc2626", "AWAY"),
+      Struct.new(:id, :name, :icon, :color, :label).new(1, "HOME", "🏀", "blue", "HOME"),
+      Struct.new(:id, :name, :icon, :color, :label).new(2, "AWAY", "🏀", "red", "AWAY"),
       [],
       Date.today,
       Date.today,

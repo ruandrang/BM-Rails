@@ -288,6 +288,42 @@
   transform: scale(1.02);
 }
 
+.timer-btn-minus {
+  height: 3.5rem;
+  border-radius: 0.75rem;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  font-weight: 700;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.timer-btn-minus:hover {
+  background-color: #fee2e2;
+  transform: scale(1.02);
+}
+
+.timer-btn-plus {
+  height: 3.5rem;
+  border-radius: 0.75rem;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  font-weight: 700;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.timer-btn-plus:hover {
+  background-color: #dbeafe;
+  transform: scale(1.02);
+}
+
 .timer-btn-green {
   height: 3.5rem;
   border-radius: 0.75rem;
@@ -501,6 +537,8 @@
     font-size: 1.5rem;
   }
   .timer-btn-gray,
+  .timer-btn-minus,
+  .timer-btn-plus,
   .timer-btn-green,
   .timer-btn-red,
   .timer-btn-black {
