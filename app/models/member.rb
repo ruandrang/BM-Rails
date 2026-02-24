@@ -1,11 +1,11 @@
 class Member < ApplicationRecord
   POSITIONS = [ "PG", "SG", "SF", "PF", "C" ].freeze
   POSITION_NAMES = {
-    "PG" => "포인트 가드",
-    "SG" => "슈팅 가드",
-    "SF" => "스몰 포워드",
-    "PF" => "파워 포워드",
-    "C" => "센터"
+    "PG" => "Point Guard",
+    "SG" => "Shooting Guard",
+    "SF" => "Small Forward",
+    "PF" => "Power Forward",
+    "C" => "Center"
   }.freeze
   POSITION_COLORS = {
     "PG" => "#3B82F6", # blue
@@ -16,7 +16,7 @@ class Member < ApplicationRecord
   }.freeze
 
   def position_name
-    POSITION_NAMES[position] || position
+    I18n.t("members.positions.#{position}", default: POSITION_NAMES[position] || position)
   end
 
   def position_color

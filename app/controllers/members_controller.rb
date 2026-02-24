@@ -23,7 +23,7 @@ class MembersController < ApplicationController
     @member.sort_order = next_sort_order
 
     if @member.save
-      redirect_to club_members_path(@club), notice: "멤버가 추가되었습니다."
+      redirect_to club_members_path(@club), notice: t("members.notices.created")
     else
       render :new, status: :unprocessable_entity
     end
@@ -34,7 +34,7 @@ class MembersController < ApplicationController
 
   def update
     if @member.update(member_params)
-      redirect_to club_members_path(@club), notice: "멤버가 수정되었습니다."
+      redirect_to club_members_path(@club), notice: t("members.notices.updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -42,13 +42,13 @@ class MembersController < ApplicationController
 
   def destroy
     @member.destroy
-    redirect_to club_members_path(@club), notice: "멤버가 삭제되었습니다."
+    redirect_to club_members_path(@club), notice: t("members.notices.deleted")
   end
 
   def import_csv
     file = params[:file]
     if file.blank?
-      redirect_to club_members_path(@club), alert: "CSV 파일을 선택해주세요."
+      redirect_to club_members_path(@club), alert: t("members.errors.no_file")
       return
     end
 
@@ -70,13 +70,17 @@ class MembersController < ApplicationController
       end
     end
 
-    redirect_to club_members_path(@club), notice: "#{imported}명의 멤버를 가져왔습니다."
+    redirect_to club_members_path(@club), notice: t("members.notices.imported", count: imported)
   rescue StandardError => e
-    redirect_to club_members_path(@club), alert: "CSV 가져오기 실패: #{e.message}"
+    redirect_to club_members_path(@club), alert: t("members.errors.import_failed", message: e.message)
   end
 
   def export_csv
-    headers = %w[이름 나이 키 포지션 등번호]
+    headers = [
+      I18n.t("members.csv.name"), I18n.t("members.csv.age"),
+      I18n.t("members.csv.height"), I18n.t("members.csv.position"),
+      I18n.t("members.csv.jersey_number")
+    ]
     csv_data = CSV.generate do |csv|
       csv << headers
       @club.members.order(:sort_order, :id).each do |member|
@@ -126,11 +130,11 @@ class MembersController < ApplicationController
   end
 
   def csv_row_to_attributes(row)
-    name = row["이름"] || row["name"] || row["Name"]
-    age = row["나이"] || row["age"] || row["Age"]
-    height = row["키"] || row["height"] || row["Height"]
-    position = row["포지션"] || row["position"] || row["Position"]
-    jersey = row["등번호"] || row["jersey_number"] || row["Number"] || row["번호"]
+    name = row[I18n.t("members.csv.name")] || row["이름"] || row["name"] || row["Name"]
+    age = row[I18n.t("members.csv.age")] || row["나이"] || row["age"] || row["Age"]
+    height = row[I18n.t("members.csv.height")] || row["키"] || row["height"] || row["Height"]
+    position = row[I18n.t("members.csv.position")] || row["포지션"] || row["position"] || row["Position"]
+    jersey = row[I18n.t("members.csv.jersey_number")] || row["등번호"] || row["jersey_number"] || row["Number"] || row["번호"]
 
     {
       name: name&.to_s&.strip,

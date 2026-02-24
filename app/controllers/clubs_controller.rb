@@ -38,7 +38,7 @@ class ClubsController < ApplicationController
       @club.club_memberships.create!(
         user: current_user, role: "owner", joined_at: Time.current
       )
-      redirect_to @club, notice: "클럽이 생성되었습니다."
+      redirect_to @club, notice: t("clubs.notices.created")
     else
       render :new, status: :unprocessable_entity
     end
@@ -49,7 +49,7 @@ class ClubsController < ApplicationController
 
   def update
     if @club.update(club_params)
-      redirect_to @club, notice: "클럽 정보가 수정되었습니다."
+      redirect_to @club, notice: t("clubs.notices.updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -57,7 +57,7 @@ class ClubsController < ApplicationController
 
   def destroy
     @club.destroy
-    redirect_to clubs_path, notice: "클럽이 삭제되었습니다."
+    redirect_to clubs_path, notice: t("clubs.notices.deleted")
   end
 
   def backup
@@ -75,12 +75,12 @@ class ClubsController < ApplicationController
   def import_all
     file = params[:file]
     if file.blank?
-      redirect_to backup_clubs_path, alert: "JSON 파일을 선택해주세요."
+      redirect_to backup_clubs_path, alert: t("clubs.errors.no_file")
       return
     end
 
     if file.size > MAX_IMPORT_SIZE
-      redirect_to backup_clubs_path, alert: "파일 크기가 너무 큽니다. (최대 10MB)"
+      redirect_to backup_clubs_path, alert: t("clubs.errors.file_too_large")
       return
     end
 
@@ -88,12 +88,12 @@ class ClubsController < ApplicationController
     stats = UserImporter.new(current_user, payload).call
     redirect_to clubs_path, notice: import_result_message(stats)
   rescue JSON::ParserError
-    redirect_to backup_clubs_path, alert: "JSON 파일 형식이 올바르지 않습니다."
+    redirect_to backup_clubs_path, alert: t("clubs.errors.invalid_json")
   rescue ArgumentError => e
     redirect_to backup_clubs_path, alert: e.message
   rescue StandardError => e
     Rails.logger.error("데이터 복원 실패: #{e.class} - #{e.message}\n#{e.backtrace&.first(5)&.join("\n")}")
-    redirect_to backup_clubs_path, alert: "복원 중 오류가 발생했습니다. 파일을 확인해주세요."
+    redirect_to backup_clubs_path, alert: t("clubs.errors.restore_failed")
   end
 
   private
@@ -104,33 +104,24 @@ class ClubsController < ApplicationController
 
   def import_result_message(stats)
     parts = []
-
-    if stats[:clubs_added] > 0
-      parts << "새 클럽 #{stats[:clubs_added]}개"
-    end
-    if stats[:members_added] > 0
-      parts << "새 멤버 #{stats[:members_added]}명"
-    end
-    if stats[:matches_added] > 0
-      parts << "새 경기 #{stats[:matches_added]}개"
-    end
+    parts << t("clubs.notices.import_new_clubs", count: stats[:clubs_added]) if stats[:clubs_added] > 0
+    parts << t("clubs.notices.import_new_members", count: stats[:members_added]) if stats[:members_added] > 0
+    parts << t("clubs.notices.import_new_matches", count: stats[:matches_added]) if stats[:matches_added] > 0
 
     skipped_parts = []
-    if stats[:members_skipped] > 0
-      skipped_parts << "멤버 #{stats[:members_skipped]}명"
-    end
-    if stats[:matches_skipped] > 0
-      skipped_parts << "경기 #{stats[:matches_skipped]}개"
-    end
+    skipped_parts << t("clubs.notices.import_skipped_members", count: stats[:members_skipped]) if stats[:members_skipped] > 0
+    skipped_parts << t("clubs.notices.import_skipped_matches", count: stats[:matches_skipped]) if stats[:matches_skipped] > 0
 
     if parts.any?
-      message = "#{parts.join(', ')} 추가 완료."
-      message += " (이미 존재: #{skipped_parts.join(', ')})" if skipped_parts.any?
-      message
+      if skipped_parts.any?
+        t("clubs.notices.import_added_with_skipped", items: parts.join(", "), skipped: skipped_parts.join(", "))
+      else
+        t("clubs.notices.import_added", items: parts.join(", "))
+      end
     elsif skipped_parts.any?
-      "모든 데이터가 이미 존재합니다. (#{skipped_parts.join(', ')} 건너뜀)"
+      t("clubs.notices.import_all_exist", skipped: skipped_parts.join(", "))
     else
-      "복원할 데이터가 없습니다."
+      t("clubs.notices.import_no_data")
     end
   end
 end

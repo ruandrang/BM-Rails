@@ -67,10 +67,10 @@ class MatchesController < ApplicationController
 
     build_teams_and_games(assignments, team_names, team_colors)
 
-    redirect_to club_match_path(@club, @match), notice: "팀이 생성되었습니다."
+    redirect_to club_match_path(@club, @match), notice: t("matches.notices.teams_created")
   rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotFound => e
     Rails.logger.error("팀 생성 실패: #{e.class} - #{e.message}")
-    flash.now[:alert] = "팀 생성에 실패했습니다. 입력 값을 확인해주세요."
+    flash.now[:alert] = t("matches.errors.create_failed")
     render :new, status: :unprocessable_entity
   end
 
@@ -92,7 +92,7 @@ class MatchesController < ApplicationController
 
   def update
     if @match.update(match_update_params)
-      redirect_to club_match_path(@club, @match), notice: "경기 정보가 수정되었습니다."
+      redirect_to club_match_path(@club, @match), notice: t("matches.notices.updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -101,9 +101,9 @@ class MatchesController < ApplicationController
   def destroy
     if @match.destroy
       expire_member_stats_cache
-      redirect_to club_matches_path(@club), notice: "경기가 삭제되었습니다."
+      redirect_to club_matches_path(@club), notice: t("matches.notices.deleted")
     else
-      redirect_to club_matches_path(@club), alert: "경기 삭제에 실패했습니다."
+      redirect_to club_matches_path(@club), alert: t("matches.errors.delete_failed")
     end
   end
 
@@ -122,20 +122,20 @@ class MatchesController < ApplicationController
     end
 
     expire_member_stats_cache
-    redirect_to club_match_path(@club, @match), notice: "경기 결과가 저장되었습니다."
+    redirect_to club_match_path(@club, @match), notice: t("matches.notices.results_saved")
   end
 
   def shuffle_teams
     games = @match.games.to_a
     if games.any? { |g| g.result != "pending" || g.home_score > 0 || g.away_score > 0 }
-      return redirect_to club_match_path(@club, @match), alert: "이미 진행된 게임이 있어 팀을 섞을 수 없습니다."
+      return redirect_to club_match_path(@club, @match), alert: t("matches.errors.games_in_progress")
     end
 
     # eager loading으로 N+1 방지
     current_members = @match.teams.includes(:members).flat_map(&:members).uniq
 
     if current_members.empty?
-      return redirect_to club_match_path(@club, @match), alert: "참가 멤버가 없어 팀을 섞을 수 없습니다."
+      return redirect_to club_match_path(@club, @match), alert: t("matches.errors.no_members_to_shuffle")
     end
 
     teams_count = @match.teams_count
@@ -154,10 +154,10 @@ class MatchesController < ApplicationController
       end
     end
 
-    redirect_to club_match_path(@club, @match), notice: "팀을 랜덤하게 새로 섞었습니다."
+    redirect_to club_match_path(@club, @match), notice: t("matches.notices.shuffled")
   rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotFound => e
     Rails.logger.error("팀 섞기 실패: #{e.class} - #{e.message}")
-    redirect_to club_match_path(@club, @match), alert: "팀 섞기에 실패했습니다."
+    redirect_to club_match_path(@club, @match), alert: t("matches.errors.shuffle_failed")
   end
 
   private
@@ -173,7 +173,7 @@ class MatchesController < ApplicationController
 
     unless params[:token].present? && @match.share_token.present? &&
            ActiveSupport::SecurityUtils.secure_compare(params[:token].to_s, @match.share_token.to_s)
-      render plain: "공유 링크가 유효하지 않습니다.", status: :not_found
+      render plain: t("matches.errors.invalid_share_link"), status: :not_found
     end
   end
 
@@ -195,15 +195,15 @@ class MatchesController < ApplicationController
     max_allowed = teams_count * 6
 
     if selected_members.size != selected_ids.size
-      return [ nil, "선택한 멤버를 찾을 수 없습니다." ]
+      return [ nil, t("matches.errors.members_not_found") ]
     end
 
     if selected_members.size < min_required
-      return [ nil, "최소 #{min_required}명을 선택해주세요." ]
+      return [ nil, t("matches.errors.min_members", count: min_required) ]
     end
 
     if selected_members.size > max_allowed
-      return [ nil, "최대 #{max_allowed}명까지 선택할 수 있습니다." ]
+      return [ nil, t("matches.errors.max_members", count: max_allowed) ]
     end
 
     [ selected_members, nil ]

@@ -75,18 +75,18 @@ module MatchScoring
       end
 
       expire_member_stats_cache
-      redirect_to club_match_path(@club, @match), notice: "경기 점수가 수정되었습니다."
+      redirect_to club_match_path(@club, @match), notice: t("matches.notices.scores_updated")
     else
-      redirect_to club_match_path(@club, @match), alert: "수정할 점수 데이터가 없습니다."
+      redirect_to club_match_path(@club, @match), alert: t("matches.errors.no_scores")
     end
   rescue ActiveRecord::RecordInvalid => e
     Rails.logger.error("점수 수정 실패: #{e.class} - #{e.message}")
-    redirect_to club_match_path(@club, @match), alert: "점수 수정에 실패했습니다. 입력 값을 확인해주세요."
+    redirect_to club_match_path(@club, @match), alert: t("matches.errors.update_failed")
   end
 
   def reset_all_scores
     unless @match.paused?
-      return redirect_to club_match_path(@club, @match), alert: "중단된 경기만 점수를 리셋할 수 있습니다."
+      return redirect_to club_match_path(@club, @match), alert: t("matches.errors.not_paused")
     end
 
     games = @match.games.to_a
@@ -104,20 +104,20 @@ module MatchScoring
     Rails.cache.delete("scoreboard_state_#{@match.id}")
     expire_member_stats_cache
 
-    redirect_to club_match_path(@club, @match), notice: "모든 점수가 초기화되었습니다."
+    redirect_to club_match_path(@club, @match), notice: t("matches.notices.scores_reset")
   rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotSaved => e
     Rails.logger.error("점수 리셋 실패: #{e.class} - #{e.message}")
-    redirect_to club_match_path(@club, @match), alert: "점수 리셋에 실패했습니다."
+    redirect_to club_match_path(@club, @match), alert: t("matches.errors.reset_failed")
   end
 
   def finish_match
     if @match.finished?
-      return redirect_to club_match_path(@club, @match), alert: "이미 종료된 경기입니다."
+      return redirect_to club_match_path(@club, @match), alert: t("matches.errors.already_finished")
     end
 
     games = @match.games.to_a
     unless games.any? { |g| g.home_score.to_i > 0 || g.away_score.to_i > 0 }
-      return redirect_to club_match_path(@club, @match), alert: "점수가 기록된 게임이 없습니다."
+      return redirect_to club_match_path(@club, @match), alert: t("matches.errors.no_recorded_games")
     end
 
     ActiveRecord::Base.transaction do
@@ -130,10 +130,10 @@ module MatchScoring
     Rails.cache.delete("scoreboard_state_#{@match.id}")
     expire_member_stats_cache
 
-    redirect_to club_match_path(@club, @match), notice: "경기가 종료되었습니다. 결과가 확정되었습니다."
+    redirect_to club_match_path(@club, @match), notice: t("matches.notices.finished")
   rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotSaved => e
     Rails.logger.error("경기 종료 실패: #{e.class} - #{e.message}")
-    redirect_to club_match_path(@club, @match), alert: "경기 종료에 실패했습니다."
+    redirect_to club_match_path(@club, @match), alert: t("matches.errors.finish_failed")
   end
 
   private

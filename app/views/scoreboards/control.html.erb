@@ -50,14 +50,14 @@
               <svg xmlns="http://www.w3.org/2000/svg" class="size-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM4 6h5v2H4V6zm0 4h5v2H4v-2zm0 4h5v2H4v-2zm12 0h4v2h-4v-2zm0-4h4v2h-4v-2zm-6 0h5v6h-5v-6z"/>
               </svg>
-              <span data-ui-key="open_display">디스플레이 열기</span>
+              <span data-ui-key="open_display"><%= t('scoreboards.control.open_display') %></span>
             <% end %>
           <% else %>
             <%= link_to scoreboard_display_club_match_path(@club, @match), target: "_blank", class: "group flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-lg bg-blue-500 hover:bg-blue-600 text-white shadow-md shadow-blue-500/25 hover:shadow-lg hover:shadow-blue-500/30 transition-all", data: { ui_key: "open_display" } do %>
               <svg xmlns="http://www.w3.org/2000/svg" class="size-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM4 6h5v2H4V6zm0 4h5v2H4v-2zm0 4h5v2H4v-2zm12 0h4v2h-4v-2zm0-4h4v2h-4v-2zm-6 0h5v6h-5v-6z"/>
               </svg>
-              <span data-ui-key="open_display">디스플레이 열기</span>
+              <span data-ui-key="open_display"><%= t('scoreboards.control.open_display') %></span>
             <% end %>
           <% end %>
           <button class="group flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-all text-gray-700"
@@ -128,7 +128,7 @@
             </button>
             <button class="timer-btn-black" data-action="reset-main">
               <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
-              <span data-ui-key="reset">리셋</span>
+              <span data-ui-key="reset"><%= t('scoreboards.control.reset') %></span>
             </button>
           </div>
         </div>
@@ -137,7 +137,7 @@
         <div class="lg:col-span-6 bg-white rounded-2xl p-8 shadow-[0_10px_15px_-3px_rgba(0,0,0,0.05),0_4px_6px_-2px_rgba(0,0,0,0.025)] border border-gray-100 flex flex-col relative overflow-hidden">
           <div class="absolute inset-0 bg-orange-50 opacity-50 pointer-events-none"></div>
           <div class="flex justify-between items-center mb-2 z-10">
-            <span class="text-sm font-bold text-[#FF6B35] uppercase tracking-widest" data-ui-key="shot_clock_title">샷클락</span>
+            <span class="text-sm font-bold text-[#FF6B35] uppercase tracking-widest" data-ui-key="shot_clock_title"><%= t('scoreboards.control.shot_clock_title') %></span>
             <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-[#FF6B35]/50" viewBox="0 0 24 24" fill="currentColor">
               <path d="M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61l1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42C16.07 4.74 14.12 4 12 4c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-2.12-.74-4.07-1.97-5.61zM12 20c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
             </svg>
@@ -171,7 +171,7 @@
               <span class="hidden px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider animate-pulse" data-home-team-foul-badge>TEAM FOUL</span>
             </div>
             <div class="flex items-center gap-3 bg-black/10 px-4 py-2 rounded-xl">
-              <span class="text-sm font-bold uppercase opacity-80" data-ui-key="foul">파울</span>
+              <span class="text-sm font-bold uppercase opacity-80" data-ui-key="foul"><%= t('scoreboards.control.foul') %></span>
               <div class="h-6 w-px bg-current opacity-30"></div>
               <button class="w-9 h-9 flex items-center justify-center rounded-lg bg-white/20 hover:bg-white/40 transition-colors text-lg font-bold" data-action="decrement-home-fouls">-</button>
               <span class="text-3xl font-black min-w-[2ch] text-center tabular-nums" data-home-fouls>0</span>
@@ -254,7 +254,7 @@
               <span class="hidden px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider animate-pulse" data-away-team-foul-badge>TEAM FOUL</span>
             </div>
             <div class="flex items-center gap-3 bg-black/10 px-4 py-2 rounded-xl">
-              <span class="text-sm font-bold uppercase opacity-80" data-ui-key="foul">파울</span>
+              <span class="text-sm font-bold uppercase opacity-80" data-ui-key="foul"><%= t('scoreboards.control.foul') %></span>
               <div class="h-6 w-px bg-current opacity-30"></div>
               <button class="w-9 h-9 flex items-center justify-center rounded-lg bg-white/20 hover:bg-white/40 transition-colors text-lg font-bold" data-action="decrement-away-fouls">-</button>
               <span class="text-3xl font-black min-w-[2ch] text-center tabular-nums" data-away-fouls>0</span>
@@ -354,7 +354,7 @@
               <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
             </svg>
             <div class="flex items-center gap-2">
-              <span class="text-sm font-bold text-blue-700" data-voice-label>음성안내</span>
+              <span class="text-sm font-bold text-blue-700" data-voice-label><%= t('scoreboards.control.voice_label') %></span>
               <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500 text-white" data-voice-status>ON</span>
             </div>
             <input type="checkbox" checked class="hidden" data-action="toggle-announcements" />
@@ -409,20 +409,20 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M3 3v18h18V3H3zm8 16H5v-6h6v6zm0-8H5V5h6v6zm8 8h-6v-6h6v6zm0-8h-6V5h6v6z"/>
                 </svg>
-                <span class="font-bold text-gray-700" data-ui-key="quarter_table_matchup">경기별 쿼터 점수</span>
+                <span class="font-bold text-gray-700" data-ui-key="quarter_table_matchup"><%= t('scoreboards.control.quarter_table_matchup') %></span>
               </div>
             <div class="flex items-center gap-2">
               <button type="button"
                       class="px-3 py-1 rounded-lg bg-gray-900 text-white text-xs font-bold transition-colors"
                       data-action="set-quarter-view-cumulative"
                       data-ui-key="view_cumulative">
-                누적
+                <%= t('scoreboards.control.view_cumulative') %>
               </button>
               <button type="button"
                       class="px-3 py-1 rounded-lg bg-white text-gray-500 hover:bg-gray-100 text-xs font-bold transition-colors"
                       data-action="set-quarter-view-per-quarter"
                       data-ui-key="view_per_quarter">
-                쿼터별
+                <%= t('scoreboards.control.view_per_quarter') %>
               </button>
               <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-gray-400 transition-transform" id="score-table-toggle-icon" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"/>
