@@ -1,12 +1,12 @@
-<% content_for :title, t("auth.profile.page_title", default: "프로필 설정") %>
+<% content_for :title, t("auth.profile.page_title") %>
 
 <div class="min-h-screen flex items-center justify-center p-4">
   <div class="card-modern-static w-full max-w-md p-8">
     <div>
       <div class="text-center mb-6">
         <div class="text-6xl mb-4">🏀</div>
-        <h1 class="text-2xl font-extrabold tracking-tight"><%= t("auth.profile.title", default: "프로필 설정") %></h1>
-        <p class="text-base-content/60 mt-2"><%= t("auth.profile.subtitle", default: "닉네임을 확인하고 시작하세요") %></p>
+        <h1 class="text-2xl font-extrabold tracking-tight"><%= t("auth.profile.title") %></h1>
+        <p class="text-base-content/60 mt-2"><%= t("auth.profile.subtitle") %></p>
       </div>
 
       <% if @user.errors.any? %>
@@ -31,16 +31,16 @@
         <% end %>
 
         <div class="form-control w-full">
-          <%= form.label :nickname, t("auth.fields.nickname", default: "닉네임"), class: "label" %>
+          <%= form.label :nickname, t("auth.fields.nickname"), class: "label" %>
           <%= form.text_field :nickname,
               required: true,
               autocomplete: "nickname",
-              placeholder: t("auth.fields.nickname_placeholder", default: "닉네임을 입력하세요"),
+              placeholder: t("auth.fields.nickname_placeholder"),
               class: "input input-bordered w-full focus:input-primary" %>
         </div>
 
         <div class="form-control mt-6">
-          <%= form.submit t("common.save", default: "저장"), class: "btn btn-primary btn-lg w-full" %>
+          <%= form.submit t("common.save"), class: "btn btn-primary btn-lg w-full" %>
         </div>
       <% end %>
     </div>

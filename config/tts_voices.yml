@@ -1,0 +1,27 @@
+# Microsoft Edge TTS 음성 설정
+# rails tts:generate 로 음성 파일 사전 생성
+# edge-tts 패키지 필요: pip3 install edge-tts
+
+# 각 언어별 네이티브 Neural 음성 사용
+voices:
+  ko:
+    voice: "ko-KR-SunHiNeural"
+    connector: "대"
+    numbers_style: "sino_korean"
+  ja:
+    voice: "ja-JP-NanamiNeural"
+    connector: "対"
+    numbers_style: "default"
+  en:
+    voice: "en-US-GuyNeural"
+    connector: "to"
+    numbers_style: "default"
+  zh:
+    voice: "zh-CN-XiaoxiaoNeural"
+    connector: "比"
+    numbers_style: "default"
+
+generation:
+  countdown: [1, 2, 3, 4, 5]
+  score_min: 0
+  score_max: 50

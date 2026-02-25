@@ -18,8 +18,8 @@
   <!-- 기본 정보 -->
   <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
     <div class="mb-4">
-      <h2 class="text-xl font-bold text-base-content"><%= t('clubs.form.name_label', default: '기본 정보') %></h2>
-      <p class="text-base-content/60 mt-1 text-sm">클럽의 이름과 소개를 입력해주세요.</p>
+      <h2 class="text-xl font-bold text-base-content"><%= t('clubs.form.section_basic_info') %></h2>
+      <p class="text-base-content/60 mt-1 text-sm"><%= t('clubs.form.section_basic_info_desc') %></p>
     </div>
 
     <div class="space-y-4">
@@ -67,7 +67,7 @@
   <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
     <div class="mb-4">
       <h2 class="text-xl font-bold text-base-content"><%= t('clubs.form.icon_label') %></h2>
-      <p class="text-base-content/60 mt-1 text-sm">클럽을 대표할 아이콘을 선택해주세요.</p>
+      <p class="text-base-content/60 mt-1 text-sm"><%= t('clubs.form.section_icon_desc') %></p>
     </div>
 
     <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
@@ -88,6 +88,6 @@
   <div class="flex items-center gap-3">
     <%= form.submit @club.new_record? ? t('clubs.form.submit_create') : t('common.save'),
         class: "btn btn-primary px-7" %>
-    <%= link_to t('common.cancel', default: '취소'), @club.new_record? ? clubs_path : club_path(@club), class: "btn btn-ghost" %>
+    <%= link_to t('common.cancel'), @club.new_record? ? clubs_path : club_path(@club), class: "btn btn-ghost" %>
   </div>
 <% end %>

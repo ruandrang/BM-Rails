@@ -3,10 +3,19 @@
 
 (function () {
   function initSidebar() {
-    const toggleBtn = document.getElementById("sidebar-toggle");
     const drawer = document.querySelector(".drawer.lg\\:drawer-open") || document.querySelector(".drawer");
+    if (!drawer) return;
 
-    if (!toggleBtn || !drawer) return;
+    // 스코어보드 페이지에서는 사이드바 강제 닫기 + 토글 비활성화
+    if (document.querySelector("[data-scoreboard-root]")) {
+      drawer.classList.remove("lg:drawer-open");
+      const checkbox = document.getElementById("app-drawer");
+      if (checkbox) checkbox.checked = false;
+      return;
+    }
+
+    const toggleBtn = document.getElementById("sidebar-toggle");
+    if (!toggleBtn) return;
 
     // Prevent duplicate listeners
     if (toggleBtn.dataset.listenerAttached === "true") return;
@@ -28,7 +37,7 @@
 
     // 2. Toggle Handler
     toggleBtn.addEventListener("click", (e) => {
-      e.preventDefault(); // Prevent form submission if inside form (though it's type button ideally)
+      e.preventDefault();
       drawer.classList.toggle("lg:drawer-open");
 
       const isOpen = drawer.classList.contains("lg:drawer-open");

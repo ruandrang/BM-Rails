@@ -1,9 +1,9 @@
-<% content_for :title, t("feedback.page_title", default: "피드백 보내기") %>
+<% content_for :title, t("feedback.page_title") %>
 
 <div class="max-w-5xl mx-auto">
   <div class="mb-6">
-    <h1 class="page-title text-base-content mb-2"><%= t("feedback.page_title", default: "피드백 보내기") %></h1>
-    <p class="text-base-content/60"><%= t("feedback.description", default: "의견, 버그 신고, 기능 제안 등 무엇이든 알려주세요.") %></p>
+    <h1 class="page-title text-base-content mb-2"><%= t("feedback.page_title") %></h1>
+    <p class="text-base-content/60"><%= t("feedback.description") %></p>
   </div>
 
   <div class="card-modern-static">
@@ -29,15 +29,15 @@
         <!-- 분류 선택 -->
         <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
           <div class="mb-4">
-            <h2 class="text-xl font-bold text-base-content"><%= t("feedback.category_label", default: "어떤 종류의 피드백인가요?") %></h2>
-            <p class="text-base-content/60 mt-1 text-sm">해당하는 분류를 선택해주세요.</p>
+            <h2 class="text-xl font-bold text-base-content"><%= t("feedback.category_label") %></h2>
+            <p class="text-base-content/60 mt-1 text-sm"><%= t("feedback.category_description") %></p>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <% [
-              ["general", "💬", t("feedback.categories.general", default: "일반 의견"), "사용 소감이나 개선 아이디어"],
-              ["bug", "🐛", t("feedback.categories.bug", default: "버그 신고"), "오류나 비정상 동작 제보"],
-              ["feature", "💡", t("feedback.categories.feature", default: "기능 제안"), "새로운 기능 요청"]
+              ["general", "💬", t("feedback.categories.general"), t("feedback.categories.general_desc")],
+              ["bug", "🐛", t("feedback.categories.bug"), t("feedback.categories.bug_desc")],
+              ["feature", "💡", t("feedback.categories.feature"), t("feedback.categories.feature_desc")]
             ].each do |value, icon, label, desc| %>
               <label class="cursor-pointer">
                 <%= form.radio_button :category, value, checked: (@feedback.category == value), class: "peer sr-only" %>
@@ -56,23 +56,23 @@
         <!-- 내용 입력 -->
         <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
           <div class="mb-4">
-            <h2 class="text-xl font-bold text-base-content"><%= t("feedback.content_label", default: "내용") %></h2>
-            <p class="text-base-content/60 mt-1 text-sm">자세히 적어주실수록 빠르게 반영할 수 있습니다.</p>
+            <h2 class="text-xl font-bold text-base-content"><%= t("feedback.content_label") %></h2>
+            <p class="text-base-content/60 mt-1 text-sm"><%= t("feedback.content_description") %></p>
           </div>
 
           <div class="rounded-xl bg-base-200/40 p-4">
             <%= form.text_area :content,
                 rows: 8,
                 required: true,
-                placeholder: t("feedback.content_placeholder", default: "여기에 의견을 작성해주세요..."),
+                placeholder: t("feedback.content_placeholder"),
                 class: "textarea textarea-bordered w-full text-base bg-base-100 focus:outline-primary" %>
-            <p class="text-xs text-base-content/40 mt-2 text-right"><%= t("feedback.content_hint", default: "최대 2,000자") %></p>
+            <p class="text-xs text-base-content/40 mt-2 text-right"><%= t("feedback.content_hint") %></p>
           </div>
         </section>
 
         <!-- 제출 -->
         <div class="flex items-center gap-3">
-          <%= form.submit t("feedback.submit", default: "피드백 보내기"), class: "btn btn-primary px-7" %>
+          <%= form.submit t("feedback.submit"), class: "btn btn-primary px-7" %>
           <%= link_to t("common.cancel"), clubs_path, class: "btn btn-ghost" %>
         </div>
 

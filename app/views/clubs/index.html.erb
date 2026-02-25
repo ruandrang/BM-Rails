@@ -51,8 +51,8 @@
 
     <!-- 초대 코드로 참여 -->
     <%= form_with url: nil, method: :get, local: true, class: "flex items-center gap-2", id: "join-code-form" do %>
-      <input type="text" name="code" placeholder="초대 코드 입력" class="input input-bordered input-sm w-36" maxlength="6" pattern="[A-Za-z0-9]{6}" />
-      <button type="submit" class="btn btn-outline btn-sm">참여</button>
+      <input type="text" name="code" placeholder="<%= t('clubs.index.invite_code_placeholder') %>" class="input input-bordered input-sm w-36" maxlength="6" pattern="[A-Za-z0-9]{6}" />
+      <button type="submit" class="btn btn-outline btn-sm"><%= t('clubs.index.join_button') %></button>
     <% end %>
     <script>
       document.getElementById('join-code-form')?.addEventListener('submit', function(e) {
@@ -82,11 +82,11 @@
                 <% if membership %>
                   <% case membership.role %>
                   <% when "owner" %>
-                    <span class="badge badge-warning badge-sm">소유자</span>
+                    <span class="badge badge-warning badge-sm"><%= t('club_memberships.index.roles.owner') %></span>
                   <% when "admin" %>
-                    <span class="badge badge-info badge-sm">운영자</span>
+                    <span class="badge badge-info badge-sm"><%= t('club_memberships.index.roles.admin') %></span>
                   <% when "member" %>
-                    <span class="badge badge-ghost badge-sm">멤버</span>
+                    <span class="badge badge-ghost badge-sm"><%= t('club_memberships.index.roles.member') %></span>
                   <% end %>
                 <% end %>
               </div>

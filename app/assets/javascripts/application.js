@@ -1603,7 +1603,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const isSoundEnabled = () => state?.sound_enabled !== false;
     const isVoiceEnabled = () => state?.voice_enabled !== false;
-    const isAnnouncementsEnabled = () => isSoundEnabled() && isVoiceEnabled();
+    // 음성 안내 토글용 — 부저와 분리됨 (부저는 isSoundEnabled로 항상 동작)
+    const isAnnouncementsEnabled = () => isVoiceEnabled();
+    // 사용자가 세션 내에서 토글을 직접 변경했는지 추적
+    let voiceToggledLocally = false;
     const isQuarterScoreResetEnabled = () => state?.quarter_score_reset_enabled === true;
     const currentVoiceRate = () => normalizeVoiceRate(state?.voice_rate, defaultVoiceRate);
     const isPerQuarterScoreView = () => quarterScoreViewMode === "per_quarter";
@@ -1711,9 +1714,14 @@ document.addEventListener("DOMContentLoaded", () => {
         incomingState.possession_switch_pattern || normalized.possession_switch_pattern
       );
       normalized.voice_rate = normalizeVoiceRate(incomingState.voice_rate, base.voice_rate);
-      const announcementsEnabled = normalized.sound_enabled !== false && normalized.voice_enabled !== false;
-      normalized.sound_enabled = announcementsEnabled;
-      normalized.voice_enabled = announcementsEnabled;
+      // 부저(sound_enabled)는 항상 true — 부저는 독립적으로 항상 작동
+      normalized.sound_enabled = true;
+      // 음성안내(voice_enabled): 세션 내 토글 변경 시 로컬 값 유지, 아니면 설정 기본값
+      if (voiceToggledLocally && state) {
+        normalized.voice_enabled = state.voice_enabled;
+      } else {
+        normalized.voice_enabled = defaultVoiceEnabled;
+      }
       normalized.quarter_score_reset_enabled = parseBooleanDataset(normalized.quarter_score_reset_enabled, false);
       normalized.state_version = parseStateVersion(incomingState.state_version, base.state_version);
       normalized.updated_at_ms = parseUpdatedAtMs(incomingState.updated_at_ms, base.updated_at_ms);
@@ -2657,9 +2665,36 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      const announcementsToggleBtn = scoreboardRoot.querySelector('[data-action="toggle-announcements"]');
+      const enabled = isAnnouncementsEnabled();
+
+      // 카드형 토글 버튼 (control 페이지)
+      const voiceToggleBtn = scoreboardRoot.querySelector(".voice-toggle-btn");
+      if (voiceToggleBtn) {
+        const statusEl = voiceToggleBtn.querySelector("[data-voice-status]");
+        const labelEl = voiceToggleBtn.querySelector("[data-voice-label]");
+        const iconEl = voiceToggleBtn.querySelector("[data-voice-icon]");
+        if (statusEl) {
+          statusEl.textContent = enabled ? "ON" : "OFF";
+          statusEl.classList.toggle("bg-blue-500", enabled);
+          statusEl.classList.toggle("bg-gray-400", !enabled);
+        }
+        if (labelEl) {
+          labelEl.classList.toggle("text-blue-700", enabled);
+          labelEl.classList.toggle("text-gray-500", !enabled);
+        }
+        if (iconEl) {
+          iconEl.classList.toggle("text-blue-500", enabled);
+          iconEl.classList.toggle("text-gray-400", !enabled);
+        }
+        voiceToggleBtn.classList.toggle("border-blue-200", enabled);
+        voiceToggleBtn.classList.toggle("bg-blue-50", enabled);
+        voiceToggleBtn.classList.toggle("border-gray-200", !enabled);
+        voiceToggleBtn.classList.toggle("bg-gray-50", !enabled);
+      }
+
+      // 텍스트형 토글 버튼 (기타 페이지)
+      const announcementsToggleBtn = scoreboardRoot.querySelector('[data-action="toggle-announcements"]:not(.voice-toggle-btn)');
       if (announcementsToggleBtn) {
-        const enabled = isAnnouncementsEnabled();
         announcementsToggleBtn.textContent = enabled ? i18nForScoreboard("announcements_on") : i18nForScoreboard("announcements_off");
         announcementsToggleBtn.classList.toggle("bg-green-50", enabled);
         announcementsToggleBtn.classList.toggle("text-green-700", enabled);
@@ -2922,6 +2957,132 @@ document.addEventListener("DOMContentLoaded", () => {
     // Track last spoken countdown to avoid duplicates
     let lastSpokenCountdown = -1;
 
+    // ── TTS Audio 플레이어 (AudioContext 기반 — 끊김 없는 연속 재생) ──
+    const TTS_AUDIO_BASE = "/audio/tts";
+    const ttsBufferCache = {}; // { "ko/5": AudioBuffer }
+    let ttsAvailable = null;   // null=미확인, true/false
+    let ttsAudioCtx = null;    // lazy init (브라우저 autoplay 정책 대응)
+
+    const getTtsContext = () => {
+      if (!ttsAudioCtx) {
+        ttsAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (ttsAudioCtx.state === "suspended") ttsAudioCtx.resume();
+      return ttsAudioCtx;
+    };
+
+    // mp3 파일 존재 여부 확인 (최초 1회, 한국어는 Web Speech API 사용)
+    const checkTtsAvailability = () => {
+      if (ttsAvailable !== null) return Promise.resolve(ttsAvailable);
+      if (uiLocale === "ko") { ttsAvailable = false; return Promise.resolve(false); }
+      const testUrl = `${TTS_AUDIO_BASE}/${uiLocale}/vs.mp3`;
+      return fetch(testUrl, { method: "HEAD" })
+        .then((r) => { ttsAvailable = r.ok; return ttsAvailable; })
+        .catch(() => { ttsAvailable = false; return false; });
+    };
+
+    // AudioBuffer에서 앞뒤 무음 제거 (mp3 인코더 패딩 제거)
+    const trimSilence = (buffer, threshold = 0.01) => {
+      const ctx = getTtsContext();
+      const data = buffer.getChannelData(0);
+      const len = data.length;
+      const margin = Math.floor(buffer.sampleRate * 0.005); // 5ms 여유
+
+      let start = 0;
+      for (let i = 0; i < len; i++) {
+        if (Math.abs(data[i]) > threshold) { start = Math.max(0, i - margin); break; }
+      }
+      let end = len - 1;
+      for (let i = len - 1; i >= start; i--) {
+        if (Math.abs(data[i]) > threshold) { end = Math.min(len - 1, i + margin); break; }
+      }
+
+      const trimLen = end - start + 1;
+      if (trimLen >= len * 0.9) return buffer; // 거의 안 잘리면 원본 반환
+
+      const trimmed = ctx.createBuffer(buffer.numberOfChannels, trimLen, buffer.sampleRate);
+      for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+        trimmed.getChannelData(ch).set(buffer.getChannelData(ch).subarray(start, end + 1));
+      }
+      return trimmed;
+    };
+
+    // mp3 → AudioBuffer 로드, 무음 제거, 캐싱
+    const loadTtsBuffer = async (locale, filename) => {
+      const key = `${locale}/${filename}`;
+      if (ttsBufferCache[key]) return ttsBufferCache[key];
+      const url = `${TTS_AUDIO_BASE}/${key}.mp3`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`TTS fetch failed: ${url}`);
+      const arrayBuf = await response.arrayBuffer();
+      const raw = await getTtsContext().decodeAudioData(arrayBuf);
+      const audioBuffer = trimSilence(raw);
+      ttsBufferCache[key] = audioBuffer;
+      return audioBuffer;
+    };
+
+    // AudioBuffer 단일 재생 (Promise)
+    const playTtsBuffer = (buffer) => {
+      return new Promise((resolve, reject) => {
+        try {
+          const ctx = getTtsContext();
+          const source = ctx.createBufferSource();
+          source.buffer = buffer;
+          source.connect(ctx.destination);
+          source.onended = resolve;
+          source.start();
+        } catch (e) { reject(e); }
+      });
+    };
+
+    // 여러 AudioBuffer를 끊김 없이 연속 재생
+    const playTtsBuffersSeamless = (buffers) => {
+      return new Promise((resolve, reject) => {
+        try {
+          const ctx = getTtsContext();
+          let startTime = ctx.currentTime;
+          buffers.forEach((buf, i) => {
+            const source = ctx.createBufferSource();
+            source.buffer = buf;
+            source.connect(ctx.destination);
+            if (i === buffers.length - 1) source.onended = resolve;
+            source.start(startTime);
+            startTime += buf.duration;
+          });
+        } catch (e) { reject(e); }
+      });
+    };
+
+    // 점수 안내: [home] + [vs] + [away] 끊김 없는 연속 재생
+    const playScoreAnnouncement = async (homeScore, awayScore) => {
+      const locale = uiLocale;
+      const home = Math.min(Math.max(0, homeScore), 50);
+      const away = Math.min(Math.max(0, awayScore), 50);
+      const buffers = await Promise.all([
+        loadTtsBuffer(locale, String(home)),
+        loadTtsBuffer(locale, "vs"),
+        loadTtsBuffer(locale, String(away))
+      ]);
+      await playTtsBuffersSeamless(buffers);
+    };
+
+    // 카운트다운 mp3 재생
+    const playCountdownAudio = async (count) => {
+      const buffer = await loadTtsBuffer(uiLocale, `countdown_${count}`);
+      await playTtsBuffer(buffer);
+    };
+
+    // TTS 가용성 확인 + 프리로드
+    checkTtsAvailability().then((available) => {
+      console.log("🔊 TTS Audio available:", available);
+      if (available) {
+        // 자주 쓰는 파일 미리 디코딩
+        [1, 2, 3, 4, 5].forEach((n) => loadTtsBuffer(uiLocale, `countdown_${n}`).catch(() => {}));
+        loadTtsBuffer(uiLocale, "vs").catch(() => {});
+      }
+    });
+    // ── TTS Audio 플레이어 끝 ──────────────────────────────
+
     // 플랫폼 감지
     const isMac = /Macintosh|MacIntel|MacPPC|Mac68K/i.test(navigator.userAgent);
     const isWindows = /Win/i.test(navigator.userAgent);
@@ -2950,9 +3111,23 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     };
 
-    // 음성 선택: 플랫폼별 우선순위
+    // 음성 선택: 품질 점수 기반 (Premium > Google > 일반 순)
     let cachedBestVoice = null;
     let cachedVoiceLang = null;
+
+    const scoreVoice = (v) => {
+      const name = (v.name || "").toLowerCase();
+      let score = 0;
+      // Premium/Enhanced/Natural 키워드 = 최고 품질 (macOS 다운로드 음성)
+      if (/premium|enhanced|natural/.test(name)) score += 100;
+      // Google 음성 = 자연스러운 품질 (인터넷 필요)
+      if (/^google/.test(name)) score += 80;
+      // 원격 음성 = 일반적으로 로컬보다 고품질
+      if (v.localService === false) score += 30;
+      // Compact 음성 = 저품질
+      if (/compact/.test(name)) score -= 50;
+      return score;
+    };
 
     const selectBestVoice = (langPrefix) => {
       if (cachedBestVoice && cachedVoiceLang === langPrefix) return cachedBestVoice;
@@ -2961,24 +3136,16 @@ document.addEventListener("DOMContentLoaded", () => {
       if (voices.length === 0) return null;
 
       const matching = voices.filter((v) => String(v.lang || "").toLowerCase().startsWith(langPrefix));
-      let selected = null;
+      if (matching.length === 0) return null;
 
-      if (platform === "mac") {
-        // Mac: macOS 네이티브 음성 우선 (품질 우수), Google 음성 2순위
-        // Mac 네이티브 음성 예: "Yuna" (ko), "Kyoko" (ja), "Samantha" (en)
-        const nativeVoice = matching.find((v) => !(/^google/i.test(v.name)) && v.localService === true);
-        const googleVoice = matching.find((v) => /^google/i.test(v.name));
-        selected = nativeVoice || googleVoice || matching[0] || null;
-      } else {
-        // Windows/기타: Google 음성 우선 (OS 음성보다 자연스러움)
-        const googleVoice = matching.find((v) => /^google/i.test(v.name));
-        selected = googleVoice || matching[0] || null;
-      }
+      // 품질 점수 내림차순 정렬 후 최고 품질 선택
+      const sorted = [...matching].sort((a, b) => scoreVoice(b) - scoreVoice(a));
+      const selected = sorted[0];
 
       if (selected) {
         cachedBestVoice = selected;
         cachedVoiceLang = langPrefix;
-        console.log("🔊 Selected voice:", selected.name, selected.lang, "(platform:", platform + ")");
+        console.log("🔊 Selected voice:", selected.name, selected.lang, "score:", scoreVoice(selected), "(platform:", platform + ")");
       }
 
       return selected;
@@ -2993,7 +3160,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const speak = (text) => {
-      if (!isVoiceEnabled() || !("speechSynthesis" in window)) return;
+      if (!isVoiceEnabled()) return;
 
       // Avoid speaking the same number twice in a row
       const numText = Number(text);
@@ -3007,6 +3174,21 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }, 2000);
 
+      // 1순위: TTS Audio (mp3) — 한국어는 Web Speech API가 더 자연스러움
+      if (ttsAvailable && uiLocale !== "ko" && numText >= 1 && numText <= 5) {
+        playCountdownAudio(numText).catch(() => {
+          speakWithWebSpeechAPI(text);
+        });
+        return;
+      }
+
+      // 2순위: Web Speech API
+      speakWithWebSpeechAPI(text);
+    };
+
+    // Web Speech API 카운트다운 (폴백)
+    const speakWithWebSpeechAPI = (text) => {
+      if (!("speechSynthesis" in window)) return;
       const utterance = new SpeechSynthesisUtterance(i18nForScoreboard("voice_countdown_pattern", { count: text }));
       utterance.lang = scoreboardVoiceLang;
       utterance.rate = currentVoiceRate();
@@ -3219,13 +3401,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const speakScore = () => {
       if (!isVoiceEnabled()) {
-        console.log("🔇 Voice disabled - state.voice_enabled:", state?.voice_enabled);
         return;
       }
 
-      // Only speak if speech synthesis is supported and acting as control
-      if (!window.speechSynthesis) {
-        console.log("🔇 Speech synthesis not supported");
+      // TTS Audio도 Web Speech API도 없으면 종료
+      if (!ttsAvailable && !window.speechSynthesis) {
         return;
       }
 
@@ -3246,21 +3426,33 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const doSpeakScore = () => {
-      // Initialize voice on first call (browser autoplay policy workaround)
-      initializeVoice();
-
       const [visualHome, visualAway] = currentMatchup();
-
-      // visualHome and visualAway already have the score values from currentMatchup
       const homeScore = visualHome.score;
       const awayScore = visualAway.score;
 
-      // Use sino-korean numerals to avoid native-korean reading like "열"
+      // 1순위: TTS Audio (mp3 연결 재생) — 한국어는 Web Speech API 사용
+      if (ttsAvailable && uiLocale !== "ko" && homeScore <= 50 && awayScore <= 50) {
+        console.log("🔊 TTS Audio score:", homeScore, "vs", awayScore);
+        playScoreAnnouncement(homeScore, awayScore).catch(() => {
+          console.warn("🔊 TTS Audio failed, falling back to Web Speech API");
+          doSpeakScoreWithWebSpeechAPI(homeScore, awayScore);
+        });
+        return;
+      }
+
+      // 2순위: Web Speech API
+      doSpeakScoreWithWebSpeechAPI(homeScore, awayScore);
+    };
+
+    // Web Speech API 점수 안내 (폴백)
+    const doSpeakScoreWithWebSpeechAPI = (homeScore, awayScore) => {
+      initializeVoice();
+
       const homeScoreText = spokenNumber(homeScore);
       const awayScoreText = spokenNumber(awayScore);
       const text = i18nForScoreboard("voice_score_pattern", { home: homeScoreText, away: awayScoreText });
 
-      console.log("🔊 Speaking score:", text);
+      console.log("🔊 Web Speech API score:", text);
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = scoreboardVoiceLang;
@@ -3268,20 +3460,12 @@ document.addEventListener("DOMContentLoaded", () => {
       utterance.volume = 1.0;
       utterance.pitch = 1.0;
 
-      // Google 음성 우선 선택 (OS 무관 동일 음성)
       const speakWithVoice = () => {
         const langPrefix = String(scoreboardVoiceLang || "").toLowerCase().split("-")[0];
         const bestVoice = selectBestVoice(langPrefix);
         if (bestVoice) {
           utterance.voice = bestVoice;
-          console.log("🔊 Using voice:", bestVoice.name, bestVoice.lang);
-        } else {
-          console.log("🔊 No matching voice found for:", langPrefix, "- using default");
         }
-
-        utterance.onstart = () => {
-          console.log("🔊 Speech started");
-        };
 
         utterance.onerror = (event) => {
           if (event.error !== "canceled") {
@@ -3289,18 +3473,12 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         };
 
-        utterance.onend = () => {
-          console.log("🔊 Speech ended");
-        };
-
         safeSpeak(utterance);
       };
 
-      // 음성 목록이 이미 로드되었으면 바로 실행
-      if (window.speechSynthesis.getVoices().length > 0) {
+      if (window.speechSynthesis && window.speechSynthesis.getVoices().length > 0) {
         speakWithVoice();
-      } else {
-        // 음성 목록 로드 대기
+      } else if (window.speechSynthesis) {
         let spoken = false;
         const handleVoicesLoaded = () => {
           if (spoken) return;
@@ -3309,10 +3487,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
         window.speechSynthesis.addEventListener("voiceschanged", handleVoicesLoaded, { once: true });
         setTimeout(() => {
-          if (!spoken) {
-            console.log("🔊 Voices load timeout, speaking with default voice");
-            handleVoicesLoaded();
-          }
+          if (!spoken) handleVoicesLoaded();
         }, 100);
       }
     };
@@ -3518,6 +3693,19 @@ document.addEventListener("DOMContentLoaded", () => {
                   state.teams.forEach(t => t.score = 0);
                 }
                 break;
+              case "exit-scoreboard": {
+                const confirmMsg = btn.dataset.confirmMessage;
+                const backUrl = btn.dataset.backUrl;
+                if (!confirm(confirmMsg)) return;
+                // 타이머 정지 + 상태 리셋 + 브로드캐스트
+                state.running = false;
+                state.shot_running = false;
+                Object.assign(state, defaultState());
+                render();
+                broadcast();
+                window.location.href = backUrl;
+                return;
+              }
               // ... existing cases ...
               case "minus-minute":
                 state.period_seconds = Math.max(0, state.period_seconds - 60);
@@ -3845,9 +4033,9 @@ document.addEventListener("DOMContentLoaded", () => {
               case "toggle-announcements":
               case "toggle-sound":
               case "toggle-voice": {
-                const nextEnabled = !isAnnouncementsEnabled();
-                state.sound_enabled = nextEnabled;
-                state.voice_enabled = nextEnabled;
+                // 토글은 음성 안내(voice_enabled)만 제어 — 부저(sound_enabled)는 항상 ON
+                state.voice_enabled = !isVoiceEnabled();
+                voiceToggledLocally = true;
                 break;
               }
               case "increment-home-fouls":

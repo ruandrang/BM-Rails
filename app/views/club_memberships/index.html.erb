@@ -12,15 +12,15 @@
   <!-- 페이지 헤더 -->
   <div class="flex items-center justify-between mb-8">
     <div>
-      <h1 class="page-title text-base-content mb-2">멤버 관리</h1>
-      <p class="text-base-content/60"><%= @club.name %>의 멤버를 관리합니다.</p>
+      <h1 class="page-title text-base-content mb-2"><%= t('club_memberships.index.title') %></h1>
+      <p class="text-base-content/60"><%= t('club_memberships.index.subtitle', club_name: @club.name) %></p>
     </div>
     <% if @current_membership&.admin? %>
       <%= link_to club_invitations_path(@club), class: "btn btn-primary btn-sm gap-2" do %>
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
         </svg>
-        초대 코드
+        <%= t('club_memberships.index.invite_code') %>
       <% end %>
     <% end %>
   </div>
@@ -44,20 +44,20 @@
               <div class="font-bold">
                 <%= membership.user.display_name %>
                 <% if membership.user == current_user %>
-                  <span class="text-xs text-base-content/50">(나)</span>
+                  <span class="text-xs text-base-content/50"><%= t('club_memberships.index.me') %></span>
                 <% end %>
               </div>
               <div class="text-xs text-base-content/50">
                 <% case membership.role %>
                 <% when "owner" %>
-                  <span class="badge badge-warning badge-xs">소유자</span>
+                  <span class="badge badge-warning badge-xs"><%= t('club_memberships.index.roles.owner') %></span>
                 <% when "admin" %>
-                  <span class="badge badge-info badge-xs">운영자</span>
+                  <span class="badge badge-info badge-xs"><%= t('club_memberships.index.roles.admin') %></span>
                 <% when "member" %>
-                  <span class="badge badge-ghost badge-xs">멤버</span>
+                  <span class="badge badge-ghost badge-xs"><%= t('club_memberships.index.roles.member') %></span>
                 <% end %>
                 <% if membership.joined_at %>
-                  · 가입: <%= membership.joined_at.strftime('%Y.%m.%d') %>
+                  · <%= t('club_memberships.index.joined_at') %> <%= membership.joined_at.strftime('%Y.%m.%d') %>
                 <% end %>
               </div>
             </div>
@@ -68,13 +68,13 @@
             <% if @current_membership&.owner? && membership.user != current_user && !membership.owner? %>
               <!-- 역할 변경 -->
               <% if membership.admin? %>
-                <%= button_to "멤버로 변경",
+                <%= button_to t('club_memberships.index.actions.change_to_member'),
                     update_role_club_membership_path(@club, membership),
                     params: { role: "member" },
                     method: :patch,
                     class: "btn btn-ghost btn-xs" %>
               <% else %>
-                <%= button_to "운영자로 승격",
+                <%= button_to t('club_memberships.index.actions.promote_to_admin'),
                     update_role_club_membership_path(@club, membership),
                     params: { role: "admin" },
                     method: :patch,
@@ -82,26 +82,26 @@
               <% end %>
 
               <!-- 소유권 양도 -->
-              <%= button_to "소유권 양도",
+              <%= button_to t('club_memberships.index.actions.transfer_ownership'),
                   transfer_ownership_club_memberships_path(@club),
                   params: { membership_id: membership.id },
                   method: :patch,
-                  form: { onsubmit: "return confirm('정말로 소유권을 양도하시겠습니까? 이 작업은 되돌릴 수 없습니다.');" },
+                  form: { onsubmit: "return confirm('#{j t('club_memberships.index.confirms.transfer_ownership')}');" },
                   class: "btn btn-ghost btn-xs text-warning" %>
             <% end %>
 
             <!-- 추방/탈퇴 -->
             <% if membership.user == current_user && !membership.owner? %>
-              <%= button_to "탈퇴",
+              <%= button_to t('club_memberships.index.actions.leave'),
                   club_membership_path(@club, membership),
                   method: :delete,
-                  form: { onsubmit: "return confirm('정말로 이 클럽에서 탈퇴하시겠습니까?');" },
+                  form: { onsubmit: "return confirm('#{j t('club_memberships.index.confirms.leave_club')}');" },
                   class: "btn btn-ghost btn-xs text-error" %>
             <% elsif @current_membership&.admin? && membership.user != current_user && !membership.owner? %>
-              <%= button_to "추방",
+              <%= button_to t('club_memberships.index.actions.remove'),
                   club_membership_path(@club, membership),
                   method: :delete,
-                  form: { onsubmit: "return confirm('이 멤버를 추방하시겠습니까?');" },
+                  form: { onsubmit: "return confirm('#{j t('club_memberships.index.confirms.remove_member')}');" },
                   class: "btn btn-ghost btn-xs text-error" %>
             <% end %>
           </div>

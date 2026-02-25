@@ -9,6 +9,6 @@ class Admin::FeedbacksController < Admin::BaseController
 
   def destroy
     Feedback.find(params[:id]).destroy
-    redirect_to admin_feedbacks_path, notice: "피드백이 삭제되었습니다."
+    redirect_to admin_feedbacks_path, notice: t("admin.feedbacks.notices.deleted")
   end
 end

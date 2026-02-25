@@ -3,7 +3,7 @@ const CACHE_VERSION = "v1";
 const CACHE_NAME = `bm-scoreboard-${CACHE_VERSION}`;
 
 // 캐시할 에셋 패턴
-const ASSET_EXTENSIONS = /\.(css|js|woff2?|ttf|eot|png|svg|ico)(\?|$)/;
+const ASSET_EXTENSIONS = /\.(css|js|woff2?|ttf|eot|png|svg|ico|mp3)(\?|$)/;
 
 // 캐시할 CDN 호스트 (Pretendard 폰트, Material Icons)
 const CACHEABLE_CDN_HOSTS = [

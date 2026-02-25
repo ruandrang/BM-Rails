@@ -12,14 +12,14 @@ module MatchMembership
       team_member.update!(team_id: target_team.id)
       render json: { success: true }
     else
-      render json: { success: false, error: "이 경기에서 멤버를 찾을 수 없습니다." }, status: :unprocessable_entity
+      render json: { success: false, error: t("match_membership.errors.member_not_in_match") }, status: :unprocessable_entity
     end
   rescue ActiveRecord::RecordNotFound => e
-    Rails.logger.error("멤버 이동 실패 (대상 없음): #{e.class} - #{e.message}")
-    render json: { success: false, error: "멤버 또는 팀을 찾을 수 없습니다." }, status: :not_found
+    Rails.logger.error("Move member failed (not found): #{e.class} - #{e.message}")
+    render json: { success: false, error: t("match_membership.errors.member_or_team_not_found") }, status: :not_found
   rescue ActiveRecord::RecordInvalid => e
-    Rails.logger.error("멤버 이동 실패: #{e.class} - #{e.message}")
-    render json: { success: false, error: "멤버 이동에 실패했습니다." }, status: :unprocessable_entity
+    Rails.logger.error("Move member failed: #{e.class} - #{e.message}")
+    render json: { success: false, error: t("match_membership.errors.move_failed") }, status: :unprocessable_entity
   end
 
   def add_member
@@ -28,17 +28,17 @@ module MatchMembership
 
     existing_team_member = TeamMember.joins(:team).where(teams: { match_id: @match.id }, member_id: member.id).first
     if existing_team_member
-      return respond_member_update_error("이미 이 경기의 다른 팀에 배정된 멤버입니다.")
+      return respond_member_update_error(t("match_membership.errors.already_assigned"))
     end
 
     target_team.team_members.create!(member: member)
-    respond_member_update_success("멤버가 팀에 추가되었습니다.")
+    respond_member_update_success(t("match_membership.notices.member_added"))
   rescue ActiveRecord::RecordNotFound => e
-    Rails.logger.error("멤버 추가 실패 (대상 없음): #{e.class} - #{e.message}")
-    respond_member_update_error("멤버 또는 팀을 찾을 수 없습니다.")
+    Rails.logger.error("Add member failed (not found): #{e.class} - #{e.message}")
+    respond_member_update_error(t("match_membership.errors.member_or_team_not_found"))
   rescue ActiveRecord::RecordInvalid => e
-    Rails.logger.error("멤버 추가 실패: #{e.class} - #{e.message}")
-    respond_member_update_error(e.record.errors.full_messages.first || "멤버 추가에 실패했습니다.")
+    Rails.logger.error("Add member failed: #{e.class} - #{e.message}")
+    respond_member_update_error(e.record.errors.full_messages.first || t("match_membership.errors.add_failed"))
   end
 
   def remove_member
@@ -46,17 +46,17 @@ module MatchMembership
     team_member = TeamMember.joins(:team).where(teams: { match_id: @match.id }, member_id: member.id).first
 
     unless team_member
-      return render json: { success: false, error: "이 경기에서 멤버를 찾을 수 없습니다." }, status: :unprocessable_entity
+      return render json: { success: false, error: t("match_membership.errors.member_not_in_match") }, status: :unprocessable_entity
     end
 
     team_member.destroy!
     render json: { success: true }
   rescue ActiveRecord::RecordNotFound => e
-    Rails.logger.error("멤버 삭제 실패 (대상 없음): #{e.class} - #{e.message}")
-    render json: { success: false, error: "멤버를 찾을 수 없습니다." }, status: :not_found
+    Rails.logger.error("Remove member failed (not found): #{e.class} - #{e.message}")
+    render json: { success: false, error: t("match_membership.errors.member_not_found") }, status: :not_found
   rescue ActiveRecord::RecordNotDestroyed => e
-    Rails.logger.error("멤버 삭제 실패: #{e.class} - #{e.message}")
-    render json: { success: false, error: "멤버 삭제에 실패했습니다." }, status: :unprocessable_entity
+    Rails.logger.error("Remove member failed: #{e.class} - #{e.message}")
+    render json: { success: false, error: t("match_membership.errors.remove_failed") }, status: :unprocessable_entity
   end
 
   private

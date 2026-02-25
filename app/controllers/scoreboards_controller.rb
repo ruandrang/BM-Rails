@@ -10,6 +10,9 @@ class ScoreboardsController < ApplicationController
   end
 
   def standalone_control
+    match_id = "standalone_u#{current_user.id}"
+    ScoreboardStore.delete(match_id)
+
     @match = Struct.new(:id, :home_team, :away_team, :teams, :date, :played_on, :regular_quarters).new(
       "standalone_u#{current_user.id}",
       Struct.new(:id, :name, :icon, :color, :label).new(1, "HOME", "🏀", "blue", "HOME"),

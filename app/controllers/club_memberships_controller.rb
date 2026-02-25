@@ -12,26 +12,26 @@ class ClubMembershipsController < ApplicationController
   # PATCH /clubs/:club_id/memberships/:id/update_role
   def update_role
     membership = @club.club_memberships.find(params[:id])
-    return redirect_with_alert("본인의 역할은 변경할 수 없습니다.") if membership.user == current_user
-    return redirect_with_alert("owner 역할은 양도로만 변경 가능합니다.") if membership.owner?
+    return redirect_with_alert(t("club_memberships.errors.cannot_change_own_role")) if membership.user == current_user
+    return redirect_with_alert(t("club_memberships.errors.owner_role_transfer_only")) if membership.owner?
 
     new_role = params[:role]
-    return redirect_with_alert("유효하지 않은 역할입니다.") unless new_role.in?(%w[admin member])
+    return redirect_with_alert(t("club_memberships.errors.invalid_role")) unless new_role.in?(%w[admin member])
 
     membership.update!(role: new_role)
-    redirect_to club_memberships_path(@club), notice: "역할이 변경되었습니다."
+    redirect_to club_memberships_path(@club), notice: t("club_memberships.notices.role_changed")
   end
 
   # PATCH /clubs/:club_id/memberships/transfer_ownership
   def transfer_ownership
     new_owner_membership = @club.club_memberships.find(params[:membership_id])
-    return redirect_with_alert("본인에게는 양도할 수 없습니다.") if new_owner_membership.user == current_user
+    return redirect_with_alert(t("club_memberships.errors.cannot_transfer_to_self")) if new_owner_membership.user == current_user
 
     ActiveRecord::Base.transaction do
       @current_membership.update!(role: "admin")
       new_owner_membership.update!(role: "owner")
     end
-    redirect_to club_memberships_path(@club), notice: "클럽 소유권이 이전되었습니다."
+    redirect_to club_memberships_path(@club), notice: t("club_memberships.notices.ownership_transferred")
   end
 
   # DELETE /clubs/:club_id/memberships/:id
@@ -40,14 +40,14 @@ class ClubMembershipsController < ApplicationController
 
     if membership.user == current_user
       # 본인 탈퇴
-      return redirect_with_alert("owner는 탈퇴할 수 없습니다. 먼저 소유권을 양도하세요.") if membership.owner?
+      return redirect_with_alert(t("club_memberships.errors.owner_cannot_leave")) if membership.owner?
       membership.destroy
-      redirect_to clubs_path, notice: "클럽에서 탈퇴했습니다."
+      redirect_to clubs_path, notice: t("club_memberships.notices.left_club")
     else
       # 관리자가 추방
-      return redirect_with_alert("owner는 추방할 수 없습니다.") if membership.owner?
+      return redirect_with_alert(t("club_memberships.errors.cannot_remove_owner")) if membership.owner?
       membership.destroy
-      redirect_to club_memberships_path(@club), notice: "멤버가 추방되었습니다."
+      redirect_to club_memberships_path(@club), notice: t("club_memberships.notices.member_removed")
     end
   end
 

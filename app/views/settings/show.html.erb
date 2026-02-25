@@ -13,8 +13,8 @@
 
         <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
           <div class="mb-4">
-            <h2 class="text-2xl font-bold text-base-content"><%= t("settings.profile.title", default: "프로필") %></h2>
-            <p class="text-base-content/60 mt-1"><%= t("settings.profile.description", default: "다른 사용자에게 표시되는 이름입니다.") %></p>
+            <h2 class="text-2xl font-bold text-base-content"><%= t("settings.profile.title") %></h2>
+            <p class="text-base-content/60 mt-1"><%= t("settings.profile.description") %></p>
           </div>
 
           <div class="flex items-center gap-4">
@@ -33,15 +33,15 @@
             <% end %>
             <div class="flex-1">
               <label class="label" for="user_nickname">
-                <span class="label-text font-semibold"><%= t("settings.profile.nickname_label", default: "표시 이름") %></span>
+                <span class="label-text font-semibold"><%= t("settings.profile.nickname_label") %></span>
               </label>
               <%= form.text_field :nickname,
                   required: true,
-                  placeholder: t("settings.profile.nickname_placeholder", default: "닉네임을 입력하세요"),
+                  placeholder: t("settings.profile.nickname_placeholder"),
                   class: "input input-bordered w-full" %>
             </div>
           </div>
-          <p class="text-sm text-base-content/50 mt-2"><%= t("settings.profile.email_info", default: "이메일: %{email}") % { email: @user.email } %></p>
+          <p class="text-sm text-base-content/50 mt-2"><%= t("settings.profile.email_info", email: @user.email) %></p>
         </section>
 
         <section class="rounded-2xl border border-base-300 bg-base-100 p-5 md:p-6">
@@ -210,17 +210,17 @@
   <% if current_user.identities.any? %>
     <div class="card-modern-static mt-6">
       <div class="card-body p-6 md:p-8">
-        <h2 class="text-xl font-bold text-base-content mb-4">연결된 소셜 계정</h2>
+        <h2 class="text-xl font-bold text-base-content mb-4"><%= t('settings.social_accounts.title') %></h2>
         <div class="space-y-3">
           <% current_user.identities.each do |identity| %>
             <div class="flex items-center gap-3 p-3 rounded-lg bg-base-200/50">
               <% case identity.provider %>
               <% when "kakao" %>
                 <span class="text-xl">💬</span>
-                <span class="font-medium">카카오</span>
+                <span class="font-medium"><%= t('settings.social_accounts.kakao') %></span>
               <% when "naver" %>
                 <span class="text-xl font-bold text-green-500">N</span>
-                <span class="font-medium">네이버</span>
+                <span class="font-medium"><%= t('settings.social_accounts.naver') %></span>
               <% when "google_oauth2" %>
                 <span class="text-xl">G</span>
                 <span class="font-medium">Google</span>

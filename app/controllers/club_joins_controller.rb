@@ -3,7 +3,7 @@ class ClubJoinsController < ApplicationController
     @invitation = ClubInvitation.active.find_by!(code: params[:code])
     @club = @invitation.club
   rescue ActiveRecord::RecordNotFound
-    redirect_to clubs_path, alert: "유효하지 않은 초대 코드입니다."
+    redirect_to clubs_path, alert: t("club_joins.errors.invalid_code")
   end
 
   def create
@@ -11,7 +11,7 @@ class ClubJoinsController < ApplicationController
     club = invitation.club
 
     if club.membership_for(current_user)
-      redirect_to club_path(club), notice: "이미 참여 중인 클럽입니다."
+      redirect_to club_path(club), notice: t("club_joins.errors.already_member")
       return
     end
 
@@ -21,8 +21,8 @@ class ClubJoinsController < ApplicationController
       joined_at: Time.current
     )
     invitation.use!
-    redirect_to club_path(club), notice: "클럽에 참여했습니다!"
+    redirect_to club_path(club), notice: t("club_joins.notices.joined")
   rescue ActiveRecord::RecordNotFound
-    redirect_to clubs_path, alert: "유효하지 않은 초대 코드입니다."
+    redirect_to clubs_path, alert: t("club_joins.errors.invalid_code")
   end
 end
