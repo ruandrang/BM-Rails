@@ -3312,6 +3312,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const shouldApplyIncomingState = (incomingState) => {
       if (!state) return true;
 
+      // 자기 자신이 보낸 state 에코는 무시 (타이머 롤백 방지)
+      if (role === "control" && incomingState?.source_client_id === localClientId) {
+        return false;
+      }
+
       const currentVersion = parseStateVersion(state.state_version, 0);
       const incomingVersion = parseStateVersion(incomingState?.state_version, 0);
       if (incomingVersion > currentVersion) return true;
