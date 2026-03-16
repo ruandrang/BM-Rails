@@ -2,8 +2,8 @@ class ClubMembershipsController < ApplicationController
   include ClubAuthorization
 
   before_action :set_authorized_club
-  before_action :require_club_owner, only: [ :update_role, :transfer_ownership ]
-  before_action :require_club_admin, only: [ :destroy ]
+  before_action :require_club_admin, only: [ :update_role, :destroy ]
+  before_action :require_club_owner, only: [ :transfer_ownership ]
 
   def index
     @memberships = @club.club_memberships.includes(:user).order(:role, :joined_at)
@@ -16,7 +16,12 @@ class ClubMembershipsController < ApplicationController
     return redirect_with_alert(t("club_memberships.errors.owner_role_transfer_only")) if membership.owner?
 
     new_role = params[:role]
-    return redirect_with_alert(t("club_memberships.errors.invalid_role")) unless new_role.in?(%w[admin member])
+    return redirect_with_alert(t("club_memberships.errors.invalid_role")) unless new_role.in?(%w[admin manager member])
+
+    # admin → admin 변경은 owner만 가능
+    if new_role == "admin" || membership.admin?
+      return redirect_with_alert(t("club_memberships.errors.owner_only_for_admin")) unless @current_membership.owner?
+    end
 
     membership.update!(role: new_role)
     redirect_to club_memberships_path(@club), notice: t("club_memberships.notices.role_changed")
@@ -41,11 +46,15 @@ class ClubMembershipsController < ApplicationController
     if membership.user == current_user
       # 본인 탈퇴
       return redirect_with_alert(t("club_memberships.errors.owner_cannot_leave")) if membership.owner?
+      # Member 연결 해제 (경기 기록 보존)
+      @club.members.where(user: current_user).update_all(user_id: nil)
       membership.destroy
       redirect_to clubs_path, notice: t("club_memberships.notices.left_club")
     else
       # 관리자가 추방
       return redirect_with_alert(t("club_memberships.errors.cannot_remove_owner")) if membership.owner?
+      # Member 연결 해제 (경기 기록 보존)
+      @club.members.where(user: membership.user).update_all(user_id: nil)
       membership.destroy
       redirect_to club_memberships_path(@club), notice: t("club_memberships.notices.member_removed")
     end

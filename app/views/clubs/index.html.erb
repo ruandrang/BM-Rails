@@ -65,67 +65,120 @@
 
   <!-- 클럽 목록 -->
   <% if @clubs.any? %>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="clubs-sortable-grid">
       <% @clubs.each do |club| %>
-        <%= link_to club_path(club), class: "card-modern cursor-pointer h-full" do %>
-          <div class="card-body flex flex-col h-full">
-            <!-- 클럽 아이콘 & 이름 -->
-            <div class="flex items-center gap-4 mb-4">
-              <div class="text-5xl">
-                <%= club_icon(club.icon) %>
-              </div>
-              <div class="flex-1">
-                <h2 class="card-title text-2xl">
-                  <%= club.name %>
-                </h2>
-                <% membership = club.membership_for(current_user) %>
-                <% if membership %>
-                  <% case membership.role %>
-                  <% when "owner" %>
-                    <span class="badge badge-warning badge-sm"><%= t('club_memberships.index.roles.owner') %></span>
-                  <% when "admin" %>
-                    <span class="badge badge-info badge-sm"><%= t('club_memberships.index.roles.admin') %></span>
-                  <% when "member" %>
-                    <span class="badge badge-ghost badge-sm"><%= t('club_memberships.index.roles.member') %></span>
+        <div data-club-id="<%= club.id %>">
+          <%= link_to club_path(club), class: "card-modern cursor-pointer h-full block" do %>
+            <div class="card-body flex flex-col h-full">
+              <!-- 클럽 아이콘 & 이름 -->
+              <div class="flex items-center gap-4 mb-4">
+                <div class="text-5xl">
+                  <%= club_icon(club.icon) %>
+                </div>
+                <div class="flex-1">
+                  <h2 class="card-title text-2xl">
+                    <%= club.name %>
+                  </h2>
+                  <% membership = club.membership_for(current_user) %>
+                  <% if membership %>
+                    <% case membership.role %>
+                    <% when "owner" %>
+                      <span class="badge badge-warning badge-sm"><%= t('club_memberships.index.roles.owner') %></span>
+                    <% when "admin" %>
+                      <span class="badge badge-info badge-sm"><%= t('club_memberships.index.roles.admin') %></span>
+                    <% when "member" %>
+                      <span class="badge badge-ghost badge-sm"><%= t('club_memberships.index.roles.member') %></span>
+                    <% end %>
                   <% end %>
-                <% end %>
-              </div>
-            </div>
-
-            <!-- 클럽 정보 -->
-            <div class="space-y-2">
-              <div class="flex items-center gap-2 text-base-content/70">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                <span><%= t('clubs.index.members_count', count: club.members.count) %></span>
+                </div>
               </div>
 
-              <div class="flex items-center gap-2 text-base-content/70">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                </svg>
-                <span><%= t('clubs.index.matches_count', count: club.matches.count) %></span>
-              </div>
-
-              <% if club.matches.any? %>
+              <!-- 클럽 정보 -->
+              <div class="space-y-2">
                 <div class="flex items-center gap-2 text-base-content/70">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                   </svg>
-                  <span><%= t('clubs.index.recent_match', date: club.matches.last.played_on.strftime('%Y-%m-%d')) %></span>
+                  <span><%= t('clubs.index.members_count', count: club.members.count) %></span>
                 </div>
-              <% end %>
-            </div>
 
-            <!-- 액션 버튼 영역 -->
-            <div class="card-actions justify-end mt-auto">
-              <div class="badge badge-primary"><%= t('clubs.index.click_to_manage') %></div>
+                <div class="flex items-center gap-2 text-base-content/70">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                  </svg>
+                  <span><%= t('clubs.index.matches_count', count: club.matches.count) %></span>
+                </div>
+
+                <% if club.matches.any? %>
+                  <div class="flex items-center gap-2 text-base-content/70">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span><%= t('clubs.index.recent_match', date: club.matches.last.played_on.strftime('%Y-%m-%d')) %></span>
+                  </div>
+                <% end %>
+              </div>
+
+              <!-- 액션 버튼 영역 -->
+              <div class="card-actions justify-end mt-auto">
+                <div class="badge badge-primary"><%= t('clubs.index.click_to_manage') %></div>
+              </div>
             </div>
-          </div>
-        <% end %>
+          <% end %>
+        </div>
       <% end %>
     </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const grid = document.getElementById('clubs-sortable-grid');
+        if (!grid || typeof Sortable === 'undefined') return;
+
+        const STORAGE_KEY = 'bm_club_order_<%= current_user.id %>';
+
+        // 저장된 순서 적용
+        const applyOrder = () => {
+          try {
+            const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+            if (!Array.isArray(saved) || saved.length === 0) return;
+            const items = Array.from(grid.children);
+            const map = {};
+            items.forEach(el => { map[el.dataset.clubId] = el; });
+            saved.forEach(id => {
+              const el = map[String(id)];
+              if (el) grid.appendChild(el);
+            });
+          } catch (e) { /* 무시 */ }
+        };
+
+        // 현재 순서 저장
+        const saveOrder = () => {
+          const ids = Array.from(grid.children).map(el => el.dataset.clubId);
+          try { localStorage.setItem(STORAGE_KEY, JSON.stringify(ids)); } catch (e) { /* 무시 */ }
+        };
+
+        applyOrder();
+
+        // 드래그 vs 클릭 구분: 드래그 시 링크 클릭 방지
+        let dragged = false;
+        grid.addEventListener('click', function(e) {
+          if (dragged) {
+            e.preventDefault();
+            dragged = false;
+          }
+        }, true);
+
+        Sortable.create(grid, {
+          animation: 200,
+          delay: 150,
+          delayOnTouchOnly: true,
+          ghostClass: 'opacity-30',
+          chosenClass: 'shadow-2xl',
+          onStart: function() { dragged = true; },
+          onEnd: function() { saveOrder(); setTimeout(function() { dragged = false; }, 100); }
+        });
+      });
+    </script>
   <% else %>
     <!-- 빈 상태 -->
     <div class="empty-state">

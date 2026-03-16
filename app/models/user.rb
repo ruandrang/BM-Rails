@@ -24,6 +24,7 @@ class User < ApplicationRecord
   has_many :club_memberships, dependent: :destroy
   has_many :clubs, through: :club_memberships
   has_many :owned_clubs, class_name: "Club", foreign_key: :user_id, dependent: :nullify
+  has_many :members, dependent: :nullify
   has_many :feedbacks, dependent: :destroy
 
   validates :nickname, presence: true
@@ -67,6 +68,11 @@ class User < ApplicationRecord
 
   def speech_locale
     SPEECH_LOCALE_BY_PREFERRED_LOCALE.fetch(preferred_locale.to_s, SPEECH_LOCALE_BY_PREFERRED_LOCALE.fetch(DEFAULT_LOCALE))
+  end
+
+  # 특정 클럽에서 본인의 Member 레코드 조회
+  def member_in(club)
+    members.find_by(club: club)
   end
 
   private

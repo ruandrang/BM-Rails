@@ -34,8 +34,10 @@
             <!-- 역할 아이콘 -->
             <% if membership.owner? %>
               <span class="text-xl">👑</span>
-            <% elsif membership.admin? %>
+            <% elsif membership.role == "admin" %>
               <span class="text-xl">🛡️</span>
+            <% elsif membership.role == "manager" %>
+              <span class="text-xl">📋</span>
             <% else %>
               <span class="text-xl">👤</span>
             <% end %>
@@ -53,6 +55,8 @@
                   <span class="badge badge-warning badge-xs"><%= t('club_memberships.index.roles.owner') %></span>
                 <% when "admin" %>
                   <span class="badge badge-info badge-xs"><%= t('club_memberships.index.roles.admin') %></span>
+                <% when "manager" %>
+                  <span class="badge badge-success badge-xs"><%= t('club_memberships.index.roles.manager') %></span>
                 <% when "member" %>
                   <span class="badge badge-ghost badge-xs"><%= t('club_memberships.index.roles.member') %></span>
                 <% end %>
@@ -63,20 +67,42 @@
             </div>
           </div>
 
-          <!-- 액션 버튼 (owner만 역할 변경 가능) -->
-          <div class="flex items-center gap-2">
+          <!-- 액션 버튼 -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <%# owner: 모든 역할 변경 가능 %>
             <% if @current_membership&.owner? && membership.user != current_user && !membership.owner? %>
-              <!-- 역할 변경 -->
-              <% if membership.admin? %>
+              <% case membership.role %>
+              <% when "admin" %>
+                <%= button_to t('club_memberships.index.actions.change_to_manager'),
+                    update_role_club_membership_path(@club, membership),
+                    params: { role: "manager" },
+                    method: :patch,
+                    class: "btn btn-ghost btn-xs" %>
                 <%= button_to t('club_memberships.index.actions.change_to_member'),
                     update_role_club_membership_path(@club, membership),
                     params: { role: "member" },
                     method: :patch,
                     class: "btn btn-ghost btn-xs" %>
-              <% else %>
+              <% when "manager" %>
                 <%= button_to t('club_memberships.index.actions.promote_to_admin'),
                     update_role_club_membership_path(@club, membership),
                     params: { role: "admin" },
+                    method: :patch,
+                    class: "btn btn-ghost btn-xs" %>
+                <%= button_to t('club_memberships.index.actions.change_to_member'),
+                    update_role_club_membership_path(@club, membership),
+                    params: { role: "member" },
+                    method: :patch,
+                    class: "btn btn-ghost btn-xs" %>
+              <% when "member" %>
+                <%= button_to t('club_memberships.index.actions.promote_to_admin'),
+                    update_role_club_membership_path(@club, membership),
+                    params: { role: "admin" },
+                    method: :patch,
+                    class: "btn btn-ghost btn-xs" %>
+                <%= button_to t('club_memberships.index.actions.promote_to_manager'),
+                    update_role_club_membership_path(@club, membership),
+                    params: { role: "manager" },
                     method: :patch,
                     class: "btn btn-ghost btn-xs" %>
               <% end %>
@@ -88,6 +114,22 @@
                   method: :patch,
                   form: { onsubmit: "return confirm('#{j t('club_memberships.index.confirms.transfer_ownership')}');" },
                   class: "btn btn-ghost btn-xs text-warning" %>
+
+            <%# admin: manager/member만 변경 가능 %>
+            <% elsif @current_membership&.admin? && !@current_membership&.owner? && membership.user != current_user && !membership.admin? %>
+              <% if membership.role == "manager" %>
+                <%= button_to t('club_memberships.index.actions.change_to_member'),
+                    update_role_club_membership_path(@club, membership),
+                    params: { role: "member" },
+                    method: :patch,
+                    class: "btn btn-ghost btn-xs" %>
+              <% elsif membership.role == "member" %>
+                <%= button_to t('club_memberships.index.actions.promote_to_manager'),
+                    update_role_club_membership_path(@club, membership),
+                    params: { role: "manager" },
+                    method: :patch,
+                    class: "btn btn-ghost btn-xs" %>
+              <% end %>
             <% end %>
 
             <!-- 추방/탈퇴 -->

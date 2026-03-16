@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_21_161026) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_09_090248) do
   create_table "club_invitations", force: :cascade do |t|
     t.integer "club_id", null: false
     t.string "code", null: false
@@ -110,8 +110,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_161026) do
     t.string "position", null: false
     t.integer "sort_order", default: 0, null: false
     t.datetime "updated_at", null: false
+    t.integer "user_id"
     t.index ["club_id", "sort_order"], name: "index_members_on_club_id_and_sort_order"
+    t.index ["club_id", "user_id"], name: "index_members_on_club_user_unique", unique: true, where: "user_id IS NOT NULL"
     t.index ["club_id"], name: "index_members_on_club_id"
+    t.index ["user_id"], name: "index_members_on_user_id"
   end
 
   create_table "team_members", force: :cascade do |t|
@@ -163,6 +166,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_161026) do
   add_foreign_key "identities", "users"
   add_foreign_key "matches", "clubs"
   add_foreign_key "members", "clubs"
+  add_foreign_key "members", "users"
   add_foreign_key "team_members", "members"
   add_foreign_key "team_members", "teams"
   add_foreign_key "teams", "matches"

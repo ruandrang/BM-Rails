@@ -4,8 +4,9 @@ class MembersController < ApplicationController
   include ClubAuthorization
 
   before_action :set_authorized_club
-  before_action :require_club_admin, except: [ :index ]
+  before_action :require_club_admin, except: [ :index, :edit_profile, :update_profile ]
   before_action :set_member, only: [ :edit, :update, :destroy ]
+  before_action :set_own_member, only: [ :edit_profile, :update_profile ]
 
   def index
     @members = @club.members.order(:sort_order, :id)
@@ -98,6 +99,19 @@ class MembersController < ApplicationController
     send_data "\uFEFF#{csv_data}", filename: filename, type: "text/csv; charset=utf-8"
   end
 
+  # 본인 프로필 수정 폼
+  def edit_profile
+  end
+
+  # 본인 프로필 저장
+  def update_profile
+    if @member.update(profile_params)
+      redirect_to club_path(@club), notice: t("members.notices.profile_updated")
+    else
+      render :edit_profile, status: :unprocessable_entity
+    end
+  end
+
   def reorder
     member_ids = Array(params[:member_ids]).map(&:to_i)
     members = @club.members.where(id: member_ids)
@@ -121,7 +135,18 @@ class MembersController < ApplicationController
     @member = @club.members.find(params[:id])
   end
 
+  # 본인의 Member 레코드만 접근
+  def set_own_member
+    @member = @club.members.find_by!(user: current_user)
+  rescue ActiveRecord::RecordNotFound
+    redirect_to club_path(@club), alert: t("members.errors.no_linked_member")
+  end
+
   def member_params
+    params.require(:member).permit(:name, :age, :height_cm, :position, :jersey_number)
+  end
+
+  def profile_params
     params.require(:member).permit(:name, :age, :height_cm, :position, :jersey_number)
   end
 

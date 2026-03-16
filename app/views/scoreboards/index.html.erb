@@ -27,7 +27,7 @@
   </div>
 
   <!-- 클럽별 경기 목록 -->
-  <div class="space-y-8">
+  <div class="space-y-8" id="scoreboard-clubs-list">
     <% if @clubs.empty? %>
       <div class="alert alert-info">
         <div>
@@ -41,16 +41,17 @@
     <% end %>
 
     <% @clubs.each do |club| %>
-      <div class="card-modern-static">
+      <div class="card-modern-static" data-club-id="<%= club.id %>">
         <div class="card-body">
           <h2 class="card-title text-2xl mb-4">
             <span class="text-3xl"><%= club_icon(club.icon) %></span>
             <%= club.name %>
           </h2>
 
-          <% if club.matches.any? %>
+          <% active_matches = club.matches.order(played_on: :desc).reject(&:finished?) %>
+          <% if active_matches.any? %>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <% club.matches.order(played_on: :desc).each do |match| %>
+              <% active_matches.each do |match| %>
                 <div class="card bg-base-200 border border-base-300 shadow-sm hover:shadow-md transition-shadow">
                   <div class="card-body p-5">
                     <!-- 경기 날짜 -->
@@ -111,4 +112,23 @@
       </div>
     <% end %>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const list = document.getElementById('scoreboard-clubs-list');
+      if (!list) return;
+      const STORAGE_KEY = 'bm_club_order_<%= current_user.id %>';
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (!Array.isArray(saved) || saved.length === 0) return;
+        const items = Array.from(list.querySelectorAll('[data-club-id]'));
+        const map = {};
+        items.forEach(el => { map[el.dataset.clubId] = el; });
+        saved.forEach(id => {
+          const el = map[String(id)];
+          if (el) list.appendChild(el);
+        });
+      } catch (e) { /* 무시 */ }
+    });
+  </script>
 </div>

@@ -119,8 +119,8 @@
       </div>
     </a>
 
-    <!-- 7. 새 경기 만들기 (admin 이상) -->
-    <% if @current_membership&.admin? %>
+    <!-- 7. 새 경기 만들기 (manager 이상) -->
+    <% if @current_membership&.manager? %>
       <%= link_to new_club_match_path(@club), class: "card-modern !bg-primary !text-primary-content !border-primary" do %>
         <div class="card-body items-center text-center">
           <div class="text-4xl mb-2 text-white">

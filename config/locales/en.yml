@@ -270,6 +270,7 @@ en:
       age_suffix: "%{age} yrs"
       height_suffix: "%{height}cm"
       games_suffix: "%{count} games"
+      edit_my_profile: "Edit My Profile"
       empty:
         title: "No members yet"
         description: "Add members to your club to create teams and start matches!"
@@ -282,14 +283,20 @@ en:
       page_title: "Edit Member - %{member_name}"
       title: "Edit Member"
       subtitle: "Update %{member_name}'s information"
+    profile:
+      page_title: "My Player Info"
+      title: "My Player Info"
+      subtitle: "Please enter your basic info."
     notices:
       created: "Member has been added."
       updated: "Member has been updated."
       deleted: "Member has been deleted."
       imported: "%{count} member(s) imported."
+      profile_updated: "Player info updated."
     errors:
       no_file: "Please select a CSV file."
       import_failed: "CSV import failed: %{message}"
+      no_linked_member: "No linked player info found."
     csv:
       name: "Name"
       age: "Age"
@@ -461,6 +468,8 @@ en:
   scoreboards:
     control:
       quarter_reset_off: "Quarter Reset OFF"
+      progression_round_robin: "By Quarter"
+      prev_quarter: "Prev Quarter"
       game_timer: "Game Timer"
       one_minute: "1 min"
       one_second: "1 sec"
@@ -531,11 +540,14 @@ en:
       roles:
         owner: "Owner"
         admin: "Admin"
+        manager: "Manager"
         member: "Member"
       joined_at: "Joined:"
       actions:
         change_to_member: "Change to Member"
         promote_to_admin: "Promote to Admin"
+        change_to_manager: "Change to Manager"
+        promote_to_manager: "Promote to Manager"
         transfer_ownership: "Transfer Ownership"
         leave: "Leave"
         remove: "Remove"
@@ -547,6 +559,7 @@ en:
       cannot_change_own_role: "You cannot change your own role."
       owner_role_transfer_only: "Owner role can only be changed by transfer."
       invalid_role: "Invalid role."
+      owner_only_for_admin: "Only the owner can change admin roles."
       cannot_transfer_to_self: "You cannot transfer ownership to yourself."
       owner_cannot_leave: "Owner cannot leave. Please transfer ownership first."
       cannot_remove_owner: "Cannot remove the owner."
@@ -567,6 +580,7 @@ en:
       already_member: "You are already a member of this club."
     notices:
       joined: "You have joined the club!"
+      joined_fill_profile: "Joined the club! Please fill in your player info."
   club_invitations:
     index:
       title: "Invite Code Management"

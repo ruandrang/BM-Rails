@@ -41,6 +41,19 @@
     <% end %>
   </div>
 
+  <!-- 내 정보 수정 버튼 (User와 연결된 Member가 있을 때) -->
+  <% my_member = current_user.member_in(@club) %>
+  <% if my_member && !@current_membership&.admin? %>
+    <div class="mb-6">
+      <%= link_to edit_profile_club_member_path(@club, my_member), class: "btn btn-outline btn-primary gap-2" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+        <%= t('members.index.edit_my_profile') %>
+      <% end %>
+    </div>
+  <% end %>
+
   <!-- 액션 버튼들 (admin 이상) -->
   <% if @current_membership&.admin? %>
     <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
@@ -97,8 +110,13 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="member-list">
       <% @members.each do |member| %>
         <% stats = @member_stats[member.id] || { games: 0, win_rate: 0.0 } %>
-        <div class="card-modern member-item cursor-pointer relative group"
-             onclick="location.href='<%= edit_club_member_path(@club, member) %>'"
+        <% card_url = if @current_membership&.admin?
+                         edit_club_member_path(@club, member)
+                       elsif member.user_id == current_user.id
+                         edit_profile_club_member_path(@club, member)
+                       end %>
+        <div class="card-modern member-item <%= 'cursor-pointer' if card_url %> relative group"
+             <%= "onclick=location.href='#{card_url}'".html_safe if card_url %>
              data-name="<%= member.name %>"
              data-position="<%= member.position %>"
              data-jersey="<%= member.jersey_number || 999 %>"

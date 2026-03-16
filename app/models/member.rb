@@ -24,9 +24,16 @@ class Member < ApplicationRecord
   end
 
   belongs_to :club
+  belongs_to :user, optional: true
   has_many :team_members, dependent: :destroy
   has_many :teams, through: :team_members
 
   validates :name, presence: true
   validates :position, presence: true, inclusion: { in: POSITIONS }
+  validates :user_id, uniqueness: { scope: :club_id }, allow_nil: true
+
+  # User와 연결된 선수인지 확인
+  def linked?
+    user_id.present?
+  end
 end

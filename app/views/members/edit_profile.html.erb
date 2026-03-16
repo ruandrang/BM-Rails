@@ -1,0 +1,109 @@
+<% content_for :title, t('members.profile.page_title') %>
+
+<div class="max-w-7xl mx-auto">
+  <!-- 뒤로가기 -->
+  <div class="mb-4">
+    <%= link_to club_path(@club), class: "btn btn-ghost btn-sm gap-2" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      <%= t('common.back') %>
+    <% end %>
+  </div>
+
+  <!-- 페이지 헤더 -->
+  <div class="mb-8">
+    <h1 class="page-title text-base-content mb-2"><%= t('members.profile.title') %></h1>
+    <p class="text-base-content/60"><%= t('members.profile.subtitle') %></p>
+  </div>
+
+  <!-- 폼 카드 -->
+  <div class="card-modern-static max-w-2xl mx-auto">
+    <div class="card-body">
+      <%= form_with model: [@club, @member], url: update_profile_club_member_path(@club, @member), method: :patch, local: true, class: "space-y-6" do |form| %>
+        <% if @member.errors.any? %>
+          <div class="alert alert-error">
+            <div>
+              <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <h3 class="font-bold"><%= t('common.input_error') %></h3>
+                <ul class="text-sm list-disc list-inside">
+                  <% @member.errors.full_messages.each do |message| %>
+                    <li><%= message %></li>
+                  <% end %>
+                </ul>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- 이름 -->
+        <div class="form-control w-full">
+          <%= form.label :name, t('members.form.name_label'), class: "label" %>
+          <%= form.text_field :name,
+              required: true,
+              placeholder: t('members.form.name_placeholder'),
+              class: "input input-bordered w-full focus:input-primary" %>
+        </div>
+
+        <!-- 2열 그리드: 나이, 키 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="form-control w-full">
+            <%= form.label :age, t('members.form.age_label'), class: "label" %>
+            <%= form.number_field :age,
+                min: 0,
+                max: 100,
+                placeholder: "25",
+                class: "input input-bordered w-full focus:input-primary" %>
+          </div>
+
+          <div class="form-control w-full">
+            <%= form.label :height_cm, t('members.form.height_label'), class: "label" %>
+            <%= form.number_field :height_cm,
+                min: 100,
+                max: 250,
+                placeholder: "180",
+                class: "input input-bordered w-full focus:input-primary" %>
+          </div>
+        </div>
+
+        <!-- 포지션 -->
+        <div class="form-control w-full">
+          <label class="label">
+            <span class="label-text font-bold"><%= t('members.form.position_label') %></span>
+          </label>
+          <div class="grid grid-cols-5 gap-3">
+            <% Member::POSITIONS.each do |pos| %>
+              <label class="cursor-pointer position-option">
+                <%= form.radio_button :position, pos, class: "hidden position-option-input", required: true %>
+                <div class="position-option-card text-center py-3 shadow-sm text-white"
+                     style="background-color: <%= Member::POSITION_COLORS[pos] %>;">
+                  <span class="position-option-check" aria-hidden="true">✓</span>
+                  <span class="text-sm font-black"><%= pos %></span>
+                  <span class="text-[10px] opacity-80 block"><%= Member::POSITION_NAMES[pos] %></span>
+                </div>
+              </label>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- 등번호 -->
+        <div class="form-control w-full max-w-xs">
+          <%= form.label :jersey_number, t('members.form.jersey_label'), class: "label" %>
+          <%= form.number_field :jersey_number,
+              min: 0,
+              max: 99,
+              placeholder: "23",
+              class: "input input-bordered w-full font-bold focus:input-primary" %>
+        </div>
+
+        <!-- 제출 버튼 -->
+        <div class="form-control mt-8">
+          <%= form.submit t('common.save'), class: "btn btn-primary btn-lg w-full gap-2" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

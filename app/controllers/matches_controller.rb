@@ -7,7 +7,7 @@ class MatchesController < ApplicationController
 
   skip_before_action :require_login, only: [ :share ]
   before_action :set_authorized_club, except: [ :share ]
-  before_action :require_club_admin, only: [ :new, :create, :edit, :update, :destroy,
+  before_action :require_club_manager, only: [ :new, :create, :edit, :update, :destroy,
     :record_results, :shuffle_teams, :reset_all_scores, :finish_match,
     :move_member, :add_member, :remove_member, :add_game, :remove_game,
     :save_game_scores, :save_quarter_scores, :update_scores ]
@@ -211,6 +211,8 @@ class MatchesController < ApplicationController
 
   def render_create_error(message)
     flash.now[:alert] = message
+    raw_stats = cached_member_stats
+    @member_stats = raw_stats.index_by { |s| s[:member].id }
     render :new, status: :unprocessable_entity
   end
 

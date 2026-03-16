@@ -2,7 +2,7 @@ class ScoreboardsController < ApplicationController
   include ClubAuthorization
 
   before_action :set_authorized_club, only: [ :control, :display ]
-  before_action :require_club_admin, only: [ :control ]
+  before_action :require_club_manager, only: [ :control ]
   before_action :set_match, only: [ :control, :display ]
 
   def index

@@ -270,6 +270,7 @@ zh:
       age_suffix: "%{age}岁"
       height_suffix: "%{height}cm"
       games_suffix: "%{count}场比赛"
+      edit_my_profile: "编辑我的信息"
       empty:
         title: "暂无成员"
         description: "添加成员到俱乐部，组建球队并开始比赛！"
@@ -282,14 +283,20 @@ zh:
       page_title: "编辑成员 - %{member_name}"
       title: "编辑成员"
       subtitle: "修改 %{member_name} 的信息"
+    profile:
+      page_title: "我的球员信息"
+      title: "我的球员信息"
+      subtitle: "请输入基本信息。"
     notices:
       created: "成员已添加。"
       updated: "成员已更新。"
       deleted: "成员已删除。"
       imported: "已导入%{count}名成员。"
+      profile_updated: "球员信息已更新。"
     errors:
       no_file: "请选择CSV文件。"
       import_failed: "CSV导入失败：%{message}"
+      no_linked_member: "未找到关联的球员信息。"
     csv:
       name: "姓名"
       age: "年龄"
@@ -461,6 +468,8 @@ zh:
   scoreboards:
     control:
       quarter_reset_off: "节重置 OFF"
+      progression_round_robin: "按节进行"
+      prev_quarter: "上一节"
       game_timer: "比赛计时"
       one_minute: "1分钟"
       one_second: "1秒"
@@ -531,11 +540,14 @@ zh:
       roles:
         owner: "所有者"
         admin: "管理员"
+        manager: "管理员"
         member: "成员"
       joined_at: "加入:"
       actions:
         change_to_member: "变更为成员"
         promote_to_admin: "提升为管理员"
+        change_to_manager: "更改为管理员"
+        promote_to_manager: "升级为管理员"
         transfer_ownership: "转让所有权"
         leave: "退出"
         remove: "移除"
@@ -550,6 +562,7 @@ zh:
       cannot_transfer_to_self: "不能转让给自己。"
       owner_cannot_leave: "所有者无法退出。请先转让所有权。"
       cannot_remove_owner: "无法移除所有者。"
+      owner_only_for_admin: "只有所有者才能更改管理员角色。"
     notices:
       role_changed: "角色已变更。"
       ownership_transferred: "俱乐部所有权已转让。"
@@ -567,6 +580,7 @@ zh:
       already_member: "您已经是此俱乐部的成员。"
     notices:
       joined: "已加入俱乐部！"
+      joined_fill_profile: "已加入俱乐部！请填写您的球员信息。"
   club_invitations:
     index:
       title: "邀请码管理"

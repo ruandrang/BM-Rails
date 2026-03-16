@@ -29,6 +29,10 @@ Rails.application.routes.draw do
 
 
     resources :members do
+      member do
+        get :edit_profile
+        patch :update_profile
+      end
       collection do
         post :import_csv
         get :export_csv

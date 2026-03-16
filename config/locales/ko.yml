@@ -270,6 +270,7 @@ ko:
       age_suffix: "%{age}세"
       height_suffix: "%{height}cm"
       games_suffix: "%{count}경기"
+      edit_my_profile: "내 정보 수정"
       empty:
         title: "멤버가 없습니다"
         description: "클럽에 멤버를 추가하여 팀을 구성하고 경기를 시작하세요!"
@@ -282,14 +283,20 @@ ko:
       page_title: "멤버 편집 - %{member_name}"
       title: "멤버 편집"
       subtitle: "%{member_name} 정보를 수정하세요"
+    profile:
+      page_title: "내 선수 정보"
+      title: "내 선수 정보"
+      subtitle: "기본 정보를 입력해주세요."
     notices:
       created: "멤버가 추가되었습니다."
       updated: "멤버가 수정되었습니다."
       deleted: "멤버가 삭제되었습니다."
       imported: "%{count}명의 멤버를 가져왔습니다."
+      profile_updated: "선수 정보가 수정되었습니다."
     errors:
       no_file: "CSV 파일을 선택해주세요."
       import_failed: "CSV 가져오기 실패: %{message}"
+      no_linked_member: "연결된 선수 정보가 없습니다."
     csv:
       name: "이름"
       age: "나이"
@@ -463,6 +470,8 @@ ko:
   scoreboards:
     control:
       quarter_reset_off: "쿼터 리셋 OFF"
+      progression_round_robin: "쿼터별 진행"
+      prev_quarter: "이전 쿼터"
       game_timer: "경기 타이머"
       one_minute: "1분"
       one_second: "1초"
@@ -533,11 +542,14 @@ ko:
       roles:
         owner: "소유자"
         admin: "운영자"
+        manager: "매니저"
         member: "멤버"
       joined_at: "가입:"
       actions:
         change_to_member: "멤버로 변경"
+        change_to_manager: "매니저로 변경"
         promote_to_admin: "운영자로 승격"
+        promote_to_manager: "매니저로 승격"
         transfer_ownership: "소유권 양도"
         leave: "탈퇴"
         remove: "추방"
@@ -549,6 +561,7 @@ ko:
       cannot_change_own_role: "본인의 역할은 변경할 수 없습니다."
       owner_role_transfer_only: "owner 역할은 양도로만 변경 가능합니다."
       invalid_role: "유효하지 않은 역할입니다."
+      owner_only_for_admin: "운영자 역할 변경은 소유자만 가능합니다."
       cannot_transfer_to_self: "본인에게는 양도할 수 없습니다."
       owner_cannot_leave: "owner는 탈퇴할 수 없습니다. 먼저 소유권을 양도하세요."
       cannot_remove_owner: "owner는 추방할 수 없습니다."
@@ -569,6 +582,7 @@ ko:
       already_member: "이미 참여 중인 클럽입니다."
     notices:
       joined: "클럽에 참여했습니다!"
+      joined_fill_profile: "클럽에 참여했습니다! 선수 정보를 입력해주세요."
   club_invitations:
     index:
       title: "초대 코드 관리"

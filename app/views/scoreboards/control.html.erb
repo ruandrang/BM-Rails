@@ -85,14 +85,23 @@
               <span data-ui-key="open_display"><%= t('scoreboards.control.open_display') %></span>
             <% end %>
           <% end %>
-          <button class="group flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-all text-gray-700"
-                  data-action="toggle-quarter-score-reset"
-                  data-ui-key="quarter_reset_off">
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
-            </svg>
-            <%= t('scoreboards.control.quarter_reset_off') %>
-          </button>
+          <% unless @match.id.to_s.start_with?("standalone_") %>
+            <button class="group flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-all text-gray-700"
+                    data-action="toggle-quarter-score-reset"
+                    data-ui-key="quarter_reset_off">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+              </svg>
+              <%= t('scoreboards.control.quarter_reset_off') %>
+            </button>
+            <button class="group flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-all text-gray-600"
+                    data-action="toggle-progression-mode">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 15h18v-2H3v2zm0 4h18v-2H3v2zm0-8h18V9H3v2zm0-6v2h18V5H3z"/>
+              </svg>
+              <%= t('scoreboards.control.progression_round_robin', default: '쿼터별 진행') %>
+            </button>
+          <% end %>
           <div class="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-50 border border-red-200">
             <span class="relative flex h-2 w-2">
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
@@ -364,53 +373,59 @@
           </svg>
           <h3 class="text-sm font-bold text-gray-500 uppercase tracking-widest"><%= t('scoreboards.control.control_center') %></h3>
         </div>
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <button class="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-gray-200 bg-gray-50 hover:bg-white hover:shadow-md transition-all group"
+        <div class="grid grid-cols-5 gap-3">
+          <button class="flex items-center justify-center gap-2 py-3 px-2 rounded-xl border border-gray-200 bg-gray-50 hover:bg-white hover:shadow-md transition-all group"
                   data-action="buzzer" data-ui-key="buzzer_label">
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-red-500 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-red-500 group-hover:scale-110 transition-transform shrink-0" viewBox="0 0 24 24" fill="currentColor">
               <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
             </svg>
-            <span class="text-sm font-bold text-gray-700"><%= t('scoreboards.control.buzzer') %></span>
+            <span class="text-sm font-bold text-gray-700 truncate"><%= t('scoreboards.control.buzzer') %></span>
           </button>
-          <button class="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 transition-all group voice-toggle-btn"
+          <button class="flex items-center justify-center gap-2 py-3 px-2 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 transition-all group voice-toggle-btn"
                   data-action="toggle-announcements"
                   data-voice-enabled="true">
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-blue-500 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor" data-voice-icon>
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-blue-500 group-hover:scale-110 transition-transform shrink-0" viewBox="0 0 24 24" fill="currentColor" data-voice-icon>
               <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
             </svg>
-            <div class="flex items-center gap-2">
-              <span class="text-sm font-bold text-blue-700" data-voice-label><%= t('scoreboards.control.voice_label') %></span>
-              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500 text-white" data-voice-status>ON</span>
-            </div>
+            <span class="text-sm font-bold text-blue-700 truncate" data-voice-label><%= t('scoreboards.control.voice_label') %></span>
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500 text-white shrink-0" data-voice-status>ON</span>
           </button>
           <% if @match.id.to_s.start_with?("standalone_") %>
-            <button class="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 transition-all font-bold group"
+            <button class="flex items-center justify-center gap-2 py-3 px-2 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 transition-all font-bold group"
                     data-action="reset-all">
-              <svg xmlns="http://www.w3.org/2000/svg" class="size-6 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-5 group-hover:scale-110 transition-transform shrink-0" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
               </svg>
-              <span class="text-sm"><%= t('scoreboards.control.reset_all', default: '전체 리셋') %></span>
+              <span class="text-sm truncate"><%= t('scoreboards.control.reset_all', default: '전체 리셋') %></span>
             </button>
           <% end %>
           <% unless @match.id.to_s.start_with?("standalone_") %>
-            <button class="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-600 transition-all font-bold group"
+            <button class="flex items-center justify-center gap-2 py-3 px-2 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-600 transition-all font-bold group"
                     data-action="save-and-pause"
                     data-ui-key="save_and_pause">
-              <svg xmlns="http://www.w3.org/2000/svg" class="size-6" viewBox="0 0 24 24" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/>
               </svg>
-              <span class="text-sm"><%= t('scoreboards.control.save_and_pause') %></span>
+              <span class="text-sm truncate"><%= t('scoreboards.control.save_and_pause') %></span>
             </button>
-            <button class="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-[#FF6B35] bg-gradient-to-br from-[#FF6B35] to-[#E55A2B] text-white hover:shadow-lg hover:shadow-orange-500/25 transition-all font-bold group"
+            <button class="flex items-center justify-center gap-2 py-3 px-2 rounded-xl border border-gray-300 bg-gray-100 hover:bg-gray-200 text-gray-600 transition-all font-bold group"
+                    data-action="prev-quarter"
+                    style="display: none;">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-5 group-hover:-translate-x-1 transition-transform shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.41 16.59L13.82 12l4.59-4.59L17 6l-6 6 6 6zM6 6h2v12H6z"/>
+              </svg>
+              <span class="text-sm truncate"><%= t('scoreboards.control.prev_quarter', default: '이전 쿼터') %></span>
+            </button>
+            <button class="flex items-center justify-center gap-2 py-3 px-2 rounded-xl border border-[#FF6B35] bg-gradient-to-br from-[#FF6B35] to-[#E55A2B] text-white hover:shadow-lg hover:shadow-orange-500/25 transition-all font-bold group"
                     data-action="next-quarter"
                     data-ui-key="next_quarter"
                     data-next-quarter-btn
                     data-finish-text="<%= t('matches.finish_label', default: '경기 종료') %>"
                     data-next-text="<%= t('matches.next_quarter_label', default: '다음 쿼터') %>">
-              <svg xmlns="http://www.w3.org/2000/svg" class="size-6 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24" fill="currentColor" data-next-quarter-icon>
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-5 group-hover:translate-x-1 transition-transform shrink-0" viewBox="0 0 24 24" fill="currentColor" data-next-quarter-icon>
                 <path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z"/>
               </svg>
-              <span class="text-sm" data-next-quarter-title><%= t('matches.next_quarter_label', default: '다음 쿼터') %></span>
+              <span class="text-sm truncate" data-next-quarter-title><%= t('matches.next_quarter_label', default: '다음 쿼터') %></span>
             </button>
           <% end %>
         </div>

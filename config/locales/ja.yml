@@ -270,6 +270,7 @@ ja:
       age_suffix: "%{age}歳"
       height_suffix: "%{height}cm"
       games_suffix: "%{count}試合"
+      edit_my_profile: "マイ情報を編集"
       empty:
         title: "メンバーがいません"
         description: "クラブにメンバーを追加してチームを作り、試合を始めましょう！"
@@ -282,14 +283,20 @@ ja:
       page_title: "メンバー編集 - %{member_name}"
       title: "メンバー編集"
       subtitle: "%{member_name}の情報を修正"
+    profile:
+      page_title: "マイ選手情報"
+      title: "マイ選手情報"
+      subtitle: "基本情報を入力してください。"
     notices:
       created: "メンバーが追加されました。"
       updated: "メンバーが更新されました。"
       deleted: "メンバーが削除されました。"
       imported: "%{count}人のメンバーをインポートしました。"
+      profile_updated: "選手情報が更新されました。"
     errors:
       no_file: "CSVファイルを選択してください。"
       import_failed: "CSVインポート失敗: %{message}"
+      no_linked_member: "リンクされた選手情報がありません。"
     csv:
       name: "名前"
       age: "年齢"
@@ -461,6 +468,8 @@ ja:
   scoreboards:
     control:
       quarter_reset_off: "Qリセット OFF"
+      progression_round_robin: "クォーター別進行"
+      prev_quarter: "前のクォーター"
       game_timer: "ゲームタイマー"
       one_minute: "1分"
       one_second: "1秒"
@@ -531,11 +540,14 @@ ja:
       roles:
         owner: "オーナー"
         admin: "管理者"
+        manager: "マネージャー"
         member: "メンバー"
       joined_at: "参加日:"
       actions:
         change_to_member: "メンバーに変更"
+        change_to_manager: "マネージャーに変更"
         promote_to_admin: "管理者に昇格"
+        promote_to_manager: "マネージャーに昇格"
         transfer_ownership: "所有権を譲渡"
         leave: "退会"
         remove: "除名"
@@ -550,6 +562,7 @@ ja:
       cannot_transfer_to_self: "自分には譲渡できません。"
       owner_cannot_leave: "オーナーは退会できません。まず所有権を譲渡してください。"
       cannot_remove_owner: "オーナーは除名できません。"
+      owner_only_for_admin: "管理者の役割変更はオーナーのみ可能です。"
     notices:
       role_changed: "役割が変更されました。"
       ownership_transferred: "クラブの所有権が移転されました。"
@@ -567,6 +580,7 @@ ja:
       already_member: "すでにこのクラブに参加しています。"
     notices:
       joined: "クラブに参加しました！"
+      joined_fill_profile: "クラブに参加しました！選手情報を入力してください。"
   club_invitations:
     index:
       title: "招待コード管理"

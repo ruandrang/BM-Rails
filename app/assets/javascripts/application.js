@@ -74,6 +74,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const teamsCount = parseInt(scoreboardRoot.dataset.teamsCount || "2", 10);
     const parsedDefaultPeriodSeconds = parseInt(scoreboardRoot.dataset.defaultPeriodSeconds || "480", 10);
     const defaultPeriodSeconds = Number.isFinite(parsedDefaultPeriodSeconds) && parsedDefaultPeriodSeconds > 0 ? parsedDefaultPeriodSeconds : 480;
+    // 샷클락 리셋 값: 0.99초를 더해 floor() 표시 시 첫 1초간 24/14가 보이도록 함
+    const SHOT_CLOCK_24 = 24.99;
+    const SHOT_CLOCK_14 = 14.99;
     const parseBooleanDataset = (value, fallback = true) => {
       if (value === undefined || value === null || value === "") return fallback;
       const normalized = String(value).trim().toLowerCase();
@@ -133,11 +136,14 @@ document.addEventListener("DOMContentLoaded", () => {
         announcements_off: "🔇 안내 OFF",
         quarter_reset_on: "쿼터별 점수 리셋 ON",
         quarter_reset_off: "쿼터별 점수 리셋 OFF",
+        progression_sequential: "경기별 진행",
+        progression_round_robin: "쿼터별 진행",
         finish_current_game: "🏁 현재 경기 종료",
         finish_match: "🏁 경기 종료",
         add_game_enabled: "+ 경기 추가 (%{current}/%{max})",
         add_game_completed: "경기 추가 완료 (%{max}/%{max})",
         next_quarter: "다음 쿼터",
+        prev_quarter: "이전 쿼터",
         score_finalize: "점수 확정",
         saved_complete: "저장 완료",
         shortcuts_hide: "⌨️ 상세 숨기기",
@@ -220,11 +226,14 @@ document.addEventListener("DOMContentLoaded", () => {
         announcements_off: "🔇 音声案内 OFF",
         quarter_reset_on: "クォーターごとリセット ON",
         quarter_reset_off: "クォーターごとリセット OFF",
+        progression_sequential: "試合別進行",
+        progression_round_robin: "クォーター別進行",
         finish_current_game: "🏁 現在の試合終了",
         finish_match: "🏁 試合終了",
         add_game_enabled: "+ 試合追加 (%{current}/%{max})",
         add_game_completed: "試合追加完了 (%{max}/%{max})",
         next_quarter: "次のクォーター",
+        prev_quarter: "前のクォーター",
         score_finalize: "スコア確定",
         saved_complete: "保存完了",
         shortcuts_hide: "⌨️ 詳細を隠す",
@@ -307,11 +316,14 @@ document.addEventListener("DOMContentLoaded", () => {
         announcements_off: "🔇 Announcements OFF",
         quarter_reset_on: "Quarter Reset ON",
         quarter_reset_off: "Quarter Reset OFF",
+        progression_sequential: "By Game",
+        progression_round_robin: "By Quarter",
         finish_current_game: "🏁 End Current Game",
         finish_match: "🏁 End Match",
         add_game_enabled: "+ Add Game (%{current}/%{max})",
         add_game_completed: "Game Slots Full (%{max}/%{max})",
         next_quarter: "Next Quarter",
+        prev_quarter: "Prev Quarter",
         score_finalize: "Finalize Score",
         saved_complete: "Saved",
         shortcuts_hide: "⌨️ Hide Details",
@@ -394,11 +406,14 @@ document.addEventListener("DOMContentLoaded", () => {
         announcements_off: "🔇 语音提示 关",
         quarter_reset_on: "每节重置 开",
         quarter_reset_off: "每节重置 关",
+        progression_sequential: "按比赛进行",
+        progression_round_robin: "按节进行",
         finish_current_game: "🏁 结束当前比赛",
         finish_match: "🏁 结束比赛",
         add_game_enabled: "+ 添加比赛 (%{current}/%{max})",
         add_game_completed: "比赛已满 (%{max}/%{max})",
         next_quarter: "下一节",
+        prev_quarter: "上一节",
         score_finalize: "确认比分",
         saved_complete: "已保存",
         shortcuts_hide: "⌨️ 隐藏详情",
@@ -481,11 +496,14 @@ document.addEventListener("DOMContentLoaded", () => {
         announcements_off: "🔇 Annonces OFF",
         quarter_reset_on: "Réinit. par quart ON",
         quarter_reset_off: "Réinit. par quart OFF",
+        progression_sequential: "Par match",
+        progression_round_robin: "Par quart",
         finish_current_game: "🏁 Terminer le match en cours",
         finish_match: "🏁 Terminer le match",
         add_game_enabled: "+ Ajouter un match (%{current}/%{max})",
         add_game_completed: "Ajout terminé (%{max}/%{max})",
         next_quarter: "Quart suivant",
+        prev_quarter: "Quart précédent",
         score_finalize: "Valider le score",
         saved_complete: "Enregistré",
         shortcuts_hide: "⌨️ Masquer les détails",
@@ -568,11 +586,14 @@ document.addEventListener("DOMContentLoaded", () => {
         announcements_off: "🔇 Avisos OFF",
         quarter_reset_on: "Reinicio por cuarto ON",
         quarter_reset_off: "Reinicio por cuarto OFF",
+        progression_sequential: "Por partido",
+        progression_round_robin: "Por cuarto",
         finish_current_game: "🏁 Finalizar juego actual",
         finish_match: "🏁 Finalizar partido",
         add_game_enabled: "+ Agregar juego (%{current}/%{max})",
         add_game_completed: "Juegos completos (%{max}/%{max})",
         next_quarter: "Siguiente cuarto",
+        prev_quarter: "Cuarto anterior",
         score_finalize: "Confirmar marcador",
         saved_complete: "Guardado",
         shortcuts_hide: "⌨️ Ocultar detalles",
@@ -655,11 +676,14 @@ document.addEventListener("DOMContentLoaded", () => {
         announcements_off: "🔇 Avvisi OFF",
         quarter_reset_on: "Reset per quarto ON",
         quarter_reset_off: "Reset per quarto OFF",
+        progression_sequential: "Per partita",
+        progression_round_robin: "Per quarto",
         finish_current_game: "🏁 Termina partita corrente",
         finish_match: "🏁 Termina partita",
         add_game_enabled: "+ Aggiungi partita (%{current}/%{max})",
         add_game_completed: "Partite complete (%{max}/%{max})",
         next_quarter: "Quarto successivo",
+        prev_quarter: "Quarto precedente",
         score_finalize: "Conferma punteggio",
         saved_complete: "Salvato",
         shortcuts_hide: "⌨️ Nascondi dettagli",
@@ -745,11 +769,14 @@ document.addEventListener("DOMContentLoaded", () => {
       announcements_off: "🔇 Avisos OFF",
       quarter_reset_on: "Reset por quarto ON",
       quarter_reset_off: "Reset por quarto OFF",
+      progression_sequential: "Por jogo",
+      progression_round_robin: "Por quarto",
       finish_current_game: "🏁 Encerrar jogo atual",
       finish_match: "🏁 Encerrar partida",
       add_game_enabled: "+ Adicionar jogo (%{current}/%{max})",
       add_game_completed: "Jogos completos (%{max}/%{max})",
       next_quarter: "Próximo quarto",
+      prev_quarter: "Quarto anterior",
       score_finalize: "Confirmar placar",
       saved_complete: "Salvo",
       shortcuts_hide: "⌨️ Ocultar detalhes",
@@ -832,11 +859,14 @@ document.addEventListener("DOMContentLoaded", () => {
       announcements_off: "🔇 Anunsyo OFF",
       quarter_reset_on: "Quarter Reset ON",
       quarter_reset_off: "Quarter Reset OFF",
+      progression_sequential: "Per Game",
+      progression_round_robin: "Per Quarter",
       finish_current_game: "🏁 Tapusin ang kasalukuyang laro",
       finish_match: "🏁 Tapusin ang laban",
       add_game_enabled: "+ Magdagdag ng laro (%{current}/%{max})",
       add_game_completed: "Puno na ang laro (%{max}/%{max})",
       next_quarter: "Susunod na quarter",
+      prev_quarter: "Nakaraang quarter",
       score_finalize: "I-finalize ang score",
       saved_complete: "Na-save",
       shortcuts_hide: "⌨️ Itago ang detalye",
@@ -919,11 +949,14 @@ document.addEventListener("DOMContentLoaded", () => {
       announcements_off: "🔇 Ansagen AUS",
       quarter_reset_on: "Viertel-Reset AN",
       quarter_reset_off: "Viertel-Reset AUS",
+      progression_sequential: "Pro Spiel",
+      progression_round_robin: "Pro Viertel",
       finish_current_game: "🏁 Aktuelles Spiel beenden",
       finish_match: "🏁 Spiel beenden",
       add_game_enabled: "+ Spiel hinzufügen (%{current}/%{max})",
       add_game_completed: "Spiele voll (%{max}/%{max})",
       next_quarter: "Nächstes Viertel",
+      prev_quarter: "Vorheriges Viertel",
       score_finalize: "Punktestand festlegen",
       saved_complete: "Gespeichert",
       shortcuts_hide: "⌨️ Details ausblenden",
@@ -1359,33 +1392,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const maxRotationStep = () => maxRotationStepForRounds(roundsPerQuarter());
 
-    const quarterForStepWithRounds = (step, rounds, regularQuarters = totalRegularQuarters()) => {
+    const quarterForStepWithRounds = (step, rounds, regularQuarters = totalRegularQuarters(), sequential = false) => {
       const safeRounds = Math.max(1, rounds);
       const safeRegularQuarters = parseRegularQuarters(regularQuarters, totalRegularQuarters());
       const parsedStep = Number.parseInt(step, 10);
       const safeStep = Number.isFinite(parsedStep) ? Math.max(0, parsedStep) : 0;
 
-      if (isTwoTeamMode()) {
+      // 경기별 순차 진행: 한 경기의 모든 쿼터를 마친 뒤 다음 경기
+      if (sequential) {
         return (safeStep % safeRegularQuarters) + 1;
       }
 
+      // 쿼터별 라운드 로빈: 모든 경기가 같은 쿼터를 돌아가며 진행
       return Math.floor(safeStep / safeRounds) + 1;
     };
 
-    const matchupSlotForStepWithRounds = (step, rounds, regularQuarters = totalRegularQuarters()) => {
+    const matchupSlotForStepWithRounds = (step, rounds, regularQuarters = totalRegularQuarters(), sequential = false) => {
       const safeRounds = Math.max(1, rounds);
       const safeRegularQuarters = parseRegularQuarters(regularQuarters, totalRegularQuarters());
       const parsedStep = Number.parseInt(step, 10);
       const safeStep = Number.isFinite(parsedStep) ? Math.max(0, parsedStep) : 0;
 
-      if (isTwoTeamMode()) {
+      if (sequential) {
         return Math.floor(safeStep / safeRegularQuarters) % safeRounds;
       }
 
       return ((safeStep % safeRounds) + safeRounds) % safeRounds;
     };
 
-    const rotationStepForPosition = (quarter, matchupSlot, rounds, regularQuarters = totalRegularQuarters()) => {
+    const rotationStepForPosition = (quarter, matchupSlot, rounds, regularQuarters = totalRegularQuarters(), sequential = false) => {
       const safeRounds = Math.max(1, rounds);
       const safeRegularQuarters = parseRegularQuarters(regularQuarters, totalRegularQuarters());
       const parsedQuarter = Number.parseInt(quarter, 10);
@@ -1397,14 +1432,14 @@ document.addEventListener("DOMContentLoaded", () => {
         ? Math.max(0, Math.min(safeRounds - 1, parsedSlot))
         : 0;
 
-      if (isTwoTeamMode()) {
+      if (sequential) {
         return (safeSlot * safeRegularQuarters) + (safeQuarter - 1);
       }
 
       return ((safeQuarter - 1) * safeRounds) + safeSlot;
     };
 
-    const quarterForStep = (step) => quarterForStepWithRounds(step, roundsPerQuarter());
+    const quarterForStep = (step) => quarterForStepWithRounds(step, roundsPerQuarter(), totalRegularQuarters(), isSequentialProgression());
 
     const normalizePossession = (value, fallback = "away") => {
       if (value === "home" || value === "away") return value;
@@ -1491,7 +1526,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const matchupIdForStep = (step = state?.rotation_step || 0) => {
       const order = normalizeMatchupOrder(state?.matchup_order);
       const rounds = roundsPerQuarter();
-      const slot = matchupSlotForStepWithRounds(step, rounds);
+      const slot = matchupSlotForStepWithRounds(step, rounds, totalRegularQuarters(), isSequentialProgression());
       return order[slot] ?? defaultMatchupOrder()[slot] ?? 0;
     };
 
@@ -1566,14 +1601,14 @@ document.addEventListener("DOMContentLoaded", () => {
         quarter: 1,
         regular_quarters: defaultRegularQuarters,
         period_seconds: defaultPeriodSeconds,
-        shot_seconds: 24,
+        shot_seconds: SHOT_CLOCK_24,
         running: false,
         shot_running: false,
         // Timer sync references for smooth display
         main_ref_at_ms: 0,
         main_ref_value: defaultPeriodSeconds,
         shot_ref_at_ms: 0,
-        shot_ref_value: 24,
+        shot_ref_value: SHOT_CLOCK_24,
         sound_enabled: defaultAnnouncementsEnabled,
         voice_enabled: defaultAnnouncementsEnabled,
         voice_rate: defaultVoiceRate,
@@ -1605,6 +1640,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const isVoiceEnabled = () => state?.voice_enabled !== false;
     // 음성 안내 토글용 — 부저와 분리됨 (부저는 isSoundEnabled로 항상 동작)
     const isAnnouncementsEnabled = () => isVoiceEnabled();
+    // 경기별 순차 진행 모드 (by_game: 1경기 모든 쿼터 → 2경기, by_quarter: 모든 경기 1쿼터 → 2쿼터)
+    const isSequentialProgression = () => state?.progression_mode === "by_game";
     // 사용자가 세션 내에서 토글을 직접 변경했는지 추적
     let voiceToggledLocally = false;
     const isQuarterScoreResetEnabled = () => state?.quarter_score_reset_enabled === true;
@@ -1734,9 +1771,15 @@ document.addEventListener("DOMContentLoaded", () => {
       normalized.rotation_step = Number.isFinite(parsedStep)
         ? Math.max(0, Math.min(parsedStep, maxStepForState))
         : 0;
-      normalized.progression_mode = isTwoTeamMode() ? "by_game" : "by_quarter";
-
+      // progression_mode: incoming 값을 존중, 없으면 팀 수 기반 기본값
       const incomingProgressionMode = incomingState.progression_mode;
+      if (incomingProgressionMode === "by_game" || incomingProgressionMode === "by_quarter") {
+        normalized.progression_mode = incomingProgressionMode;
+      } else {
+        normalized.progression_mode = isTwoTeamMode() ? "by_game" : "by_quarter";
+      }
+      const isIncomingSequential = normalized.progression_mode === "by_game";
+
       if (isTwoTeamMode() && incomingProgressionMode !== "by_game") {
         // Backward compatibility: convert old quarter-first step sequencing to game-first.
         // Guard: if incoming quarter already matches by-game progression, skip conversion.
@@ -1752,7 +1795,7 @@ document.addEventListener("DOMContentLoaded", () => {
           incomingQuarter !== legacyQuarter;
 
         if (!looksLikeByGameState) {
-          const convertedStep = rotationStepForPosition(legacyQuarter, legacySlot, roundsForState, regularQuartersForIncoming);
+          const convertedStep = rotationStepForPosition(legacyQuarter, legacySlot, roundsForState, regularQuartersForIncoming, isIncomingSequential);
           normalized.rotation_step = Math.max(0, Math.min(convertedStep, maxStepForState));
         }
       }
@@ -1761,7 +1804,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (Number.isFinite(parsedQuarter) && parsedQuarter > regularQuartersForIncoming) {
         normalized.quarter = parsedQuarter;
       } else {
-        normalized.quarter = quarterForStepWithRounds(normalized.rotation_step, roundsForState, regularQuartersForIncoming);
+        normalized.quarter = quarterForStepWithRounds(normalized.rotation_step, roundsForState, regularQuartersForIncoming, isIncomingSequential);
       }
       if (incomingState.base_possession === "home" || incomingState.base_possession === "away") {
         normalized.base_possession = incomingState.base_possession;
@@ -1782,7 +1825,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const currentMatchupIndex = () => {
-      return matchupSlotForStepWithRounds(state.rotation_step, roundsPerQuarter());
+      return matchupSlotForStepWithRounds(state.rotation_step, roundsPerQuarter(), totalRegularQuarters(), isSequentialProgression());
     };
 
     const currentMatchupId = () => {
@@ -1922,11 +1965,9 @@ document.addEventListener("DOMContentLoaded", () => {
           // 득점 시 샷클락 리셋
           if (isScoreAddAction) {
             if (state.period_seconds >= 24) {
-              state.shot_seconds = 24;
-            } else if (state.period_seconds >= 14) {
-              state.shot_seconds = 14;
+              state.shot_seconds = SHOT_CLOCK_24;
             } else {
-              state.shot_seconds = -1; // 경기 시간 14초 미만이면 비활성화
+              state.shot_seconds = -1;
             }
             state.shot_running = false;
           }
@@ -2225,6 +2266,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
+      // PREV QUARTER 버튼: 첫 스텝이면 숨기고, 그 외에는 표시
+      const prevQuarterBtn = scoreboardRoot.querySelector('[data-action="prev-quarter"]');
+      if (prevQuarterBtn) {
+        prevQuarterBtn.style.display = state.rotation_step > 0 ? '' : 'none';
+      }
+
       const quarterScoreResetBtn = scoreboardRoot.querySelector('[data-action="toggle-quarter-score-reset"]');
       if (quarterScoreResetBtn) {
         const enabled = isQuarterScoreResetEnabled();
@@ -2235,6 +2282,23 @@ document.addEventListener("DOMContentLoaded", () => {
         quarterScoreResetBtn.classList.toggle("bg-white", !enabled);
         quarterScoreResetBtn.classList.toggle("text-gray-600", !enabled);
         quarterScoreResetBtn.classList.toggle("border-gray-300", !enabled);
+      }
+
+      // 진행 순서 토글 버튼 상태 업데이트
+      const progressionBtn = scoreboardRoot.querySelector('[data-action="toggle-progression-mode"]');
+      if (progressionBtn) {
+        const seq = isSequentialProgression();
+        progressionBtn.textContent = seq ? i18nForScoreboard("progression_sequential") : i18nForScoreboard("progression_round_robin");
+        progressionBtn.classList.toggle("bg-indigo-50", seq);
+        progressionBtn.classList.toggle("text-indigo-700", seq);
+        progressionBtn.classList.toggle("border-indigo-200", seq);
+        progressionBtn.classList.toggle("bg-gray-50", !seq);
+        progressionBtn.classList.toggle("text-gray-600", !seq);
+        progressionBtn.classList.toggle("border-gray-200", !seq);
+        // 경기 진행 중이면 비활성화
+        progressionBtn.disabled = state.rotation_step > 0;
+        progressionBtn.classList.toggle("opacity-50", state.rotation_step > 0);
+        progressionBtn.classList.toggle("cursor-not-allowed", state.rotation_step > 0);
       }
 
       const cumulativeViewBtn = scoreboardRoot.querySelector('[data-action="set-quarter-view-cumulative"]');
@@ -2272,7 +2336,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const finishGameBtn = scoreboardRoot.querySelector('[data-action="finish-game"]');
       if (finishGameBtn) {
-        const hasRemainingGames = isTwoTeamMode() && currentMatchupIndex() < (roundsPerQuarter() - 1);
+        const hasRemainingGames = isSequentialProgression() && currentMatchupIndex() < (roundsPerQuarter() - 1);
         finishGameBtn.textContent = hasRemainingGames ? i18nForScoreboard("finish_current_game") : i18nForScoreboard("finish_match");
       }
 
@@ -2759,17 +2823,30 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       buzzerCooldownUntil = now + 3000;
 
+      // 진행 중인 TTS 음성 즉시 중단 — 부저와 음성이 겹쳐서 소리가 달라지는 문제 방지
+      if (window.speechSynthesis && (window.speechSynthesis.speaking || window.speechSynthesis.pending)) {
+        window.speechSynthesis.cancel();
+      }
+      lastSpokenCountdown = -1;
+
       if (!buzzerCtx) initBuzzerAudio();
       if (!buzzerCtx) {
         console.error('[Buzzer] No AudioContext');
         return;
       }
 
-      // suspended 상태면 resume 시도
+      // suspended 상태면 resume 후 재생 (지연 방지)
       if (buzzerCtx.state === 'suspended') {
-        buzzerCtx.resume().catch(() => {});
+        buzzerCtx.resume().then(() => {
+          _playBuzzerSound();
+        }).catch(() => {});
+        return;
       }
 
+      _playBuzzerSound();
+    };
+
+    const _playBuzzerSound = () => {
       try {
         // 440Hz 사각파 2초 + 페이드아웃 (경기장용 큰 소리)
         const osc = buzzerCtx.createOscillator();
@@ -2838,17 +2915,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const speakCountdownIfNeeded = (previousSeconds, nextSeconds) => {
       if (nextSeconds >= previousSeconds) return;
-      if (nextSeconds <= 0) return;
       if (previousSeconds <= 0) return;
 
-      const speakTarget = previousSeconds > 5 && nextSeconds < 5 ? 5 : nextSeconds;
-      if (speakTarget <= 5 && speakTarget > 0) {
+      // 샷클락이 작동 중이면 메인 타이머 카운트다운 음성 건너뛰기
+      // (샷클락 카운트다운과 겹쳐서 뒤죽박죽 되는 문제 방지)
+      if (state.shot_running && state.shot_seconds > 0) return;
+
+      // 화면에 보이던 숫자를 읽음: 5→4 전환 시 "5", 1→0 전환 시 "1"
+      // 큰 수에서 한번에 5 이하로 점프 시에도 "5" 읽음
+      const speakTarget = previousSeconds > 5 ? 5 : previousSeconds;
+      if (speakTarget >= 1 && speakTarget <= 5) {
         speak(speakTarget);
       }
     };
 
     const startMainTimer = () => {
       if (mainTimer) return;
+      // 타이머 시작 시 AudioContext 선제적 resume (5초 카운트다운/부저 지연 방지)
+      if (buzzerCtx && buzzerCtx.state === 'suspended') buzzerCtx.resume().catch(() => {});
+      if (ttsAudioCtx && ttsAudioCtx.state === 'suspended') ttsAudioCtx.resume().catch(() => {});
       mainLastTickAtMs = Date.now();
       mainTimer = setInterval(() => {
         const currentSeconds = Math.max(0, Number.parseFloat(state.period_seconds) || 0);
@@ -2917,13 +3002,16 @@ document.addEventListener("DOMContentLoaded", () => {
         // Round to 2 decimal places for precision display
         state.shot_seconds = Math.round(nextSeconds * 100) / 100;
 
-        // 음성 카운트다운: 화면에 표시되는 숫자(floor)가 변경될 때 읽기
-        // 5, 4, 3, 2, 1 만 읽음
+        // 음성 카운트다운: floor가 변경될 때 이전 숫자(보이던 숫자)를 읽음
+        // 5→4 전환 시 "5", 1→0 전환 시 "1"
         const prevFloor = Math.floor(previousSeconds);
         const nextFloor = Math.floor(nextSeconds);
 
-        if (prevFloor !== nextFloor && nextFloor > 0 && nextFloor <= 5) {
-          speak(nextFloor);
+        if (prevFloor !== nextFloor) {
+          const speakTarget = prevFloor > 5 ? 5 : prevFloor;
+          if (speakTarget >= 1 && speakTarget <= 5) {
+            speak(speakTarget);
+          }
         }
 
         // 0.05초 미만이면 0으로 처리하고 버저 울림 (부동소수점 오차 방지)
@@ -2967,8 +3055,20 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!ttsAudioCtx) {
         ttsAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
       }
-      if (ttsAudioCtx.state === "suspended") ttsAudioCtx.resume();
+      if (ttsAudioCtx.state === "suspended") {
+        // resume()이 완료될 때까지 기다리지 않지만, 캐시해두어 반복 호출 방지
+        ttsAudioCtx.resume().catch(() => {});
+      }
       return ttsAudioCtx;
+    };
+
+    // AudioContext resume을 확실히 완료한 뒤 반환 (점수 안내처럼 즉시 재생이 필요한 곳용)
+    const ensureTtsContext = async () => {
+      const ctx = getTtsContext();
+      if (ctx.state === "suspended") {
+        await ctx.resume();
+      }
+      return ctx;
     };
 
     // mp3 파일 존재 여부 확인 (최초 1회, 한국어는 Web Speech API 사용)
@@ -3055,6 +3155,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 점수 안내: [home] + [vs] + [away] 끊김 없는 연속 재생
     const playScoreAnnouncement = async (homeScore, awayScore) => {
+      await ensureTtsContext(); // suspended 상태 해제 대기
       const locale = uiLocale;
       const home = Math.min(Math.max(0, homeScore), 50);
       const away = Math.min(Math.max(0, awayScore), 50);
@@ -3068,6 +3169,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 카운트다운 mp3 재생
     const playCountdownAudio = async (count) => {
+      await ensureTtsContext(); // suspended 상태 해제 대기
       const buffer = await loadTtsBuffer(uiLocale, `countdown_${count}`);
       await playTtsBuffer(buffer);
     };
@@ -3435,6 +3537,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const homeScore = visualHome.score;
       const awayScore = visualAway.score;
 
+      // 진행 중인 카운트다운 음성 즉시 취소 — 점수 안내가 우선
+      if (window.speechSynthesis && (window.speechSynthesis.speaking || window.speechSynthesis.pending)) {
+        window.speechSynthesis.cancel();
+      }
+      lastSpokenCountdown = -1;
+
       // 1순위: TTS Audio (mp3 연결 재생) — 한국어는 Web Speech API 사용
       if (ttsAvailable && uiLocale !== "ko" && homeScore <= 50 && awayScore <= 50) {
         console.log("🔊 TTS Audio score:", homeScore, "vs", awayScore);
@@ -3481,20 +3589,8 @@ document.addEventListener("DOMContentLoaded", () => {
         safeSpeak(utterance);
       };
 
-      if (window.speechSynthesis && window.speechSynthesis.getVoices().length > 0) {
-        speakWithVoice();
-      } else if (window.speechSynthesis) {
-        let spoken = false;
-        const handleVoicesLoaded = () => {
-          if (spoken) return;
-          spoken = true;
-          speakWithVoice();
-        };
-        window.speechSynthesis.addEventListener("voiceschanged", handleVoicesLoaded, { once: true });
-        setTimeout(() => {
-          if (!spoken) handleVoicesLoaded();
-        }, 100);
-      }
+      // 음성 목록이 이미 로드되었거나 없어도 바로 재생 시도 (지연 방지)
+      speakWithVoice();
     };
 
     const normalizeScoreValue = (rawValue) => {
@@ -3560,6 +3656,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const isScoreAddAction = ["add-home", "add-home-1", "add-home-2", "add-home-3",
                                 "add-away", "add-away-1", "add-away-2", "add-away-3"].includes(action);
 
+      // 득점 시 AudioContext를 선제적으로 resume (음성 안내 지연 방지)
+      if (isScoreAddAction && ttsAudioCtx && ttsAudioCtx.state === "suspended") {
+        ttsAudioCtx.resume().catch(() => {});
+      }
+
       if (action === "add-home") state.teams[homeIdx].score += 1;
       else if (action === "sub-home") state.teams[homeIdx].score = Math.max(0, state.teams[homeIdx].score - 1);
       else if (action === "add-home-1") state.teams[homeIdx].score += 1;
@@ -3576,11 +3677,9 @@ document.addEventListener("DOMContentLoaded", () => {
       // 득점 시 샷클락 리셋
       if (isScoreAddAction) {
         if (state.period_seconds >= 24) {
-          state.shot_seconds = 24;
-        } else if (state.period_seconds >= 14) {
-          state.shot_seconds = 14;
+          state.shot_seconds = SHOT_CLOCK_24;
         } else {
-          state.shot_seconds = -1; // 경기 시간 14초 미만이면 비활성화
+          state.shot_seconds = -1;
         }
         state.shot_running = false;
       }
@@ -3686,9 +3785,9 @@ document.addEventListener("DOMContentLoaded", () => {
               case "reset-all":
                 if (confirm(i18nForScoreboard("confirm_reset_all"))) {
                   state.period_seconds = defaultPeriodSeconds;
-                  state.shot_seconds = 24;
+                  state.shot_seconds = SHOT_CLOCK_24;
                   state.main_ref_value = defaultPeriodSeconds;
-                  state.shot_ref_value = 24;
+                  state.shot_ref_value = SHOT_CLOCK_24;
                   state.running = false;
                   state.shot_running = false;
                   state.home_fouls = 0;
@@ -3740,13 +3839,10 @@ document.addEventListener("DOMContentLoaded", () => {
               case "reset-shot-24":
                 // 경기 시간에 따라 적절한 샷클락 값 설정
                 if (state.period_seconds >= 24) {
-                  state.shot_seconds = 24;
-                  state.shot_ref_value = 24;
-                } else if (state.period_seconds >= 14) {
-                  // 경기 시간 14~24초: 14초로 리셋
-                  state.shot_seconds = 14;
-                  state.shot_ref_value = 14;
+                  state.shot_seconds = SHOT_CLOCK_24;
+                  state.shot_ref_value = SHOT_CLOCK_24;
                 } else {
+                  // 경기 시간 < 24초: 샷클락 비활성화
                   state.shot_seconds = -1;
                 }
                 // Shot clock stops on reset - user must manually start
@@ -3757,8 +3853,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (state.period_seconds < 14) {
                   state.shot_seconds = -1;
                 } else {
-                  state.shot_seconds = 14;
-                  state.shot_ref_value = 14;
+                  state.shot_seconds = SHOT_CLOCK_14;
+                  state.shot_ref_value = SHOT_CLOCK_14;
                 }
                 // Shot clock stops on reset - user must manually start
                 state.shot_running = false;
@@ -3804,7 +3900,7 @@ document.addEventListener("DOMContentLoaded", () => {
                       const newRounds = roundsPerQuarter();
                       state.rotation_step = Math.min(
                         maxRotationStep(),
-                        Math.max(0, rotationStepForPosition(previousQuarterNumber, previousSlotIndex, newRounds))
+                        Math.max(0, rotationStepForPosition(previousQuarterNumber, previousSlotIndex, newRounds, totalRegularQuarters(), isSequentialProgression()))
                       );
                       state.quarter = currentQuarter();
                       applyQuarterPossession(state.quarter);
@@ -3977,7 +4073,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 state.quarter = currentQuarter();
                 state.period_seconds = defaultPeriodSeconds;
-                state.shot_seconds = 24;
+                state.shot_seconds = SHOT_CLOCK_24;
                 state.home_fouls = 0;
                 state.away_fouls = 0;
                 applyQuarterPossession(state.quarter);
@@ -3986,38 +4082,43 @@ document.addEventListener("DOMContentLoaded", () => {
                 break;
               }
               case "prev-quarter": {
-                // Previous quarter logic (Simplified reverse of next-quarter or just decrement quarter?)
-                // For now, let's just decrement logic carefully if needed, or simple decrement quarter
-                // Use simple decrement for now as full reverse logic is complex and rarely used perfectly
-                state.quarter = Math.max(1, state.quarter - 1);
-                // Ideally we should reverse rotation_step too, but user didn't explicitly ask for full undo support
-                // Let's implement basic undo for rotation_step
-                if (state.rotation_step > 0) {
-                  // SAVE current (which matches nextPairIdx logic above)
-                  const curPairIdx = currentMatchupId();
-                  const [c1, c2] = matchupPairById(curPairIdx);
-                  if (c1 !== undefined && c2 !== undefined && state.teams[c1] && state.teams[c2]) {
-                    state.matchup_scores[curPairIdx] = { team1: state.teams[c1].score, team2: state.teams[c2].score };
-                    // 파울도 저장
-                    if (!state.matchup_fouls) state.matchup_fouls = [];
-                    state.matchup_fouls[curPairIdx] = { team1: state.home_fouls || 0, team2: state.away_fouls || 0 };
-                  }
+                if (state.rotation_step <= 0) break;
 
-                  state.rotation_step -= 1;
-
-                  // LOAD prev
-                  const prevPairIdx = currentMatchupId();
-                  const [pr1, pr2] = matchupPairById(prevPairIdx);
-                  if (pr1 !== undefined && pr2 !== undefined && state.teams[pr1] && state.teams[pr2]) {
-                    const prevScores = state.matchup_scores[prevPairIdx] || { team1: 0, team2: 0 };
-                    state.teams[pr1].score = prevScores.team1;
-                    state.teams[pr2].score = prevScores.team2;
-                  }
-
-                  state.quarter = currentQuarter();
-                  state.period_seconds = defaultPeriodSeconds;
-                  applyQuarterPossession(state.quarter);
+                // 현재 경기의 점수/파울 저장
+                const curPairIdx = currentMatchupId();
+                const [c1, c2] = matchupPairById(curPairIdx);
+                if (c1 !== undefined && c2 !== undefined && state.teams[c1] && state.teams[c2]) {
+                  state.matchup_scores[curPairIdx] = { team1: state.teams[c1].score, team2: state.teams[c2].score };
+                  if (!state.matchup_fouls) state.matchup_fouls = [];
+                  state.matchup_fouls[curPairIdx] = { team1: state.home_fouls || 0, team2: state.away_fouls || 0 };
                 }
+
+                // 현재 쿼터의 히스토리 삭제 (되돌리기이므로)
+                const curQuarter = currentQuarter();
+                if (state.quarter_history[curPairIdx]) {
+                  delete state.quarter_history[curPairIdx][curQuarter];
+                }
+
+                state.rotation_step -= 1;
+
+                // 이전 경기의 점수/파울 복원
+                const prevPairIdx = currentMatchupId();
+                const [pr1, pr2] = matchupPairById(prevPairIdx);
+                if (pr1 !== undefined && pr2 !== undefined && state.teams[pr1] && state.teams[pr2]) {
+                  const prevScores = state.matchup_scores[prevPairIdx] || { team1: 0, team2: 0 };
+                  state.teams[pr1].score = prevScores.team1;
+                  state.teams[pr2].score = prevScores.team2;
+                  const prevFouls = state.matchup_fouls?.[prevPairIdx] || { team1: 0, team2: 0 };
+                  state.home_fouls = prevFouls.team1;
+                  state.away_fouls = prevFouls.team2;
+                }
+
+                state.quarter = currentQuarter();
+                state.period_seconds = defaultPeriodSeconds;
+                state.shot_seconds = SHOT_CLOCK_24;
+                state.running = false;
+                state.shot_running = false;
+                applyQuarterPossession(state.quarter);
                 break;
               }
               case "next-matchup":
@@ -4035,6 +4136,12 @@ document.addEventListener("DOMContentLoaded", () => {
               case "toggle-quarter-score-reset":
                 state.quarter_score_reset_enabled = !isQuarterScoreResetEnabled();
                 break;
+              case "toggle-progression-mode": {
+                // 경기 진행 중(rotation_step > 0)이면 모드 전환 불가
+                if (state.rotation_step > 0) break;
+                state.progression_mode = isSequentialProgression() ? "by_quarter" : "by_game";
+                break;
+              }
               case "toggle-announcements":
               case "toggle-sound":
               case "toggle-voice": {
@@ -4202,10 +4309,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     const slotIndex = currentMatchupIndex();
                     const rounds = roundsPerQuarter();
-                    const hasNextGame = isTwoTeamMode() && slotIndex < (rounds - 1);
+                    const hasNextGame = isSequentialProgression() && slotIndex < (rounds - 1);
 
                     if (hasNextGame) {
-                      const nextStep = rotationStepForPosition(1, slotIndex + 1, rounds);
+                      const nextStep = rotationStepForPosition(1, slotIndex + 1, rounds, totalRegularQuarters(), isSequentialProgression());
                       state.rotation_step = Math.max(0, Math.min(nextStep, maxRotationStep()));
 
                       const nextPairIdx = currentMatchupId();
@@ -4231,7 +4338,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                       state.quarter = currentQuarter();
                       state.period_seconds = defaultPeriodSeconds;
-                      state.shot_seconds = 24;
+                      state.shot_seconds = SHOT_CLOCK_24;
                       state.home_fouls = 0;
                       state.away_fouls = 0;
                       applyQuarterPossession(state.quarter);
@@ -4264,7 +4371,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   }
                 };
 
-                const hasRemainingGames = isTwoTeamMode() && currentMatchupIndex() < (roundsPerQuarter() - 1);
+                const hasRemainingGames = isSequentialProgression() && currentMatchupIndex() < (roundsPerQuarter() - 1);
                 const message = hasRemainingGames
                   ? i18nForScoreboard("confirm_finish_current_game")
                   : i18nForScoreboard("confirm_finish_match");
