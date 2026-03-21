@@ -3072,13 +3072,10 @@ document.addEventListener("DOMContentLoaded", () => {
       return ctx;
     };
 
-    // mp3 파일 존재 여부 확인 (최초 1회)
+    // TTS mp3 비활성화 — Web Speech API만 사용
     const checkTtsAvailability = () => {
-      if (ttsAvailable !== null) return Promise.resolve(ttsAvailable);
-      const testUrl = `${TTS_AUDIO_BASE}/${uiLocale}/vs.mp3`;
-      return fetch(testUrl, { method: "HEAD" })
-        .then((r) => { ttsAvailable = r.ok; return ttsAvailable; })
-        .catch(() => { ttsAvailable = false; return false; });
+      ttsAvailable = false;
+      return Promise.resolve(false);
     };
 
     // AudioBuffer에서 앞뒤 무음 제거 (mp3 인코더 패딩 제거)
