@@ -3072,10 +3072,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return ctx;
     };
 
-    // mp3 파일 존재 여부 확인 (최초 1회, 한국어는 Web Speech API 사용)
+    // mp3 파일 존재 여부 확인 (최초 1회)
     const checkTtsAvailability = () => {
       if (ttsAvailable !== null) return Promise.resolve(ttsAvailable);
-      if (uiLocale === "ko") { ttsAvailable = false; return Promise.resolve(false); }
       const testUrl = `${TTS_AUDIO_BASE}/${uiLocale}/vs.mp3`;
       return fetch(testUrl, { method: "HEAD" })
         .then((r) => { ttsAvailable = r.ok; return ttsAvailable; })
@@ -3277,8 +3276,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }, 2000);
 
-      // 1순위: TTS Audio (mp3) — 한국어는 Web Speech API가 더 자연스러움
-      if (ttsAvailable && uiLocale !== "ko" && numText >= 1 && numText <= 5) {
+      // 1순위: TTS Audio (mp3) — 즉시 재생으로 싱크 정확
+      if (ttsAvailable && numText >= 1 && numText <= 5) {
         playCountdownAudio(numText).catch(() => {
           speakWithWebSpeechAPI(text);
         });
@@ -3544,8 +3543,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       lastSpokenCountdown = -1;
 
-      // 1순위: TTS Audio (mp3 연결 재생) — 한국어는 Web Speech API 사용
-      if (ttsAvailable && uiLocale !== "ko" && homeScore <= 50 && awayScore <= 50) {
+      // 1순위: TTS Audio (mp3 연결 재생) — 즉시 재생으로 싱크 정확
+      if (ttsAvailable && homeScore <= 50 && awayScore <= 50) {
         console.log("🔊 TTS Audio score:", homeScore, "vs", awayScore);
         playScoreAnnouncement(homeScore, awayScore).catch(() => {
           console.warn("🔊 TTS Audio failed, falling back to Web Speech API");
