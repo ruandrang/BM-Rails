@@ -2916,7 +2916,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const speakCountdownIfNeeded = (previousSeconds, nextSeconds) => {
       if (nextSeconds >= previousSeconds) return;
       if (previousSeconds <= 0) return;
-      if (nextSeconds > 5) return; // 5초 구간 밖이면 안 읽음
+      if (nextSeconds >= 5) return; // 5초 미만 구간에서만 읽음
 
       // 샷클락이 작동 중이면 메인 타이머 카운트다운 음성 건너뛰기
       // (샷클락 카운트다운과 겹쳐서 뒤죽박죽 되는 문제 방지)
@@ -3008,7 +3008,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const prevFloor = Math.floor(previousSeconds);
         const nextFloor = Math.floor(nextSeconds);
 
-        if (prevFloor !== nextFloor && nextFloor <= 5) {
+        if (prevFloor !== nextFloor && nextFloor < 5) {
           const speakTarget = prevFloor > 5 ? 5 : prevFloor;
           if (speakTarget >= 1 && speakTarget <= 5) {
             speak(speakTarget);
